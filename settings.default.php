@@ -53,6 +53,7 @@ define('TINYIB_MAXKB', 2048);         // Maximum file size in kilobytes  [0 to d
 define('TINYIB_MAXKBDESC', '2 MB');   // Human-readable representation of the maximum file size
 define('TINYIB_THUMBNAIL', 'gd');     // Thumbnail method to use: gd / imagemagick  (see README for instructions)
 define('TINYIB_NOFILEOK', false);     // Allow the creation of new threads without uploading a file
+define('TINYIB_FILE_ALLOW_DUPLICATE', false); // Allow duplicate files
 
 // Thumbnail size - new thread
 define('TINYIB_MAXWOP', 250);         // Width

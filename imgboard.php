@@ -161,7 +161,9 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 			$post['file_size'] = $_FILES['file']['size'];
 			$post['file_size_formatted'] = convertBytes($post['file_size']);
 
-			checkDuplicateFile($post['file_hex']);
+			if (TINYIB_FILE_ALLOW_DUPLICATE === false) {
+				checkDuplicateFile($post['file_hex']);
+			}
 
 			$file_mime_split = explode(' ', trim(mime_content_type($_FILES['file']['tmp_name'])));
 			if (count($file_mime_split) > 0) {
