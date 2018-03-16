@@ -1,0 +1,7 @@
+{
+    "name": "vvatashi/tinyib",
+    "type": "project",
+    "require": {
+        "twig/twig": "~2.0"
+    }
+}
