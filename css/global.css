@@ -128,3 +128,29 @@ hr {
 .adminbar a:link, .adminbar a:visited, .adminbar a:active, .adminbar a:hover {
 	text-decoration: none;
 }
+
+
+sub,
+sup {
+	font-size: 0.75em;
+	line-height: 0;
+	position: relative;
+	vertical-align: baseline;
+}
+
+sup {
+	top: -0.5em;
+}
+
+sub {
+	bottom: -0.25em;
+}
+
+.spoiler {
+	background-color: #000;
+	color: #000;
+}
+
+.spoiler:hover {
+	color: #fff;
+}

@@ -69,6 +69,25 @@ function makeLinksClickable($text) {
 	return $text;
 }
 
+function bbcode($message) {
+	$patterns = array(
+		'/\[b\]([^[]*)\[\/b\]/si' => '<strong>\\1</strong>',
+		'/\[i\]([^[]*)\[\/i\]/si' => '<em>\\1</em>',
+		'/\[u\]([^[]*)\[\/u\]/si' => '<span style="text-decoration: underline;">\\1</span>',
+		'/\[s\]([^[]*)\[\/s\]/si' => '<del>\\1</del>',
+		'/\[sup\]([^[]*)\[\/sup\]/si' => '<sup>\\1</sup>',
+		'/\[sub\]([^[]*)\[\/sub\]/si' => '<sub>\\1</sub>',
+		'/\[spoiler\]([^[]*)\[\/spoiler\]/si' => '<span class="spoiler">\\1</span>',
+		'/\[code\]([^[]*)\[\/code\]/si' => '<code style="white-space: pre;">\\1</code>',
+	);
+
+	do {
+		$message = preg_replace(array_keys($patterns), array_values($patterns), $message, -1, $count);
+	} while ($count);
+
+	return $message;
+}
+
 function buildPost($post, $res) {
 	$return = "";
 	$threadid = ($post['parent'] == TINYIB_NEWTHREAD) ? $post['id'] : $post['parent'];
@@ -170,7 +189,7 @@ EOF;
 	$return .= <<<EOF
 <a id="${post['id']}"></a>
 <label>
-	<input type="checkbox" name="delete" value="${post['id']}"> 
+	<input type="checkbox" name="delete" value="${post['id']}">
 EOF;
 
 	if ($post['subject'] != '') {
@@ -196,8 +215,12 @@ EOF;
 	if (TINYIB_TRUNCATE > 0 && !$res && substr_count($post['message'], '<br>') > TINYIB_TRUNCATE) { // Truncate messages on board index pages for readability
 		$br_offsets = strallpos($post['message'], '<br>');
 		$post['message'] = substr($post['message'], 0, $br_offsets[TINYIB_TRUNCATE - 1]);
+		$post['message'] = bbcode($post['message']);
 		$post['message'] .= '<br><span class="omittedposts">Post truncated.  Click Reply to view.</span><br>';
+	} else {
+		$post['message'] = bbcode($post['message']);
 	}
+
 	$return .= <<<EOF
 <div class="message">
 ${post["message"]}
@@ -434,7 +457,7 @@ EOF;
 		</div>
 		<hr>
 		<form id="delform" action="imgboard.php?delete" method="post">
-		<input type="hidden" name="board" 
+		<input type="hidden" name="board"
 EOF;
 	$body .= 'value="' . TINYIB_BOARD . '">' . <<<EOF
 		$htmlposts
@@ -723,41 +746,41 @@ EOF;
 	return <<<EOF
 	<fieldset>
 	<legend>Moderating No.${post['id']}</legend>
-	
+
 	<fieldset>
 	<legend>Action</legend>
-	
+
 	<table border="0" cellspacing="0" cellpadding="0" width="100%">
 	<tr><td align="right" width="50%;">
-	
+
 	<form method="get" action="?">
 	<input type="hidden" name="manage" value="">
 	<input type="hidden" name="delete" value="${post['id']}">
 	<input type="submit" value="Delete $post_or_thread" class="managebutton" style="width: 50%;">
 	</form>
-	
+
 	</td><td><small>$delete_info</small></td></tr>
 	<tr><td align="right" width="50%;">
-	
+
 	<form method="get" action="?">
 	<input type="hidden" name="manage" value="">
 	<input type="hidden" name="bans" value="${post['ip']}">
 	<input type="submit" value="Ban Poster" class="managebutton" style="width: 50%;"$ban_disabled>
 	</form>
-	
+
 	</td><td><small>$ban_info</small></td></tr>
 
 	$sticky_html
-	
+
 	</table>
-	
+
 	</fieldset>
-	
+
 	<fieldset>
-	<legend>$post_or_thread</legend>	
+	<legend>$post_or_thread</legend>
 	$post_html
 	</fieldset>
-	
+
 	</fieldset>
 	<br>
 EOF;
@@ -824,7 +847,7 @@ EOF;
 	$output .= <<<EOF
 	<fieldset>
 	<legend>Status</legend>
-	
+
 	<fieldset>
 	<legend>Info</legend>
 	<table border="0" cellspacing="0" cellpadding="0" width="100%">
@@ -838,14 +861,14 @@ EOF;
 	</fieldset>
 
 	$reqmod_html
-	
+
 	<fieldset>
 	<legend>Recent posts</legend>
 	<table border="0" cellspacing="0" cellpadding="0" width="100%">
 	$post_html
 	</table>
 	</fieldset>
-	
+
 	</fieldset>
 	<br>
 EOF;
