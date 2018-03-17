@@ -25,7 +25,6 @@ EOF;
 		<link rel="stylesheet" type="text/css" href="css/global.css">
 		<link rel="stylesheet" type="text/css" href="css/futaba.css" title="Futaba">
 		<link rel="alternate stylesheet" type="text/css" href="css/burichan.css" title="Burichan">
-		<script src="js/jquery.js"></script>
 		<script src="js/tinyib.js"></script>
 		$js_captcha
 	</head>
