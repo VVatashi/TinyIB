@@ -74,6 +74,7 @@ function wakabamark($message) {
 	$patterns = array(
 		'/\*\*(.*?)\*\*/si' => '[b]\\1[/b]',
 		'/\*(.*?)\*/si' => '[i]\\1[/i]',
+		'/~~(.*?)~~/si' => '[s]\\1[/s]',
 		'/%%(.*?)%%/si' => '[spoiler]\\1[/spoiler]',
 		'/`(.*?)`/si' => '[code]\\1[/code]',
 	);
