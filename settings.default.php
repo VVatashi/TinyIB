@@ -42,11 +42,59 @@ $tinyib_uploads = array('image/jpeg'                    => array('jpg'),
 #                       'video/webm'                    => array('webm')); // WebM upload requires mediainfo and ffmpegthumbnailer  (see README for instructions)
 #                       'audio/webm'                    => array('webm'));
 
-// oEmbed APIs
+function buildEmbedHtml($url, $extension) {
+    if ($extension === 'mp4') {
+        return '<video controls autoplay><source src="' . $url . '" type="video/mp4" /></video>';
+    }
+    elseif ($extension === 'webm') {
+        return '<video controls autoplay><source src="' . $url . '" type="video/webm" /></video>';
+    }
+    else {
+        return '<img src="' . $url . '" alt="" />';
+    }
+}
+
+// Embeds
 //   Empty array to disable
-$tinyib_embeds = array('SoundCloud' => 'http://soundcloud.com/oembed?format=json&url=TINYIBEMBED',
-                       'Vimeo'      => 'http://vimeo.com/api/oembed.json?url=TINYIBEMBED',
-                       'YouTube'    => 'http://www.youtube.com/oembed?url=TINYIBEMBED&format=json');
+$tinyib_embeds = array(
+    // oEmbed APIs
+    'SoundCloud' => array(
+        'type' => 'oembed',
+        'url' => 'http://soundcloud.com/oembed?format=json&url=TINYIBEMBED',
+    ),
+    'Vimeo' => array(
+        'type' => 'oembed',
+        'url' => 'http://vimeo.com/api/oembed.json?url=TINYIBEMBED',
+    ),
+    'YouTube' => array(
+        'type' => 'oembed',
+        'url' => 'http://www.youtube.com/oembed?url=TINYIBEMBED&format=json',
+    ),
+    // Custom embeds
+    'Imgur' => array(
+        'type' => 'custom',
+        'callback' => function ($url) {
+            $matches = array();
+
+            if (preg_match('/(?:https?:\/\/)i\.imgur\.com\/(\w{1,8})\.(\w{3,4})/i', $url, $matches)) {
+                $hash = $matches[1];
+                $extension = $matches[2];
+                $url = "https://i.imgur.com/$hash.$extension";
+                $is_video = in_array($extension, array('mp4', 'webm'));
+                
+                return array(
+                    'type' => $is_video ? 'video' : 'photo',
+                    'title' => "$hash.$extension",
+                    'url' => $url,
+                    'thumbnail_url' => "https://i.imgur.com/${hash}m.jpg",
+                    'html' => buildEmbedHtml($url, $extension),
+                );
+            }
+
+            return null;
+        },
+    ),
+);
 
 // File control
 define('TINYIB_MAXKB', 2048);         // Maximum file size in kilobytes  [0 to disable]

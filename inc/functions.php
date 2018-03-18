@@ -35,7 +35,7 @@ if (TINYIB_DBDRIVER === 'pgsql') {
 	CREATE INDEX ON "' . TINYIB_DBPOSTS . '"("bumped");
 	CREATE INDEX ON "' . TINYIB_DBPOSTS . '"("stickied");
 	CREATE INDEX ON "' . TINYIB_DBPOSTS . '"("moderated");';
-	
+
 	$bans_sql = 'CREATE TABLE "' . TINYIB_DBBANS . '" (
 		"id" bigserial NOT NULL,
 		"ip" varchar(39) NOT NULL,
@@ -77,7 +77,7 @@ if (TINYIB_DBDRIVER === 'pgsql') {
 		KEY `stickied` (`stickied`),
 		KEY `moderated` (`moderated`)
 	)";
-	
+
 	$bans_sql = "CREATE TABLE `" . TINYIB_DBBANS . "` (
 		`id` mediumint(7) unsigned NOT NULL auto_increment,
 		`ip` varchar(39) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
@@ -607,11 +607,28 @@ function isEmbed($file_hex) {
 
 function getEmbed($url) {
 	global $tinyib_embeds;
-	foreach ($tinyib_embeds as $service => $service_url) {
+
+	function getOEmbed($service_url, $url) {
 		$service_url = str_ireplace("TINYIBEMBED", urlencode($url), $service_url);
-		$result = json_decode(url_get_contents($service_url), true);
+		return json_decode(url_get_contents($service_url), true);
+	}
+
+	foreach ($tinyib_embeds as $name => $service) {
+		if (is_string($service)) {
+			// oEmbed by default
+			$result = getOEmbed($service, $url);
+		}
+		elseif (is_array($service)) {
+			if ($service['type'] === 'oembed') {
+				$result = getOEmbed($service['url'], $url);
+			}
+			elseif ($service['type'] === 'custom') {
+				$result = $service['callback']($url);
+			}
+		}
+
 		if (!empty($result)) {
-			return array($service, $result);
+			return array($name, $result);
 		}
 	}
 

@@ -136,14 +136,16 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 			fancyDie("Could not create thumbnail.");
 		}
 
-		addVideoOverlay($thumb_location);
+		if ($embed['type'] !== 'photo') {
+			addVideoOverlay($thumb_location);
+		}
 
 		$thumb_info = getimagesize($thumb_location);
 		$post['thumb_width'] = $thumb_info[0];
 		$post['thumb_height'] = $thumb_info[1];
 
 		$post['file_original'] = cleanString($embed['title']);
-		$post['file'] = str_ireplace(array('src="https://', 'src="http://'), 'src="//', $embed['html']);
+		$post['file'] = $embed['html'];
 	} else if (isset($_FILES['file'])) {
 		if ($_FILES['file']['name'] != "") {
 			validateFileUpload();
