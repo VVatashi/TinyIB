@@ -92,6 +92,7 @@ function bbcode($message) {
 		'/\[sub\]([^[]*)\[\/sub\]/si' => '<sub>\\1</sub>',
 		'/\[spoiler\]([^[]*)\[\/spoiler\]/si' => '<span class="spoiler">\\1</span>',
 		'/\[code\]([^[]*)\[\/code\]/si' => '<code style="white-space: pre;">\\1</code>',
+		'/\[rp\]([^[]*)\[\/rp\]/si' => '<span class="rp">\\1</span>',
 	);
 
 	do {

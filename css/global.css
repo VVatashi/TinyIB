@@ -146,11 +146,13 @@ sub {
 	bottom: -0.25em;
 }
 
-.spoiler {
+.spoiler,
+.rp {
 	background-color: #000;
 	color: #000;
 }
 
-.spoiler:hover {
+.spoiler:hover,
+.rp:hover {
 	color: #fff;
 }
