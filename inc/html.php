@@ -69,6 +69,18 @@ function makeLinksClickable($text) {
 	return $text;
 }
 
+function wakabamark($message) {
+	// Converts wakabamark to bbcodes
+	$patterns = array(
+		'/\*\*(.*?)\*\*/si' => '[b]\\1[/b]',
+		'/\*(.*?)\*/si' => '[i]\\1[/i]',
+		'/%%(.*?)%%/si' => '[spoiler]\\1[/spoiler]',
+		'/`(.*?)`/si' => '[code]\\1[/code]',
+	);
+
+	return preg_replace(array_keys($patterns), array_values($patterns), $message);
+}
+
 function bbcode($message) {
 	$patterns = array(
 		'/\[b\]([^[]*)\[\/b\]/si' => '<strong>\\1</strong>',
@@ -218,6 +230,7 @@ EOF;
 		$post['message'] = bbcode($post['message']);
 		$post['message'] .= '<br><span class="omittedposts">Post truncated.  Click Reply to view.</span><br>';
 	} else {
+		$post['message'] = wakabamark($post['message']);
 		$post['message'] = bbcode($post['message']);
 	}
 
