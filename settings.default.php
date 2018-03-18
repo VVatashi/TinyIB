@@ -55,6 +55,7 @@ define('TINYIB_THUMBNAIL', 'gd');     // Thumbnail method to use: gd / imagemagi
 define('TINYIB_NOFILEOK', false);     // Allow the creation of new threads without uploading a file
 define('TINYIB_FILE_ALLOW_DUPLICATE', false); // Allow duplicate files
 define('TINYIB_FILE_ANIM_GIF_THUMB', true); // Animate gif thumbnails
+define('TINYIB_FILE_SHOW_ORIG_NAME', true); // Show original file name
 
 // Thumbnail size - new thread
 define('TINYIB_MAXWOP', 250);         // Width

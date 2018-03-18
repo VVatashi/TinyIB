@@ -141,7 +141,7 @@ EOF;
 		if ($post["image_width"] > 0 && $post["image_height"] > 0) {
 			$filesize .= ", " . $post["image_width"] . "x" . $post["image_height"];
 		}
-		if ($post["file_original"] != "") {
+		if (TINYIB_FILE_SHOW_ORIG_NAME && $post["file_original"] != "") {
 			$filesize .= ", " . $post["file_original"];
 		}
 		$filesize .= ")";
