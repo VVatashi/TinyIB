@@ -1,0 +1,220 @@
+$bg-color: #eef2ff;
+$form-bg-color: #98e;
+$link-hover-color: #d00;
+$link-color: #34345c;
+$name-color: #117743;
+$post-bg-color: #d6daf0;
+$quote-color: #789922;
+$subject-color: #0f0c5d;
+$text-color: #000;
+
+html,
+body {
+  background: $bg-color;
+  color: $text-color;
+  font-size: 12pt;
+}
+
+a {
+  background: inherit;
+  color: $link-color;
+  font-family: sans-serif;
+  text-decoration: none;
+
+  &:visited {
+    background: inherit;
+    color: $link-color;
+    font-family: sans-serif;
+    text-decoration: none;
+  }
+
+  &:hover {
+    background: inherit;
+    color: $link-hover-color;
+    font-family: sans-serif;
+  }
+}
+
+hr {
+  background-image: linear-gradient(to left, $bg-color, rgba(52, 52, 92, .75), $bg-color);
+  color: $link-color;
+}
+
+.filesize {
+  font-family: sans-serif;
+  font-size: 12px;
+  text-decoration: underline;
+
+  a {
+    text-decoration: underline;
+
+    &:visited {
+      text-decoration: underline;
+    }
+  }
+}
+
+.adminbar {
+  background: inherit;
+}
+
+.logo {
+  background: inherit;
+  clear: both;
+  color: #af0a0f;
+  font-size: 24pt;
+  text-align: center;
+  width: 100%;
+}
+
+.replymode,
+.manageinfo,
+.catalogmode {
+  color: #fff;
+  width: 100%;
+}
+
+.replymode {
+  background: #0010e0;
+}
+
+.manageinfo {
+  background: #00b930;
+}
+
+.catalogmode {
+  background: #0040e0;
+}
+
+.postarea {
+  background: inherit;
+}
+
+.rules {
+  font-family: sans-serif;
+  font-size: 10px;
+  width: 468px;
+
+  li {
+    margin-left: 1em;
+  }
+}
+
+.postblock {
+  background: $form-bg-color;
+  color: $text-color;
+  font-weight: 800;
+}
+
+.footer {
+  font-family: sans-serif;
+  font-size: 10px;
+}
+
+.passvalid {
+  background: $form-bg-color;
+  color: #fff;
+  text-align: center;
+  width: 100%;
+}
+
+.dellist {
+  background: inherit;
+  text-align: center;
+}
+
+.delbuttons {
+  background: inherit;
+  padding-bottom: 4px;
+  text-align: center;
+}
+
+.managehead {
+  background: #0f8fe1;
+  color: $text-color;
+  font-family: sans-serif;
+  font-size: 14px;
+  padding: 0;
+}
+
+.postlists {
+  background: #fff;
+  color: $text-color;
+  padding: 0;
+  width: 100%;
+}
+
+.row1,
+.row2 {
+  color: $text-color;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+
+.row1 {
+  background: #9ad2f6;
+}
+
+.row2 {
+  background: #fff;
+}
+
+.unkfunc {
+  color: $quote-color;
+}
+
+.filetitle,
+.postername,
+.oldpost,
+.omittedposts,
+.replytitle,
+.commentpostername {
+  background: inherit;
+  font-family: serif;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.filetitle {
+  color: $subject-color;
+}
+
+.postername {
+  color: $name-color;
+  font-size: 12px;
+}
+
+.oldpost {
+  color: $subject-color;
+}
+
+.omittedposts {
+  color: #070707;
+}
+
+.reply {
+  background: $post-bg-color;
+  color: $text-color;
+  font-family: serif;
+}
+
+.replyhl {
+  background: #d6bad0;
+  color: $text-color;
+}
+
+.replytitle {
+  color: $subject-color;
+}
+
+.commentpostername {
+  color: $name-color;
+  font-size: 12px;
+}
+
+.thumbnailmsg {
+  background: inherit;
+  color: $text-color;
+  font-family: sans-serif;
+  font-size: 9px;
+}
