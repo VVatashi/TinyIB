@@ -1,0 +1,97 @@
+{% if is_mysqli_recommended %}
+  <fieldset>
+    <legend>Notice</legend>
+
+    <p>
+      <b>TINYIB_DBMODE</b> is currently <b>mysql</b> in <b>settings.php</b>,
+      but <a href="http://www.php.net/manual/en/book.mysqli.php">MySQLi</a> is installed.
+      Please change it to <b>mysqli</b>. This will not affect your data.
+    </p>
+  </fieldset>
+{% endif %}
+
+<fieldset>
+  <legend>Status</legend>
+
+  <fieldset>
+    <legend>Info</legend>
+
+    <table border="0" cellspacing="0" cellpadding="0" width="100%">
+      <tbody><tr><td>{{ info }}</td></tr></tbody>
+    </table>
+  </fieldset>
+
+  {% if reqmod_posts %}
+    <fieldset>
+      <legend>Pending posts</legend>
+
+      <table border="0" cellspacing="0" cellpadding="0" width="100%">
+        {% for post in reqmod_posts %}
+          {% if not loop.first %}
+            <tr><td colspan="2"><hr></td></tr>
+          {% endif %}
+
+          <tr>
+            <td>{{ post['rendered'] }}</td>
+            <td valign="top" align="right">
+              <table border="0">
+                <tr>
+                  <td>
+                    <form method="get" action="?">
+                      <input type="hidden" name="manage" value="" />
+                      <input type="hidden" name="approve" value="{{ post['id'] }}" />
+                      <input type="submit" value="Approve" class="managebutton" />
+                    </form>
+                  </td>
+
+                  <td>
+                    <form method="get" action="?">
+                      <input type="hidden" name="manage" value="" />
+                      <input type="hidden" name="moderate" value="{{ post['id'] }}" />
+                      <input type="submit" value="More Info" class="managebutton" />
+                    </form>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td align="right" colspan="2">
+                    <form method="get" action="?">
+                      <input type="hidden" name="manage" value="" />
+                      <input type="hidden" name="delete" value="{{ post['id'] }}" />
+                      <input type="submit" value="Delete" class="managebutton" />
+                    </form>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    </fieldset>
+  {% endif %}
+
+  <fieldset>
+    <legend>Recent posts</legend>
+
+    <table border="0" cellspacing="0" cellpadding="0" width="100%">
+      {% for post in posts %}
+        {% if not loop.first %}
+          <tr><td colspan="2"><hr></td></tr>
+        {% endif %}
+
+        <tr>
+          <td>{{ post['rendered'] }}</td>
+          <td valign="top" align="right">
+            <form method="get" action="?">
+              <input type="hidden" name="manage" value="" />
+              <input type="hidden" name="moderate" value="{{ post['id'] }}" />
+              <input type="submit" value="Moderate" class="managebutton" />
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  </fieldset>
+</fieldset>
+
+<br />

@@ -137,7 +137,7 @@ EOF;
 	$return .= <<<EOF
 <a id="${post['id']}"></a>
 <label>
-	<input type="checkbox" name="delete" value="${post['id']}"> 
+	<input type="checkbox" name="delete" value="${post['id']}">
 EOF;
 
 	if ($post['subject'] != '') {
@@ -366,7 +366,7 @@ EOF;
 		</div>
 		<hr>
 		<form id="delform" action="imgboard.php?delete" method="post">
-		<input type="hidden" name="board" 
+		<input type="hidden" name="board"
 EOF;
 	$body .= 'value="' . TINYIB_BOARD . '">' . <<<EOF
 		$htmlposts
@@ -486,170 +486,48 @@ function manageRawPostForm() {
 }
 
 function manageModeratePost($post) {
-	global $isadmin;
-	$ban = banByIP($post['ip']);
-	$ban_disabled = (!$ban && $isadmin) ? '' : ' disabled';
-	$ban_info = (!$ban) ? ((!$isadmin) ? 'Only an administrator may ban an IP address.' : ('IP address: ' . $post["ip"])) : (' A ban record already exists for ' . $post['ip']);
-	$delete_info = ($post['parent'] == TINYIB_NEWTHREAD) ? 'This will delete the entire thread below.' : 'This will delete the post below.';
-	$post_or_thread = ($post['parent'] == TINYIB_NEWTHREAD) ? 'Thread' : 'Post';
+	global $twig, $isadmin;
 
-	$sticky_html = "";
-	if ($post["parent"] == TINYIB_NEWTHREAD) {
-		$sticky_set = $post['stickied'] == 1 ? '0' : '1';
-		$sticky_unsticky = $post['stickied'] == 1 ? 'Un-sticky' : 'Sticky';
-		$sticky_unsticky_help = $post['stickied'] == 1 ? 'Return this thread to a normal state.' : 'Keep this thread at the top of the board.';
-		$sticky_html = <<<EOF
-	<tr><td colspan="2">&nbsp;</td></tr>
-	<tr><td align="right" width="50%;">
-		<form method="get" action="?">
-		<input type="hidden" name="manage" value="">
-		<input type="hidden" name="sticky" value="${post['id']}">
-		<input type="hidden" name="setsticky" value="$sticky_set">
-		<input type="submit" value="$sticky_unsticky Thread" class="managebutton" style="width: 50%;">
-		</form>
-	</td><td><small>$sticky_unsticky_help</small></td></tr>
-EOF;
+	$data = array(
+		'has_ban' => banByIP($post['ip']),
+		'is_admin' => $isadmin,
+		'post' => $post,
+	);
 
-		$post_html = "";
-		$posts = postsInThreadByID($post["id"]);
-		foreach ($posts as $post_temp) {
-			$post_html .= buildPost($post_temp, TINYIB_INDEXPAGE);
-		}
-	} else {
-		$post_html = buildPost($post, TINYIB_INDEXPAGE);
-	}
+	$is_thread = $post['parent'] == TINYIB_NEWTHREAD;
+	$posts = $is_thread ? postsInThreadByID($post['id']) : array($post);
 
-	return <<<EOF
-	<fieldset>
-	<legend>Moderating No.${post['id']}</legend>
-	
-	<fieldset>
-	<legend>Action</legend>
-	
-	<table border="0" cellspacing="0" cellpadding="0" width="100%">
-	<tr><td align="right" width="50%;">
-	
-	<form method="get" action="?">
-	<input type="hidden" name="manage" value="">
-	<input type="hidden" name="delete" value="${post['id']}">
-	<input type="submit" value="Delete $post_or_thread" class="managebutton" style="width: 50%;">
-	</form>
-	
-	</td><td><small>$delete_info</small></td></tr>
-	<tr><td align="right" width="50%;">
-	
-	<form method="get" action="?">
-	<input type="hidden" name="manage" value="">
-	<input type="hidden" name="bans" value="${post['ip']}">
-	<input type="submit" value="Ban Poster" class="managebutton" style="width: 50%;"$ban_disabled>
-	</form>
-	
-	</td><td><small>$ban_info</small></td></tr>
+	$data['posts'] = array_map(function ($post) {
+		$post['rendered'] = buildPost($post, TINYIB_INDEXPAGE);
+		return $post;
+	}, $posts);
 
-	$sticky_html
-	
-	</table>
-	
-	</fieldset>
-	
-	<fieldset>
-	<legend>$post_or_thread</legend>	
-	$post_html
-	</fieldset>
-	
-	</fieldset>
-	<br>
-EOF;
+	return $twig->render('_manage_moderate_post.twig', $data);
 }
 
 function manageStatus() {
-	global $isadmin;
+	global $twig, $isadmin;
 	$threads = countThreads();
 	$bans = count(allBans());
-	$info = $threads . ' ' . plural('thread', $threads) . ', ' . $bans . ' ' . plural('ban', $bans);
-	$output = '';
 
-	if ($isadmin && TINYIB_DBMODE == 'mysql' && function_exists('mysqli_connect')) { // Recommend MySQLi
-		$output .= <<<EOF
-	<fieldset>
-	<legend>Notice</legend>
-	<p><b>TINYIB_DBMODE</b> is currently <b>mysql</b> in <b>settings.php</b>, but <a href="http://www.php.net/manual/en/book.mysqli.php">MySQLi</a> is installed.  Please change it to <b>mysqli</b>.  This will not affect your data.</p>
-	</fieldset>
-EOF;
-	}
-
-	$reqmod_html = '';
+	$data = array(
+		'info' => $threads . ' ' . plural('thread', $threads) . ', ' . $bans . ' ' . plural('ban', $bans),
+		'is_mysqli_recommended' => $isadmin && TINYIB_DBMODE == 'mysql' && function_exists('mysqli_connect'),
+	);
 
 	if (TINYIB_REQMOD == 'files' || TINYIB_REQMOD == 'all') {
-		$reqmod_post_html = '';
-
-		$reqmod_posts = latestPosts(false);
-		foreach ($reqmod_posts as $post) {
-			if ($reqmod_post_html != '') {
-				$reqmod_post_html .= '<tr><td colspan="2"><hr></td></tr>';
-			}
-			$reqmod_post_html .= '<tr><td>' . buildPost($post, TINYIB_INDEXPAGE) . '</td><td valign="top" align="right">
-			<table border="0"><tr><td>
-			<form method="get" action="?"><input type="hidden" name="manage" value=""><input type="hidden" name="approve" value="' . $post['id'] . '"><input type="submit" value="Approve" class="managebutton"></form>
-			</td><td>
-			<form method="get" action="?"><input type="hidden" name="manage" value=""><input type="hidden" name="moderate" value="' . $post['id'] . '"><input type="submit" value="More Info" class="managebutton"></form>
-			</td></tr><tr><td align="right" colspan="2">
-			<form method="get" action="?"><input type="hidden" name="manage" value=""><input type="hidden" name="delete" value="' . $post['id'] . '"><input type="submit" value="Delete" class="managebutton"></form>
-			</td></tr></table>
-			</td></tr>';
-		}
-
-		if ($reqmod_post_html != '') {
-			$reqmod_html = <<<EOF
-	<fieldset>
-	<legend>Pending posts</legend>
-	<table border="0" cellspacing="0" cellpadding="0" width="100%">
-	$reqmod_post_html
-	</table>
-	</fieldset>
-EOF;
-		}
+		$data['reqmod_posts'] = array_map(function ($post) {
+			$post['rendered'] = buildPost($post, TINYIB_INDEXPAGE);
+			return $post;
+		}, latestPosts(false));
 	}
 
-	$post_html = '';
-	$posts = latestPosts(true);
-	foreach ($posts as $post) {
-		if ($post_html != '') {
-			$post_html .= '<tr><td colspan="2"><hr></td></tr>';
-		}
-		$post_html .= '<tr><td>' . buildPost($post, TINYIB_INDEXPAGE) . '</td><td valign="top" align="right"><form method="get" action="?"><input type="hidden" name="manage" value=""><input type="hidden" name="moderate" value="' . $post['id'] . '"><input type="submit" value="Moderate" class="managebutton"></form></td></tr>';
-	}
+	$data['posts'] = array_map(function ($post) {
+		$post['rendered'] = buildPost($post, TINYIB_INDEXPAGE);
+		return $post;
+	}, latestPosts(true));
 
-	$output .= <<<EOF
-	<fieldset>
-	<legend>Status</legend>
-	
-	<fieldset>
-	<legend>Info</legend>
-	<table border="0" cellspacing="0" cellpadding="0" width="100%">
-	<tbody>
-	<tr><td>
-		$info
-	</td>
-	</tr>
-	</tbody>
-	</table>
-	</fieldset>
-
-	$reqmod_html
-	
-	<fieldset>
-	<legend>Recent posts</legend>
-	<table border="0" cellspacing="0" cellpadding="0" width="100%">
-	$post_html
-	</table>
-	</fieldset>
-	
-	</fieldset>
-	<br>
-EOF;
-
-	return $output;
+	return $twig->render('_manage_status.twig', $data);
 }
 
 function manageInfo($text) {
