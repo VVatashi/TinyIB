@@ -3,47 +3,14 @@ if (!defined('TINYIB_BOARD')) {
 	die('');
 }
 
-function pageHeader() {
-	$js_captcha = TINYIB_CAPTCHA === 'recaptcha' ? '<script src="https://www.google.com/recaptcha/api.js" async defer></script>' : '';
+require_once './vendor/autoload.php';
 
-	$return = <<<EOF
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta http-equiv="content-type" content="text/html;charset=UTF-8">
-		<meta http-equiv="cache-control" content="max-age=0">
-		<meta http-equiv="cache-control" content="no-cache">
-		<meta http-equiv="expires" content="0">
-		<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT">
-		<meta http-equiv="pragma" content="no-cache">
-		<meta name="viewport" content="width=device-width,initial-scale=1">
-		<title>
-EOF;
-	$return .= TINYIB_BOARDDESC . <<<EOF
-		</title>
-		<link rel="shortcut icon" href="favicon.ico">
-		<link rel="stylesheet" type="text/css" href="css/global.css">
-		<link rel="stylesheet" type="text/css" href="css/futaba.css" title="Futaba">
-		<link rel="alternate stylesheet" type="text/css" href="css/burichan.css" title="Burichan">
-		<script src="js/tinyib.js"></script>
-		$js_captcha
-	</head>
-EOF;
-	return $return;
-}
-
-function pageFooter() {
-	// If the footer link is removed from the page, please link to TinyIB somewhere on the site.
-	// This is all I ask in return for the free software you are using.
-
-	return <<<EOF
-		<div class="footer">
-			- <a href="http://www.2chan.net" target="_top">futaba</a> + <a href="http://www.1chan.net" target="_top">futallaby</a> + <a href="https://github.com/tslocum/TinyIB" target="_top">tinyib</a> -
-		</div>
-	</body>
-</html>
-EOF;
-}
+$loader = new Twig_Loader_Filesystem('./templates');
+$twig = new Twig_Environment($loader, array(
+	'autoescape' => false,
+	'cache' => './templates/cache',
+	'debug' => true,
+));
 
 function supportedFileTypes() {
 	global $tinyib_uploads;
@@ -272,42 +239,8 @@ EOF;
 	$embed_input_html = '';
 	$unique_posts_html = '';
 
-	$captcha_html = '';
-	if (TINYIB_CAPTCHA) {
-		if (TINYIB_CAPTCHA === 'recaptcha') {
-			$captcha_inner_html = '
-<div style="min-height: 80px;">
-	<div class="g-recaptcha" data-sitekey="' . TINYIB_RECAPTCHA_SITE . '"></div>
-	<noscript>
-		<div>
-			<div style="width: 302px; height: 422px; position: relative;">
-				<div style="width: 302px; height: 422px; position: absolute;">
-					<iframe src="https://www.google.com/recaptcha/api/fallback?k=' . TINYIB_RECAPTCHA_SITE . '" frameborder="0" scrolling="no" style="width: 302px; height:422px; border-style: none;"></iframe>
-				</div>
-			</div>
-			<div style="width: 300px; height: 60px; border-style: none;bottom: 12px; left: 25px; margin: 0px; padding: 0px; right: 25px;background: #f9f9f9; border: 1px solid #c1c1c1; border-radius: 3px;">
-				<textarea id="g-recaptcha-response" name="g-recaptcha-response" class="g-recaptcha-response" style="width: 250px; height: 40px; border: 1px solid #c1c1c1; margin: 10px 25px; padding: 0px; resize: none;"></textarea>
-			</div>
-		</div>
-	</noscript>
-</div>';
-		} else { // Simple CAPTCHA
-			$captcha_inner_html = '
-<input type="text" name="captcha" id="captcha" size="6" accesskey="c" autocomplete="off">&nbsp;&nbsp;(enter the text below)<br>
-<img id="captchaimage" src="inc/captcha.php" width="175" height="55" alt="CAPTCHA" onclick="javascript:reloadCAPTCHA()" style="margin-top: 5px;cursor: pointer;">';
-		}
-
-		$captcha_html = <<<EOF
-					<tr>
-						<td class="postblock">
-							CAPTCHA
-						</td>
-						<td>
-							$captcha_inner_html
-						</td>
-					</tr>
-EOF;
-	}
+	global $twig;
+	$captcha_html = $twig->render('_captcha.twig');
 
 	if (!empty($tinyib_uploads)) {
 		if (TINYIB_MAXKB > 0) {
@@ -357,7 +290,6 @@ EOF;
 	}
 
 	$body = <<<EOF
-	<body>
 		<div class="adminbar">
 			[<a href="$managelink" style="text-decoration: underline;">Manage</a>]
 		</div>
@@ -451,7 +383,9 @@ EOF;
 		$pagenavigator
 		<br>
 EOF;
-	return pageHeader() . $body . pageFooter();
+
+	global $twig;
+	return $twig->render('page.twig', array('body' => $body));
 }
 
 function rebuildIndexes() {
@@ -501,33 +435,16 @@ function rebuildThread($id) {
 	writePage('res/' . $id . '.html', fixLinksInRes(buildPage($htmlposts, $id)));
 }
 
-function adminBar() {
-	global $loggedin, $isadmin, $returnlink;
-	$return = '[<a href="' . $returnlink . '" style="text-decoration: underline;">Return</a>]';
-	if (!$loggedin) {
-		return $return;
-	}
-
-	return '[<a href="?manage">Status</a>] [' . (($isadmin) ? '<a href="?manage&bans">Bans</a>] [' : '') . '<a href="?manage&moderate">Moderate Post</a>] [<a href="?manage&rawpost">Raw Post</a>] [' . (($isadmin) ? '<a href="?manage&rebuildall">Rebuild All</a>] [' : '') . (($isadmin && installedViaGit()) ? '<a href="?manage&update">Update</a>] [' : '') . (($isadmin && TINYIB_DBMIGRATE) ? '<a href="?manage&dbmigrate"><b>Migrate Database</b></a>] [' : '') . '<a href="?manage&logout">Log Out</a>] &middot; ' . $return;
-}
-
 function managePage($text, $onload = '') {
-	$adminbar = adminBar();
-	$body = <<<EOF
-	<body$onload>
-		<div class="adminbar">
-			$adminbar
-		</div>
-		<div class="logo">
-EOF;
-	$body .= TINYIB_LOGO . TINYIB_BOARDDESC . <<<EOF
-		</div>
-		<hr width="90%">
-		<div class="replymode">Manage mode</div>
-		$text
-		<hr>
-EOF;
-	return pageHeader() . $body . pageFooter();
+	global $twig, $isadmin, $loggedin, $returnlink;
+	return $twig->render('manage.twig', array(
+		'body_attribs' => $onload,
+		'is_admin' => $isadmin,
+		'is_installed_via_git' => installedViaGit(),
+		'is_logged_in' => $loggedin,
+		'return_link' => $returnlink,
+		'text' => $text,
+	));
 }
 
 function manageOnLoad($page) {
@@ -544,146 +461,28 @@ function manageOnLoad($page) {
 }
 
 function manageLogInForm() {
-	return <<<EOF
-	<form id="tinyib" name="tinyib" method="post" action="?manage">
-	<fieldset>
-	<legend align="center">Enter an administrator or moderator password</legend>
-	<div class="login">
-	<input type="password" id="managepassword" name="managepassword"><br>
-	<input type="submit" value="Log In" class="managebutton">
-	</div>
-	</fieldset>
-	</form>
-	<br>
-EOF;
+	global $twig;
+	return $twig->render('_manage_log_in_form.twig');
 }
 
 function manageBanForm() {
-	return <<<EOF
-	<form id="tinyib" name="tinyib" method="post" action="?manage&bans">
-	<fieldset>
-	<legend>Ban an IP address</legend>
-	<label for="ip">IP Address:</label> <input type="text" name="ip" id="ip" value="${_GET['bans']}"> <input type="submit" value="Submit" class="managebutton"><br>
-	<label for="expire">Expire(sec):</label> <input type="text" name="expire" id="expire" value="0">&nbsp;&nbsp;<small><a href="#" onclick="document.tinyib.expire.value='3600';return false;">1hr</a>&nbsp;<a href="#" onclick="document.tinyib.expire.value='86400';return false;">1d</a>&nbsp;<a href="#" onclick="document.tinyib.expire.value='172800';return false;">2d</a>&nbsp;<a href="#" onclick="document.tinyib.expire.value='604800';return false;">1w</a>&nbsp;<a href="#" onclick="document.tinyib.expire.value='1209600';return false;">2w</a>&nbsp;<a href="#" onclick="document.tinyib.expire.value='2592000';return false;">30d</a>&nbsp;<a href="#" onclick="document.tinyib.expire.value='0';return false;">never</a></small><br>
-	<label for="reason">Reason:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label> <input type="text" name="reason" id="reason">&nbsp;&nbsp;<small>optional</small>
-	<legend>
-	</fieldset>
-	</form><br>
-EOF;
+	global $twig;
+	return $twig->render('_manage_ban_form.twig', array('ip' => $_GET['bans']));
 }
 
 function manageBansTable() {
-	$text = '';
-	$allbans = allBans();
-	if (count($allbans) > 0) {
-		$text .= '<table border="1"><tr><th>IP Address</th><th>Set At</th><th>Expires</th><th>Reason Provided</th><th>&nbsp;</th></tr>';
-		foreach ($allbans as $ban) {
-			$expire = ($ban['expire'] > 0) ? date('y/m/d(D)H:i:s', $ban['expire']) : 'Does not expire';
-			$reason = ($ban['reason'] == '') ? '&nbsp;' : htmlentities($ban['reason']);
-			$text .= '<tr><td>' . $ban['ip'] . '</td><td>' . date('y/m/d(D)H:i:s', $ban['timestamp']) . '</td><td>' . $expire . '</td><td>' . $reason . '</td><td><a href="?manage&bans&lift=' . $ban['id'] . '">lift</a></td></tr>';
-		}
-		$text .= '</table>';
-	}
-	return $text;
+	global $twig;
+	return $twig->render('_manage_bans_table.twig', array('bans' => allBans()));
 }
 
 function manageModeratePostForm() {
-	return <<<EOF
-	<form id="tinyib" name="tinyib" method="get" action="?">
-	<input type="hidden" name="manage" value="">
-	<fieldset>
-	<legend>Moderate a post</legend>
-	<div valign="top"><label for="moderate">Post ID:</label> <input type="text" name="moderate" id="moderate"> <input type="submit" value="Submit" class="managebutton"></div><br>
-	<small><b>Tip:</b> While browsing the image board, you can easily moderate a post if you are logged in:<br>
-	Tick the box next to a post and click "Delete" at the bottom of the page with a blank password.</small><br>
-	</fieldset>
-	</form><br>
-EOF;
+	global $twig;
+	return $twig->render('_manage_moderate_post_form.twig');
 }
 
 function manageRawPostForm() {
-	$max_file_size_input_html = '';
-	if (TINYIB_MAXKB > 0) {
-		$max_file_size_input_html = '<input type="hidden" name="MAX_FILE_SIZE" value="' . strval(TINYIB_MAXKB * 1024) . '">';
-	}
-
-	return <<<EOF
-	<div class="postarea">
-		<form id="tinyib" name="tinyib" method="post" action="?" enctype="multipart/form-data">
-		<input type="hidden" name="rawpost" value="1">
-		$max_file_size_input_html
-		<table class="postform">
-			<tbody>
-				<tr>
-					<td class="postblock">
-						Reply to
-					</td>
-					<td>
-						<input type="text" name="parent" size="28" maxlength="75" value="0" accesskey="t">&nbsp;0 to start a new thread
-					</td>
-				</tr>
-				<tr>
-					<td class="postblock">
-						Name
-					</td>
-					<td>
-						<input type="text" name="name" size="28" maxlength="75" accesskey="n">
-					</td>
-				</tr>
-				<tr>
-					<td class="postblock">
-						E-mail
-					</td>
-					<td>
-						<input type="text" name="email" size="28" maxlength="75" accesskey="e">
-					</td>
-				</tr>
-				<tr>
-					<td class="postblock">
-						Subject
-					</td>
-					<td>
-						<input type="text" name="subject" size="40" maxlength="75" accesskey="s" autocomplete="off">
-						<input type="submit" value="Submit" accesskey="z">
-					</td>
-				</tr>
-				<tr>
-					<td class="postblock">
-						Message
-					</td>
-					<td>
-						<textarea name="message" cols="48" rows="4" accesskey="m"></textarea>
-					</td>
-				</tr>
-				<tr>
-					<td class="postblock">
-						File
-					</td>
-					<td>
-						<input type="file" name="file" size="35" accesskey="f">
-					</td>
-				</tr>
-				<tr>
-					<td class="postblock">
-						Password
-					</td>
-					<td>
-						<input type="password" name="password" size="8" accesskey="p">&nbsp;(for post and file deletion)
-					</td>
-				</tr>
-				<tr>
-					<td colspan="2" class="rules">
-						<ul>
-							<li>Text entered in the Message field will be posted as is with no formatting applied.</li>
-							<li>Line-breaks must be specified with "&lt;br&gt;".</li>
-						</ul>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-		</form>
-	</div>
-EOF;
+	global $twig;
+	return $twig->render('_manage_raw_post_form.twig');
 }
 
 function manageModeratePost($post) {
@@ -854,5 +653,6 @@ EOF;
 }
 
 function manageInfo($text) {
-	return '<div class="manageinfo">' . $text . '</div>';
+	global $twig;
+	return $twig->render('_manage_info.twig', array('text' => $text));
 }

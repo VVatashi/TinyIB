@@ -1,0 +1,64 @@
+<div class="postarea">
+  <form id="tinyib" name="tinyib" method="post" action="?" enctype="multipart/form-data">
+    <input type="hidden" name="rawpost" value="1" />
+
+    {% if constant('TINYIB_MAXKB') > 0 %}
+      <input type="hidden" name="MAX_FILE_SIZE" value="{{ constant('TINYIB_MAXKB') * 1024 }}" />
+    {% endif %}
+
+    <table class="postform">
+      <tbody>
+        <tr>
+          <td class="postblock">Reply to</td>
+          <td>
+            <input type="text" name="parent" size="28" maxlength="75" value="0" accesskey="t" />&nbsp;0 to start a new thread
+          </td>
+        </tr>
+
+        <tr>
+          <td class="postblock">Name</td>
+          <td><input type="text" name="name" size="28" maxlength="75" accesskey="n" /></td>
+        </tr>
+
+        <tr>
+          <td class="postblock">E-mail</td>
+          <td><input type="text" name="email" size="28" maxlength="75" accesskey="e" /></td>
+        </tr>
+
+        <tr>
+          <td class="postblock">Subject</td>
+          <td>
+            <input type="text" name="subject" size="40" maxlength="75" accesskey="s" autocomplete="off" />
+            <input type="submit" value="Submit" accesskey="z" />
+          </td>
+        </tr>
+
+        <tr>
+          <td class="postblock">Message</td>
+          <td><textarea name="message" cols="48" rows="4" accesskey="m"></textarea></td>
+        </tr>
+
+        <tr>
+          <td class="postblock">File</td>
+          <td><input type="file" name="file" size="35" accesskey="f" /></td>
+        </tr>
+
+        <tr>
+          <td class="postblock">Password</td>
+          <td>
+            <input type="password" name="password" size="8" accesskey="p" />&nbsp;(for post and file deletion)
+          </td>
+        </tr>
+
+        <tr>
+          <td colspan="2" class="rules">
+            <ul>
+              <li>Text entered in the Message field will be posted as is with no formatting applied.</li>
+              <li>Line-breaks must be specified with "&lt;br&gt;".</li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </form>
+</div>
