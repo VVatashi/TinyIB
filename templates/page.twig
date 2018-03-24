@@ -1,5 +1,177 @@
 {% extends 'html.twig' %}
 
 {% block body %}
-  {{ body }}
+  <div class="adminbar">
+    [<a href="{{ manage_link }}" style="text-decoration: underline;">Manage</a>]
+  </div>
+
+  <div class="logo">
+    {{ constant('TINYIB_LOGO') }}
+    {{ constant('TINYIB_BOARDDESC') }}
+  </div>
+
+  <hr width="90%" />
+
+  {% if parent != constant('TINYIB_NEWTHREAD') %}
+    &#91;<a href="../">Return</a>&#93;
+    <div class="replymode">Posting mode: Reply</div>
+  {% endif %}
+
+  <div class="postarea">
+    <form name="postform" id="postform" action="imgboard.php" method="post" enctype="multipart/form-data">
+      {% if uploads and constant('TINYIB_MAXKB') > 0 %}
+        <input type="hidden" name="MAX_FILE_SIZE" value="{{ constant('TINYIB_MAXKB') * 1024 }}" />
+      {% endif %}
+
+      <input type="hidden" name="parent" value="{{ parent }}" />
+
+      <table class="postform">
+        <tbody>
+          <tr>
+            <td class="postblock">Name</td>
+            <td><input type="text" name="name" size="28" maxlength="75" accesskey="n" /></td>
+          </tr>
+
+          <tr>
+            <td class="postblock">E-mail</td>
+            <td><input type="text" name="email" size="28" maxlength="75" accesskey="e" /></td>
+          </tr>
+
+          <tr>
+            <td class="postblock">Subject</td>
+            <td>
+              <input type="text" name="subject" size="40" maxlength="75" accesskey="s" autocomplete="off" />
+              <input type="submit" value="Submit" accesskey="z" />
+            </td>
+          </tr>
+
+          <tr>
+            <td class="postblock">Message</td>
+            <td><textarea id="message" name="message" cols="48" rows="4" accesskey="m"></textarea></td>
+          </tr>
+
+          {% include '_captcha.twig' %}
+
+          {% if uploads %}
+            <tr>
+              <td class="postblock">File</td>
+              <td><input type="file" name="file" size="35" accesskey="f" /></td>
+            </tr>
+          {% endif %}
+
+          {% if embeds %}
+            <tr>
+              <td class="postblock">Embed</td>
+              <td>
+                <input type="text" name="embed" size="28" accesskey="x" autocomplete="off" />&nbsp;&nbsp;(paste a YouTube URL)
+              </td>
+            </tr>
+          {% endif %}
+
+          <tr>
+            <td class="postblock">Password</td>
+            <td>
+              <input type="password" name="password" id="newpostpassword" size="8" accesskey="p" />&nbsp;&nbsp;(for post and file deletion)
+            </td>
+          </tr>
+
+          <tr>
+            <td colspan="2" class="rules">
+              <ul>
+                {% if constant('TINYIB_REQMOD') == 'files' or constant('TINYIB_REQMOD') == 'all' %}
+                  <li>All posts {{ constant('TINYIB_REQMOD') == 'files' ? ' with a file attached' }} will be moderated before being shown.</li>
+                {% endif %}
+
+                {% if uploads %}
+                  <li>{{ filetypes }}</li>
+                {% endif %}
+
+                {% if uploads and constant('TINYIB_MAXKB') > 0 %}
+                  <li>Maximum file size allowed is {{ constant('TINYIB_MAXKBDESC') }}.</li>
+                {% endif %}
+
+                {% if thumbnails %}
+                  <li>
+                    Images greater than
+                    {{ constant('TINYIB_MAXWOP') }}x{{ constant('TINYIB_MAXHOP') }}
+
+                    {% if constant('TINYIB_MAXW') != constant('TINYIB_MAXWOP')
+                      or constant('TINYIB_MAXH') != constant('TINYIB_MAXHOP') %}
+                      (new thread) or {{ constant('TINYIB_MAXW') }}x{{ constant('TINYIB_MAXH') }} (reply)
+                    {% endif %}
+
+                    will be thumbnailed.
+                  </li>
+                {% endif %}
+
+                {% if unique_posts > 0 %}
+                  <li>Currently {{ unique_posts }} unique user posts.</li>
+                {% endif %}
+              </ul>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </form>
+  </div>
+
+  <hr />
+
+  <form id="delform" action="imgboard.php?delete" method="post">
+    <input type="hidden" name="board" value="{{ constant('TINYIB_BOARD') }}" />
+
+    {{ posts }}
+
+    <table class="userdelete">
+      <tbody>
+        <tr>
+          <td>
+            Delete Post
+            <input type="password" name="password" id="deletepostpassword" size="8" placeholder="Password" />&nbsp;
+            <input name="deletepost" value="Delete" type="submit" />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </form>
+
+  <table border="1">
+    <tbody>
+      <tr>
+        {% if parent == constant('TINYIB_NEWTHREAD') %}
+          {% if this_page == 0 %}
+            <td>Previous</td>
+          {% else %}
+            <td>
+              <form method="get" action="{{ (this_page == 1) ? 'index' : this_page - 1 }}.html">
+                <input value="Previous" type="submit" />
+              </form>
+            </td>
+          {% endif %}
+
+          <td>
+            {% for i in 0..pages %}
+              {% if this_page == i %}
+                &#91;{{ i }}&#93;
+              {% else %}
+                &#91;<a href="{{ (i == 0) ? 'index' : i }}.html">{{ i }}</a>&#93;
+              {% endif %}
+            {% endfor %}
+          </td>
+
+          {% if pages <= this_page %}
+            <td>Next</td>
+          {% else %}
+            <td>
+              <form method="get" action="{{ this_page + 1 }}.html">
+                <input value="Next" type="submit" />
+              </form>
+            </td>
+          {% endif %}
+        {% endif %}
+      </tr>
+    </tbody>
+  </table>
+
+  <br />
 {% endblock %}

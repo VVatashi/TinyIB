@@ -11,6 +11,8 @@ $twig = new Twig_Environment($loader, array(
 	'cache' => './templates/cache',
 	'debug' => true,
 ));
+$twig->addGlobal('embeds', $tinyib_uploads);
+$twig->addGlobal('uploads', $tinyib_embeds);
 
 function supportedFileTypes() {
 	global $tinyib_uploads;
@@ -188,204 +190,25 @@ EOF;
 }
 
 function buildPage($htmlposts, $parent, $pages = 0, $thispage = 0) {
-	global $tinyib_uploads, $tinyib_embeds;
+	global $twig, $tinyib_uploads;
 
 	$managelink = basename($_SERVER['PHP_SELF']) . "?manage";
-	$maxdimensions = TINYIB_MAXWOP . 'x' . TINYIB_MAXHOP;
-	if (TINYIB_MAXW != TINYIB_MAXWOP || TINYIB_MAXH != TINYIB_MAXHOP) {
-		$maxdimensions .= ' (new thread) or ' . TINYIB_MAXW . 'x' . TINYIB_MAXH . ' (reply)';
-	}
 
-	$postingmode = "";
-	$pagenavigator = "";
-	if ($parent == TINYIB_NEWTHREAD) {
-		$pages = max($pages, 0);
-		$previous = ($thispage == 1) ? "index" : $thispage - 1;
-		$next = $thispage + 1;
+	$thumbnails = isset($tinyib_uploads['image/jpeg'])
+		|| isset($tinyib_uploads['image/pjpeg'])
+		|| isset($tinyib_uploads['image/png'])
+		|| isset($tinyib_uploads['image/gif']);
 
-		$pagelinks = ($thispage == 0) ? "<td>Previous</td>" : '<td><form method="get" action="' . $previous . '.html"><input value="Previous" type="submit"></form></td>';
-
-		$pagelinks .= "<td>";
-		for ($i = 0; $i <= $pages; $i++) {
-			if ($thispage == $i) {
-				$pagelinks .= '&#91;' . $i . '&#93; ';
-			} else {
-				$href = ($i == 0) ? "index" : $i;
-				$pagelinks .= '&#91;<a href="' . $href . '.html">' . $i . '</a>&#93; ';
-			}
-		}
-		$pagelinks .= "</td>";
-
-		$pagelinks .= ($pages <= $thispage) ? "<td>Next</td>" : '<td><form method="get" action="' . $next . '.html"><input value="Next" type="submit"></form></td>';
-
-		$pagenavigator = <<<EOF
-<table border="1">
-	<tbody>
-		<tr>
-			$pagelinks
-		</tr>
-	</tbody>
-</table>
-EOF;
-	} else {
-		$postingmode = '&#91;<a href="../">Return</a>&#93;<div class="replymode">Posting mode: Reply</div> ';
-	}
-
-	$max_file_size_input_html = '';
-	$max_file_size_rules_html = '';
-	$reqmod_html = '';
-	$filetypes_html = '';
-	$file_input_html = '';
-	$embed_input_html = '';
-	$unique_posts_html = '';
-
-	global $twig;
-	$captcha_html = $twig->render('_captcha.twig');
-
-	if (!empty($tinyib_uploads)) {
-		if (TINYIB_MAXKB > 0) {
-			$max_file_size_input_html = '<input type="hidden" name="MAX_FILE_SIZE" value="' . strval(TINYIB_MAXKB * 1024) . '">';
-			$max_file_size_rules_html = '<li>Maximum file size allowed is ' . TINYIB_MAXKBDESC . '.</li>';
-		}
-
-		$filetypes_html = '<li>' . supportedFileTypes() . '</li>';
-
-		$file_input_html = <<<EOF
-					<tr>
-						<td class="postblock">
-							File
-						</td>
-						<td>
-							<input type="file" name="file" size="35" accesskey="f">
-						</td>
-					</tr>
-EOF;
-	}
-
-	if (!empty($tinyib_embeds)) {
-		$embed_input_html = <<<EOF
-					<tr>
-						<td class="postblock">
-							Embed
-						</td>
-						<td>
-							<input type="text" name="embed" size="28" accesskey="x" autocomplete="off">&nbsp;&nbsp;(paste a YouTube URL)
-						</td>
-					</tr>
-EOF;
-	}
-
-	if (TINYIB_REQMOD == 'files' || TINYIB_REQMOD == 'all') {
-		$reqmod_html = '<li>All posts' . (TINYIB_REQMOD == 'files' ? ' with a file attached' : '') . ' will be moderated before being shown.</li>';
-	}
-
-	$thumbnails_html = '';
-	if (isset($tinyib_uploads['image/jpeg']) || isset($tinyib_uploads['image/pjpeg']) || isset($tinyib_uploads['image/png']) || isset($tinyib_uploads['image/gif'])) {
-		$thumbnails_html = "<li>Images greater than $maxdimensions will be thumbnailed.</li>";
-	}
-
-	$unique_posts = uniquePosts();
-	if ($unique_posts > 0) {
-		$unique_posts_html = "<li>Currently $unique_posts unique user posts.</li>\n";
-	}
-
-	$body = <<<EOF
-		<div class="adminbar">
-			[<a href="$managelink" style="text-decoration: underline;">Manage</a>]
-		</div>
-		<div class="logo">
-EOF;
-	$body .= TINYIB_LOGO . TINYIB_BOARDDESC . <<<EOF
-		</div>
-		<hr width="90%">
-		$postingmode
-		<div class="postarea">
-			<form name="postform" id="postform" action="imgboard.php" method="post" enctype="multipart/form-data">
-			$max_file_size_input_html
-			<input type="hidden" name="parent" value="$parent">
-			<table class="postform">
-				<tbody>
-					<tr>
-						<td class="postblock">
-							Name
-						</td>
-						<td>
-							<input type="text" name="name" size="28" maxlength="75" accesskey="n">
-						</td>
-					</tr>
-					<tr>
-						<td class="postblock">
-							E-mail
-						</td>
-						<td>
-							<input type="text" name="email" size="28" maxlength="75" accesskey="e">
-						</td>
-					</tr>
-					<tr>
-						<td class="postblock">
-							Subject
-						</td>
-						<td>
-							<input type="text" name="subject" size="40" maxlength="75" accesskey="s" autocomplete="off">
-							<input type="submit" value="Submit" accesskey="z">
-						</td>
-					</tr>
-					<tr>
-						<td class="postblock">
-							Message
-						</td>
-						<td>
-							<textarea id="message" name="message" cols="48" rows="4" accesskey="m"></textarea>
-						</td>
-					</tr>
-					$captcha_html
-					$file_input_html
-					$embed_input_html
-					<tr>
-						<td class="postblock">
-							Password
-						</td>
-						<td>
-							<input type="password" name="password" id="newpostpassword" size="8" accesskey="p">&nbsp;&nbsp;(for post and file deletion)
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2" class="rules">
-							<ul>
-								$reqmod_html
-								$filetypes_html
-								$max_file_size_rules_html
-								$thumbnails_html
-								$unique_posts_html
-							</ul>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-			</form>
-		</div>
-		<hr>
-		<form id="delform" action="imgboard.php?delete" method="post">
-		<input type="hidden" name="board"
-EOF;
-	$body .= 'value="' . TINYIB_BOARD . '">' . <<<EOF
-		$htmlposts
-		<table class="userdelete">
-			<tbody>
-				<tr>
-					<td>
-						Delete Post <input type="password" name="password" id="deletepostpassword" size="8" placeholder="Password">&nbsp;<input name="deletepost" value="Delete" type="submit">
-					</td>
-				</tr>
-			</tbody>
-		</table>
-		</form>
-		$pagenavigator
-		<br>
-EOF;
-
-	global $twig;
-	return $twig->render('page.twig', array('body' => $body));
+	return $twig->render('page.twig', array(
+		'filetypes' => supportedFileTypes(),
+		'posts' => $htmlposts,
+		'manage_link' => $managelink,
+		'pages' => max($pages, 0),
+		'this_page' => $thispage,
+		'parent' => $parent,
+		'thumbnails' => $thumbnails,
+		'unique_posts' => uniquePosts(),
+	));
 }
 
 function rebuildIndexes() {
