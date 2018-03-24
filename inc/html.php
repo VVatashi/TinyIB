@@ -76,7 +76,7 @@ function buildPost($post, $res) {
 	$is_thread = $post['parent'] == TINYIB_NEWTHREAD;
 	$is_embed = isEmbed($post["file_hex"]);
 
-	$post['message'] = bbcode($post['message']);
+	$post['message'] = bbcode(wakabamark($post['message']));
 
 	if (!isset($post["omitted"])) {
 		$post["omitted"] = 0;

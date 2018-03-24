@@ -5,6 +5,11 @@
     [<a href="{{ manage_link }}" style="text-decoration: underline;">Manage</a>]
   </div>
 
+  <div class="style-switcher">
+    <select id="style-switcher" onchange="setStyle(this.value)">
+    </select>
+  </div>
+
   <div class="logo">
     {{ constant('TINYIB_LOGO') }}
     {{ constant('TINYIB_BOARDDESC') }}
