@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    {% include '_head.twig' %}
+  </head>
+
+  <body {{ body_attribs }}>
+    {% block body %}
+    {% endblock %}
+
+    {% include '_footer.twig' %}
+  </body>
+</html>

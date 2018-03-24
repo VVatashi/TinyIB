@@ -1,0 +1,28 @@
+{% if is_logged_in %}
+  [<a href="?manage">Status</a>]
+
+  {% if is_admin %}
+    [<a href="?manage&bans">Bans</a>]
+  {% endif %}
+
+  [<a href="?manage&moderate">Moderate Post</a>]
+  [<a href="?manage&rawpost">Raw Post</a>]
+
+  {% if is_admin %}
+    [<a href="?manage&rebuildall">Rebuild All</a>]
+  {% endif %}
+
+  {% if is_admin and is_installed_via_git %}
+    [<a href="?manage&update">Update</a>]
+  {% endif %}
+
+  {% if is_admin and constant('TINYIB_DBMIGRATE') %}
+   [<a href="?manage&dbmigrate"><b>Migrate Database</b></a>]
+  {% endif %}
+
+  [<a href="?manage&logout">Log Out</a>]
+
+  &middot;
+{% endif %}
+
+[<a href="{{ return_link }}" style="text-decoration: underline;">Return</a>]

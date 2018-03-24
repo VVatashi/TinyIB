@@ -1,0 +1,22 @@
+{% extends 'html.twig' %}
+
+{% block body %}
+  <div class="adminbar">
+    {% include '_admin_bar.twig' %}
+  </div>
+
+  <div class="logo">
+    {{ constant('TINYIB_LOGO') }}
+    {{ constant('TINYIB_BOARDDESC') }}
+  </div>
+
+  <hr width="90%" />
+
+  <div class="replymode">
+    Manage mode
+  </div>
+
+  {{ text }}
+
+  <hr />
+{% endblock %}

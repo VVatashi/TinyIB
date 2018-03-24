@@ -1,0 +1,54 @@
+{% set is_thread = post['parent'] == constant('TINYIB_NEWTHREAD') %}
+
+{% if not is_thread %}
+  <br />
+{% endif %}
+
+{% if is_embed or post['file'] %}
+  <span class="filesize">
+    {% if is_thread and post['file'] %}
+      {{ is_embed ? 'Embed: ' : 'File: ' }}
+    {% endif %}
+
+    {% if is_embed %}
+      <a href="{{ direct_link }}"
+        onclick="return expandFile(event, '{{ post['id'] }}');">
+        {{ post['file_original'] }}
+      </a>
+      &ndash;({{ post['file_hex'] }})
+    {% elseif post['file'] %}
+      {{ thumblink }}
+      <a href="{{ direct_link }}" target="_blank"
+        {% if expand %}onclick="return expandFile(event, '{{ post['id'] }}');" {% endif %}>
+        {{ post['file'] }}
+      </a>
+      &ndash;({{ post['file_size_formatted'] }}
+
+      {% if post['image_width'] > 0 and post['image_height'] > 0 %}
+        , {{ post['image_width'] }}x{{ post['image_height'] }}
+      {% endif %}
+
+      {% if post['file_original'] %}
+        , {{ post['file_original'] }}
+      {% endif %})
+    {% endif %}
+  </span>
+
+  <br />
+{% endif %}
+
+<div id="thumbfile{{ post['id'] }}">
+  {% if post['thumb_width'] > 0 and post['thumb_height'] > 0 %}
+    <a href="{{ direct_link }}" target="_blank"
+      {% if expand %}onclick="return expandFile(event, '{{ post['id'] }}');" {% endif %}>
+	    <img src="thumb/{{ post['thumb'] }}" alt="{{ post['id'] }}"
+        class="thumb" id="thumbnail{{ post['id'] }}"
+        width="{{ post['thumb_width'] }}" height="{{ post['thumb_height'] }}" />
+    </a>
+  {% endif %}
+</div>
+
+{% if expandhtml %}
+  <div id="expand{{ post['id'] }}" style="display: none;">{{ expandhtml }}</div>
+  <div id="file{{ post['id'] }}" class="thumb" style="display: none;"></div>
+{% endif %}
