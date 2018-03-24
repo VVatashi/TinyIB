@@ -39,33 +39,18 @@ function makeLinksClickable($text) {
 }
 
 function buildPost($post, $res) {
-	$return = "";
-	$threadid = ($post['parent'] == TINYIB_NEWTHREAD) ? $post['id'] : $post['parent'];
-
-	if ($res == TINYIB_RESPAGE) {
-		$reflink = "<a href=\"$threadid.html#{$post['id']}\">No.</a><a href=\"$threadid.html#q{$post['id']}\" onclick=\"javascript:quotePost('{$post['id']}')\">{$post['id']}</a>";
-	} else {
-		$reflink = "<a href=\"res/$threadid.html#{$post['id']}\">No.</a><a href=\"res/$threadid.html#q{$post['id']}\">{$post['id']}</a>";
-	}
-
-	if ($post["stickied"] == 1) {
-		$reflink .= ' <img src="sticky.png" alt="Stickied" title="Stickied" width="16" height="16">';
-	}
+	global $twig;
+	$is_thread = $post['parent'] == TINYIB_NEWTHREAD;
+	$is_embed = isEmbed($post["file_hex"]);
 
 	if (!isset($post["omitted"])) {
 		$post["omitted"] = 0;
 	}
 
-	$filehtml = '';
-	$filesize = '';
 	$expandhtml = '';
-	$direct_link = isEmbed($post["file_hex"]) ? "#" : (($res == TINYIB_RESPAGE ? "../" : "") . "src/" . $post["file"]);
+	$direct_link = $is_embed ? "#" : (($res == TINYIB_RESPAGE ? "../" : "") . "src/" . $post["file"]);
 
-	if ($post['parent'] == TINYIB_NEWTHREAD && $post["file"] != '') {
-		$filesize .= isEmbed($post['file_hex']) ? 'Embed: ' : 'File: ';
-	}
-
-	if (isEmbed($post["file_hex"])) {
+	if ($is_embed) {
 		$expandhtml = $post['file'];
 	} else if (substr($post['file'], -5) == '.webm') {
 		$dimensions = 'width="500" height="50"';
@@ -81,112 +66,17 @@ EOF;
 		$expandhtml = "<a href=\"$direct_link\" onclick=\"return expandFile(event, '${post['id']}');\"><img src=\"" . ($res == TINYIB_RESPAGE ? "../" : "") . "src/${post["file"]}\" width=\"${post["image_width"]}\" style=\"max-width: 100%;height: auto;\"></a>";
 	}
 
-	$thumblink = "<a href=\"$direct_link\" target=\"_blank\"" . ((isEmbed($post["file_hex"]) || in_array(substr($post['file'], -4), array('.jpg', '.png', '.gif', 'webm'))) ? " onclick=\"return expandFile(event, '${post['id']}');\"" : "") . ">";
+	$expand = $is_embed || in_array(substr($post['file'], -4), array('.jpg', '.png', '.gif', 'webm'));
 	$expandhtml = rawurlencode($expandhtml);
 
-	if (isEmbed($post["file_hex"])) {
-		$filesize .= "<a href=\"$direct_link\" onclick=\"return expandFile(event, '${post['id']}');\">${post['file_original']}</a>&ndash;(${post['file_hex']})";
-	} else if ($post["file"] != '') {
-		$filesize .= $thumblink . "${post["file"]}</a>&ndash;(${post["file_size_formatted"]}";
-		if ($post["image_width"] > 0 && $post["image_height"] > 0) {
-			$filesize .= ", " . $post["image_width"] . "x" . $post["image_height"];
-		}
-		if ($post["file_original"] != "") {
-			$filesize .= ", " . $post["file_original"];
-		}
-		$filesize .= ")";
-	}
-
-	if ($filesize != '') {
-		$filesize = '<span class="filesize">' . $filesize . '</span>';
-	}
-
-	if ($filesize != '') {
-		if ($post['parent'] != TINYIB_NEWTHREAD) {
-			$filehtml .= '<br>';
-		}
-		$filehtml .= $filesize . '<br><div id="thumbfile' . $post['id'] . '">';
-		if ($post["thumb_width"] > 0 && $post["thumb_height"] > 0) {
-			$filehtml .= <<<EOF
-$thumblink
-	<img src="thumb/${post["thumb"]}" alt="${post["id"]}" class="thumb" id="thumbnail${post['id']}" width="${post["thumb_width"]}" height="${post["thumb_height"]}">
-</a>
-EOF;
-		}
-		$filehtml .= '</div>';
-
-		if ($expandhtml != '') {
-			$filehtml .= <<<EOF
-<div id="expand${post['id']}" style="display: none;">$expandhtml</div>
-<div id="file${post['id']}" class="thumb" style="display: none;"></div>
-EOF;
-		}
-	}
-	if ($post["parent"] == TINYIB_NEWTHREAD) {
-		$return .= $filehtml;
-	} else {
-		$return .= <<<EOF
-<table>
-<tbody>
-<tr>
-<td class="doubledash">
-	&#0168;
-</td>
-<td class="reply" id="reply${post["id"]}">
-EOF;
-	}
-
-	$return .= <<<EOF
-<a id="${post['id']}"></a>
-<label>
-	<input type="checkbox" name="delete" value="${post['id']}">
-EOF;
-
-	if ($post['subject'] != '') {
-		$return .= ' <span class="filetitle">' . $post['subject'] . '</span> ';
-	}
-
-	$return .= <<<EOF
-${post["nameblock"]}
-</label>
-<span class="reflink">
-	$reflink
-</span>
-EOF;
-
-	if ($post['parent'] != TINYIB_NEWTHREAD) {
-		$return .= $filehtml;
-	}
-
-	if ($post['parent'] == TINYIB_NEWTHREAD && $res == TINYIB_INDEXPAGE) {
-		$return .= "&nbsp;[<a href=\"res/${post["id"]}.html\">Reply</a>]";
-	}
-
-	if (TINYIB_TRUNCATE > 0 && !$res && substr_count($post['message'], '<br>') > TINYIB_TRUNCATE) { // Truncate messages on board index pages for readability
-		$br_offsets = strallpos($post['message'], '<br>');
-		$post['message'] = substr($post['message'], 0, $br_offsets[TINYIB_TRUNCATE - 1]);
-		$post['message'] .= '<br><span class="omittedposts">Post truncated.  Click Reply to view.</span><br>';
-	}
-	$return .= <<<EOF
-<div class="message">
-${post["message"]}
-</div>
-EOF;
-
-	if ($post['parent'] == TINYIB_NEWTHREAD) {
-		if ($res == TINYIB_INDEXPAGE && $post['omitted'] > 0) {
-			$return .= '<span class="omittedposts">' . $post['omitted'] . ' ' . plural('post', $post['omitted']) . ' omitted. Click Reply to view.</span>';
-		}
-	} else {
-		$return .= <<<EOF
-</td>
-</tr>
-</tbody>
-</table>
-EOF;
-	}
-
-	return $return;
+	return $twig->render($is_thread ? '_thread.twig' : '_post.twig', array(
+		'direct_link' => $direct_link,
+		'expand' => $expand,
+		'expandhtml' => $expandhtml,
+		'is_embed' => $is_embed,
+		'post' => $post,
+		'res' => $res,
+	));
 }
 
 function buildPage($htmlposts, $parent, $pages = 0, $thispage = 0) {
