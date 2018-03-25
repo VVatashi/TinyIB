@@ -1,0 +1,13 @@
+<div class="header__admin-bar admin-bar adminbar">
+  {% include '_admin_bar.twig' %}
+</div>
+
+<div class="header__style-switcher">
+  <select id="style-switcher" onchange="setStyle(this.value)">
+  </select>
+</div>
+
+<div class="header__logo">
+  {{ constant('TINYIB_LOGO') }}
+  {{ constant('TINYIB_BOARDDESC') }}
+</div>

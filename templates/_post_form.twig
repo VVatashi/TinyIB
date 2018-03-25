@@ -1,0 +1,95 @@
+<form name="postform" id="postform" action="imgboard.php" method="post" enctype="multipart/form-data">
+  {% if uploads and constant('TINYIB_MAXKB') > 0 %}
+    <input type="hidden" name="MAX_FILE_SIZE" value="{{ constant('TINYIB_MAXKB') * 1024 }}" />
+  {% endif %}
+
+  <input type="hidden" name="parent" value="{{ parent }}" />
+
+  <table class="layout__postform postform">
+    <tbody>
+      <tr>
+        <td class="postform__block">Name</td>
+        <td><input type="text" name="name" size="28" maxlength="75" accesskey="n" /></td>
+      </tr>
+
+      <tr>
+        <td class="postform__block">E-mail</td>
+        <td><input type="text" name="email" size="28" maxlength="75" accesskey="e" /></td>
+      </tr>
+
+      <tr>
+        <td class="postform__block">Subject</td>
+        <td>
+          <input type="text" name="subject" size="40" maxlength="75" accesskey="s" autocomplete="off" />
+          <input type="submit" value="Submit" accesskey="z" />
+        </td>
+      </tr>
+
+      <tr>
+        <td class="postform__block">Message</td>
+        <td><textarea id="message" name="message" cols="48" rows="4" accesskey="m"></textarea></td>
+      </tr>
+
+      {% include '_captcha.twig' %}
+
+      {% if uploads %}
+        <tr>
+          <td class="postform__block">File</td>
+          <td><input type="file" name="file" size="35" accesskey="f" /></td>
+        </tr>
+      {% endif %}
+
+      {% if embeds %}
+        <tr>
+          <td class="postform__block">Embed</td>
+          <td>
+            <input type="text" name="embed" size="28" accesskey="x" autocomplete="off" />&nbsp;&nbsp;(paste a YouTube URL)
+          </td>
+        </tr>
+      {% endif %}
+
+      <tr>
+        <td class="postform__block">Password</td>
+        <td>
+          <input type="password" name="password" id="newpostpassword" size="8" accesskey="p" />&nbsp;&nbsp;(for post and file deletion)
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="2" class="postform__rules">
+          <ul class="postform__rules-list">
+            {% if constant('TINYIB_REQMOD') == 'files' or constant('TINYIB_REQMOD') == 'all' %}
+              <li>All posts {{ constant('TINYIB_REQMOD') == 'files' ? ' with a file attached' }} will be moderated before being shown.</li>
+            {% endif %}
+
+            {% if uploads %}
+              <li>{{ filetypes }}</li>
+            {% endif %}
+
+            {% if uploads and constant('TINYIB_MAXKB') > 0 %}
+              <li>Maximum file size allowed is {{ constant('TINYIB_MAXKBDESC') }}.</li>
+            {% endif %}
+
+            {% if thumbnails %}
+              <li>
+                Images greater than
+                {{ constant('TINYIB_MAXWOP') }}x{{ constant('TINYIB_MAXHOP') }}
+
+                {% if constant('TINYIB_MAXW') != constant('TINYIB_MAXWOP')
+                  or constant('TINYIB_MAXH') != constant('TINYIB_MAXHOP') %}
+                  (new thread) or {{ constant('TINYIB_MAXW') }}x{{ constant('TINYIB_MAXH') }} (reply)
+                {% endif %}
+
+                will be thumbnailed.
+              </li>
+            {% endif %}
+
+            {% if unique_posts > 0 %}
+              <li>Currently {{ unique_posts }} unique user posts.</li>
+            {% endif %}
+          </ul>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</form>

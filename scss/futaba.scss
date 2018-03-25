@@ -1,197 +1,35 @@
-$bg-color: #ffe;
-$form-bg-color: #ea8;
-$link-hover-color: #d00;
-$link-color: #00e;
-$name-color: #117743;
-$post-bg-color: #f0e0d6;
-$quote-color: #789922;
-$subject-color: #cc1105;
-$text-color: #800000;
-$trip-color: #228854;
+@import 'futaba/vars';
 
-html,
-body {
-  background: $bg-color;
-  color: $text-color;
+@import 'futaba/base';
+@import 'futaba/post';
+@import 'futaba/postform';
+
+.footer {
+  font-family: serif;
+  font-size: .85em;
 }
 
-a {
-  color: $link-color;
-
-  &:hover {
-    color: $link-hover-color;
+.header {
+  &__logo { 
+    clear: both;
+    color: $text-color;
+    font-size: 2em;
+    text-align: center;
+    width: 100%;
   }
 }
 
-hr {
-  background-image: linear-gradient(to left, $bg-color, rgba($text-color, .75), $bg-color);
-  color: $text-color;
-}
-
-.reflink {
-  a {
+.post-ref {
+  &__link {
     &:hover {
       font-weight: bold;
     }
   }
 }
 
-.logo {
-  clear: both;
-  color: $text-color;
-  font-size: 2em;
-  text-align: center;
-  width: 100%;
-}
-
-.replymode,
-.manageinfo,
-.catalogmode {
-  color: #fff;
-  padding: 2px;
-  text-align: center;
-  width: 100%;
-}
-
-.replymode {
-  background: #e04000;
-}
-
-.manageinfo {
-  background: #00b930;
-}
-
-.catalogmode {
-  background: #0040e0;
-}
-
-.rules {
-  font-family: sans-serif;
-  font-size: 10px;
-  width: 468px;
-
-  li {
-    margin-left: 1em;
-  }
-}
-
-.postblock {
-  background: $form-bg-color;
-  color: $text-color;
-  font-weight: 800;
-}
-
-.footer {
-  font-family: serif;
-  font-size: 12px;
-}
-
-.passvalid {
-  background: $form-bg-color;
-  color: #fff;
-  text-align: center;
-  width: 100%;
-}
-
-.dellist {
-  font-weight: bold;
-  text-align: center;
-}
-
-.delbuttons {
-  padding-bottom: 4px;
-  text-align: center;
-}
-
-.managehead {
-  background: #aa6;
-  color: #400000;
-  padding: 0;
-}
-
-.postlists {
-  background: #fff;
-  color: $text-color;
-  padding: 0;
-  width: 100%;
-}
-
-.row1 {
-  background: #eec;
-  color: $text-color;
-}
-
-.row2 {
-  background: #dda;
-  color: $text-color;
-}
-
-.unkfunc {
-  background: inherit;
-  color: $quote-color;
-}
-
-.filesize {
-  text-decoration: none;
-}
-
-.filetitle {
-  background: inherit;
-  color: $subject-color;
-  font-size: 1.2em;
-  font-weight: 800;
-}
-
-.postername {
-  color: $name-color;
-  font-weight: bold;
-}
-
-.postertrip {
-  color: $trip-color;
-}
-
-.oldpost {
-  color: $subject-color;
-  font-weight: 800;
-}
-
-.omittedposts {
-  color: #707070;
-}
+// Styles for Dollchan Extension tools comptability
 
 .reply {
   background: $post-bg-color;
-  color: $text-color;
-}
-
-.replyhl {
-  background: #f0c0b0;
-  color: $text-color;
-}
-
-.replytitle {
-  color: $subject-color;
-  font-size: 1.2em;
-  font-weight: 800;
-}
-
-.commentpostername {
-  color: $name-color;
-  font-weight: 800;
-}
-
-.thumbnailmsg {
-  color: $text-color;
-  font-size: small;
-}
-
-.abbrev {
-  color: #707070;
-}
-
-.highlight {
-  background: $post-bg-color;
-  border: 2px dashed $form-bg-color;
   color: $text-color;
 }

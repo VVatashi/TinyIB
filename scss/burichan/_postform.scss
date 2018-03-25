@@ -1,0 +1,19 @@
+@import 'burichan/vars';
+
+.postform {
+  &__block {
+    background: $form-bg-color;
+    color: $text-color;
+    font-weight: 800;
+  }
+
+  &__rules {
+    font-family: sans-serif;
+    font-size: .7em;
+    margin-left: 1em;
+  }
+
+  &__rules-list {
+    list-style-type: disc;
+  }
+}

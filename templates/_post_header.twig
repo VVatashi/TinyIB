@@ -1,0 +1,28 @@
+<a id="{{ post['id'] }}" name="{{ post['id'] }}"></a>
+
+<input class="post__delete" id="delete_{{ post['id'] }}" type="checkbox" name="delete" value="{{ post['id'] }}" />
+
+<label class="post__name-block" for="delete_{{ post['id'] }}">
+  {% if post['subject'] %}
+    <span class="filetitle">{{ post['subject'] }}</span>
+  {% endif %}
+
+  {{ post['nameblock'] }}
+</label>
+
+<span class="post__post-ref post-ref reflink">
+  {% if res == constant('TINYIB_RESPAGE') %}
+    <a class="post-ref__link" href="{{ thread_id }}.html#{{ post['id'] }}">No.</a>
+    <a class="post-ref__link" href="{{ thread_id }}.html#q{{ post['id'] }}"
+      onclick="javascript:quotePost('{{ post['id'] }}')">
+      {{ post['id'] }}
+    </a>
+  {% else %}
+    <a class="post-ref__link" href="res/{{ thread_id }}.html#{{ post['id'] }}">No.</a>
+    <a class="post-ref__link" href="res/{{ thread_id }}.html#q{{ post['id'] }}">{{ post['id'] }}</a>
+  {% endif %}
+
+  {% if post[stickied] %}
+    <img src="sticky.png" alt="Stickied" title="Stickied" width="16" height="16" />
+  {% endif %}
+</span>

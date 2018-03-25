@@ -1,0 +1,15 @@
+.admin-bar {
+  text-align: right;
+
+  &__list-item {
+    display: inline;
+
+    &::before {
+      content: '[';
+    }
+
+    &::after {
+      content: ']';
+    }
+  }
+}

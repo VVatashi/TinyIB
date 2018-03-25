@@ -1,0 +1,56 @@
+html,
+body {
+  background-color: #212121;
+  box-sizing: border-box;
+  color: #9e9e9e;
+  display: block;
+  font-family: sans-serif;
+  line-height: 1.42857143;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  padding: 5px;
+}
+
+a {
+  color: $link-color;
+
+  &:hover {
+    color: $link-color;
+  }
+}
+
+hr {
+  border-color: #bbb;
+  border-style: solid none none none;
+  border-width: 1px;
+}
+
+input[type='text'],
+input[type='password'],
+select,
+textarea {
+  background: #6f6f6f;
+  border-color: transparent;
+  border-radius: 3px;
+  color: #dedede;
+  font-family: -apple-system, BlinkMacSystemFont, Roboto, Open Sans, Helvetica Neue, sans-serif;
+}
+
+input[type="submit"] {
+  background: linear-gradient(180deg, #777, #6f6f6f);
+  border: 1px solid #6f6f6f;
+  border-radius: 4px;
+  color: #dedede;
+  cursor: pointer;
+  height: 23px;
+  margin: 0 10px;
+  transition: background .3s 50ms;
+  width: 90px;
+
+  &:hover {
+    background: linear-gradient(180deg, #6f6f6f, #888);
+  }
+}

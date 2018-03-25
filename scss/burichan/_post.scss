@@ -1,0 +1,27 @@
+@import 'burichan/vars';
+
+.post {
+  color: $text-color;
+  font-family: serif;
+
+  &__file-info {
+    font-family: sans-serif;
+    font-size: .85em;
+    text-decoration: underline;
+  }
+
+  &__omitted {
+    font-family: serif;
+    font-size: 1em;
+    font-weight: 800;
+  }
+
+  &_reply {
+    background: $post-bg-color;
+  }
+
+  .postername {
+    font-size: .85em;
+  }
+}
+

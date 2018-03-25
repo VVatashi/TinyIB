@@ -1,0 +1,20 @@
+@import 'vars';
+
+html,
+body {
+  background: $bg-color;
+  color: $text-color;
+}
+
+a {
+  color: $link-color;
+
+  &:hover {
+    color: $link-hover-color;
+  }
+}
+
+hr {
+  background-image: linear-gradient(to left, $bg-color, rgba($text-color, .75), $bg-color);
+  color: $text-color;
+}

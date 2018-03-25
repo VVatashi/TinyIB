@@ -1,0 +1,17 @@
+@import 'vars';
+
+.post {
+  color: $text-color;
+
+  &__file-info {
+    text-decoration: none;
+  }
+
+  &__omitted {
+    color: $omitted-color;
+  }
+
+  &_reply {
+    background: $post-bg-color;
+  }
+}

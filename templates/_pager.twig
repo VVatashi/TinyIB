@@ -1,0 +1,37 @@
+<table border="1">
+  <tbody>
+    <tr>
+      {% if parent == constant('TINYIB_NEWTHREAD') %}
+        {% if this_page == 0 %}
+          <td>Previous</td>
+        {% else %}
+          <td>
+            <form method="get" action="{{ (this_page == 1) ? 'index' : this_page - 1 }}.html">
+              <input value="Previous" type="submit" />
+            </form>
+          </td>
+        {% endif %}
+
+        <td>
+          {% for i in 0..pages %}
+            {% if this_page == i %}
+              &#91;{{ i }}&#93;
+            {% else %}
+              &#91;<a href="{{ (i == 0) ? 'index' : i }}.html">{{ i }}</a>&#93;
+            {% endif %}
+          {% endfor %}
+        </td>
+
+        {% if pages <= this_page %}
+          <td>Next</td>
+        {% else %}
+          <td>
+            <form method="get" action="{{ this_page + 1 }}.html">
+              <input value="Next" type="submit" />
+            </form>
+          </td>
+        {% endif %}
+      {% endif %}
+    </tr>
+  </tbody>
+</table>

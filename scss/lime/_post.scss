@@ -1,0 +1,65 @@
+.post {
+  display: block;
+  font-family: sans-serif;
+
+  &__file-info {
+    color: #717171;
+    font-size: .7em;
+    margin-left: 0;
+    text-decoration: none;
+  }
+
+  &__delete {
+    display: none;
+  }
+
+  &__name-block,
+  &__post-ref {
+    color: #717171;
+    font-family: sans-serif;
+    font-size: .85em;
+    margin-bottom: 5px;
+    margin-left: 5px;
+    max-width: 100%;
+  }
+
+  &__message {
+    color: #f5f5f5;
+
+    .unkfunc {
+      color: #64ffda;
+    }
+  }
+
+  &__omitted {
+    color: #666;
+  }
+
+  &_reply {
+    background: #424242;
+    border: 0;
+    border-radius: 5px;
+    box-sizing: border-box;
+    clear: both;
+    float: left;
+    margin: 3px;
+    min-width: 450px;
+    padding: 5px;
+  }
+
+  .filetitle {
+    color: #005a83;
+    font-size: 1.1em;
+    font-weight: 800;
+  }
+
+  .postername {
+    color: #60debf;
+    font-weight: 800;
+  }
+
+  .postertrip {
+    color: #1ab38d;
+    font-weight: 400;
+  }
+}

@@ -13,6 +13,7 @@ $twig = new Twig_Environment($loader, array(
 ));
 $twig->addGlobal('embeds', $tinyib_uploads);
 $twig->addGlobal('uploads', $tinyib_embeds);
+$twig->addGlobal('manage_link', basename($_SERVER['PHP_SELF']) . "?manage");
 
 function supportedFileTypes() {
 	global $tinyib_uploads;
@@ -127,7 +128,6 @@ function buildPage($htmlposts, $parent, $pages = 0, $thispage = 0) {
 	return $twig->render('page.twig', array(
 		'filetypes' => supportedFileTypes(),
 		'posts' => $htmlposts,
-		'manage_link' => $managelink,
 		'pages' => max($pages, 0),
 		'this_page' => $thispage,
 		'parent' => $parent,
@@ -190,6 +190,7 @@ function managePage($text, $onload = '') {
 		'is_admin' => $isadmin,
 		'is_installed_via_git' => installedViaGit(),
 		'is_logged_in' => $loggedin,
+		'is_manage_page' => true,
 		'return_link' => $returnlink,
 		'text' => $text,
 	));

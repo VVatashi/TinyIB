@@ -64,11 +64,11 @@ function scrollIntoView(el) {
 
 function expandFile(e, id) {
 	if (e == undefined || e.which == undefined || e.which == 1) {
-		var thumbfile = qid('thumbfile' + id);
-		var file = qid('file' + id);
+		var thumbfile = qid('thumbfile_' + id);
+		var file = qid('file_' + id);
 
 		if (thumbfile.getAttribute('expanded') != 'true') {
-			var expand = qid('expand' + id);
+			var expand = qid('expand_' + id);
 
 			thumbfile.setAttribute('expanded', 'true');
 			file.innerHTML = decodeURIComponent(expand.textContent);
@@ -88,7 +88,7 @@ function expandFile(e, id) {
 			thumbfile.style.display = '';
 			thumbfile.setAttribute('expanded', 'false');
 
-			var thumbnail = qid('thumbnail' + id);
+			var thumbnail = qid('thumbnail_' + id);
 			scrollIntoView(thumbnail);
 		}
 

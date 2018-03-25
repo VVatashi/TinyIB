@@ -1,0 +1,9 @@
+.post-ref {
+  &__link {
+    color: inherit;
+
+    &:hover {
+      color: #800000;
+    }
+  }
+}

@@ -6,9 +6,17 @@
   </head>
 
   <body {{ body_attribs }}>
-    {% block body %}
-    {% endblock %}
+    <div class="layout">
+      <header class="layout__header header">
+        {% include '_header.twig' %}
+      </header>
 
-    {% include '_footer.twig' %}
+      {% block body %}
+      {% endblock %}
+
+      <footer class="layout__footer footer">
+        {% include '_footer.twig' %}
+      </footer>
+    </div>
   </body>
 </html>

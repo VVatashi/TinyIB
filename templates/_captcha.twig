@@ -21,10 +21,7 @@
           </noscript>
         </div>
       {% else %} <!-- Simple CAPTCHA -->
-        <input type="text" name="captcha" id="captcha" size="6" accesskey="c" autocomplete="off" />&nbsp;&nbsp;(enter the text below)
-
-        <br />
-
+        <input type="text" name="captcha" id="captcha" size="6" accesskey="c" autocomplete="off" />&nbsp;&nbsp;(enter the text below)<br />
         <img id="captchaimage" src="inc/captcha.php" width="175" height="55" alt="CAPTCHA" onclick="javascript:reloadCAPTCHA()" style="margin-top: 5px;cursor: pointer;">
       {% endif %}
     </td>
