@@ -28,7 +28,7 @@
         , {{ post['image_width'] }}x{{ post['image_height'] }}
       {% endif %}
 
-      {% if post['file_original'] %}
+      {% if constant('TINYIB_FILE_SHOW_ORIG_NAME') and post['file_original'] %}
         , {{ post['file_original'] }}
       {% endif %})
     {% endif %}
