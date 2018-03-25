@@ -8,3 +8,10 @@
 @import 'global/post-ref';
 @import 'global/post';
 @import 'global/postform';
+
+// Styles for Dollchan Extension tools comptability
+
+.de-win-inpost {
+  clear: both !important;
+  float: left !important;
+}

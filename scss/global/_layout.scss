@@ -33,6 +33,13 @@
     clear: both;
     float: left;
     margin: 2px 0;
+
+    &::before,
+    &::after {
+      clear: both;
+      content: '';
+      display: table;
+    }
   }
 
   &__userdelete {
