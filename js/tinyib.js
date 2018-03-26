@@ -127,6 +127,24 @@ function setStyle(url) {
   setCookie('tinyib_style', encodeURIComponent(title), expiration_date.toGMTString());
 }
 
+function insertBBCode(code) {
+  var messageEl = qs('#message');
+
+  var str = messageEl.value;
+  var begin = messageEl.selectionStart;
+  var end = messageEl.selectionEnd;
+
+  messageEl.value = [
+    str.substring(0, begin),
+    '[', code, ']',
+    str.substring(begin, end),
+    '[/', code, ']',
+    str.substring(end),
+  ].join('');
+
+  return false;
+}
+
 (function () {
   window.styles = {};
 
