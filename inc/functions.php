@@ -638,3 +638,24 @@ function getEmbed($url) {
 function installedViaGit() {
 	return is_dir('.git');
 }
+
+function dice($message) {
+	return preg_replace_callback('/##(\d+)d(\d+)##/si', function ($matches) {
+		$count = min(max((int) $matches[1], 1), TINYIB_DICE_MAX_COUNT);
+		$max = min(max((int) $matches[2], 1), TINYIB_DICE_MAX_VALUE);
+
+		$sum = 0;
+		$results = [];
+
+		for ($i = 0; $i < $count; ++$i) {
+			$value = mt_rand(1, $max);
+
+			$sum += $value;
+			$results[] = $value;
+		}
+
+		$info = implode(', ', $results);
+
+		return "<span class=\"dice\" title=\"$info\">##${count}d$max## = $sum</span>";
+	}, $message);
+}

@@ -93,13 +93,19 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 	$post['name'] = cleanString(substr($post['name'], 0, 75));
 	$post['email'] = cleanString(str_replace('"', '&quot;', substr($_POST['email'], 0, 75)));
 	$post['subject'] = cleanString(substr($_POST['subject'], 0, 75));
+
 	if ($rawpost) {
 		$rawposttext = ($isadmin) ? ' <span style="color: red;">## Admin</span>' : ' <span style="color: purple;">## Mod</span>';
 		$post['message'] = $_POST['message']; // Treat message as raw HTML
 	} else {
 		$rawposttext = '';
 		$post['message'] = str_replace("\n", '<br>', makeLinksClickable(colorQuote(postLink(cleanString(rtrim($_POST['message']))))));
+
+		if (TINYIB_DICE_ENABLED) {
+			$post['message'] = dice($post['message']);
+		}
 	}
+
 	$post['password'] = ($_POST['password'] != '') ? md5(md5($_POST['password'])) : '';
 	$post['nameblock'] = nameBlock($post['name'], $post['tripcode'], $post['email'], time(), $rawposttext);
 

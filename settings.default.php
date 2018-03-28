@@ -96,6 +96,11 @@ $tinyib_embeds = array(
     ),
 );
 
+// Dice roll
+define('TINYIB_DICE_ENABLED', true);
+define('TINYIB_DICE_MAX_COUNT', 20);
+define('TINYIB_DICE_MAX_VALUE', 10000);
+
 // File control
 define('TINYIB_MAXKB', 2048);         // Maximum file size in kilobytes  [0 to disable]
 define('TINYIB_MAXKBDESC', '2 MB');   // Human-readable representation of the maximum file size
