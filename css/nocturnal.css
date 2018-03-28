@@ -1,0 +1,286 @@
+﻿:root {
+    --post-bg: #14151F;
+                /* header bg */
+    --alt-bg: #1d1e2a;
+                /* bg */
+    --header-bg: #1a1b26;
+                /* post bg */
+    --main-text: #ccc;
+      /* main text */
+    --secondary-text: #74857C;
+        /* name >text and quote */
+    --third-text: #a88085;
+       /* date and links */
+    --title-text: #B294BB;
+       /* board title */
+}
+
+/* fonts */
+body, .post__message , option, div.post div.postInfo span.nameBlock span.postertrip, div.post div.postInfo span.nameBlock span.name, div.post div.postInfo span.subject,  .yotsuba_b_new .backlink, .quotelink, div#boardNavDesktop a, table.postForm > tbody > tr > td:first-child,
+input[type="text"], input[type="password"], table.postForm > tbody textarea {
+    font-family: "Open Sans", "Segoe UI";
+    font-weight: 600;
+    font-size: 13px;
+}
+
+body, html {
+    background: var(--alt-bg) repeat fixed center center;
+}  
+
+.de-oppost, .oppost {
+    min-height: 225px;
+}    
+
+body, .menu-button .fa, table.postForm > tbody > tr > td:first-child, input[type="text"], input[type="password"], table.postForm > tbody textarea, #recaptcha_response_field, div#boardNavDesktopFoot, .gal-count, #index-search, .expand-all-shortcut, .subject, div.post div.postInfo span.subject, #custom-board-list, .yotsuba-b:root #board-list a, .yotsuba:root #board-list a {
+    color: var(--main-text);
+}
+
+body, .postform, input[type="text"], input[type="password"], .postform > tbody textarea, .subject, div.post div.postInfo span.subject {
+    color: var(--main-text);
+
+}
+
+/*blyat*/
+img {
+    opacity: 0.6;
+    transition: 0.15s ease-in-out;
+}
+
+img:hover {
+    opacity: 1.0;
+    transition: 0.3s ease-in-out;
+}
+
+img.de-fullimg {
+    opacity: 1.0;
+}
+
+.header__logo {
+    text-align: center;
+    /*margin-left: 60px ;   */
+    font-family: "Segoe Script", cursive;
+    font-size: 48px;
+    padding: 0px;
+    color: var(--title-text);
+    text-shadow: 3px 3px 3px rgba(0,0,0,0.3);
+}
+
+table.postForm > tbody > tr > td:first-child, input[type="text"], input[type="password"], table.postForm > tbody textarea, #recaptcha_response_field {
+    background: transparent;
+    /*! border: none ; */
+}
+
+div.thread {
+    background: transparent;
+}    
+    
+/* op */
+.de-oppost {
+    background: var(--post-bg);
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+}
+
+.post__thumb {
+    float: right;
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
+}
+
+.de-pview .post__thumb {
+    float: left;
+}
+
+textarea {
+    background: transparent;
+    color: white;
+}
+
+.postform__rules {
+    display: none;
+}
+
+.post__message {
+    max-width: 100%;
+    overflow-wrap: break-word;
+}
+
+.de-post-counter {
+    color: #6dc950;
+}
+
+.post__message {
+    min-width: -moz-fit-content;
+    min-width: min-content;
+}
+
+.layout__postform {
+    bottom: 10px;
+    right: 0%;
+    width: 300px;
+    border: 1px var(--header-bg);
+    padding: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    background: var(--header-bg);
+    border-color: var(--post-bg);
+    border-radius: 0px;
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* reply and op bg colors */    
+
+   
+.layout__post, .de-oppost {
+    width: 100%;
+    padding: 10px;
+    -moz-box-sizing: border-box;
+}
+
+.de-oppost {
+    width: 100%;
+    margin: 0 auto;
+}
+
+.de-oppost {
+    padding-bottom: 3px;
+}
+
+ 
+div.reply, .catalog-mode:root .board, .inline .post {
+    background: var(--post-bg);
+}                                                            /* misc */    
+    
+
+    
+          /* unscrollable horizontally, fixes stupid header issues */    
+body {
+    overflow-x: hidden;
+}       
+
+/* transition for links */
+ a:hover {
+    transition: ease-in-out .2s;
+}
+    
+
+
+div.reply {
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+    /*box-shadow: none ;*/
+}
+
+div.reply:hover {
+    box-shadow: 8px 8px 8px rgba(0, 0, 0, 0.2);
+    /*box-shadow: none ;*/
+}     
+   /* give reply borders  */
+div.reply, .post__message, .de-oppost {
+    border: 0px;
+    border-style: solid;
+}
+
+div.post blockquote.postMessage {
+    width: 96%;
+}   
+    
+
+/* change the margin depending on whether you show the banner and the header */    
+hr {
+    margin-top: 0px;
+    padding-top: 0px;
+    border: 0;
+}
+ 
+.post__file-info {
+    margin-top: 0px;
+    margin-left: -3px;
+    padding: 4px;
+    max-width: 440px;
+}    
+   
+
+/* name block */    
+    
+.post__name-block {
+    padding: 4px;
+    margin-left: -3px;
+}                                  /* header title */
+body, .menu-button .fa, table.postForm > tbody > tr > td:first-child, input[type="text"], input[type="password"], table.postForm > tbody textarea, #recaptcha_response_field, div#boardNavDesktopFoot, .gal-count, #index-search, .expand-all-shortcut, .subject, div.post div.postInfo span.subject, #custom-board-list, .yotsuba-b:root #board-list a, .yotsuba:root #board-list a {
+    color: var(--main-text);
+}
+
+/* watcher and name block bg, quote text */
+
+span.postername,
+span.postertrip,
+.backlink a,
+a:hover,
+code,
+blockquote > span.quote {
+    color: var(--secondary-text);
+}
+
+a, 
+.post__file-info,
+span.postNum a:hover,  
+select,
+span.dateTime,
+.de-link-pref:hover,
+.post__file-info,
+.post__post-ref,
+.post__post-ref, 
+.post__post-ref a {
+    color: var(--third-text);
+}
+    
+    
+div.post div.postInfo span.postNum {
+    padding: 8px;
+    float: right;
+    margin-right: 4px;
+    margin-top: -8px;
+}
+
+span.dateTime {
+    padding: 4px;
+    right: 27%;
+    margin-top: -4px;
+}             
+    
+/* menu dropdown */    
+.fa-angle-down::before, .op .menu-button, .postContainer .menu-button {
+    content: url("http://i.imgur.com/6aLeXdr.png");
+    margin-right: 0px;
+    margin-top: 1px;
+    float: right;
+    width: 10px;
+    height: 10px;
+    /*box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);*/
+}
+
+.fa-angle-down::before {
+    opacity: 0.5;
+}       
+
+/* give image borders */    
+
+    
+    
+/* Links */
+a, a:hover, div.post div.postInfo span.postNum a:hover, a.quotelink, a.deadlink {
+    text-decoration: none;
+}    
+
+
+.fileText a {
+    text-decoration: none;
+}
+
+    
+.post_reply {
+    padding: 10px !important;
+     margin-bottom: 30px !important;
+}
+form {
+    max-width: 1100px !important;
+    margin: 0 auto !important;
+}
