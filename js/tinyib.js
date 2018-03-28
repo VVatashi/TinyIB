@@ -142,6 +142,10 @@ function insertBBCode(code) {
     str.substring(end),
   ].join('');
 
+  messageEl.focus();
+  messageEl.selectionStart = begin + code.length + 2;
+  messageEl.selectionEnd = begin + code.length + 2 + (end - begin);
+
   return false;
 }
 
