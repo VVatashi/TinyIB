@@ -34,13 +34,23 @@ define('TINYIB_MAXREPLIES', 0);       // Maximum replies before a thread stops b
 // Upload types
 //   Empty array to disable
 //   Format: MIME type => (extension, optional thumbnail)
-$tinyib_uploads = array('image/jpeg'                    => array('jpg'),
-                        'image/pjpeg'                   => array('jpg'),
-                        'image/png'                     => array('png'),
-                        'image/gif'                     => array('gif'));
-#                       'application/x-shockwave-flash' => array('swf', 'swf_thumbnail.png'));
-#                       'video/webm'                    => array('webm')); // WebM upload requires mediainfo and ffmpegthumbnailer  (see README for instructions)
-#                       'audio/webm'                    => array('webm'));
+$tinyib_uploads = array(
+    'image/jpeg' => array('jpg'),
+    'image/pjpeg' => array('jpg'),
+    'image/png' => array('png'),
+    'image/gif' => array('gif'),
+
+    //'application/x-shockwave-flash' => array('swf', 'swf_thumbnail.png'));
+
+    // WebM upload requires mediainfo and ffmpegthumbnailer  (see README for instructions)
+    //'video/webm' => array('webm'),
+    //'audio/webm' => array('webm', 'audio_thumbnail.png'),
+
+    'audio/mpeg' => array('mp3', 'audio_thumbnail.png'),
+    'audio/mp3' => array('mp3', 'audio_thumbnail.png'),
+    'audio/x-mpeg' => array('mp3', 'audio_thumbnail.png'),
+    'audio/x-mpeg-3' => array('mp3', 'audio_thumbnail.png'),
+);
 
 function buildEmbedHtml($url, $extension) {
     if ($extension === 'mp4') {
@@ -81,7 +91,7 @@ $tinyib_embeds = array(
                 $extension = $matches[2];
                 $url = "https://i.imgur.com/$hash.$extension";
                 $is_video = in_array($extension, array('mp4', 'webm'));
-                
+
                 return array(
                     'type' => $is_video ? 'video' : 'photo',
                     'title' => "$hash.$extension",
