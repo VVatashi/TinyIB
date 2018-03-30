@@ -185,6 +185,25 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 				$file_mime = mime_content_type($file_location);
 			}
 
+			// If can't obtain file mime, try get it from extension
+			if (empty($file_mime) || $file_mime === 'application/octet-stream') {
+				$mime_types = array(
+					'jpg' => 'image/jpeg',
+					'jpeg' => 'image/jpeg',
+					'png' => 'image/png',
+					'gif' => 'image/gif',
+					'mp3' => 'audio/mpeg',
+					'webm' => 'video/webm',
+				);
+
+				$parts = explode('.', $_FILES['file']['name']);
+				$extension = end($parts);
+
+				if (isset($mime_types[$extension])) {
+					$file_mime = $mime_types[$extension];
+				}
+			}
+
 			if (empty($file_mime) || !isset($tinyib_uploads[$file_mime])) {
 				fancyDie(supportedFileTypes());
 			}
