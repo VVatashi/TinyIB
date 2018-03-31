@@ -1,6 +1,11 @@
 {
     "name": "vvatashi/tinyib",
     "type": "project",
+    "autoload": {
+        "psr-4": {
+            "TinyIB\\": "inc/"
+        }
+    },
     "require": {
         "twig/twig": "~2.0"
     }

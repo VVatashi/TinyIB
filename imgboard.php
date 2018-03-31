@@ -45,21 +45,14 @@ if (TINYIB_CAPTCHA === 'recaptcha' && (TINYIB_RECAPTCHA_SITE == '' || TINYIB_REC
 
 // Check directories are writable by the script
 $writedirs = array("res", "src", "thumb");
-if (TINYIB_DBMODE == 'flatfile') {
-	$writedirs[] = "inc/flatfile";
-}
+
 foreach ($writedirs as $dir) {
 	if (!is_writable($dir)) {
 		fancyDie("Directory '" . $dir . "' can not be written to.  Please modify its permissions.");
 	}
 }
 
-$includes = array("inc/defines.php", "inc/functions.php", "inc/html.php");
-if (in_array(TINYIB_DBMODE, array('flatfile', 'mysql', 'mysqli', 'sqlite', 'sqlite3', 'pdo'))) {
-	$includes[] = 'inc/database_' . TINYIB_DBMODE . '.php';
-} else {
-	fancyDie("Unknown database mode specified.");
-}
+$includes = array('inc/defines.php', 'inc/functions.php', 'inc/html.php', 'inc/database.php');
 
 foreach ($includes as $include) {
 	include $include;
@@ -68,6 +61,8 @@ foreach ($includes as $include) {
 if (TINYIB_TIMEZONE != '') {
 	date_default_timezone_set(TINYIB_TIMEZONE);
 }
+
+global $ban_repository, $post_repository;
 
 $redirect = true;
 // Check if the request is to make a post
@@ -312,22 +307,22 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 		$slow_redirect = true;
 	}
 
-	$post['id'] = insertPost($post);
+	$post['id'] = $post_repository->insertPost($post);
 
 	if ($post['moderated'] == '1') {
 		if (TINYIB_ALWAYSNOKO || strtolower($post['email']) == 'noko') {
 			$redirect = 'res/' . ($post['parent'] == TINYIB_NEWTHREAD ? $post['id'] : $post['parent']) . '.html#' . $post['id'];
 		}
 
-		trimThreads();
+		$post_repository->trimThreads();
 
 		echo 'Updating thread...<br>';
 		if ($post['parent'] != TINYIB_NEWTHREAD) {
 			rebuildThread($post['parent']);
 
 			if (strtolower($post['email']) != 'sage') {
-				if (TINYIB_MAXREPLIES == 0 || numRepliesToThreadByID($post['parent']) <= TINYIB_MAXREPLIES) {
-					bumpThreadByID($post['parent']);
+				if (TINYIB_MAXREPLIES == 0 || $post_repository->numRepliesToThreadByID($post['parent']) <= TINYIB_MAXREPLIES) {
+					$post_repository->bumpThreadByID($post['parent']);
 				}
 			}
 		} else {
@@ -347,7 +342,7 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 		fancyDie('Post deletion is currently disabled.<br>Please try again in a few moments.');
 	}
 
-	$post = postByID($_POST['delete']);
+	$post = $post_repository->postByID($_POST['delete']);
 	if ($post) {
 		list($loggedin, $isadmin) = manageCheckLogIn();
 
@@ -355,7 +350,7 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 			// Redirect to post moderation page
 			echo '--&gt; --&gt; --&gt;<meta http-equiv="refresh" content="0;url=' . basename($_SERVER['PHP_SELF']) . '?manage&moderate=' . $_POST['delete'] . '">';
 		} elseif ($post['password'] != '' && md5(md5($_POST['password'])) == $post['password']) {
-			deletePostByID($post['id']);
+			$post_repository->deletePostByID($post['id']);
 			if ($post['parent'] == TINYIB_NEWTHREAD) {
 				threadUpdated($post['id']);
 			} else {
@@ -385,18 +380,18 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 	if ($loggedin) {
 		if ($isadmin) {
 			if (isset($_GET['rebuildall'])) {
-				$allthreads = allThreads();
+				$allthreads = $post_repository->allThreads();
 				foreach ($allthreads as $thread) {
 					rebuildThread($thread['id']);
 				}
 				rebuildIndexes();
 				$text .= manageInfo('Rebuilt board.');
 			} elseif (isset($_GET['bans'])) {
-				clearExpiredBans();
+				$ban_repository->clearExpiredBans();
 
 				if (isset($_POST['ip'])) {
 					if ($_POST['ip'] != '') {
-						$banexists = banByIP($_POST['ip']);
+						$banexists = $ban_repository->banByIP($_POST['ip']);
 						if ($banexists) {
 							fancyDie('Sorry, there is already a ban on record for that IP address.');
 						}
@@ -406,13 +401,13 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 						$ban['expire'] = ($_POST['expire'] > 0) ? (time() + $_POST['expire']) : 0;
 						$ban['reason'] = $_POST['reason'];
 
-						insertBan($ban);
+						$ban_repository->insertBan($ban);
 						$text .= manageInfo('Ban record added for ' . $ban['ip']);
 					}
 				} elseif (isset($_GET['lift'])) {
-					$ban = banByID($_GET['lift']);
+					$ban = $ban_repository->banByID($_GET['lift']);
 					if ($ban) {
-						deleteBanByID($_GET['lift']);
+						$ban_repository->deleteBanByID($_GET['lift']);
 						$text .= manageInfo('Ban record lifted for ' . $ban['ip']);
 					}
 				}
@@ -433,74 +428,13 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 					$text .= '<p><b>TinyIB was not installed via Git.</b></p>
 					<p>If you installed TinyIB without Git, you must <a href="https://github.com/tslocum/TinyIB">update manually</a>.  If you did install with Git, ensure the script has read and write access to the <b>.git</b> folder.</p>';
 				}
-			} elseif (isset($_GET['dbmigrate'])) {
-				if (TINYIB_DBMIGRATE) {
-					if (isset($_GET['go'])) {
-						if (TINYIB_DBMODE == 'flatfile') {
-							if (function_exists('mysqli_connect')) {
-								$link = @mysqli_connect(TINYIB_DBHOST, TINYIB_DBUSERNAME, TINYIB_DBPASSWORD);
-								if (!$link) {
-									fancyDie("Could not connect to database: " . ((is_object($link)) ? mysqli_error($link) : (($link_error = mysqli_connect_error()) ? $link_error : '(unknown error)')));
-								}
-								$db_selected = @mysqli_query($link, "USE " . constant('TINYIB_DBNAME'));
-								if (!$db_selected) {
-									fancyDie("Could not select database: " . ((is_object($link)) ? mysqli_error($link) : (($link_error = mysqli_connect_error()) ? $link_error : '(unknown error')));
-								}
-
-								if (mysqli_num_rows(mysqli_query($link, "SHOW TABLES LIKE '" . TINYIB_DBPOSTS . "'")) == 0) {
-									if (mysqli_num_rows(mysqli_query($link, "SHOW TABLES LIKE '" . TINYIB_DBBANS . "'")) == 0) {
-										mysqli_query($link, $posts_sql);
-										mysqli_query($link, $bans_sql);
-
-										$max_id = 0;
-										$threads = allThreads();
-										foreach ($threads as $thread) {
-											$posts = postsInThreadByID($thread['id']);
-											foreach ($posts as $post) {
-												mysqli_query($link, "INSERT INTO `" . TINYIB_DBPOSTS . "` (`id`, `parent`, `timestamp`, `bumped`, `ip`, `name`, `tripcode`, `email`, `nameblock`, `subject`, `message`, `password`, `file`, `file_hex`, `file_original`, `file_size`, `file_size_formatted`, `image_width`, `image_height`, `thumb`, `thumb_width`, `thumb_height`, `stickied`) VALUES (" . $post['id'] . ", " . $post['parent'] . ", " . time() . ", " . time() . ", '" . $_SERVER['REMOTE_ADDR'] . "', '" . mysqli_real_escape_string($link, $post['name']) . "', '" . mysqli_real_escape_string($link, $post['tripcode']) . "',	'" . mysqli_real_escape_string($link, $post['email']) . "',	'" . mysqli_real_escape_string($link, $post['nameblock']) . "', '" . mysqli_real_escape_string($link, $post['subject']) . "', '" . mysqli_real_escape_string($link, $post['message']) . "', '" . mysqli_real_escape_string($link, $post['password']) . "', '" . $post['file'] . "', '" . $post['file_hex'] . "', '" . mysqli_real_escape_string($link, $post['file_original']) . "', " . $post['file_size'] . ", '" . $post['file_size_formatted'] . "', " . $post['image_width'] . ", " . $post['image_height'] . ", '" . $post['thumb'] . "', " . $post['thumb_width'] . ", " . $post['thumb_height'] . ", " . $post['stickied'] . ")");
-												$max_id = max($max_id, $post['id']);
-											}
-										}
-										if ($max_id > 0 && !mysqli_query($link, "ALTER TABLE `" . TINYIB_DBPOSTS . "` AUTO_INCREMENT = " . ($max_id + 1))) {
-											$text .= '<p><b>Warning:</b> Unable to update the AUTO_INCREMENT value for table ' . TINYIB_DBPOSTS . ', please set it to ' . ($max_id + 1) . '.</p>';
-										}
-
-										$max_id = 0;
-										$bans = allBans();
-										foreach ($bans as $ban) {
-											$max_id = max($max_id, $ban['id']);
-											mysqli_query($link, "INSERT INTO `" . TINYIB_DBBANS . "` (`id`, `ip`, `timestamp`, `expire`, `reason`) VALUES ('" . mysqli_real_escape_string($link, $ban['id']) . "', '" . mysqli_real_escape_string($link, $ban['ip']) . "', '" . mysqli_real_escape_string($link, $ban['timestamp']) . "', '" . mysqli_real_escape_string($link, $ban['expire']) . "', '" . mysqli_real_escape_string($link, $ban['reason']) . "')");
-										}
-										if ($max_id > 0 && !mysqli_query($link, "ALTER TABLE `" . TINYIB_DBBANS . "` AUTO_INCREMENT = " . ($max_id + 1))) {
-											$text .= '<p><b>Warning:</b> Unable to update the AUTO_INCREMENT value for table ' . TINYIB_DBBANS . ', please set it to ' . ($max_id + 1) . '.</p>';
-										}
-
-										$text .= '<p><b>Database migration complete</b>.  Set TINYIB_DBMODE to mysqli and TINYIB_DBMIGRATE to false, then click <b>Rebuild All</b> above and ensure everything looks the way it should.</p>';
-									} else {
-										fancyDie('Bans table (' . TINYIB_DBBANS . ') already exists!  Please DROP this table and try again.');
-									}
-								} else {
-									fancyDie('Posts table (' . TINYIB_DBPOSTS . ') already exists!  Please DROP this table and try again.');
-								}
-							} else {
-								fancyDie('Please install the <a href="http://php.net/manual/en/book.mysqli.php">MySQLi extension</a> and try again.');
-							}
-						} else {
-							fancyDie('Set TINYIB_DBMODE to flatfile and enter in your MySQL settings in settings.php before migrating.');
-						}
-					} else {
-						$text .= '<p>This tool currently only supports migration from a flat file database to MySQL.  Your original database will not be deleted.  If the migration fails, disable the tool and your board will be unaffected.  See the <a href="https://github.com/tslocum/TinyIB#migrating" target="_blank">README</a> <small>(<a href="README.md" target="_blank">alternate link</a>)</small> for instructions.</a><br><br><a href="?manage&dbmigrate&go"><b>Start the migration</b></a></p>';
-					}
-				} else {
-					fancyDie('Set TINYIB_DBMIGRATE to true in settings.php to use this feature.');
-				}
 			}
 		}
 
 		if (isset($_GET['delete'])) {
-			$post = postByID($_GET['delete']);
+			$post = $post_repository->postByID($_GET['delete']);
 			if ($post) {
-				deletePostByID($post['id']);
+				$post_repository->deletePostByID($post['id']);
 				rebuildIndexes();
 				if ($post['parent'] != TINYIB_NEWTHREAD) {
 					rebuildThread($post['parent']);
@@ -511,13 +445,14 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 			}
 		} elseif (isset($_GET['approve'])) {
 			if ($_GET['approve'] > 0) {
-				$post = postByID($_GET['approve']);
+				$post = $post_repository->postByID($_GET['approve']);
 				if ($post) {
-					approvePostByID($post['id']);
+					$post_repository->approvePostByID($post['id']);
 					$thread_id = $post['parent'] == TINYIB_NEWTHREAD ? $post['id'] : $post['parent'];
 
-					if (strtolower($post['email']) != 'sage' && (TINYIB_MAXREPLIES == 0 || numRepliesToThreadByID($thread_id) <= TINYIB_MAXREPLIES)) {
-						bumpThreadByID($thread_id);
+					if (strtolower($post['email']) != 'sage'
+						&& (TINYIB_MAXREPLIES == 0 || $post_repository->numRepliesToThreadByID($thread_id) <= TINYIB_MAXREPLIES)) {
+						$post_repository->bumpThreadByID($thread_id);
 					}
 					threadUpdated($thread_id);
 
@@ -528,7 +463,7 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 			}
 		} elseif (isset($_GET['moderate'])) {
 			if ($_GET['moderate'] > 0) {
-				$post = postByID($_GET['moderate']);
+				$post = $post_repository->postByID($_GET['moderate']);
 				if ($post) {
 					$text .= manageModeratePost($post);
 				} else {
@@ -540,9 +475,9 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 			}
 		} elseif (isset($_GET['sticky']) && isset($_GET['setsticky'])) {
 			if ($_GET['sticky'] > 0) {
-				$post = postByID($_GET['sticky']);
+				$post = $post_repository->postByID($_GET['sticky']);
 				if ($post && $post['parent'] == TINYIB_NEWTHREAD) {
-					stickyThreadByID($post['id'], (intval($_GET['setsticky'])));
+					$post_repository->stickyThreadByID($post['id'], (intval($_GET['setsticky'])));
 					threadUpdated($post['id']);
 
 					$text .= manageInfo('Thread No.' . $post['id'] . ' ' . (intval($_GET['setsticky']) == 1 ? 'stickied' : 'un-stickied') . '.');
@@ -569,7 +504,7 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 	}
 
 	echo managePage($text, $onload);
-} elseif (!file_exists('index.html') || countThreads() == 0) {
+} elseif (!file_exists('index.html') || $post_repository->countThreads() == 0) {
 	rebuildIndexes();
 }
 
