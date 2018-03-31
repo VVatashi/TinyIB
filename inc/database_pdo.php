@@ -1,242 +1,148 @@
 <?php
 
-use TinyIB\Repository\PDORepository;
+use TinyIB\Repository\PDOBanRepository;
+use TinyIB\Repository\PDOPostRepository;
 
 if (!defined('TINYIB_BOARD')) {
     die('');
 }
 
-/** @var \TinyIB\Repository\IRepository $banRepository */
-$banRepository = new PDORepository(TINYIB_DBBANS);
+/** @var \TinyIB\Repository\IBanRepository $banRepository */
+$banRepository = new PDOBanRepository(TINYIB_DBBANS);
 
-/** @var \TinyIB\Repository\IRepository $postRepository */
-$postRepository = new PDORepository(TINYIB_DBPOSTS);
+/** @var \TinyIB\Repository\IPostRepository $postRepository */
+$postRepository = new PDOPostRepository(TINYIB_DBPOSTS);
 
 # Post Functions
 function uniquePosts()
 {
     global $postRepository;
-    return $postRepository->getCount([], 'distinct(ip)');
+    return $postRepository->uniquePosts();
 }
 
 function postByID($id)
 {
     global $postRepository;
-    return $postRepository->getOne(['id' => $id]);
+    return $postRepository->postByID($id);
 }
 
 function threadExistsByID($id)
 {
     global $postRepository;
-    return $postRepository->getCount([
-        'id' => $id,
-        'parent' => 0,
-        'moderated' => 1,
-    ]) > 0;
+    return $postRepository->threadExistsByID($id);
 }
 
 function insertPost($post)
 {
     global $postRepository;
-    $now = time();
-
-    return $postRepository->insert([
-        'parent' => $post['parent'],
-        'timestamp' => $now,
-        'bumped' => $now,
-        'ip' => $_SERVER['REMOTE_ADDR'],
-        'name' => $post['name'],
-        'tripcode' => $post['tripcode'],
-        'email' => $post['email'],
-        'nameblock' => $post['nameblock'],
-        'subject' => $post['subject'],
-        'message' => $post['message'],
-        'password' => $post['password'],
-        'file' => $post['file'],
-        'file_hex' => $post['file_hex'],
-        'file_original' => $post['file_original'],
-        'file_size' => $post['file_size'],
-        'file_size_formatted' => $post['file_size_formatted'],
-        'image_width' => $post['image_width'],
-        'image_height' => $post['image_height'],
-        'thumb' => $post['thumb'],
-        'thumb_width' => $post['thumb_width'],
-        'thumb_height' => $post['thumb_height'],
-        'moderated' => $post['moderated'],
-    ]);
+    return $postRepository->insertPost($post);
 }
 
 function approvePostByID($id)
 {
     global $postRepository;
-    $postRepository->update(['id' => $id], ['moderated' => 1]);
+    $postRepository->approvePostByID($id);
 }
 
 function stickyThreadByID($id, $setsticky)
 {
     global $postRepository;
-    $postRepository->update(['id' => $id], ['stickied' => (int)$setsticky]);
+    $postRepository->stickyThreadByID($id, $setsticky);
 }
 
 function bumpThreadByID($id)
 {
     global $postRepository;
-    $now = time();
-
-    $postRepository->update(['id' => $id], ['bumped' => $now]);
+    $postRepository->bumpThreadByID($id);
 }
 
 function countThreads()
 {
     global $postRepository;
-    return $postRepository->getCount(['parent' => 0, 'moderated' => 1]);
+    return $postRepository->countThreads();
 }
 
 function allThreads()
 {
     global $postRepository;
-    return $postRepository->getAll(
-        ['parent' => 0, 'moderated' => 1],
-        'stickied DESC, bumped DESC'
-    );
+    return $postRepository->allThreads();
 }
 
 function numRepliesToThreadByID($id)
 {
     global $postRepository;
-    return $postRepository->getCount(['parent' => $id, 'moderated' => 1]);
+    return $postRepository->numRepliesToThreadByID($id);
 }
 
 function postsInThreadByID($id, $moderated_only = true)
 {
     global $postRepository;
-
-    $conditions = [
-        [
-            '#op' => 'OR',
-            'id' => $id,
-            'parent' => $id,
-        ],
-    ];
-
-    if ($moderated_only === true) {
-        $conditions['moderated'] = 1;
-    }
-
-    return $postRepository->getAll($conditions, 'id ASC');
+    return $postRepository->postsInThreadByID($id, $moderated_only);
 }
 
 function postsByHex($hex)
 {
     global $postRepository;
-    return $postRepository->getOne(['file_hex' => $hex, 'moderated' => 1]);
+    return $postRepository->postsByHex($hex);
 }
 
 function latestPosts($moderated = true)
 {
     global $postRepository;
-    return $postRepository->getRange(
-        ['moderated' => (int)$moderated],
-        'timestamp DESC',
-        10
-    );
+    return $postRepository->latestPosts($moderated);
 }
 
 function deletePostByID($id)
 {
     global $postRepository;
-    $posts = postsInThreadByID($id, false);
-
-    foreach ($posts as $post) {
-        if ($post['id'] != $id) {
-            deletePostImages($post);
-            $postRepository->delete(['id' => $id]);
-        } else {
-            $thispost = $post;
-        }
-    }
-
-    if (isset($thispost)) {
-        if ($thispost['parent'] == TINYIB_NEWTHREAD) {
-            @unlink('res/' . $thispost['id'] . '.html');
-        }
-
-        deletePostImages($thispost);
-        $postRepository->delete(['id' => $thispost['id']]);
-    }
+    $postRepository->deletePostByID($id);
 }
 
 function trimThreads()
 {
     global $postRepository;
-    $limit = (int)TINYIB_MAXTHREADS;
-
-    if ($limit > 0) {
-        $results = $postRepository->getRange(
-            ['parent' => 0, 'moderated' => 1],
-            'stickied DESC, bumped DESC',
-            100,
-            $limit,
-            'id'
-        );
-
-        foreach ($results as $post) {
-            deletePostByID($post['id']);
-        }
-    }
+    $postRepository->trimThreads();
 }
 
 function lastPostByIP()
 {
     global $postRepository;
-    return $postRepository->getOne(['ip' => $_SERVER['REMOTE_ADDR']], 'id DESC');
+    return $postRepository->lastPostByIP();
 }
 
 # Ban Functions
 function banByID($id)
 {
     global $banRepository;
-    return $banRepository->getOne(['id' => $id]);
+    return $banRepository->banByID($id);
 }
 
 function banByIP($ip)
 {
     global $banRepository;
-    return $banRepository->getOne(['ip' => $ip]);
+    return $banRepository->banByIP($ip);
 }
 
 function allBans()
 {
     global $banRepository;
-    return $banRepository->getAll([], 'timestamp DESC');
+    return $banRepository->allBans();
 }
 
 function insertBan($ban)
 {
     global $banRepository;
-    $now = time();
-
-    return $banRepository->insert([
-        'ip' => $ban['ip'],
-        'timestamp' => $now,
-        'expire' => $ban['expire'],
-        'reason' => $ban['reason'],
-    ]);
+    return $banRepository->insertBan($ban);
 }
 
 function clearExpiredBans()
 {
     global $banRepository;
-    $now = time();
-
-    $banRepository->delete([
-        ['expire' => ['#op' => '>', 0]],
-        ['expire' => ['#op' => '<=', $now]],
-    ]);
+    $banRepository->clearExpiredBans();
 }
 
 function deleteBanByID($id)
 {
     global $banRepository;
-    $banRepository->delete(['id' => $id]);
+    $banRepository->deleteBanByID($id);
 }

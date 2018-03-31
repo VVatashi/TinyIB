@@ -5,7 +5,7 @@ namespace TinyIB\Repository;
 use \TinyIB\Repository\PDOHelper;
 use \TinyIB\Repository\SQLHelper;
 
-class PDORepository implements IRepository
+abstract class PDORepository implements IRepository
 {
     /** @var \PDO $pdo */
     protected static $pdo;
@@ -103,6 +103,7 @@ class PDORepository implements IRepository
         $params = array_values($data);
         $statement = static::$pdo->prepare($query);
         $statement->execute($params);
+        return static::$pdo->lastInsertId();
     }
 
     /**
