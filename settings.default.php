@@ -50,14 +50,13 @@ $tinyib_uploads = array(
     'audio/x-mpeg-3' => array('mp3', 'audio_thumbnail.png'),
 );
 
-function buildEmbedHtml($url, $extension) {
+function buildEmbedHtml($url, $extension)
+{
     if ($extension === 'mp4') {
         return '<video controls autoplay><source src="' . $url . '" type="video/mp4" /></video>';
-    }
-    elseif ($extension === 'webm') {
+    } elseif ($extension === 'webm') {
         return '<video controls autoplay><source src="' . $url . '" type="video/webm" /></video>';
-    }
-    else {
+    } else {
         return '<img src="' . $url . '" alt="" />';
     }
 }
