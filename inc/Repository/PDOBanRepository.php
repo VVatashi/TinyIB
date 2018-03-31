@@ -23,7 +23,29 @@ class PDOBanRepository extends PDORepository implements IBanRepository
         $table_exists = $query->fetchColumn() != 0;
 
         if ($table_exists === false) {
-            static::$pdo->exec($bans_sql);
+            if (TINYIB_DBDRIVER === 'pgsql') {
+                $sql = 'CREATE TABLE "' . TINYIB_DBBANS . '" (
+                    "id" bigserial NOT NULL,
+                    "ip" varchar(39) NOT NULL,
+                    "timestamp" integer NOT NULL,
+                    "expire" integer NOT NULL,
+                    "reason" text NOT NULL,
+                    PRIMARY KEY	("id")
+                );
+                CREATE INDEX ON "' . TINYIB_DBBANS . '"("ip");';
+            } else {
+                $sql = "CREATE TABLE `" . TINYIB_DBBANS . "` (
+                    `id` mediumint(7) unsigned NOT NULL auto_increment,
+                    `ip` varchar(39) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+                    `timestamp` int(20) NOT NULL,
+                    `expire` int(20) NOT NULL,
+                    `reason` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+                    PRIMARY KEY	(`id`),
+                    KEY `ip` (`ip`)
+                )";
+            }
+
+            static::$pdo->exec($sql);
         }
     }
 
