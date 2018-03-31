@@ -62,6 +62,8 @@ if (TINYIB_TIMEZONE != '') {
 	date_default_timezone_set(TINYIB_TIMEZONE);
 }
 
+global $ban_repository, $post_repository;
+
 $redirect = true;
 // Check if the request is to make a post
 if (isset($_POST['message']) || isset($_POST['file'])) {
@@ -286,22 +288,22 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 		$slow_redirect = true;
 	}
 
-	$post['id'] = insertPost($post);
+	$post['id'] = $post_repository->insertPost($post);
 
 	if ($post['moderated'] == '1') {
 		if (TINYIB_ALWAYSNOKO || strtolower($post['email']) == 'noko') {
 			$redirect = 'res/' . ($post['parent'] == TINYIB_NEWTHREAD ? $post['id'] : $post['parent']) . '.html#' . $post['id'];
 		}
 
-		trimThreads();
+		$post_repository->trimThreads();
 
 		echo 'Updating thread...<br>';
 		if ($post['parent'] != TINYIB_NEWTHREAD) {
 			rebuildThread($post['parent']);
 
 			if (strtolower($post['email']) != 'sage') {
-				if (TINYIB_MAXREPLIES == 0 || numRepliesToThreadByID($post['parent']) <= TINYIB_MAXREPLIES) {
-					bumpThreadByID($post['parent']);
+				if (TINYIB_MAXREPLIES == 0 || $post_repository->numRepliesToThreadByID($post['parent']) <= TINYIB_MAXREPLIES) {
+					$post_repository->bumpThreadByID($post['parent']);
 				}
 			}
 		} else {
@@ -321,7 +323,7 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 		fancyDie('Post deletion is currently disabled.<br>Please try again in a few moments.');
 	}
 
-	$post = postByID($_POST['delete']);
+	$post = $post_repository->postByID($_POST['delete']);
 	if ($post) {
 		list($loggedin, $isadmin) = manageCheckLogIn();
 
@@ -329,7 +331,7 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 			// Redirect to post moderation page
 			echo '--&gt; --&gt; --&gt;<meta http-equiv="refresh" content="0;url=' . basename($_SERVER['PHP_SELF']) . '?manage&moderate=' . $_POST['delete'] . '">';
 		} elseif ($post['password'] != '' && md5(md5($_POST['password'])) == $post['password']) {
-			deletePostByID($post['id']);
+			$post_repository->deletePostByID($post['id']);
 			if ($post['parent'] == TINYIB_NEWTHREAD) {
 				threadUpdated($post['id']);
 			} else {
@@ -359,18 +361,18 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 	if ($loggedin) {
 		if ($isadmin) {
 			if (isset($_GET['rebuildall'])) {
-				$allthreads = allThreads();
+				$allthreads = $post_repository->allThreads();
 				foreach ($allthreads as $thread) {
 					rebuildThread($thread['id']);
 				}
 				rebuildIndexes();
 				$text .= manageInfo('Rebuilt board.');
 			} elseif (isset($_GET['bans'])) {
-				clearExpiredBans();
+				$ban_repository->clearExpiredBans();
 
 				if (isset($_POST['ip'])) {
 					if ($_POST['ip'] != '') {
-						$banexists = banByIP($_POST['ip']);
+						$banexists = $ban_repository->banByIP($_POST['ip']);
 						if ($banexists) {
 							fancyDie('Sorry, there is already a ban on record for that IP address.');
 						}
@@ -380,13 +382,13 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 						$ban['expire'] = ($_POST['expire'] > 0) ? (time() + $_POST['expire']) : 0;
 						$ban['reason'] = $_POST['reason'];
 
-						insertBan($ban);
+						$ban_repository->insertBan($ban);
 						$text .= manageInfo('Ban record added for ' . $ban['ip']);
 					}
 				} elseif (isset($_GET['lift'])) {
-					$ban = banByID($_GET['lift']);
+					$ban = $ban_repository->banByID($_GET['lift']);
 					if ($ban) {
-						deleteBanByID($_GET['lift']);
+						$ban_repository->deleteBanByID($_GET['lift']);
 						$text .= manageInfo('Ban record lifted for ' . $ban['ip']);
 					}
 				}
@@ -411,9 +413,9 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 		}
 
 		if (isset($_GET['delete'])) {
-			$post = postByID($_GET['delete']);
+			$post = $post_repository->postByID($_GET['delete']);
 			if ($post) {
-				deletePostByID($post['id']);
+				$post_repository->deletePostByID($post['id']);
 				rebuildIndexes();
 				if ($post['parent'] != TINYIB_NEWTHREAD) {
 					rebuildThread($post['parent']);
@@ -424,13 +426,14 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 			}
 		} elseif (isset($_GET['approve'])) {
 			if ($_GET['approve'] > 0) {
-				$post = postByID($_GET['approve']);
+				$post = $post_repository->postByID($_GET['approve']);
 				if ($post) {
-					approvePostByID($post['id']);
+					$post_repository->approvePostByID($post['id']);
 					$thread_id = $post['parent'] == TINYIB_NEWTHREAD ? $post['id'] : $post['parent'];
 
-					if (strtolower($post['email']) != 'sage' && (TINYIB_MAXREPLIES == 0 || numRepliesToThreadByID($thread_id) <= TINYIB_MAXREPLIES)) {
-						bumpThreadByID($thread_id);
+					if (strtolower($post['email']) != 'sage'
+						&& (TINYIB_MAXREPLIES == 0 || $post_repository->numRepliesToThreadByID($thread_id) <= TINYIB_MAXREPLIES)) {
+						$post_repository->bumpThreadByID($thread_id);
 					}
 					threadUpdated($thread_id);
 
@@ -441,7 +444,7 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 			}
 		} elseif (isset($_GET['moderate'])) {
 			if ($_GET['moderate'] > 0) {
-				$post = postByID($_GET['moderate']);
+				$post = $post_repository->postByID($_GET['moderate']);
 				if ($post) {
 					$text .= manageModeratePost($post);
 				} else {
@@ -453,9 +456,9 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 			}
 		} elseif (isset($_GET['sticky']) && isset($_GET['setsticky'])) {
 			if ($_GET['sticky'] > 0) {
-				$post = postByID($_GET['sticky']);
+				$post = $post_repository->postByID($_GET['sticky']);
 				if ($post && $post['parent'] == TINYIB_NEWTHREAD) {
-					stickyThreadByID($post['id'], (intval($_GET['setsticky'])));
+					$post_repository->stickyThreadByID($post['id'], (intval($_GET['setsticky'])));
 					threadUpdated($post['id']);
 
 					$text .= manageInfo('Thread No.' . $post['id'] . ' ' . (intval($_GET['setsticky']) == 1 ? 'stickied' : 'un-stickied') . '.');
@@ -482,7 +485,7 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 	}
 
 	echo managePage($text, $onload);
-} elseif (!file_exists('index.html') || countThreads() == 0) {
+} elseif (!file_exists('index.html') || $post_repository->countThreads() == 0) {
 	rebuildIndexes();
 }
 

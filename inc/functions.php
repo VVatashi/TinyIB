@@ -238,10 +238,13 @@ function fixLinksInRes($html) {
 }
 
 function _postLink($matches) {
-	$post = postByID($matches[1]);
+	global $post_repository;
+	$post = $post_repository->postByID($matches[1]);
+
 	if ($post) {
 		return '<a href="res/' . ($post['parent'] == TINYIB_NEWTHREAD ? $post['id'] : $post['parent']) . '.html#' . $matches[1] . '">' . $matches[0] . '</a>';
 	}
+
 	return $matches[0];
 }
 
@@ -310,21 +313,25 @@ function checkCAPTCHA() {
 }
 
 function checkBanned() {
-	$ban = banByIP($_SERVER['REMOTE_ADDR']);
+	global $ban_repository;
+	$ban = $ban_repository->banByIP($_SERVER['REMOTE_ADDR']);
+
 	if ($ban) {
 		if ($ban['expire'] == 0 || $ban['expire'] > time()) {
 			$expire = ($ban['expire'] > 0) ? ('<br>This ban will expire ' . date('y/m/d(D)H:i:s', $ban['expire'])) : '<br>This ban is permanent and will not expire.';
 			$reason = ($ban['reason'] == '') ? '' : ('<br>Reason: ' . $ban['reason']);
 			fancyDie('Your IP address ' . $ban['ip'] . ' has been banned from posting on this image board.  ' . $expire . $reason);
 		} else {
-			clearExpiredBans();
+			$ban_repository->clearExpiredBans();
 		}
 	}
 }
 
 function checkFlood() {
+	global $post_repository;
+
 	if (TINYIB_DELAY > 0) {
-		$lastpost = lastPostByIP();
+		$lastpost = $post_repository->lastPostByIP();
 		if ($lastpost) {
 			if ((time() - $lastpost['timestamp']) < TINYIB_DELAY) {
 				fancyDie("Please wait a moment before posting again.  You will be able to make another post in " . (TINYIB_DELAY - (time() - $lastpost['timestamp'])) . " " . plural("second", (TINYIB_DELAY - (time() - $lastpost['timestamp']))) . ".");
@@ -363,9 +370,11 @@ function manageCheckLogIn() {
 }
 
 function setParent() {
+	global $post_repository;
+
 	if (isset($_POST["parent"])) {
 		if ($_POST["parent"] != TINYIB_NEWTHREAD) {
-			if (!threadExistsByID($_POST['parent'])) {
+			if (!$post_repository->threadExistsByID($_POST['parent'])) {
 				fancyDie("Invalid parent thread ID supplied, unable to create post.");
 			}
 
@@ -415,7 +424,9 @@ function validateFileUpload() {
 }
 
 function checkDuplicateFile($hex) {
-	$hexmatches = postsByHex($hex);
+	global $post_repository;
+	$hexmatches = $post_repository->postsByHex($hex);
+
 	if (count($hexmatches) > 0) {
 		foreach ($hexmatches as $hexmatch) {
 			fancyDie("Duplicate file uploaded. That file has already been posted <a href=\"res/" . (($hexmatch["parent"] == TINYIB_NEWTHREAD) ? $hexmatch["id"] : $hexmatch["parent"]) . ".html#" . $hexmatch["id"] . "\">here</a>.");
