@@ -261,7 +261,6 @@ function manageStatus() {
 
 	$data = array(
 		'info' => $threads . ' ' . plural('thread', $threads) . ', ' . $bans . ' ' . plural('ban', $bans),
-		'is_mysqli_recommended' => $isadmin && TINYIB_DBMODE == 'mysql' && function_exists('mysqli_connect'),
 	);
 
 	if (TINYIB_REQMOD == 'files' || TINYIB_REQMOD == 'all') {

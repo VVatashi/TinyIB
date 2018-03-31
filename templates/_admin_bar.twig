@@ -26,10 +26,6 @@
         {{ self.link('Update', '?manage&update') }}
       {% endif %}
 
-      {% if is_admin and constant('TINYIB_DBMIGRATE') %}
-        {{ self.link('<b>Migrate Database</b>', '?manage&dbmigrate') }}
-      {% endif %}
-
       {{ self.link('Log Out', '?manage&logout') }}
 
       &middot;
