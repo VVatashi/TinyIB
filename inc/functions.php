@@ -444,6 +444,20 @@ function createThumbnail($file_location, $thumb_location, $new_w, $new_h)
         $exit_status = 1;
         $extension = pathinfo($thumb_location, PATHINFO_EXTENSION);
 
+        $info = getimagesize($file_location);
+
+        if (isset($info[0])) {
+            if ($info[0] > TINYIB_FILE_MAXW) {
+                return false;
+            }
+        }
+        
+        if (isset($info[1])) {
+            if ($info[1] > TINYIB_FILE_MAXH) {
+                return false;
+            }
+        }
+
         if ($extension === 'gif') {
             if (TINYIB_FILE_ANIM_GIF_THUMB) {
                 exec("convert $file_location -auto-orient -thumbnail '" . $new_w . "x" . $new_h . "' -coalesce -layers OptimizeFrame -depth 4 -type palettealpha $thumb_location", $discard, $exit_status);

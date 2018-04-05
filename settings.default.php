@@ -116,6 +116,8 @@ define('TINYIB_NOFILEOK', false);     // Allow the creation of new threads witho
 define('TINYIB_FILE_ALLOW_DUPLICATE', false); // Allow duplicate files
 define('TINYIB_FILE_ANIM_GIF_THUMB', true); // Animate gif thumbnails
 define('TINYIB_FILE_SHOW_ORIG_NAME', true); // Show original file name
+define('TINYIB_FILE_MAXW', 8192);           // Max allowed width
+define('TINYIB_FILE_MAXH', 8192);           // Max allowed height
 
 // Thumbnail size - new thread
 define('TINYIB_MAXWOP', 250);         // Width
