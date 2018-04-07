@@ -1,0 +1,15 @@
+{% set thread_id = reply['parent'] %}
+
+<div class="layout__reply reply" id="reply_{{ reply['id'] }}">
+  <div class="reply__inner">
+    <div class="reply__header">
+      {% include '_reply_header.twig' %}
+    </div>
+
+    {% include '_reply_file.twig' %}
+
+    <div class="reply__message message">
+      {{ reply['message'] }}
+    </div>
+  </div>
+</div>

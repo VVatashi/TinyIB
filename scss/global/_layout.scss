@@ -1,3 +1,5 @@
+@import '../utils';
+
 .layout {
   &__header {
     margin-bottom: 1em;
@@ -29,17 +31,10 @@
     text-align: left;
   }
 
-  &__post {
-    clear: both;
-    float: left;
-    margin: 2px 0;
+  &__reply {
+    @include clearfix;
 
-    &::before,
-    &::after {
-      clear: both;
-      content: '';
-      display: table;
-    }
+    margin: 2px 0;
   }
 
   &__userdelete {

@@ -50,11 +50,17 @@ input[type='submit'] {
   }
 }
 
-.post {
+.reply {
   background: transparent;
   //background-image: url(bgpostnew.jpg);
   color: #fff;
   max-width: 100%;
+
+  &__inner {
+    border: 2px solid transparent;
+    border-image: linear-gradient(to bottom right, #fb99f9 0%, #f632fe 100%);
+    border-image-slice: 1;
+  }
 
   &__header {
     color: #9a9a9a;
@@ -79,30 +85,24 @@ input[type='submit'] {
       }
     }
   }
-
-  &_reply {
-    border: 2px solid transparent;
-    border-image: linear-gradient(to bottom right, #fb99f9 0%, #f632fe 100%);
-    border-image-slice: 1;
-  }
-
-  .filetitle {
-    color: #0ff;
-    text-shadow: 0 0 4px rgba(255, 255, 255, .5);
-  }
-
-  .postername {
-    color: #0ff;
-    font-weight: 700;
-    text-shadow: 0 0 4px rgba(255, 255, 255, .5);
-  }
-
-  .postertrip {
-    color: #0ff;
-  }
 }
 
-.post-ref {
+.filetitle {
+  color: #0ff;
+  text-shadow: 0 0 4px rgba(255, 255, 255, .5);
+}
+
+.postername {
+  color: #0ff;
+  font-weight: 700;
+  text-shadow: 0 0 4px rgba(255, 255, 255, .5);
+}
+
+.postertrip {
+  color: #0ff;
+}
+
+.reply-ref {
   &__link {
     color: #0ff;
 
@@ -129,8 +129,9 @@ input[type='submit'] {
 
 // Styles for Dollchan Extension tools comptability
 
-.reply {
+.de-menu,
+.de-popup,
+.de-win-body {
   background: #1a0f26;
   color: inherit;
 }
-

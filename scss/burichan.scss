@@ -1,7 +1,7 @@
 @import 'burichan/vars';
 
 @import 'burichan/base';
-@import 'burichan/post';
+@import 'burichan/reply';
 @import 'burichan/postform';
 
 .footer {
@@ -22,7 +22,9 @@
 
 // Styles for Dollchan Extension tools comptability
 
-.reply {
+.de-menu,
+.de-popup,
+.de-win-body {
   background: $post-bg-color;
   color: $text-color;
 }

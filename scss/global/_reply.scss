@@ -1,4 +1,8 @@
-.post {
+.reply {
+  &__inner {
+    float: left;
+  }
+
   &__file-info {
     display: block;
     margin-left: 20px;
@@ -29,32 +33,28 @@
     }
   }
 
-  &_thread {
-    width: 100%;
-  }
-
   &__thumb {
     border: 0;
     float: left;
     margin: 4px 20px;
   }
+}
 
-  .filetitle {
-    color: #cc1105;
-    font-size: 1.2em;
-    font-weight: 800;
-  }
+.filetitle {
+  color: #cc1105;
+  font-size: 1.2em;
+  font-weight: 800;
+}
 
-  .postername {
-    color: #117743;
-    font-weight: bold;
-  }
+.postername {
+  color: #117743;
+  font-weight: bold;
+}
 
-  .postertrip {
-    color: #228854;
-  }
+.postertrip {
+  color: #228854;
+}
 
-  .moderator {
-    color: #f00;
-  }
+.moderator {
+  color: #f00;
 }

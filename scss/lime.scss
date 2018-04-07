@@ -1,7 +1,7 @@
 $link-color: #1de9b6;
 
 @import 'lime/base';
-@import 'lime/post';
+@import 'lime/reply';
 @import 'lime/postform';
 
 .layout {
@@ -35,7 +35,7 @@ $link-color: #1de9b6;
   }
 }
 
-.post-ref {
+.reply-ref {
   &__link {
     &:hover {
       color: #32d96f;
@@ -46,7 +46,9 @@ $link-color: #1de9b6;
 
 // Styles for Dollchan Extension tools comptability
 
-.reply {
+.de-menu,
+.de-popup,
+.de-win-body {
   background: #424242;
   color: inherit;
 }

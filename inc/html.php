@@ -105,12 +105,12 @@ EOF;
     $expand = $is_embed || in_array(substr($post['file'], -4), array('.jpg', '.png', '.gif', 'webm'));
     $expandhtml = rawurlencode($expandhtml);
 
-    return $renderer->render($is_thread ? '_thread.twig' : '_post.twig', array(
+    return $renderer->render($is_thread ? '_thread.twig' : '_reply.twig', array(
         'direct_link' => $direct_link,
         'expand' => $expand,
         'expandhtml' => $expandhtml,
         'is_embed' => $is_embed,
-        'post' => $post,
+        'reply' => $post,
         'res' => $res,
     ));
 }

@@ -1,7 +1,7 @@
 @import 'futaba/vars';
 
 @import 'futaba/base';
-@import 'futaba/post';
+@import 'futaba/reply';
 @import 'futaba/postform';
 
 .footer {
@@ -29,7 +29,9 @@
 
 // Styles for Dollchan Extension tools comptability
 
-.reply {
+.de-menu,
+.de-popup,
+.de-win-body {
   background: $post-bg-color;
   color: $text-color;
 }

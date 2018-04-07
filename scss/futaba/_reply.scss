@@ -1,7 +1,11 @@
 @import 'vars';
 
-.post {
+.reply {
   color: $text-color;
+
+  &__inner {
+    background: $post-bg-color;
+  }
 
   &__file-info {
     text-decoration: none;
@@ -9,9 +13,5 @@
 
   &__omitted {
     color: $omitted-color;
-  }
-
-  &_reply {
-    background: $post-bg-color;
   }
 }
