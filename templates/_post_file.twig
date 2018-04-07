@@ -22,13 +22,13 @@
   <div id="expand_{{ post['id'] }}" style="display: none;">
     {% if is_embed %}
       {{ post['file']|url_encode }}
-    {% elseif is_image %}
+    {% elseif post['file_type'] == 'image' %}
       {{ ('<a href="' ~ direct_link ~ '" onclick="return expandFile(event, \'' ~ post['id'] ~ '\');\">'
 ~ '<img src="' ~ direct_link
 ~ '" width="' ~ post['image_width']
 ~ '" style="max-width: 100%; height: auto;">'
 ~ '</a>')|url_encode }}
-    {% elseif is_audio or is_video %}
+    {% elseif post['file_type'] == 'audio' or post['file_type'] == 'video' %}
       {% set dimensions = 'width="500" height="50"' %}
 
       {% if post['image_width'] > 0 and post['image_height'] > 0 %}

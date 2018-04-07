@@ -36,13 +36,13 @@
 
   &__message {
     color: #f5f5f5;
-
-    .unkfunc {
-      color: #64ffda;
-    }
   }
 
   &__omitted {
     color: #666;
+  }
+
+  .unkfunc {
+    color: #64ffda;
   }
 }

@@ -23,7 +23,7 @@
 
 <label class="post-header__name-block" for="delete_{{ post['id'] }}">
   {% if post['email'] %}
-    <a href="mailto:{{ post['email'] }}">
+    <a class="post-header__email" href="mailto:{{ post['email'] }}">
       {{ self.nameblock(post) }}
     </a>
   {% else %}

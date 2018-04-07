@@ -10,27 +10,6 @@
 
   &__message {
     margin: 1em 25px 5px;
-
-    .unkfunc {
-      color: #789922;
-    }
-
-    .spoiler,
-    .rp {
-      background-color: #000;
-      color: #000;
-
-      &:hover {
-        color: #fff;
-      }
-    }
-
-    .dice {
-      color: #228854;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: .85em;
-      font-weight: 600;
-    }
   }
 
   &__thumb {
@@ -38,8 +17,29 @@
     float: left;
     margin: 4px 20px;
   }
-}
 
-.moderator {
-  color: #f00;
+  .dice {
+    color: #228854;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: .85em;
+    font-weight: 600;
+  }
+
+  .moderator {
+    color: #f00;
+  }
+
+  .spoiler,
+  .rp {
+    background-color: #000;
+    color: #000;
+
+    &:hover {
+      color: #fff;
+    }
+  }
+
+  .unkfunc {
+    color: #789922;
+  }
 }

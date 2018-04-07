@@ -16,19 +16,19 @@
 
   &__message {
     color: #fff;
+  }
 
-    .unkfunc {
-      color: #0ff;
+  .spoiler,
+  .rp {
+    background-color: #6f6f6f;
+    color: #6f6f6f;
+
+    &:hover {
+      color: inherit;
     }
+  }
 
-    .spoiler,
-    .rp {
-      background-color: #6f6f6f;
-      color: #6f6f6f;
-
-      &:hover {
-        color: inherit;
-      }
-    }
+  .unkfunc {
+    color: #0ff;
   }
 }
