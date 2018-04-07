@@ -1,19 +1,14 @@
 <?php
+
 if (!defined('TINYIB_BOARD')) {
     die('');
 }
 
-require_once './vendor/autoload.php';
-
-$loader = new Twig_Loader_Filesystem('./templates');
-$twig = new Twig_Environment($loader, array(
-    'autoescape' => false,
-    'cache' => './templates/cache',
-    'debug' => true,
-));
-$twig->addGlobal('embeds', $tinyib_uploads);
-$twig->addGlobal('uploads', $tinyib_embeds);
-$twig->addGlobal('manage_link', basename($_SERVER['PHP_SELF']) . "?manage");
+$renderer = new \TinyIB\Renderer([
+    'embeds' => $tinyib_uploads,
+    'uploads' => $tinyib_embeds,
+    'manage_link' => basename($_SERVER['PHP_SELF']) . "?manage",
+]);
 
 function supportedFileTypes()
 {
@@ -78,7 +73,7 @@ function bbcode($message)
 
 function buildPost($post, $res)
 {
-    global $twig;
+    global $renderer;
     $is_thread = $post['parent'] == TINYIB_NEWTHREAD;
     $is_embed = isEmbed($post["file_hex"]);
 
@@ -110,7 +105,7 @@ EOF;
     $expand = $is_embed || in_array(substr($post['file'], -4), array('.jpg', '.png', '.gif', 'webm'));
     $expandhtml = rawurlencode($expandhtml);
 
-    return $twig->render($is_thread ? '_thread.twig' : '_post.twig', array(
+    return $renderer->render($is_thread ? '_thread.twig' : '_post.twig', array(
         'direct_link' => $direct_link,
         'expand' => $expand,
         'expandhtml' => $expandhtml,
@@ -122,7 +117,7 @@ EOF;
 
 function buildPage($htmlposts, $parent, $pages = 0, $thispage = 0)
 {
-    global $twig, $post_repository, $tinyib_uploads;
+    global $renderer, $post_repository, $tinyib_uploads;
 
     $managelink = basename($_SERVER['PHP_SELF']) . "?manage";
 
@@ -131,7 +126,7 @@ function buildPage($htmlposts, $parent, $pages = 0, $thispage = 0)
         || isset($tinyib_uploads['image/png'])
         || isset($tinyib_uploads['image/gif']);
 
-    return $twig->render('page.twig', array(
+    return $renderer->render('page.twig', array(
         'filetypes' => supportedFileTypes(),
         'posts' => $htmlposts,
         'pages' => max($pages, 0),
@@ -197,9 +192,9 @@ function rebuildThread($id)
 
 function managePage($text, $onload = '')
 {
-    global $twig, $isadmin, $loggedin, $returnlink;
+    global $renderer, $isadmin, $loggedin, $returnlink;
 
-    return $twig->render('manage.twig', array(
+    return $renderer->render('manage.twig', array(
         'body_attribs' => $onload,
         'is_admin' => $isadmin,
         'is_installed_via_git' => installedViaGit(),
@@ -226,37 +221,37 @@ function manageOnLoad($page)
 
 function manageLogInForm()
 {
-    global $twig;
-    return $twig->render('_manage_log_in_form.twig');
+    global $renderer;
+    return $renderer->render('_manage_log_in_form.twig');
 }
 
 function manageBanForm()
 {
-    global $twig;
-    return $twig->render('_manage_ban_form.twig', array('ip' => $_GET['bans']));
+    global $renderer;
+    return $renderer->render('_manage_ban_form.twig', array('ip' => $_GET['bans']));
 }
 
 function manageBansTable()
 {
-    global $twig, $ban_repository;
-    return $twig->render('_manage_bans_table.twig', array('bans' => $ban_repository->allBans()));
+    global $renderer, $ban_repository;
+    return $renderer->render('_manage_bans_table.twig', array('bans' => $ban_repository->allBans()));
 }
 
 function manageModeratePostForm()
 {
-    global $twig;
-    return $twig->render('_manage_moderate_post_form.twig');
+    global $renderer;
+    return $renderer->render('_manage_moderate_post_form.twig');
 }
 
 function manageRawPostForm()
 {
-    global $twig;
-    return $twig->render('_manage_raw_post_form.twig');
+    global $renderer;
+    return $renderer->render('_manage_raw_post_form.twig');
 }
 
 function manageModeratePost($post)
 {
-    global $twig, $ban_repository, $post_repository, $isadmin;
+    global $renderer, $ban_repository, $post_repository, $isadmin;
 
     $data = array(
         'has_ban' => $ban_repository->banByIP($post['ip']),
@@ -272,12 +267,12 @@ function manageModeratePost($post)
         return $post;
     }, $posts);
 
-    return $twig->render('_manage_moderate_post.twig', $data);
+    return $renderer->render('_manage_moderate_post.twig', $data);
 }
 
 function manageStatus()
 {
-    global $twig, $ban_repository, $post_repository, $isadmin;
+    global $renderer, $ban_repository, $post_repository, $isadmin;
     $threads = $post_repository->countThreads();
     $bans = count($ban_repository->allBans());
 
@@ -297,11 +292,11 @@ function manageStatus()
         return $post;
     }, $post_repository->latestPosts(true));
 
-    return $twig->render('_manage_status.twig', $data);
+    return $renderer->render('_manage_status.twig', $data);
 }
 
 function manageInfo($text)
 {
-    global $twig;
-    return $twig->render('_manage_info.twig', array('text' => $text));
+    global $renderer;
+    return $renderer->render('_manage_info.twig', array('text' => $text));
 }
