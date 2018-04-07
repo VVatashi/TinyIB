@@ -1,0 +1,63 @@
+@import 'vars';
+
+.post {
+  background: $post-bg;
+  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+  border: 0px;
+  border-style: solid;
+  box-sizing: border-box;
+  color: $main-text;
+
+  &_oppost {
+    margin: 0 auto;
+    min-height: 225px;
+    padding: 10px;
+    padding-bottom: 3px;
+    width: 100%;
+  }
+
+  &_reply {
+    margin-bottom: 30px;
+    margin-top: 30px;
+    padding: 10px;
+
+    &:hover {
+      box-shadow: 8px 8px 8px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  &__inner {
+    float: unset;
+  }
+
+  &__subject {
+    color: $main-text;
+  }
+
+  &__name,
+  &__tripcode {
+    color: $secondary-text;
+  }
+
+  &__file-info {
+    color: $title-text;
+    margin-top: 0px;
+    margin-left: -3px;
+    max-width: 440px;
+    padding: 4px;
+  }
+
+  &__thumb {
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
+    float: right;
+  }
+
+  &__message {
+    border: 0px;
+    border-style: solid;
+    max-width: 100%;
+    min-width: -moz-fit-content;
+    min-width: min-content;
+    overflow-wrap: break-word;
+  }
+}

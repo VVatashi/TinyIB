@@ -1,0 +1,26 @@
+.post-header {
+  &__subject {
+    color: #0ff;
+    text-shadow: 0 0 4px rgba(255, 255, 255, .5);
+  }
+  
+  &__name {
+    color: #0ff;
+    font-weight: 700;
+    text-shadow: 0 0 4px rgba(255, 255, 255, .5);
+  }
+  
+  &__tripcode {
+    color: #0ff;
+  }
+
+  &__reflink {
+    &__link {
+      color: #0ff;
+  
+      &:hover {
+        color: inherit;
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+@import 'vars';
+
+.de-link-pref:hover {
+  color: $title-text;
+}
+
+.de-post-counter {
+  color: #6dc950;
+}
+
+.de-pview {
+  .post__thumb {
+    float: left;
+  }
+}
+
+.de-menu,
+.de-popup,
+.de-cfg-body {
+  background: $post-bg;
+}

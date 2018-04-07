@@ -1,4 +1,4 @@
-.reply {
+.post {
   &__inner {
     float: left;
   }
@@ -38,21 +38,6 @@
     float: left;
     margin: 4px 20px;
   }
-}
-
-.filetitle {
-  color: #cc1105;
-  font-size: 1.2em;
-  font-weight: 800;
-}
-
-.postername {
-  color: #117743;
-  font-weight: bold;
-}
-
-.postertrip {
-  color: #228854;
 }
 
 .moderator {

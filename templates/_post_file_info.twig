@@ -1,0 +1,32 @@
+{% set is_thread = post['parent'] == constant('TINYIB_NEWTHREAD') %}
+{% set is_embed = post['file_type'] == 'embed' %}
+
+{% if post['file_type'] %}
+  {% if is_thread %}
+    {{ is_embed ? 'Embed: ' : 'File: ' }}
+  {% endif %}
+
+  {% if is_embed %}
+    <a class="file-info__expand" href="{{ direct_link }}"
+      onclick="return expandFile(event, '{{ post['id'] }}');">
+      {{ post['file_original'] }}
+    </a>
+    &ndash;({{ post['file_hex'] }})
+  {% elseif post['file'] %}
+    {{ thumblink }}
+
+    <a class="file-info__expand" href="{{ direct_link }}" target="_blank"
+      {% if expand %}onclick="return expandFile(event, '{{ post['id'] }}');"{% endif %}>
+      {{ post['file'] }}
+    </a>
+    &ndash;({{ post['file_size_formatted'] }}
+
+    {% if post['image_width'] > 0 and post['image_height'] > 0 %},
+      {{ post['image_width'] }}x{{ post['image_height'] }}
+    {% endif %}
+
+    {% if constant('TINYIB_FILE_SHOW_ORIG_NAME') and post['file_original'] %},
+      {{ post['file_original'] }}
+    {% endif %})
+  {% endif %}
+{% endif %}

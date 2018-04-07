@@ -1,0 +1,41 @@
+{% set thread_id = post['id'] %}
+
+<div class="content__post post post_oppost oppost">
+  {% if post['file_type'] %}
+    <span class="post__file-info file-info filesize">
+      {% include '_post_file_info.twig' %}
+    </span>
+  {% endif %}
+
+  <div class="post__header post-header">
+    {% include '_post_header.twig' %}
+
+    {% if res == constant('TINYIB_INDEXPAGE') %}
+      &nbsp;[<a href="res/{{ post['id'] }}.html">Reply</a>]
+    {% endif %}
+  </div>
+
+  {% if post['file_type'] %}
+    {% include '_post_file.twig' %}
+  {% endif %}
+
+  <div class="post__message message">
+    {{ post['message'] }}
+
+    {% if post['is_truncated'] %}
+      <p>
+        <span class="post__omitted omittedposts">
+          Post truncated. Click Reply to view.
+        </span>
+      </p>
+    {% endif %}
+
+    {% if res == constant('TINYIB_INDEXPAGE') and post['omitted'] > 0 %}
+      <p>
+        <span class="post__omitted omittedposts">
+          {{ post['omitted'] }} post{{ post['omitted'] > 1 ? 's' }} omitted. Click Reply to view.
+        </span>
+      </p>
+    {% endif %}
+  </div>
+</div>

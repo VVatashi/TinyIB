@@ -1,0 +1,13 @@
+.postform {
+  &__block {
+    text-align: right;
+  }
+
+  &__rules {
+    font-size: .7em;
+  }
+
+  &__rules-list {
+    list-style-type: disc;
+  }
+}

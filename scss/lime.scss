@@ -1,65 +1,9 @@
-$link-color: #1de9b6;
-
+@import 'lime/admin_bar';
 @import 'lime/base';
-@import 'lime/reply';
+@import 'lime/content';
+@import 'lime/de';
+@import 'lime/file_info';
+@import 'lime/header';
+@import 'lime/post_header';
+@import 'lime/post';
 @import 'lime/postform';
-
-.content {
-  &__userdelete {
-    display: none;
-  }
-}
-
-.header {
-  &__logo {
-    clear: both;
-    font-size: 2em;
-    font-weight: bold;
-    text-align: left;
-  }
-}
-
-.admin-bar {
-  color: #9e9e9e;
-  font-size: .8em;
-  font-weight: bold;
-}
-
-.file-info {
-  &__expand {
-    color: #717171;
-
-    &:hover {
-      color: #717171;
-    }
-  }
-}
-
-.reply-ref {
-  &__link {
-    &:hover {
-      color: #32d96f;
-      text-decoration: overline underline;
-    }
-  }
-}
-
-// Styles for Dollchan Extension tools comptability
-
-.de-menu,
-.de-popup,
-.de-cfg-body {
-  background: #424242;
-  color: inherit;
-}
-
-.de-post-btns {
-  color: inherit;
-  margin-left: 4px;
-}
-
-.de-post-counter {
-  &::after {
-    color: #717171 !important;
-  }
-}

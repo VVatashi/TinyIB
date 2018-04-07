@@ -1,0 +1,21 @@
+{% set thread_id = post['parent'] %}
+
+<div class="content__post post post_reply reply" id="reply_{{ post['id'] }}">
+  <div class="post__inner">
+    <div class="post__header post-header">
+      {% include '_post_header.twig' %}
+    </div>
+
+    {% if post['file_type'] %}
+      <span class="post__file-info file-info filesize">
+        {% include '_post_file_info.twig' %}
+      </span>
+
+      {% include '_post_file.twig' %}
+    {% endif %}
+
+    <div class="post__message message">
+      {{ post['message'] }}
+    </div>
+  </div>
+</div>

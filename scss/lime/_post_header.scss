@@ -1,0 +1,31 @@
+.post-header {
+  &__subject {
+    color: #005a83;
+    font-size: 1.1em;
+    font-weight: 800;
+  }
+  
+  &__name {
+    color: #60debf;
+    font-weight: 800;
+  }
+  
+  &__tripcode {
+    color: #1ab38d;
+    font-weight: 400;
+  }
+
+  &__reflink {
+    color: #717171;
+    font-family: sans-serif;
+    font-size: .85em;
+    margin-bottom: 5px;
+    margin-left: 5px;
+    max-width: 100%;
+    
+    &:hover {
+      color: #32d96f;
+      text-decoration: overline underline;
+    }
+  }
+}

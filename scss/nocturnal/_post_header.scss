@@ -1,0 +1,12 @@
+@import 'vars';
+
+.post-header {
+  &__name-block {
+    padding: 4px;
+    margin-left: -3px;
+  }
+
+  &__reflink {
+    color: $title-text;
+  }
+}

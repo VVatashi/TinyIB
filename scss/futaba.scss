@@ -1,37 +1,7 @@
-@import 'futaba/vars';
-
 @import 'futaba/base';
-@import 'futaba/reply';
+@import 'futaba/de';
+@import 'futaba/footer';
+@import 'futaba/header';
+@import 'futaba/post_header';
+@import 'futaba/post';
 @import 'futaba/postform';
-
-.footer {
-  font-family: serif;
-  font-size: .85em;
-}
-
-.header {
-  &__logo { 
-    clear: both;
-    color: $text-color;
-    font-size: 2em;
-    text-align: center;
-    width: 100%;
-  }
-}
-
-.post-ref {
-  &__link {
-    &:hover {
-      font-weight: bold;
-    }
-  }
-}
-
-// Styles for Dollchan Extension tools comptability
-
-.de-menu,
-.de-popup,
-.de-cfg-body {
-  background: $post-bg-color;
-  color: $text-color;
-}

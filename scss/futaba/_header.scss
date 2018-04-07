@@ -1,0 +1,11 @@
+@import 'vars';
+
+.header {
+  &__logo { 
+    clear: both;
+    color: $text-color;
+    font-size: 2em;
+    text-align: center;
+    width: 100%;
+  }
+}

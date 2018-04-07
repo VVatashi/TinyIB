@@ -1,30 +1,7 @@
-@import 'burichan/vars';
-
 @import 'burichan/base';
-@import 'burichan/reply';
+@import 'burichan/de';
+@import 'burichan/footer';
+@import 'burichan/header';
+@import 'burichan/post_header';
+@import 'burichan/post';
 @import 'burichan/postform';
-
-.footer {
-  font-family: sans-serif;
-  font-size: .7em;
-}
-
-.header {
-  &__logo {
-    background: inherit;
-    clear: both;
-    color: #af0a0f;
-    font-size: 1.7em;
-    text-align: center;
-    width: 100%;
-  }
-}
-
-// Styles for Dollchan Extension tools comptability
-
-.de-menu,
-.de-popup,
-.de-cfg-body {
-  background: $post-bg-color;
-  color: $text-color;
-}

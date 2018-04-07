@@ -507,8 +507,8 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
                     $is_thread = $post['parent'] == TINYIB_NEWTHREAD;
                     $posts = $is_thread ? $post_repository->postsInThreadByID($post['id']) : array($post);
 
-                    $data['posts'] = array_map(function ($post) {
-                        $post['rendered'] = buildPost($post, TINYIB_INDEXPAGE);
+                    $data['posts'] = array_map(function ($post) use ($renderer) {
+                        $post['rendered'] = $renderer->renderPost($post, TINYIB_INDEXPAGE);
                         return $post;
                     }, $posts);
 
@@ -564,14 +564,14 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
             $data['info'] = $threads . ' ' . plural('thread', $threads) . ', ' . $bans . ' ' . plural('ban', $bans);
 
             if (TINYIB_REQMOD === 'files' || TINYIB_REQMOD === 'all') {
-                $data['reqmod_posts'] = array_map(function ($post) {
-                    $post['rendered'] = buildPost($post, TINYIB_INDEXPAGE);
+                $data['reqmod_posts'] = array_map(function ($post) use ($renderer) {
+                    $post['rendered'] = $renderer->renderPost($post, TINYIB_INDEXPAGE);
                     return $post;
                 }, $post_repository->latestPosts(false));
             }
 
-            $data['posts'] = array_map(function ($post) {
-                $post['rendered'] = buildPost($post, TINYIB_INDEXPAGE);
+            $data['posts'] = array_map(function ($post) use ($renderer) {
+                $post['rendered'] = $renderer->renderPost($post, TINYIB_INDEXPAGE);
                 return $post;
             }, $post_repository->latestPosts(true));
 

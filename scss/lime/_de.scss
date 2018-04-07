@@ -1,0 +1,17 @@
+.de-menu,
+.de-popup,
+.de-cfg-body {
+  background: #424242;
+  color: inherit;
+}
+
+.de-post-btns {
+  color: inherit;
+  margin-left: 4px;
+}
+
+.de-post-counter {
+  &::after {
+    color: #717171 !important;
+  }
+}

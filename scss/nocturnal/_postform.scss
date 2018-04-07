@@ -1,0 +1,9 @@
+@import 'vars';
+
+.postform {
+  color: $main-text;
+
+  &__rules {
+    display: none;
+  }
+}

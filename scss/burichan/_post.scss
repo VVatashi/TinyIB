@@ -1,6 +1,6 @@
 @import 'burichan/vars';
 
-.reply {
+.post {
   color: $text-color;
   font-family: serif;
 
@@ -19,8 +19,4 @@
     font-size: 1em;
     font-weight: 800;
   }
-}
-
-.postername {
-  font-size: .85em;
 }
