@@ -11,8 +11,10 @@
         {% include '_header.twig' %}
       </header>
 
-      {% block body %}
-      {% endblock %}
+      <main class="layout__content content">
+        {% block body %}
+        {% endblock %}
+      </main>
 
       <footer class="layout__footer footer">
         {% include '_footer.twig' %}

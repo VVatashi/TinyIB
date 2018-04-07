@@ -4,7 +4,7 @@ $link-color: #1de9b6;
 @import 'lime/reply';
 @import 'lime/postform';
 
-.layout {
+.content {
   &__userdelete {
     display: none;
   }
@@ -48,7 +48,7 @@ $link-color: #1de9b6;
 
 .de-menu,
 .de-popup,
-.de-win-body {
+.de-cfg-body {
   background: #424242;
   color: inherit;
 }

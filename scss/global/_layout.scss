@@ -1,46 +1,6 @@
-@import '../utils';
-
 .layout {
   &__header {
     margin-bottom: 1em;
-  }
-
-  &__replymode,
-  &__manageinfo {
-    color: #fff;
-    padding: 2px;
-    text-align: center;
-    width: 100%;
-  }
-
-  &__replymode {
-    background: #e04000;
-  }
-
-  &__manageinfo {
-    background: #00b930;
-  }
-
-  &__login,
-  &__postarea {
-    text-align: center;
-  }
-
-  &__postform {
-    margin: 0 auto;
-    text-align: left;
-  }
-
-  &__reply {
-    @include clearfix;
-
-    margin: 2px 0;
-  }
-
-  &__userdelete {
-    float: right;
-    text-align: center;
-    white-space: nowrap;
   }
 
   &__footer {

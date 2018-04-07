@@ -88,7 +88,7 @@ function buildPost($post, $res)
 
     if ($is_embed) {
         $expandhtml = $post['file'];
-    } else if (substr($post['file'], -5) == '.webm') {
+    } elseif (substr($post['file'], -5) == '.webm') {
         $dimensions = 'width="500" height="50"';
         if ($post['image_width'] > 0 && $post['image_height'] > 0) {
             $dimensions = 'width="' . $post['image_width'] . '" height="' . $post['image_height'] . '"';
@@ -98,21 +98,21 @@ function buildPost($post, $res)
     <source src="$direct_link"></source>
 </video>
 EOF;
-    } else if (in_array(substr($post['file'], -4), array('.jpg', '.png', '.gif'))) {
+    } elseif (in_array(substr($post['file'], -4), array('.jpg', '.png', '.gif'))) {
         $expandhtml = "<a href=\"$direct_link\" onclick=\"return expandFile(event, '${post['id']}');\"><img src=\"" . ($res == TINYIB_RESPAGE ? "../" : "") . "src/${post["file"]}\" width=\"${post["image_width"]}\" style=\"max-width: 100%;height: auto;\"></a>";
     }
 
     $expand = $is_embed || in_array(substr($post['file'], -4), array('.jpg', '.png', '.gif', 'webm'));
     $expandhtml = rawurlencode($expandhtml);
 
-    return $renderer->render($is_thread ? '_thread.twig' : '_reply.twig', array(
+    return $renderer->render($is_thread ? '_thread.twig' : '_reply.twig', [
         'direct_link' => $direct_link,
         'expand' => $expand,
         'expandhtml' => $expandhtml,
         'is_embed' => $is_embed,
         'reply' => $post,
         'res' => $res,
-    ));
+    ]);
 }
 
 function buildPage($htmlposts, $parent, $pages = 0, $thispage = 0)
@@ -126,7 +126,7 @@ function buildPage($htmlposts, $parent, $pages = 0, $thispage = 0)
         || isset($tinyib_uploads['image/png'])
         || isset($tinyib_uploads['image/gif']);
 
-    return $renderer->render('page.twig', array(
+    return $renderer->render($parent === 0 ? 'board.twig' : 'thread.twig', [
         'filetypes' => supportedFileTypes(),
         'posts' => $htmlposts,
         'pages' => max($pages, 0),
@@ -134,7 +134,7 @@ function buildPage($htmlposts, $parent, $pages = 0, $thispage = 0)
         'parent' => $parent,
         'thumbnails' => $thumbnails,
         'unique_posts' => $post_repository->uniquePosts(),
-    ));
+    ]);
 }
 
 function rebuildIndexes()
@@ -188,115 +188,4 @@ function rebuildThread($id)
     $htmlposts .= "\n<hr>";
 
     writePage('res/' . $id . '.html', fixLinksInRes(buildPage($htmlposts, $id)));
-}
-
-function managePage($text, $onload = '')
-{
-    global $renderer, $isadmin, $loggedin, $returnlink;
-
-    return $renderer->render('manage.twig', array(
-        'body_attribs' => $onload,
-        'is_admin' => $isadmin,
-        'is_installed_via_git' => installedViaGit(),
-        'is_logged_in' => $loggedin,
-        'is_manage_page' => true,
-        'return_link' => $returnlink,
-        'text' => $text,
-    ));
-}
-
-function manageOnLoad($page)
-{
-    switch ($page) {
-        case 'login':
-            return ' onload="document.tinyib.managepassword.focus();"';
-        case 'moderate':
-            return ' onload="document.tinyib.moderate.focus();"';
-        case 'rawpost':
-            return ' onload="document.tinyib.message.focus();"';
-        case 'bans':
-            return ' onload="document.tinyib.ip.focus();"';
-    }
-}
-
-function manageLogInForm()
-{
-    global $renderer;
-    return $renderer->render('_manage_log_in_form.twig');
-}
-
-function manageBanForm()
-{
-    global $renderer;
-    return $renderer->render('_manage_ban_form.twig', array('ip' => $_GET['bans']));
-}
-
-function manageBansTable()
-{
-    global $renderer, $ban_repository;
-    return $renderer->render('_manage_bans_table.twig', array('bans' => $ban_repository->allBans()));
-}
-
-function manageModeratePostForm()
-{
-    global $renderer;
-    return $renderer->render('_manage_moderate_post_form.twig');
-}
-
-function manageRawPostForm()
-{
-    global $renderer;
-    return $renderer->render('_manage_raw_post_form.twig');
-}
-
-function manageModeratePost($post)
-{
-    global $renderer, $ban_repository, $post_repository, $isadmin;
-
-    $data = array(
-        'has_ban' => $ban_repository->banByIP($post['ip']),
-        'is_admin' => $isadmin,
-        'post' => $post,
-    );
-
-    $is_thread = $post['parent'] == TINYIB_NEWTHREAD;
-    $posts = $is_thread ? $post_repository->postsInThreadByID($post['id']) : array($post);
-
-    $data['posts'] = array_map(function ($post) {
-        $post['rendered'] = buildPost($post, TINYIB_INDEXPAGE);
-        return $post;
-    }, $posts);
-
-    return $renderer->render('_manage_moderate_post.twig', $data);
-}
-
-function manageStatus()
-{
-    global $renderer, $ban_repository, $post_repository, $isadmin;
-    $threads = $post_repository->countThreads();
-    $bans = count($ban_repository->allBans());
-
-    $data = array(
-        'info' => $threads . ' ' . plural('thread', $threads) . ', ' . $bans . ' ' . plural('ban', $bans),
-    );
-
-    if (TINYIB_REQMOD == 'files' || TINYIB_REQMOD == 'all') {
-        $data['reqmod_posts'] = array_map(function ($post) {
-            $post['rendered'] = buildPost($post, TINYIB_INDEXPAGE);
-            return $post;
-        }, $post_repository->latestPosts(false));
-    }
-
-    $data['posts'] = array_map(function ($post) {
-        $post['rendered'] = buildPost($post, TINYIB_INDEXPAGE);
-        return $post;
-    }, $post_repository->latestPosts(true));
-
-    return $renderer->render('_manage_status.twig', $data);
-}
-
-function manageInfo($text)
-{
-    global $renderer;
-    return $renderer->render('_manage_info.twig', array('text' => $text));
 }

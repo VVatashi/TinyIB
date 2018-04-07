@@ -1,0 +1,22 @@
+{% extends '_html.twig' %}
+
+{% block body %}
+  &#91;<a href="../">Return</a>&#93;
+  <div class="content__replymode replymode">Posting mode: Reply</div>
+
+  <form id="delform" action="imgboard.php?delete" method="post">
+    <input type="hidden" name="board" value="{{ constant('TINYIB_BOARD') }}" />
+
+    {{ posts }}
+
+    <div class="content__userdelete">
+      Delete Post
+      <input type="password" name="password" id="deletepostpassword" size="8" placeholder="Password" />&nbsp;
+      <input name="deletepost" value="Delete" type="submit" />
+    </div>
+  </form>
+
+  <div class="content__postarea">
+    {% include '_post_form.twig' %}
+  </div>
+{% endblock %}

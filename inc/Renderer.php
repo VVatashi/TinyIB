@@ -26,7 +26,7 @@ class Renderer
      * @param string $template
      * @param array $variables
      */
-    public function render($template, $variables)
+    public function render($template, $variables = [])
     {
         return $this->twig->render($template, $variables);
     }

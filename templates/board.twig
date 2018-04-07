@@ -1,24 +1,19 @@
 {% extends '_html.twig' %}
 
 {% block body %}
-  {% if parent != constant('TINYIB_NEWTHREAD') %}
-    &#91;<a href="../">Return</a>&#93;
-    <div class="layout__replymode replymode">Posting mode: Reply</div>
-  {% endif %}
-
   <form id="delform" action="imgboard.php?delete" method="post">
     <input type="hidden" name="board" value="{{ constant('TINYIB_BOARD') }}" />
 
     {{ posts }}
 
-    <div class="layout__userdelete">
+    <div class="content__userdelete">
       Delete Post
       <input type="password" name="password" id="deletepostpassword" size="8" placeholder="Password" />&nbsp;
       <input name="deletepost" value="Delete" type="submit" />
     </div>
   </form>
 
-  <div class="layout__postarea">
+  <div class="content__postarea">
     {% include '_post_form.twig' %}
   </div>
 

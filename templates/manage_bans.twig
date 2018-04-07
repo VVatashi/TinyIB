@@ -1,0 +1,67 @@
+{% extends '_manage.twig' %}
+
+{% macro expire(title, value) %}
+  <a href="#" onclick="document.tinyib.expire.value='{{ value }}';return false;">{{ title }}</a>
+{% endmacro %}
+
+{% import _self as self %}
+
+{% set body_attribs = 'onload="document.tinyib.ip.focus();"' %}
+
+{% block manage %}
+  {{ text}}
+
+  <form id="tinyib" name="tinyib" method="post" action="?manage&bans">
+    <fieldset>
+      <legend>Ban an IP address</legend>
+
+      <p>
+        <label for="ip">IP Address:</label>
+        <input type="text" name="ip" id="ip" value="{{ ip }}" />
+        <input type="submit" value="Submit" class="managebutton" />
+      </p>
+
+      <p>
+        <label for="expire">Expire(sec):</label>
+        <input type="text" name="expire" id="expire" value="0" />&nbsp;&nbsp;
+        <small>
+          {{ self.expire('1hr',   '3600') }}&nbsp;
+          {{ self.expire('1d',    '86400') }}&nbsp;
+          {{ self.expire('2d',    '172800') }}&nbsp;
+          {{ self.expire('1w',    '604800') }}&nbsp;
+          {{ self.expire('2w',    '1209600') }}&nbsp;
+          {{ self.expire('30d',   '2592000') }}&nbsp;
+          {{ self.expire('never', '0') }}
+        </small>
+      </p>
+
+      <p>
+        <label for="reason">Reason:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+        <input type="text" name="reason" id="reason" />&nbsp;&nbsp;
+        <small>optional</small>
+      </p>
+    </fieldset>
+  </form>
+
+  {% if bans %}
+    <table border="1">
+      <tr>
+        <th>IP Address</th>
+        <th>Set At</th>
+        <th>Expires</th>
+        <th>Reason Provided</th>
+        <th>&nbsp;</th>
+      </tr>
+
+      {% for ban in bans %}
+        <tr>
+          <td>{{ ban['ip'] }}</td>
+          <td>{{ ban['timestamp']|date }}</td>
+          <td>{{ ban['expire'] > 0 ? ban['expire']|date : 'Does not expire' }}</td>
+          <td>{{ ban['reason'] ? ban['reason']|e : '&nbsp;' }}</td>
+          <td><a href="?manage&bans&lift={{ ban['id'] }}">lift</a></td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+{% endblock %}
