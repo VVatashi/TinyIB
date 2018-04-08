@@ -1,0 +1,23 @@
+@import 'vars';
+
+.postform {
+  &__block {
+    background: $post-bg-color;
+    border: 1px solid #666;
+    color: #ccc;
+    font-weight: 800;
+    padding-left: 3px;
+    padding-right: 3px;
+    text-align: left;
+  }
+
+  &__rules {
+    font-family: sans-serif;
+    font-size: 10px;
+    width: 468px;
+  }
+
+  &__rules-list-item {
+    margin-left: 1em;
+  }
+}

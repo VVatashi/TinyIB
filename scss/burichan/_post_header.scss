@@ -2,4 +2,10 @@
   &__name {
     font-size: .85em;
   }
+
+  &__reflink {
+    &:hover {
+      color: #800000;
+    }
+  }
 }

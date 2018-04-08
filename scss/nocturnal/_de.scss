@@ -1,4 +1,5 @@
 @import 'vars';
+@import '../utils';
 
 .de-link-pref:hover {
   color: $title-text;
@@ -14,8 +15,10 @@
   }
 }
 
+.de-cfg-body,
 .de-menu,
 .de-popup,
-.de-cfg-body {
+.de-pview,
+.de-win > .de-win-body {
   background: $post-bg;
 }

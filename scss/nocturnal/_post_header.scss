@@ -2,11 +2,11 @@
 
 .post-header {
   &__name-block {
-    padding: 4px;
     margin-left: -3px;
+    padding: 4px;
   }
 
   &__reflink {
-    color: $title-text;
+    color: $third-text;
   }
 }

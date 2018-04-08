@@ -1,0 +1,17 @@
+@import 'vars';
+
+.content {
+  &__replymode {
+    background: #aaa;
+    color: $input-bg-color;
+    padding: 2px;
+    text-align: center;
+    width: 100%;
+  }
+
+  &__footer {
+    font-family: serif;
+    font-size: 12px;
+    text-align: center;
+  }
+}

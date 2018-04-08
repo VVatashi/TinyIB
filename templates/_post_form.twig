@@ -72,19 +72,19 @@
         <td colspan="2" class="postform__rules">
           <ul class="postform__rules-list">
             {% if constant('TINYIB_REQMOD') == 'files' or constant('TINYIB_REQMOD') == 'all' %}
-              <li>All posts {{ constant('TINYIB_REQMOD') == 'files' ? ' with a file attached' }} will be moderated before being shown.</li>
+              <li class="postform__rules-list-item">All posts {{ constant('TINYIB_REQMOD') == 'files' ? ' with a file attached' }} will be moderated before being shown.</li>
             {% endif %}
 
             {% if uploads %}
-              <li>{{ filetypes }}</li>
+              <li class="postform__rules-list-item">{{ filetypes }}</li>
             {% endif %}
 
             {% if uploads and constant('TINYIB_MAXKB') > 0 %}
-              <li>Maximum file size allowed is {{ constant('TINYIB_MAXKBDESC') }}.</li>
+              <li class="postform__rules-list-item">Maximum file size allowed is {{ constant('TINYIB_MAXKBDESC') }}.</li>
             {% endif %}
 
             {% if thumbnails %}
-              <li>
+              <li class="postform__rules-list-item">
                 Images greater than
                 {{ constant('TINYIB_MAXWOP') }}x{{ constant('TINYIB_MAXHOP') }}
 
@@ -98,7 +98,7 @@
             {% endif %}
 
             {% if unique_posts > 0 %}
-              <li>Currently {{ unique_posts }} unique user posts.</li>
+              <li class="postform__rules-list-item">Currently {{ unique_posts }} unique user posts.</li>
             {% endif %}
           </ul>
         </td>

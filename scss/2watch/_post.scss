@@ -1,0 +1,29 @@
+@import 'vars';
+@import '../utils';
+
+.post {
+  &__inner {
+    background: $post-bg-color;
+    border-radius: 5px;
+    color: $post-text-color;
+    padding: 5px;
+  }
+
+  &__file-info {
+    margin-left: 0;
+    text-decoration: none;
+
+    @include breakpoint($phone-up) {
+      margin-left: 20px;
+    }
+  }
+
+  &__omitted {
+    color: #707070;
+  }
+
+  .unkfunc {
+    background: inherit;
+    color: #789922;
+  }
+}

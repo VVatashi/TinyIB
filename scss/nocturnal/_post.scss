@@ -2,47 +2,26 @@
 
 .post {
   background: $post-bg;
-  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
   border: 0px;
   border-style: solid;
+  box-shadow: 3px 3px 5px rgba(0, 0, 0, .2);
   box-sizing: border-box;
   color: $main-text;
 
-  &_oppost {
-    margin: 0 auto;
-    min-height: 225px;
-    padding: 10px;
-    padding-bottom: 3px;
-    width: 100%;
-  }
-
   &_reply {
-    margin-bottom: 30px;
-    margin-top: 30px;
-    padding: 10px;
-
-    &:hover {
-      box-shadow: 8px 8px 8px rgba(0, 0, 0, 0.2);
-    }
+    margin-bottom: 10px;
+    margin-top: 10px;
   }
 
   &__inner {
     float: unset;
-  }
-
-  &__subject {
-    color: $main-text;
-  }
-
-  &__name,
-  &__tripcode {
-    color: $secondary-text;
+    padding: 10px;
   }
 
   &__file-info {
-    color: $title-text;
-    margin-top: 0px;
+    color: $third-text;
     margin-left: -3px;
+    margin-top: 0;
     max-width: 440px;
     padding: 4px;
   }
@@ -59,5 +38,9 @@
     min-width: -moz-fit-content;
     min-width: min-content;
     overflow-wrap: break-word;
+  }
+
+  &:hover {
+    box-shadow: 8px 8px 8px rgba(0, 0, 0, 0.2);
   }
 }

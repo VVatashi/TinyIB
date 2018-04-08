@@ -1,0 +1,16 @@
+@import 'vars';
+
+.header {
+  &__admin-bar {
+    clear: both;
+    float: right;
+  }
+
+  &__logo {
+    clear: both;
+    color: $text-color;
+    font-size: 2em;
+    text-align: left;
+    width: 100%;
+  }
+}

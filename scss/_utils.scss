@@ -11,3 +11,20 @@
     display: table;
   }
 }
+
+$phone-up: 600px;
+$tablet-portrait-up: 900px;
+$tablet-landscape-up: 1200px;
+$desktop-up: 1800px;
+
+@mixin breakpoint($min-width) {
+  @media screen and (min-width: $min-width) {
+    @content;
+  }
+}
+
+@mixin breakpoint-max($max-width) {
+  @media screen and (max-width: $max-width - 1) {
+    @content;
+  }
+}
