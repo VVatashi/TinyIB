@@ -1,12 +1,16 @@
 {% macro nameblock(post) %}
-  {% set name = post['name'] ?: 'Anonymous' %}
-
   {% if post['subject'] %}
     <span class="post-header__subject filetitle">{{ post['subject'] }}</span>
   {% endif %}
 
   {% spaceless %}
-    <span class="post-header__name postername">{{ name }}</span>
+    {% if post['name'] %}
+      <span class="post-header__name postername">{{ post['name'] }}</span>
+    {% elseif not post['tripcode'] %}
+      <span class="post-header__name postername">Anonymous</span>
+    {% else %}
+      <span class="post-header__name postername"></span>
+    {% endif %}
 
     {% if post['tripcode'] %}
       <span class="post-header__tripcode postertrip">!{{ post['tripcode'] }}</span>
