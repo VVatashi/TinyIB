@@ -141,4 +141,112 @@ class Renderer
             'res' => $res,
         ]);
     }
+
+    public function supportedFileTypes()
+    {
+        global $tinyib_uploads;
+        if (empty($tinyib_uploads)) {
+            return "";
+        }
+
+        $types_allowed = array_map('strtoupper', array_unique(array_column($tinyib_uploads, 0)));
+        $types_last = array_pop($types_allowed);
+        $types_formatted = $types_allowed
+            ? implode(', ', $types_allowed) . ' and ' . $types_last
+            : $types_last;
+
+        return "Supported file type" . (count($tinyib_uploads) != 1 ? "s are " : " is ") . $types_formatted . ".";
+    }
+
+    public function makeLinksClickable($text)
+    {
+        $text = preg_replace('!(((f|ht)tp(s)?://)[-a-zA-Zа-яА-Я()0-9@:%\!_+.,~#?&;//=]+)!i', '<a href="$1" target="_blank">$1</a>', $text);
+        $text = preg_replace('/\(\<a href\=\"(.*)\)"\ target\=\"\_blank\">(.*)\)\<\/a>/i', '(<a href="$1" target="_blank">$2</a>)', $text);
+        $text = preg_replace('/\<a href\=\"(.*)\."\ target\=\"\_blank\">(.*)\.\<\/a>/i', '<a href="$1" target="_blank">$2</a>.', $text);
+        $text = preg_replace('/\<a href\=\"(.*)\,"\ target\=\"\_blank\">(.*)\,\<\/a>/i', '<a href="$1" target="_blank">$2</a>,', $text);
+    
+        return $text;
+    }
+
+    public function rebuildIndexes()
+    {
+        global $post_repository, $renderer;
+    
+        $page = 0;
+        $i = 0;
+        $posts = [];
+        $threads = $post_repository->allThreads();
+        $pages = ceil(count($threads) / TINYIB_THREADSPERPAGE) - 1;
+    
+        foreach ($threads as $thread) {
+            $replies = $post_repository->postsInThreadByID($thread['id']);
+            $thread['omitted'] = max(0, count($replies) - TINYIB_PREVIEWREPLIES - 1);
+    
+            $replies = array_slice($replies, -TINYIB_PREVIEWREPLIES);
+            array_unshift($replies, $thread);
+    
+            $posts = array_merge($posts, array_map(function ($post) use ($renderer) {
+                return $renderer->preprocessPost($post, TINYIB_INDEXPAGE);
+            }, $replies));
+    
+            if (++$i >= TINYIB_THREADSPERPAGE) {
+                $file = ($page == 0) ? 'index.html' : $page . '.html';
+                $html = $renderer->render('board.twig', [
+                    'filetypes' => $this->supportedFileTypes(),
+                    'posts' => $posts,
+                    'pages' => max($pages, 0),
+                    'this_page' => $page,
+                    'parent' => 0,
+                    'res' => TINYIB_INDEXPAGE,
+                    'thumbnails' => true,
+                    'unique_posts' => $post_repository->uniquePosts(),
+                ]);
+    
+                writePage($file, $html);
+    
+                $page++;
+                $i = 0;
+                $posts = [];
+            }
+        }
+    
+        if ($page == 0 || !empty($posts)) {
+            $file = ($page == 0) ? 'index.html' : $page . '.html';
+            $html = $renderer->render('board.twig', [
+                'filetypes' => $this->supportedFileTypes(),
+                'posts' => $posts,
+                'pages' => max($pages, 0),
+                'this_page' => $page,
+                'parent' => 0,
+                'res' => TINYIB_INDEXPAGE,
+                'thumbnails' => true,
+                'unique_posts' => $post_repository->uniquePosts(),
+            ]);
+    
+            writePage($file, $html);
+        }
+    }
+    
+    /**
+     * @param integer $id
+     */
+    public function rebuildThread($id)
+    {
+        global $post_repository, $renderer;
+    
+        $posts = array_map(function ($post) use ($renderer) {
+            return $renderer->preprocessPost($post, TINYIB_RESPAGE);
+        }, $post_repository->postsInThreadByID($id));
+    
+        $html = $renderer->render('thread.twig', [
+            'filetypes' => $this->supportedFileTypes(),
+            'posts' => $posts,
+            'parent' => $id,
+            'res' => TINYIB_RESPAGE,
+            'thumbnails' => true,
+            'unique_posts' => $post_repository->uniquePosts(),
+        ]);
+    
+        writePage('res/' . $id . '.html', fixLinksInRes($html));
+    }
 }

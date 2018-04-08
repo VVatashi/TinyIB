@@ -4,7 +4,6 @@ html,
 body {
   background-color: $bg-color;
   color: $text-color;
-  font-family: 'Trebuchet MS', Trebuchet, serif;
 }
 
 a {
@@ -16,6 +15,10 @@ a {
     color: $link-active-color;
     text-shadow: $link-active-color 0 0 10px;
   }
+}
+
+hr {
+  background: #fff;
 }
 
 input {

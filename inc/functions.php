@@ -21,8 +21,10 @@ function plural($singular, $count, $plural = 's')
 
 function threadUpdated($id)
 {
-    rebuildThread($id);
-    rebuildIndexes();
+    global $renderer;
+
+    $renderer->rebuildThread($id);
+    $renderer->rebuildIndexes();
 }
 
 function newPost($parent = TINYIB_NEWTHREAD)

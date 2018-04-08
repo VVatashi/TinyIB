@@ -6,6 +6,9 @@
 
 require_once './vendor/autoload.php';
 
+use TinyIB\Repository\PDOBanRepository;
+use TinyIB\Repository\PDOPostRepository;
+
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
 session_start();
@@ -58,11 +61,24 @@ foreach ($writedirs as $dir) {
     }
 }
 
-$includes = array('inc/defines.php', 'inc/functions.php', 'inc/html.php', 'inc/database.php');
+define('TINYIB_NEWTHREAD', '0');
+define('TINYIB_INDEXPAGE', false);
+define('TINYIB_RESPAGE', true);
 
-foreach ($includes as $include) {
-    include $include;
-}
+/** @var \TinyIB\Repository\IBanRepository $ban_repository */
+$ban_repository = new PDOBanRepository(TINYIB_DBBANS);
+
+/** @var \TinyIB\Repository\IPostRepository $post_repository */
+$post_repository = new PDOPostRepository(TINYIB_DBPOSTS);
+
+include 'inc/functions.php';
+
+/** @var \TinyIB\Renderer $renderer */
+$renderer = new \TinyIB\Renderer([
+    'embeds' => $tinyib_uploads,
+    'uploads' => $tinyib_embeds,
+    'manage_link' => basename($_SERVER['PHP_SELF']) . "?manage",
+]);
 
 if (TINYIB_TIMEZONE != '') {
     date_default_timezone_set(TINYIB_TIMEZONE);
@@ -100,7 +116,7 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
         $post['message'] = $_POST['message']; // Treat message as raw HTML
     } else {
         $rawposttext = '';
-        $post['message'] = str_replace("\n", '<br>', makeLinksClickable(colorQuote(postLink(cleanString(rtrim($_POST['message']))))));
+        $post['message'] = str_replace("\n", '<br>', $renderer->makeLinksClickable(colorQuote(postLink(cleanString(rtrim($_POST['message']))))));
 
         if (TINYIB_DICE_ENABLED) {
             $post['message'] = dice($post['message']);
@@ -206,7 +222,7 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
             }
 
             if (empty($file_mime) || !isset($tinyib_uploads[$file_mime])) {
-                fancyDie(supportedFileTypes());
+                fancyDie($renderer->supportedFileTypes());
             }
 
             $file_name = time() . substr(microtime(), 2, 3);
@@ -324,7 +340,7 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 
         print 'Updating thread...<br>';
         if ($post['parent'] != TINYIB_NEWTHREAD) {
-            rebuildThread($post['parent']);
+            $renderer->rebuildThread($post['parent']);
 
             if (strtolower($post['email']) != 'sage') {
                 if (TINYIB_MAXREPLIES == 0 || $post_repository->numRepliesToThreadByID($post['parent']) <= TINYIB_MAXREPLIES) {
@@ -332,11 +348,11 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
                 }
             }
         } else {
-            rebuildThread($post['id']);
+            $renderer->rebuildThread($post['id']);
         }
 
         print 'Updating index...<br>';
-        rebuildIndexes();
+        $renderer->rebuildIndexes();
     }
 // Check if the request is to delete a post and/or its associated image
 } elseif (isset($_GET['delete']) && !isset($_GET['manage'])) {
@@ -394,10 +410,10 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
             $allthreads = $post_repository->allThreads();
 
             foreach ($allthreads as $thread) {
-                rebuildThread($thread['id']);
+                $renderer->rebuildThread($thread['id']);
             }
 
-            rebuildIndexes();
+            $renderer->rebuildIndexes();
 
             $data['text'] = 'Rebuilt board.';
             print $renderer->render('manage_info.twig', $data);
@@ -454,10 +470,10 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 
             if ($post) {
                 $post_repository->deletePostByID($post['id']);
-                rebuildIndexes();
+                $renderer->rebuildIndexes();
 
                 if ($post['parent'] != TINYIB_NEWTHREAD) {
-                    rebuildThread($post['parent']);
+                    $renderer->rebuildThread($post['parent']);
                 }
 
                 $id = $post['id'];
@@ -581,7 +597,7 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
         }
     }
 } elseif (!file_exists('index.html') || $post_repository->countThreads() == 0) {
-    rebuildIndexes();
+    $renderer->rebuildIndexes();
 }
 
 if ($redirect) {

@@ -7,7 +7,15 @@
   <form id="delform" action="imgboard.php?delete" method="post">
     <input type="hidden" name="board" value="{{ constant('TINYIB_BOARD') }}" />
 
-    {{ posts }}
+    {% for post in posts %}
+      {% if post['parent'] == constant('TINYIB_NEWTHREAD') %}
+        {% include '_post_oppost.twig' %}
+      {% else %}
+        {% include '_post.twig' %}
+      {% endif %}
+    {% endfor %}
+
+    <hr />
 
     <div class="content__userdelete">
       Delete Post
