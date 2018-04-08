@@ -1,6 +1,40 @@
 .postform {
   &__block {
+    color: #fff;
     text-align: right;
+  }
+
+  &__markup {
+    margin: 0 0 5px;
+  }
+
+  &__button-markup {
+    background: transparent;
+    border: 1px solid #6f6f6f;
+    border-radius: 0;
+    color: #d0d0d0;
+    font: inherit;
+    font-style: inherit;
+    height: 25px;
+    margin: -2px;
+    min-width: 30px;
+    text-align: center;
+    text-shadow: none;
+    transition: color, text-shadow .2s;
+
+    &:hover {
+      color: #f5f5f5;
+      text-shadow: 0 0 15px #aaa;
+    }
+
+    &_b {
+      border-radius: 4px 0 0 4px;
+      margin-left: 0;
+    }
+
+    &_rp {
+      border-radius: 0 4px 4px 0;
+    }
   }
 
   &__rules {

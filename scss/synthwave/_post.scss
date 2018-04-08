@@ -8,14 +8,41 @@
     border: 2px solid transparent;
     border-image: linear-gradient(to bottom right, #fb99f9 0%, #f632fe 100%);
     border-image-slice: 1;
+    margin: 1px 0 7px 1px;
+    max-width: 1280px;
+    min-width: 450px;
+    padding: 10px;
   }
 
   &__header {
     color: #9a9a9a;
+    text-shadow: none;
+  }
+
+  &__file-info {
+    border-top: 1px solid #505050;
+    content: '';
+    display: block;
+    font-size: 10px;
+    margin-bottom: 1px;
+    margin-left: 0;
+    margin-top: 2px;
+  }
+
+  &__thumb {
+    border: none;
+    margin: 7px 15px 5px 5px;
   }
 
   &__message {
     color: #fff;
+    margin: .5em;
+  }
+
+  .dice {
+    background: none;
+    border-radius: 0;
+    color: green;
   }
 
   .spoiler,

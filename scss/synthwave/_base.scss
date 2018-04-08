@@ -3,6 +3,7 @@ body {
   background: linear-gradient(to top, #1a0f26, #120524);
   background-attachment: fixed;
   color: #ff8fff;
+  line-height: 1.42857143;
 }
 
 a {
@@ -11,12 +12,12 @@ a {
   text-shadow: 0 0 2px rgba(255, 255, 255, .5);
 
   &:hover {
-    color: inherit;
+    color: #ff8fff;
   }
 }
 
 hr {
-  border-color: #ff8fff;
+  border-color: #184b62;
   border-style: solid none none none;
   border-width: 1px;
 }
@@ -33,8 +34,11 @@ input[type='submit'] {
   border: 1px solid #6f6f6f;
   color: #dedede;
   cursor: pointer;
+  height: 23px;
+  margin: 0 10px;
   padding: 0;
   position: relative;
+  width: 90px;
   z-index: 1;
 
   &:hover {

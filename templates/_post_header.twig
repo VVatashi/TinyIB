@@ -29,6 +29,13 @@
   {% else %}
     {{ self.nameblock(post) }}
   {% endif %}
+
+  {% set date_iso = post['timestamp']|date('c') %}
+  {% set date = post['timestamp']|date('l, jS F Y H:i:s') %}
+
+  <time class="post-header__datetime" datetime="{{ date_iso }}" title="{{ date_iso }}">
+    {{ date }}
+  </time>
 </label>
 
 <span class="post-header__reflink-wrapper reflink">
