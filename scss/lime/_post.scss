@@ -1,5 +1,4 @@
 .post {
-  display: block;
   font-family: sans-serif;
 
   &__inner {
@@ -40,9 +39,5 @@
 
   &__omitted {
     color: #666;
-  }
-
-  .unkfunc {
-    color: #64ffda;
   }
 }

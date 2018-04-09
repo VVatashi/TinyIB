@@ -3,14 +3,12 @@
 .layout {
   &__postform {
     background: $header-bg;
-    bottom: 10px;
     border: 1px $header-bg;
     border-color: $post-bg;
-    border-radius: 0px;
-    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
+    border-radius: 0;
+    bottom: 10px;
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, .2);
     padding: 0px;
-    padding-top: 0px;
-    padding-bottom: 0px;
     right: 0%;
     width: 300px;
   }

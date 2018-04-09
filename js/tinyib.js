@@ -64,19 +64,19 @@ function scrollIntoView(el) {
 
 function expandFile(e, id) {
   if (e == undefined || e.which == undefined || e.which == 1) {
-    var thumbfile = qid('thumbfile_' + id);
+    var wrapper = qid('thumbnail-wrapper_' + id);
     var file = qid('file_' + id);
 
-    if (thumbfile.getAttribute('expanded') != 'true') {
+    if (wrapper.getAttribute('expanded') != 'true') {
       var expand = qid('expand_' + id);
 
-      thumbfile.setAttribute('expanded', 'true');
+      wrapper.setAttribute('expanded', 'true');
       file.innerHTML = decodeURIComponent(expand.textContent);
       file.style.visibility = 'hidden';
 
       setTimeout(function (id) {
         return function () {
-          thumbfile.style.display = 'none';
+          wrapper.style.display = 'none';
           file.style.visibility = 'visible';
           file.style.display = '';
           scrollIntoView(file);
@@ -85,8 +85,8 @@ function expandFile(e, id) {
     } else {
       file.style.display = 'none';
       file.innerHTML = '';
-      thumbfile.style.display = '';
-      thumbfile.setAttribute('expanded', 'false');
+      wrapper.style.display = '';
+      wrapper.setAttribute('expanded', 'false');
 
       var thumbnail = qid('thumbnail_' + id);
       scrollIntoView(thumbnail);

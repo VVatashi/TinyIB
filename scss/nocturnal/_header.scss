@@ -3,10 +3,10 @@
 .header {
   &__logo {
     color: $title-text;
-    text-align: center;
     font-family: "Segoe Script", cursive;
     font-size: 48px;
     padding: 0px;
+    text-align: center;
     text-shadow: 3px 3px 3px rgba(0, 0, 0, 0.3);
   }
 }

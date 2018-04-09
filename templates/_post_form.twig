@@ -31,13 +31,13 @@
           <div class="postform__markup">
             <button class="postform__button-markup postform__button-markup_b" type="button" onclick="insertBBCode('b')"><strong>b</strong></button>
             <button class="postform__button-markup postform__button-markup_i" type="button" onclick="insertBBCode('i')"><em>i</em></button>
-            <button class="postform__button-markup postform__button-markup_u" type="button" onclick="insertBBCode('u')"><span style="text-decoration: underline;">u</span></button>
+            <button class="postform__button-markup postform__button-markup_u" type="button" onclick="insertBBCode('u')"><span class="underline">u</span></button>
             <button class="postform__button-markup postform__button-markup_s" type="button" onclick="insertBBCode('s')"><del>s</del></button>
             <button class="postform__button-markup postform__button-markup_sup" type="button" onclick="insertBBCode('sup')"><sup>Sup</sup></button>
             <button class="postform__button-markup postform__button-markup_sub" type="button" onclick="insertBBCode('sub')"><sub>Sub</sub></button>
             <button class="postform__button-markup postform__button-markup_spoiler" type="button" onclick="insertBBCode('spoiler')"><span class="spoiler">Spoiler</span></button>
-            <button class="postform__button-markup postform__button-markup_code" type="button" onclick="insertBBCode('code')"><code style="white-space: pre;">Code</code></button>
-            <button class="postform__button-markup postform__button-markup_rp" type="button" onclick="insertBBCode('rp')"><span class="rp">RP</span></button>
+            <button class="postform__button-markup postform__button-markup_code" type="button" onclick="insertBBCode('code')"><code>Code</code></button>
+            <button class="postform__button-markup postform__button-markup_rp" type="button" onclick="insertBBCode('rp')"><span class="spoiler">RP</span></button>
           </div>
           <textarea id="message" name="message" cols="48" rows="4" accesskey="m"></textarea>
         </td>
@@ -69,7 +69,7 @@
       </tr>
 
       <tr>
-        <td colspan="2" class="postform__rules">
+        <td colspan="2" class="postform__rules rules">
           <ul class="postform__rules-list">
             {% if constant('TINYIB_REQMOD') == 'files' or constant('TINYIB_REQMOD') == 'all' %}
               <li class="postform__rules-list-item">All posts {{ constant('TINYIB_REQMOD') == 'files' ? ' with a file attached' }} will be moderated before being shown.</li>

@@ -7,9 +7,9 @@
     </div>
 
     {% if post['file_type'] %}
-      <span class="post__file-info file-info filesize">
+      <div class="post__file-info file-info filesize">
         {% include '_post_file_info.twig' %}
-      </span>
+      </div>
 
       {% include '_post_file.twig' %}
     {% endif %}

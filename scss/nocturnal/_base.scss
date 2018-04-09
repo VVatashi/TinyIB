@@ -4,7 +4,7 @@ body,
 html {
   background: $alt-bg repeat fixed center center;
   color: $main-text;
-  font-family: "Open Sans", "Segoe UI", sans-serif;
+  font-family: 'Open Sans', 'Segoe UI', sans-serif;
   font-size: 13px;
   font-weight: 600;
   overflow-x: hidden;
@@ -16,28 +16,28 @@ a {
 
   &:hover {
     color: $secondary-text;
-    transition: ease-in-out .2s;
+    transition: color ease-in-out .2s;
   }
 }
 
 img {
-  opacity: 0.6;
-  transition: 0.15s ease-in-out;
+  opacity: .6;
+  transition: opacity .15s ease-in-out;
 
   &:hover {
-    opacity: 1.0;
-    transition: 0.3s ease-in-out;
+    opacity: 1;
+    transition: opacity .3s ease-in-out;
   }
 }
 
 img.de-fullimg {
-  opacity: 1.0;
+  opacity: 1;
 }
 
 hr {
+  border: 0;
   margin-top: 0px;
   padding-top: 0px;
-  border: 0;
 }
 
 code {
@@ -60,6 +60,6 @@ textarea {
 }
 
 form {
-  max-width: 1100px;
   margin: 0 auto;
+  max-width: 1100px;
 }

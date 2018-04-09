@@ -2,6 +2,7 @@ html,
 body {
   font-family: 'Open Sans', sans-serif;
   font-size: 14px;
+  line-height: 1.4;
 }
 
 body {
@@ -38,6 +39,10 @@ ul {
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+code {
+  overflow: auto;
 }
 
 sub,

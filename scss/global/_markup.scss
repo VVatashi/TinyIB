@@ -1,0 +1,28 @@
+.dice {
+  color: #228854;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: .85em;
+  font-weight: 600;
+}
+
+.moderator {
+  color: #f00;
+}
+
+.spoiler,
+.rp {
+  background-color: #000;
+  color: #000;
+
+  &:hover {
+    color: #fff;
+  }
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.unkfunc {
+  color: #789922;
+}

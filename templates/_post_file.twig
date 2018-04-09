@@ -7,12 +7,12 @@
   {% set direct_link = url_prefix ~ 'src/' ~ post['file'] %}
 {% endif %}
 
-<div id="thumbfile_{{ post['id'] }}">
+<div class="post__thumbnail-wrapper" id="thumbnail-wrapper_{{ post['id'] }}">
   {% if post['thumb_width'] > 0 and post['thumb_height'] > 0 %}
-    <a href="{{ direct_link }}" target="_blank"
+    <a class="post__thumbnail-link" href="{{ direct_link }}" target="_blank"
       {% if is_embed or post['file'] %}onclick="return expandFile(event, '{{ post['id'] }}');" {% endif %}>
 	    <img src="thumb/{{ post['thumb'] }}" alt="{{ post['id'] }}"
-        class="post__thumb" id="thumbnail_{{ post['id'] }}"
+        class="post__thumbnail" id="thumbnail_{{ post['id'] }}"
         width="{{ post['thumb_width'] }}" height="{{ post['thumb_height'] }}" />
     </a>
   {% endif %}

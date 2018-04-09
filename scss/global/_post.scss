@@ -1,6 +1,7 @@
 .post {
   &__inner {
     float: left;
+    overflow: hidden;
   }
 
   &__file-info {
@@ -12,34 +13,9 @@
     margin: 1em 25px 5px;
   }
 
-  &__thumb {
+  &__thumbnail {
     border: 0;
     float: left;
     margin: 4px 20px;
-  }
-
-  .dice {
-    color: #228854;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: .85em;
-    font-weight: 600;
-  }
-
-  .moderator {
-    color: #f00;
-  }
-
-  .spoiler,
-  .rp {
-    background-color: #000;
-    color: #000;
-
-    &:hover {
-      color: #fff;
-    }
-  }
-
-  .unkfunc {
-    color: #789922;
   }
 }

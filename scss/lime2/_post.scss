@@ -6,11 +6,15 @@
     padding: 10px;
   }
 
-  &__thumb {
+  &__file-info {
+    margin: 0;
+  }
+
+  &__thumbnail {
     padding-right: 10px;
   }
 
-  &__thumb,
+  &__thumbnail,
   &__header,
   &__message {
     margin: 0;
@@ -19,14 +23,5 @@
   &__message {
     color: $post-text-color;
     margin-bottom: 10px
-  }
-
-  .rp {
-    background-color: transparent;
-    color: pink;
-  }
-
-  .unkfunc {
-    color: #64FFDA;
   }
 }

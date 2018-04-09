@@ -1,0 +1,19 @@
+.dice {
+  background: none;
+  border-radius: 0;
+  color: green;
+}
+
+.spoiler,
+.rp {
+  background-color: #6f6f6f;
+  color: #6f6f6f;
+
+  &:hover {
+    color: inherit;
+  }
+}
+
+.unkfunc {
+  color: #0ff;
+}

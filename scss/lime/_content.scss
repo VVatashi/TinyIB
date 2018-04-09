@@ -1,4 +1,8 @@
 .content {
+  &__post {
+    display: block;
+  }
+
   &__userdelete {
     display: none;
   }
