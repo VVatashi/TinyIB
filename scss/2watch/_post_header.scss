@@ -19,6 +19,8 @@
   }
 
   &__reflink {
+    color: inherit;
+
     &:hover {
       font-weight: bold;
     }

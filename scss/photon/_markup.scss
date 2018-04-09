@@ -1,0 +1,13 @@
+.spoiler,
+.rp {
+  background: #bbb;
+  color: #bbb;
+
+  &:hover {
+    color: #333;
+  }
+}
+
+.unkfunc {
+  color: #789922;
+}
