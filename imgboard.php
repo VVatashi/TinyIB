@@ -6,6 +6,8 @@
 
 require_once './vendor/autoload.php';
 
+use TinyIB\Controller;
+use TinyIB\Renderer;
 use TinyIB\Repository\PDOBanRepository;
 use TinyIB\Repository\PDOPostRepository;
 
@@ -25,6 +27,7 @@ if (get_magic_quotes_gpc()) {
     foreach ($_GET as $key => $val) {
         $_GET[$key] = stripslashes($val);
     }
+
     foreach ($_POST as $key => $val) {
         $_POST[$key] = stripslashes($val);
     }
@@ -42,7 +45,7 @@ if (!file_exists('settings.php')) {
     fancyDie('Please copy the file settings.default.php to settings.php');
 }
 
-require 'settings.php';
+require_once 'settings.php';
 
 if (TINYIB_TRIPSEED == '' || TINYIB_ADMINPASS == '') {
     fancyDie('TINYIB_TRIPSEED and TINYIB_ADMINPASS must be configured.');
@@ -73,18 +76,19 @@ $post_repository = new PDOPostRepository(TINYIB_DBPOSTS);
 
 include 'inc/functions.php';
 
-/** @var \TinyIB\Renderer $renderer */
-$renderer = new \TinyIB\Renderer([
+/** @var \TinyIB\IRenderer $renderer */
+$renderer = new Renderer($post_repository, [
     'embeds' => $tinyib_uploads,
     'uploads' => $tinyib_embeds,
     'manage_link' => basename($_SERVER['PHP_SELF']) . "?manage",
 ]);
 
+/** @var \TinyIB\Controller $controller */
+$controller = new Controller($ban_repository, $post_repository, $renderer);
+
 if (TINYIB_TIMEZONE != '') {
     date_default_timezone_set(TINYIB_TIMEZONE);
 }
-
-global $ban_repository, $post_repository;
 
 $redirect = true;
 // Check if the request is to make a post
@@ -144,9 +148,9 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 
         if ($file_mime == "image/jpeg") {
             $post['thumb'] = $temp_file . '.jpg';
-        } else if ($file_mime == "image/gif") {
+        } elseif ($file_mime == "image/gif") {
             $post['thumb'] = $temp_file . '.gif';
-        } else if ($file_mime == "image/png") {
+        } elseif ($file_mime == "image/png") {
             $post['thumb'] = $temp_file . '.png';
         } else {
             fancyDie("Error while processing audio/video.");
@@ -284,7 +288,7 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
                 if ($file_mime == "application/x-shockwave-flash") {
                     addVideoOverlay("thumb/" . $post['thumb']);
                 }
-            } else if (in_array($file_mime, array('image/jpeg', 'image/pjpeg', 'image/png', 'image/gif'))) {
+            } elseif (in_array($file_mime, array('image/jpeg', 'image/pjpeg', 'image/png', 'image/gif'))) {
                 $post['thumb'] = $file_name . "s." . $tinyib_uploads[$file_mime][0];
                 list($thumb_maxwidth, $thumb_maxheight) = thumbnailDimensions($post);
 
@@ -356,37 +360,11 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
     }
 // Check if the request is to delete a post and/or its associated image
 } elseif (isset($_GET['delete']) && !isset($_GET['manage'])) {
-    if (!isset($_POST['delete'])) {
-        fancyDie('Tick the box next to a post and click "Delete" to delete it.');
-    }
-
-    if (TINYIB_DBMIGRATE) {
-        fancyDie('Post deletion is currently disabled.<br>Please try again in a few moments.');
-    }
-
-    $post = $post_repository->postByID($_POST['delete']);
-    if ($post) {
-        list($loggedin, $isadmin) = manageCheckLogIn();
-
-        if ($loggedin && $_POST['password'] == '') {
-            // Redirect to post moderation page
-            print '--&gt; --&gt; --&gt;<meta http-equiv="refresh" content="0;url=' . basename($_SERVER['PHP_SELF']) . '?manage&moderate=' . $_POST['delete'] . '">';
-        } elseif ($post['password'] != '' && md5(md5($_POST['password'])) == $post['password']) {
-            $post_repository->deletePostByID($post['id']);
-            if ($post['parent'] == TINYIB_NEWTHREAD) {
-                threadUpdated($post['id']);
-            } else {
-                threadUpdated($post['parent']);
-            }
-            fancyDie('Post deleted.');
-        } else {
-            fancyDie('Invalid password.');
-        }
-    } else {
-        fancyDie('Sorry, an invalid post identifier was sent.  Please go back, refresh the page, and try again.');
-    }
-
-    $redirect = false;
+    $id = isset($_POST['delete']) ? $_POST['delete'] : null;
+    $password = isset($_POST['password']) ? $_POST['password'] : null;
+    $response = $controller->deletePost($id, $password);
+    $response->send();
+    exit;
 // Check if the request is to access the management area
 } elseif (isset($_GET['manage'])) {
     $navbar = '&nbsp;';

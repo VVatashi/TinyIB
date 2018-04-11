@@ -2,13 +2,22 @@
 
 namespace TinyIB;
 
-class Renderer
+class Renderer implements IRenderer
 {
+    /** @var \TinyIB\Repository\IPostRepository $post_repository */
+    protected $post_repository;
+
     /** @var string $twig */
     protected $twig;
 
-    public function __construct($variables)
+    /**
+     * @param \TinyIB\Repository\IPostRepository $post_repository
+     * @param array $variables
+     */
+    public function __construct($post_repository, $variables)
     {
+        $this->post_repository = $post_repository;
+
         $loader = new \Twig_Loader_Filesystem('./templates');
 
         $this->twig = new \Twig_Environment($loader, array(
@@ -23,8 +32,7 @@ class Renderer
     }
 
     /**
-     * @param string $template
-     * @param array $variables
+     * {@inheritDoc}
      */
     public function render($template, $variables = [])
     {
@@ -164,34 +172,32 @@ class Renderer
         $text = preg_replace('/\(\<a href\=\"(.*)\)"\ target\=\"\_blank\">(.*)\)\<\/a>/i', '(<a href="$1" target="_blank">$2</a>)', $text);
         $text = preg_replace('/\<a href\=\"(.*)\."\ target\=\"\_blank\">(.*)\.\<\/a>/i', '<a href="$1" target="_blank">$2</a>.', $text);
         $text = preg_replace('/\<a href\=\"(.*)\,"\ target\=\"\_blank\">(.*)\,\<\/a>/i', '<a href="$1" target="_blank">$2</a>,', $text);
-    
+
         return $text;
     }
 
     public function rebuildIndexes()
     {
-        global $post_repository, $renderer;
-    
         $page = 0;
         $i = 0;
         $posts = [];
-        $threads = $post_repository->allThreads();
+        $threads = $this->post_repository->allThreads();
         $pages = ceil(count($threads) / TINYIB_THREADSPERPAGE) - 1;
-    
+
         foreach ($threads as $thread) {
-            $replies = $post_repository->postsInThreadByID($thread['id']);
+            $replies = $this->post_repository->postsInThreadByID($thread['id']);
             $thread['omitted'] = max(0, count($replies) - TINYIB_PREVIEWREPLIES - 1);
-    
+
             $replies = array_slice($replies, -TINYIB_PREVIEWREPLIES);
             array_unshift($replies, $thread);
-    
-            $posts = array_merge($posts, array_map(function ($post) use ($renderer) {
-                return $renderer->preprocessPost($post, TINYIB_INDEXPAGE);
+
+            $posts = array_merge($posts, array_map(function ($post) {
+                return $this->preprocessPost($post, TINYIB_INDEXPAGE);
             }, $replies));
-    
+
             if (++$i >= TINYIB_THREADSPERPAGE) {
                 $file = ($page == 0) ? 'index.html' : $page . '.html';
-                $html = $renderer->render('board.twig', [
+                $html = $this->render('board.twig', [
                     'filetypes' => $this->supportedFileTypes(),
                     'posts' => $posts,
                     'pages' => max($pages, 0),
@@ -199,20 +205,20 @@ class Renderer
                     'parent' => 0,
                     'res' => TINYIB_INDEXPAGE,
                     'thumbnails' => true,
-                    'unique_posts' => $post_repository->uniquePosts(),
+                    'unique_posts' => $this->post_repository->uniquePosts(),
                 ]);
-    
+
                 writePage($file, $html);
-    
+
                 $page++;
                 $i = 0;
                 $posts = [];
             }
         }
-    
+
         if ($page == 0 || !empty($posts)) {
             $file = ($page == 0) ? 'index.html' : $page . '.html';
-            $html = $renderer->render('board.twig', [
+            $html = $this->render('board.twig', [
                 'filetypes' => $this->supportedFileTypes(),
                 'posts' => $posts,
                 'pages' => max($pages, 0),
@@ -220,33 +226,31 @@ class Renderer
                 'parent' => 0,
                 'res' => TINYIB_INDEXPAGE,
                 'thumbnails' => true,
-                'unique_posts' => $post_repository->uniquePosts(),
+                'unique_posts' => $this->post_repository->uniquePosts(),
             ]);
-    
+
             writePage($file, $html);
         }
     }
-    
+
     /**
      * @param integer $id
      */
     public function rebuildThread($id)
     {
-        global $post_repository, $renderer;
-    
-        $posts = array_map(function ($post) use ($renderer) {
-            return $renderer->preprocessPost($post, TINYIB_RESPAGE);
-        }, $post_repository->postsInThreadByID($id));
-    
-        $html = $renderer->render('thread.twig', [
+        $posts = array_map(function ($post) {
+            return $this->preprocessPost($post, TINYIB_RESPAGE);
+        }, $this->post_repository->postsInThreadByID($id));
+
+        $html = $this->render('thread.twig', [
             'filetypes' => $this->supportedFileTypes(),
             'posts' => $posts,
             'parent' => $id,
             'res' => TINYIB_RESPAGE,
             'thumbnails' => true,
-            'unique_posts' => $post_repository->uniquePosts(),
+            'unique_posts' => $this->post_repository->uniquePosts(),
         ]);
-    
+
         writePage('res/' . $id . '.html', fixLinksInRes($html));
     }
 }
