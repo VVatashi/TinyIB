@@ -1,6 +1,6 @@
 <?php
 
-namespace TinyIB;
+namespace TinyIB\Renderer;
 
 class Renderer implements IRenderer
 {
@@ -104,10 +104,7 @@ class Renderer implements IRenderer
     }
 
     /**
-     * @param array $post
-     * @param boolean $res
-     *
-     * @return array
+     * {@inheritDoc}
      */
     public function preprocessPost($post, $res)
     {
@@ -134,10 +131,7 @@ class Renderer implements IRenderer
     }
 
     /**
-     * @param array $post
-     * @param boolean $res
-     *
-     * @return string
+     * {@inheritDoc}
      */
     public function renderPost($post, $res)
     {
@@ -176,6 +170,24 @@ class Renderer implements IRenderer
         return $text;
     }
 
+    protected function writePage($filename, $contents)
+    {
+        $tempfile = tempnam('res/', TINYIB_BOARD . 'tmp'); /* Create the temporary file */
+        $fp = fopen($tempfile, 'w');
+        fwrite($fp, $contents);
+        fclose($fp);
+        /* If we aren't able to use the rename function, try the alternate method */
+        if (!@rename($tempfile, $filename)) {
+            copy($tempfile, $filename);
+            unlink($tempfile);
+        }
+
+        chmod($filename, 0664); /* it was created 0600 */
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function rebuildIndexes()
     {
         $page = 0;
@@ -208,7 +220,7 @@ class Renderer implements IRenderer
                     'unique_posts' => $this->post_repository->uniquePosts(),
                 ]);
 
-                writePage($file, $html);
+                $this->writePage($file, $html);
 
                 $page++;
                 $i = 0;
@@ -229,12 +241,12 @@ class Renderer implements IRenderer
                 'unique_posts' => $this->post_repository->uniquePosts(),
             ]);
 
-            writePage($file, $html);
+            $this->writePage($file, $html);
         }
     }
 
     /**
-     * @param integer $id
+     * {@inheritDoc}
      */
     public function rebuildThread($id)
     {
@@ -251,6 +263,6 @@ class Renderer implements IRenderer
             'unique_posts' => $this->post_repository->uniquePosts(),
         ]);
 
-        writePage('res/' . $id . '.html', fixLinksInRes($html));
+        $this->writePage('res/' . $id . '.html', fixLinksInRes($html));
     }
 }

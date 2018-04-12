@@ -19,14 +19,6 @@ function plural($singular, $count, $plural = 's')
     return ($count == 1 ? $singular : $plural);
 }
 
-function threadUpdated($id)
-{
-    global $renderer;
-
-    $renderer->rebuildThread($id);
-    $renderer->rebuildIndexes();
-}
-
 function newPost($parent = TINYIB_NEWTHREAD)
 {
     return array(
@@ -141,21 +133,6 @@ function nameBlock($name, $tripcode, $email, $timestamp, $rawposttext)
     return $output . $rawposttext . ' ' . date('y/m/d(D)H:i:s', $timestamp);
 }
 
-function writePage($filename, $contents)
-{
-    $tempfile = tempnam('res/', TINYIB_BOARD . 'tmp'); /* Create the temporary file */
-    $fp = fopen($tempfile, 'w');
-    fwrite($fp, $contents);
-    fclose($fp);
-    /* If we aren't able to use the rename function, try the alternate method */
-    if (!@rename($tempfile, $filename)) {
-        copy($tempfile, $filename);
-        unlink($tempfile);
-    }
-
-    chmod($filename, 0664); /* it was created 0600 */
-}
-
 function fixLinksInRes($html)
 {
     $search = array(' href="css/', ' src="js/', ' href="src/', ' href="thumb/', ' href="res/', ' href="imgboard.php', ' href="favicon.ico', 'src="thumb/', 'src="inc/', 'src="sticky.png', ' action="imgboard.php');
@@ -232,13 +209,13 @@ function checkCAPTCHA()
             }
             fancyDie($captcha_error);
         }
-    } else if (TINYIB_CAPTCHA) { // Simple CAPTCHA
+    } elseif (TINYIB_CAPTCHA) { // Simple CAPTCHA
         $captcha = isset($_POST['captcha']) ? strtolower(trim($_POST['captcha'])) : '';
         $captcha_solution = isset($_SESSION['tinyibcaptcha']) ? strtolower(trim($_SESSION['tinyibcaptcha'])) : '';
 
         if ($captcha == '') {
             fancyDie('Please enter the CAPTCHA text.');
-        } else if ($captcha != $captcha_solution) {
+        } elseif ($captcha != $captcha_solution) {
             fancyDie('Incorrect CAPTCHA text entered.  Please try again.<br>Click the image to retrieve a new CAPTCHA.');
         }
     }
@@ -393,9 +370,9 @@ function createThumbnail($file_location, $thumb_location, $new_w, $new_h)
         $system = array_reverse($system);
         if (preg_match("/jpg|jpeg/", $system[0])) {
             $src_img = imagecreatefromjpeg($file_location);
-        } else if (preg_match("/png/", $system[0])) {
+        } elseif (preg_match("/png/", $system[0])) {
             $src_img = imagecreatefrompng($file_location);
-        } else if (preg_match("/gif/", $system[0])) {
+        } elseif (preg_match("/gif/", $system[0])) {
             $src_img = imagecreatefromgif($file_location);
         } else {
             return false;
@@ -429,11 +406,11 @@ function createThumbnail($file_location, $thumb_location, $new_w, $new_h)
             if (!imagepng($dst_img, $thumb_location)) {
                 return false;
             }
-        } else if (preg_match("/jpg|jpeg/", $system[0])) {
+        } elseif (preg_match("/jpg|jpeg/", $system[0])) {
             if (!imagejpeg($dst_img, $thumb_location, 70)) {
                 return false;
             }
-        } else if (preg_match("/gif/", $system[0])) {
+        } elseif (preg_match("/gif/", $system[0])) {
             if (!imagegif($dst_img, $thumb_location)) {
                 return false;
             }

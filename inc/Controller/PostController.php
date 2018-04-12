@@ -1,10 +1,10 @@
 <?php
 
-namespace TinyIB;
+namespace TinyIB\Controller;
 
 use TinyIB\Response;
 
-class Controller
+class PostController implements IPostController
 {
     /** @var \TinyIB\Repository\IBanRepository $ban_repository */
     protected $ban_repository;
@@ -12,15 +12,15 @@ class Controller
     /** @var \TinyIB\Repository\IPostRepository $post_repository */
     protected $post_repository;
 
-    /** @var \TinyIB\IRenderer $renderer */
+    /** @var \TinyIB\Renderer\IRenderer $renderer */
     protected $renderer;
 
     /**
-     * Constructs new controller.
+     * Constructs new post controller.
      *
      * @param \TinyIB\Repository\IBanRepository $ban_repository
      * @param \TinyIB\Repository\IPostRepository $post_repository
-     * @param \TinyIB\IRenderer $renderer
+     * @param \TinyIB\Renderer\IRenderer $renderer
      */
     public function __construct($ban_repository, $post_repository, $renderer)
     {
@@ -30,16 +30,9 @@ class Controller
     }
 
     /**
-     * Deletes specified post.
-     *
-     * @param integer $id
-     *   Post id.
-     * @param string|null $password
-     *   Post delete password.
-     *
-     * @return \TinyIB\Response
+     * {@inheritDoc}
      */
-    public function deletePost($id, $password = null)
+    public function delete($id, $password = null)
     {
         if (empty($id)) {
             $message = 'Tick the box next to a post and click "Delete" to delete it.';
@@ -59,9 +52,9 @@ class Controller
         }
 
         // Disabled due to Dollchan Extension Tools breaks.
-        // list($loggedin, $isadmin) = manageCheckLogIn();
+        // list($logged_in, $is_admin) = manageCheckLogIn();
         //
-        // if ($loggedin && empty($password)) {
+        // if ($logged_in && empty($password)) {
         //     $url = basename($_SERVER['PHP_SELF']) . '?manage&moderate=' . $id;
         //     return Response::redirect($url);
         // }
@@ -73,6 +66,7 @@ class Controller
         }
 
         $this->post_repository->deletePostByID($post['id']);
+
         $is_thread = $post['parent'] == TINYIB_NEWTHREAD;
         $thread_id = $is_thread ? $post['id'] : $post['parent'];
 

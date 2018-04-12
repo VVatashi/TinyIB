@@ -42,32 +42,79 @@ class Response
 
     // Common response types.
 
+    /**
+     * @param string $content
+     * @param array $headers
+     *
+     * @return \TinyIB\Response
+     */
     public static function ok($content = '', $headers = [])
     {
         return new static($content, $headers, 200);
     }
 
+    /**
+     * @param string $location
+     * @param array $headers
+     *
+     * @return \TinyIB\Response
+     */
     public static function redirect($location, $headers = [])
     {
         $headers[] = 'Location:' . $location;
         return new static('', $headers, 302);
     }
 
+    /**
+     * @param string $content
+     * @param array $headers
+     *
+     * @return \TinyIB\Response
+     */
     public static function badRequest($content = '', $headers = [])
     {
         return new static($content, $headers, 400);
     }
 
+    /**
+     * @param string $content
+     * @param array $headers
+     *
+     * @return \TinyIB\Response
+     */
     public static function forbidden($content = '', $headers = [])
     {
         return new static($content, $headers, 403);
     }
 
+    /**
+     * @param string $content
+     * @param array $headers
+     *
+     * @return \TinyIB\Response
+     */
     public static function notFound($content = '', $headers = [])
     {
         return new static($content, $headers, 404);
     }
 
+    /**
+     * @param string $content
+     * @param array $headers
+     *
+     * @return \TinyIB\Response
+     */
+    public static function serverError($content = '', $headers = [])
+    {
+        return new static($content, $headers, 500);
+    }
+
+    /**
+     * @param string $content
+     * @param array $headers
+     *
+     * @return \TinyIB\Response
+     */
     public static function serviceUnavailable($content = '', $headers = [])
     {
         return new static($content, $headers, 503);

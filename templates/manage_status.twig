@@ -23,7 +23,13 @@
             {% endif %}
 
             <tr>
-              <td>{{ post['rendered'] }}</td>
+              <td>
+                {% if post['parent'] == constant('TINYIB_NEWTHREAD') %}
+                  {% include '_post_oppost.twig' %}
+                {% else %}
+                  {% include '_post.twig' %}
+                {% endif %}
+              </td>
               <td valign="top" align="right">
                 <table border="0">
                   <tr>
@@ -71,7 +77,13 @@
           {% endif %}
 
           <tr>
-            <td>{{ post['rendered'] }}</td>
+            <td>
+              {% if post['parent'] == constant('TINYIB_NEWTHREAD') %}
+                {% include '_post_oppost.twig' %}
+              {% else %}
+                {% include '_post.twig' %}
+              {% endif %}
+            </td>
             <td valign="top" align="right">
               <form method="get" action="?">
                 <input type="hidden" name="manage" value="" />

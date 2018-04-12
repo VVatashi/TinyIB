@@ -6,10 +6,12 @@
 
 require_once './vendor/autoload.php';
 
-use TinyIB\Controller;
-use TinyIB\Renderer;
+use TinyIB\Controller\ManageController;
+use TinyIB\Controller\PostController;
+use TinyIB\Renderer\Renderer;
 use TinyIB\Repository\PDOBanRepository;
 use TinyIB\Repository\PDOPostRepository;
+use TinyIB\Response;
 
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
@@ -42,25 +44,34 @@ function fancyDie($message)
 }
 
 if (!file_exists('settings.php')) {
-    fancyDie('Please copy the file settings.default.php to settings.php');
+    $message = 'Please copy the file settings.default.php to settings.php';
+    Response::serverError($message)->send();
+    exit;
 }
 
 require_once 'settings.php';
 
 if (TINYIB_TRIPSEED == '' || TINYIB_ADMINPASS == '') {
-    fancyDie('TINYIB_TRIPSEED and TINYIB_ADMINPASS must be configured.');
+    $message = 'TINYIB_TRIPSEED and TINYIB_ADMINPASS must be configured.';
+    Response::serverError($message)->send();
+    exit;
 }
 
-if (TINYIB_CAPTCHA === 'recaptcha' && (TINYIB_RECAPTCHA_SITE == '' || TINYIB_RECAPTCHA_SECRET == '')) {
-    fancyDie('TINYIB_RECAPTCHA_SITE and TINYIB_RECAPTCHA_SECRET  must be configured.');
+if (TINYIB_CAPTCHA === 'recaptcha'
+    && (TINYIB_RECAPTCHA_SITE == '' || TINYIB_RECAPTCHA_SECRET == '')) {
+    $message = 'TINYIB_RECAPTCHA_SITE and TINYIB_RECAPTCHA_SECRET  must be configured.';
+    Response::serverError($message)->send();
+    exit;
 }
 
 // Check directories are writable by the script
-$writedirs = array("res", "src", "thumb");
+$writedirs = ["res", "src", "thumb"];
 
 foreach ($writedirs as $dir) {
     if (!is_writable($dir)) {
-        fancyDie("Directory '" . $dir . "' can not be written to.  Please modify its permissions.");
+        $message = "Directory '" . $dir . "' can not be written to.  Please modify its permissions.";
+        Response::serverError($message)->send();
+        exit;
     }
 }
 
@@ -68,31 +79,37 @@ define('TINYIB_NEWTHREAD', '0');
 define('TINYIB_INDEXPAGE', false);
 define('TINYIB_RESPAGE', true);
 
+include 'inc/functions.php';
+
+if (TINYIB_TIMEZONE != '') {
+    date_default_timezone_set(TINYIB_TIMEZONE);
+}
+
 /** @var \TinyIB\Repository\IBanRepository $ban_repository */
 $ban_repository = new PDOBanRepository(TINYIB_DBBANS);
 
 /** @var \TinyIB\Repository\IPostRepository $post_repository */
 $post_repository = new PDOPostRepository(TINYIB_DBPOSTS);
 
-include 'inc/functions.php';
-
-/** @var \TinyIB\IRenderer $renderer */
+/** @var \TinyIB\Renderer\IRenderer $renderer */
 $renderer = new Renderer($post_repository, [
     'embeds' => $tinyib_uploads,
-    'uploads' => $tinyib_embeds,
+    'is_installed_via_git' => installedViaGit(),
     'manage_link' => basename($_SERVER['PHP_SELF']) . "?manage",
+    'return_link' => basename($_SERVER['PHP_SELF']),
+    'uploads' => $tinyib_embeds,
 ]);
 
-/** @var \TinyIB\Controller $controller */
-$controller = new Controller($ban_repository, $post_repository, $renderer);
+/** @var \TinyIB\Controller\IManageController $manage_controller */
+$manage_controller = new ManageController($ban_repository, $post_repository, $renderer);
 
-if (TINYIB_TIMEZONE != '') {
-    date_default_timezone_set(TINYIB_TIMEZONE);
-}
+/** @var \TinyIB\Controller\IPostController $post_controller */
+$post_controller = new PostController($ban_repository, $post_repository, $renderer);
 
-$redirect = true;
 // Check if the request is to make a post
 if (isset($_POST['message']) || isset($_POST['file'])) {
+    $redirect = true;
+
     if (TINYIB_DBMIGRATE) {
         fancyDie('Posting is currently disabled.<br>Please try again in a few moments.');
     }
@@ -208,14 +225,14 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 
             // If can't obtain file mime, try get it from extension
             if (empty($file_mime) || $file_mime === 'application/octet-stream') {
-                $mime_types = array(
+                $mime_types = [
                     'jpg' => 'image/jpeg',
                     'jpeg' => 'image/jpeg',
                     'png' => 'image/png',
                     'gif' => 'image/gif',
                     'mp3' => 'audio/mpeg',
                     'webm' => 'video/webm',
-                );
+                ];
 
                 $parts = explode('.', $_FILES['file']['name']);
                 $extension = end($parts);
@@ -271,7 +288,7 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
 
                     $post['file_original'] = "$mins:$secs" . ($post['file_original'] != '' ? (', ' . $post['file_original']) : '');
                 }
-            } elseif (in_array($file_mime, array('image/jpeg', 'image/pjpeg', 'image/png', 'image/gif', 'application/x-shockwave-flash'))) {
+            } elseif (in_array($file_mime, ['image/jpeg', 'image/pjpeg', 'image/png', 'image/gif', 'application/x-shockwave-flash'])) {
                 $file_info = getimagesize($file_location);
 
                 $post['image_width'] = $file_info[0];
@@ -288,7 +305,7 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
                 if ($file_mime == "application/x-shockwave-flash") {
                     addVideoOverlay("thumb/" . $post['thumb']);
                 }
-            } elseif (in_array($file_mime, array('image/jpeg', 'image/pjpeg', 'image/png', 'image/gif'))) {
+            } elseif (in_array($file_mime, ['image/jpeg', 'image/pjpeg', 'image/png', 'image/gif'])) {
                 $post['thumb'] = $file_name . "s." . $tinyib_uploads[$file_mime][0];
                 list($thumb_maxwidth, $thumb_maxheight) = thumbnailDimensions($post);
 
@@ -358,228 +375,67 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
         print 'Updating index...<br>';
         $renderer->rebuildIndexes();
     }
+
+    if ($redirect) {
+        $url = is_string($redirect) ? $redirect : 'index.html';
+        Response::redirect($url)->send();
+    }
 // Check if the request is to delete a post and/or its associated image
 } elseif (isset($_GET['delete']) && !isset($_GET['manage'])) {
     $id = isset($_POST['delete']) ? $_POST['delete'] : null;
     $password = isset($_POST['password']) ? $_POST['password'] : null;
-    $response = $controller->deletePost($id, $password);
-    $response->send();
+
+    $post_controller->delete($id, $password)->send();
     exit;
 // Check if the request is to access the management area
 } elseif (isset($_GET['manage'])) {
-    $navbar = '&nbsp;';
-    $redirect = false;
-    $loggedin = false;
-    $isadmin = false;
-    $returnlink = basename($_SERVER['PHP_SELF']);
-
-    list($loggedin, $isadmin) = manageCheckLogIn();
-
-    $data = [
-        'is_admin' => $isadmin,
-        'is_installed_via_git' => installedViaGit(),
-        'is_logged_in' => $loggedin,
-        'is_manage_page' => true,
-        'return_link' => $returnlink,
-    ];
-
     if (isset($_GET['rebuildall'])) {
-        if ($loggedin && $isadmin) {
-            $allthreads = $post_repository->allThreads();
-
-            foreach ($allthreads as $thread) {
-                $renderer->rebuildThread($thread['id']);
-            }
-
-            $renderer->rebuildIndexes();
-
-            $data['text'] = 'Rebuilt board.';
-            print $renderer->render('manage_info.twig', $data);
-        } else {
-            print $renderer->render('manage_login_form.twig', $data);
-        }
+        $manage_controller->rebuildAll()->send();
     } elseif (isset($_GET['bans'])) {
-        if ($loggedin && $isadmin) {
-            $ban_repository->clearExpiredBans();
+        $bans = $_GET['bans'];
 
-            if (isset($_POST['ip'])) {
-                if ($_POST['ip'] != '') {
-                    $banexists = $ban_repository->banByIP($_POST['ip']);
-                    if ($banexists) {
-                        fancyDie('Sorry, there is already a ban on record for that IP address.');
-                    }
+        if (!empty($_POST['ip'])) {
+            $ip = $_POST['ip'];
+            $expire = isset($_POST['expire']) ? $_POST['expire'] : null;
+            $reason = isset($_POST['reason']) ? $_POST['reason'] : null;
 
-                    $ban = array();
-                    $ban['ip'] = $_POST['ip'];
-                    $ban['expire'] = ($_POST['expire'] > 0) ? (time() + $_POST['expire']) : 0;
-                    $ban['reason'] = $_POST['reason'];
+            $manage_controller->addBan($bans, $ip, $expire, $reason)->send();
+        } elseif (!empty($_GET['lift'])) {
+            $lift = $_GET['lift'];
 
-                    $ban_repository->insertBan($ban);
-                    $data['text'] = 'Ban record added for ' . $ban['ip'];
-                }
-            } elseif (isset($_GET['lift'])) {
-                $ban = $ban_repository->banByID($_GET['lift']);
-
-                if ($ban) {
-                    $ban_repository->deleteBanByID($_GET['lift']);
-                    $data['text'] = 'Ban record lifted for ' . $ban['ip'];
-                }
-            }
-
-            $data['ip'] = $_GET['bans'];
-            $data['bans'] = $ban_repository->allBans();
-            print $renderer->render('manage_bans.twig', $data);
+            $manage_controller->liftBan($bans, $lift)->send();
         } else {
-            print $renderer->render('manage_login_form.twig', $data);
+            $manage_controller->listBans($bans)->send();
         }
     } elseif (isset($_GET['update'])) {
-        if ($loggedin && $isadmin) {
-            if (is_dir('.git')) {
-                $data['git_output'] = shell_exec('git pull 2>&1');
-            }
-
-            print $renderer->render('manage_update.twig', $data);
-        } else {
-            print $renderer->render('manage_login_form.twig', $data);
-        }
+        $manage_controller->update()->send();
     } elseif (isset($_GET['delete'])) {
-        if ($loggedin) {
-            $post = $post_repository->postByID($_GET['delete']);
+        $id = $_GET['delete'];
 
-            if ($post) {
-                $post_repository->deletePostByID($post['id']);
-                $renderer->rebuildIndexes();
-
-                if ($post['parent'] != TINYIB_NEWTHREAD) {
-                    $renderer->rebuildThread($post['parent']);
-                }
-
-                $id = $post['id'];
-                $data['text'] = "Post No.$id deleted.";
-                print $renderer->render('manage_info.twig', $data);
-            } else {
-                fancyDie("Sorry, there doesn't appear to be a post with that ID.");
-            }
-        } else {
-            print $renderer->render('manage_log_inform.twig', $data);
-        }
+        $manage_controller->delete($id)->send();
     } elseif (isset($_GET['approve'])) {
-        if ($loggedin) {
-            if ($_GET['approve'] > 0) {
-                $post = $post_repository->postByID($_GET['approve']);
-                if ($post) {
-                    $post_repository->approvePostByID($post['id']);
-                    $thread_id = $post['parent'] == TINYIB_NEWTHREAD ? $post['id'] : $post['parent'];
+        $id = $_GET['approve'];
 
-                    if (strtolower($post['email']) != 'sage'
-                        && (TINYIB_MAXREPLIES == 0
-                        || $post_repository->numRepliesToThreadByID($thread_id) <= TINYIB_MAXREPLIES)) {
-                        $post_repository->bumpThreadByID($thread_id);
-                    }
-
-                    threadUpdated($thread_id);
-
-                    $id = $post['id'];
-                    $data['text'] = "Post No.$id approved.";
-                    print $renderer->render('manage_info.twig', $data);
-                } else {
-                    fancyDie("Sorry, there doesn't appear to be a post with that ID.");
-                }
-            }
-        } else {
-            print $renderer->render('manage_login_form.twig', $data);
-        }
+        $manage_controller->approve($id)->send();
     } elseif (isset($_GET['moderate'])) {
-        if ($loggedin) {
-            if ($_GET['moderate'] > 0) {
-                $post = $post_repository->postByID($_GET['moderate']);
+        $id = $_GET['moderate'];
 
-                if ($post) {
-                    $data['has_ban'] = $ban_repository->banByIP($post['ip']);
-                    $data['post'] = $post;
-
-                    $is_thread = $post['parent'] == TINYIB_NEWTHREAD;
-                    $posts = $is_thread ? $post_repository->postsInThreadByID($post['id']) : array($post);
-
-                    $data['posts'] = array_map(function ($post) use ($renderer) {
-                        $post['rendered'] = $renderer->renderPost($post, TINYIB_INDEXPAGE);
-                        return $post;
-                    }, $posts);
-
-                    print $renderer->render('manage_moderate_post.twig', $data);
-                } else {
-                    fancyDie("Sorry, there doesn't appear to be a post with that ID.");
-                }
-            } else {
-                print $renderer->render('manage_moderate_form.twig', $data);
-            }
-        } else {
-            print $renderer->render('manage_login_form.twig', $data);
-        }
+        $manage_controller->moderate($id)->send();
     } elseif (isset($_GET['sticky']) && isset($_GET['setsticky'])) {
-        if ($loggedin) {
-            if ($_GET['sticky'] > 0) {
-                $post = $post_repository->postByID($_GET['sticky']);
-                if ($post && $post['parent'] == TINYIB_NEWTHREAD) {
-                    $post_repository->stickyThreadByID($post['id'], (intval($_GET['setsticky'])));
-                    threadUpdated($post['id']);
+        $id = $_GET['sticky'];
+        $sticky = (bool) intval($_GET['setsticky']);
 
-                    $id = $post['id'];
-                    $action = intval($_GET['setsticky']) == 1 ? 'stickied' : 'un-stickied';
-                    $data['text'] = "Thread No.$id $action.";
-                    print $renderer->render('manage_info.twig', $data);
-                } else {
-                    fancyDie("Sorry, there doesn't appear to be a thread with that ID.");
-                }
-            } else {
-                fancyDie("Form data was lost. Please go back and try again.");
-            }
-        } else {
-            print $renderer->render('manage_login_form.twig', $data);
-        }
+        $manage_controller->setSticky($id, $sticky)->send();
     } elseif (isset($_GET["rawpost"])) {
-        if ($loggedin) {
-            print $renderer->render('manage_raw_post_form.twig', $data);
-        } else {
-            print $renderer->render('manage_login_form.twig', $data);
-        }
+        $manage_controller->rawPost()->send();
     } elseif (isset($_GET["logout"])) {
-        if ($loggedin) {
-            $_SESSION['tinyib'] = '';
-            session_destroy();
-            die('--&gt; --&gt; --&gt;<meta http-equiv="refresh" content="0;url=' . $returnlink . '?manage">');
-        } else {
-            print $renderer->render('manage_login_form.twig', $data);
-        }
+        $manage_controller->logout()->send();
     } else {
-        if ($loggedin) {
-            $threads = $post_repository->countThreads();
-            $bans = count($ban_repository->allBans());
-            $data['info'] = $threads . ' ' . plural('thread', $threads) . ', ' . $bans . ' ' . plural('ban', $bans);
-
-            if (TINYIB_REQMOD === 'files' || TINYIB_REQMOD === 'all') {
-                $data['reqmod_posts'] = array_map(function ($post) use ($renderer) {
-                    $post['rendered'] = $renderer->renderPost($post, TINYIB_INDEXPAGE);
-                    return $post;
-                }, $post_repository->latestPosts(false));
-            }
-
-            $data['posts'] = array_map(function ($post) use ($renderer) {
-                $post['rendered'] = $renderer->renderPost($post, TINYIB_INDEXPAGE);
-                return $post;
-            }, $post_repository->latestPosts(true));
-
-            print $renderer->render('manage_status.twig', $data);
-        } else {
-            print $renderer->render('manage_login_form.twig', $data);
-        }
+        $manage_controller->status()->send();
     }
 } elseif (!file_exists('index.html') || $post_repository->countThreads() == 0) {
     $renderer->rebuildIndexes();
-}
-
-if ($redirect) {
-    print '--&gt; --&gt; --&gt;<meta http-equiv="refresh" content="'
-        . (isset($slow_redirect) ? '3' : '0') . ';url='
-        . (is_string($redirect) ? $redirect : 'index.html') . '">';
+    Response::redirect('index.html')->send();
+} else {
+    Response::redirect('index.html')->send();
 }
