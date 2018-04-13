@@ -204,7 +204,10 @@ class Renderer implements IRenderer
             $thread['omitted'] = max(0, count($replies) - TINYIB_PREVIEWREPLIES - 1);
 
             $replies = array_slice($replies, -TINYIB_PREVIEWREPLIES);
-            array_unshift($replies, $thread);
+
+            if (empty($replies) || $replies[0]['id'] !== $thread['id']) {
+                array_unshift($replies, $thread);
+            }
 
             $posts = array_merge($posts, array_map(function ($post) {
                 return $this->preprocessPost($post, TINYIB_INDEXPAGE);
