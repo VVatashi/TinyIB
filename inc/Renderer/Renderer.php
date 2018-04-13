@@ -160,6 +160,9 @@ class Renderer implements IRenderer
         return "Supported file type" . (count($tinyib_uploads) != 1 ? "s are " : " is ") . $types_formatted . ".";
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function makeLinksClickable($text)
     {
         $text = preg_replace('!(((f|ht)tp(s)?://)[-a-zA-Zа-яА-Я()0-9@:%\!_+.,~#?&;//=]+)!i', '<a href="$1" target="_blank">$1</a>', $text);

@@ -28,6 +28,13 @@ interface IRenderer
      */
     public function renderPost($post, $res);
 
+    /**
+     * @param string $text
+     *
+     * @return string
+     */
+    public function makeLinksClickable($text);
+
     public function rebuildIndexes();
 
     /**

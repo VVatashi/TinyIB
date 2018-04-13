@@ -21,7 +21,7 @@ function plural($singular, $count, $plural = 's')
 
 function newPost($parent = TINYIB_NEWTHREAD)
 {
-    return array(
+    return [
         'parent' => $parent,
         'timestamp' => '0',
         'bumped' => '0',
@@ -45,7 +45,7 @@ function newPost($parent = TINYIB_NEWTHREAD)
         'thumb_height' => '0',
         'stickied' => '0',
         'moderated' => '1'
-    );
+    ];
 }
 
 function convertBytes($number)
@@ -113,24 +113,6 @@ function nameAndTripcode($name)
     }
 
     return array($name, "");
-}
-
-function nameBlock($name, $tripcode, $email, $timestamp, $rawposttext)
-{
-    $output = '<span class="postername">';
-    $output .= ($name == '' && $tripcode == '') ? 'Anonymous' : $name;
-
-    if ($tripcode != '') {
-        $output .= '</span><span class="postertrip">!' . $tripcode;
-    }
-
-    $output .= '</span>';
-
-    if ($email != '' && strtolower($email) != 'noko') {
-        $output = '<a href="mailto:' . $email . '">' . $output . '</a>';
-    }
-
-    return $output . $rawposttext . ' ' . date('y/m/d(D)H:i:s', $timestamp);
 }
 
 function fixLinksInRes($html)

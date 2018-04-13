@@ -5,6 +5,16 @@ namespace TinyIB\Controller;
 interface IPostController
 {
     /**
+     * Create post.
+     *
+     * @param array $data
+     *   Post data.
+     *
+     * @return \TinyIB\Response
+     */
+    public function create($data);
+
+    /**
      * Deletes specified post.
      *
      * @param integer $id
