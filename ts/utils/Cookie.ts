@@ -13,5 +13,5 @@ export function get(name: string, _default: string = null) {
 export function set(name: string, value: string, expiration: Date) {
   const value_enc = encodeURIComponent(value);
   const expiration_str = expiration.toUTCString();
-  document.cookie = `${name}=${value_enc}; path=/; expired=${expiration_str}`;
+  document.cookie = `${name}=${value_enc}; path=/; expires=${expiration_str}`;
 }

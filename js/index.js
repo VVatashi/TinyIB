@@ -45,7 +45,7 @@ System.register("utils/Cookie", [], function (exports_3, context_3) {
     function set(name, value, expiration) {
         var value_enc = encodeURIComponent(value);
         var expiration_str = expiration.toUTCString();
-        document.cookie = name + "=" + value_enc + "; path=/; expired=" + expiration_str;
+        document.cookie = name + "=" + value_enc + "; path=/; expires=" + expiration_str;
     }
     exports_3("set", set);
     return {
@@ -54,10 +54,10 @@ System.register("utils/Cookie", [], function (exports_3, context_3) {
         }
     };
 });
-System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function (exports_4, context_4) {
+System.register("modules/FormSave", ["utils/DOM", "utils/Cookie"], function (exports_4, context_4) {
     "use strict";
     var __moduleName = context_4 && context_4.id;
-    var DOM_1, Cookie, StyleSwitcher;
+    var DOM_1, Cookie, FormSave;
     return {
         setters: [
             function (DOM_1_1) {
@@ -68,12 +68,66 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
             }
         ],
         execute: function () {
+            FormSave = /** @class */ (function () {
+                function FormSave() {
+                    var _this = this;
+                    document.addEventListener('DOMContentLoaded', function () { return _this.onLoad(); });
+                }
+                FormSave.prototype.onLoad = function () {
+                    var name = DOM_1.qs('input[name="name"]');
+                    if (name) {
+                        // Load name
+                        name.value = Cookie.get('tinyib_name', '');
+                        // Save name on change
+                        name.addEventListener('change', function () {
+                            var expiration_date = new Date();
+                            expiration_date.setTime(expiration_date.getTime() + 365 * 24 * 60 * 60 * 1000);
+                            Cookie.set('tinyib_name', name.value, expiration_date);
+                        });
+                    }
+                    var new_post_password = DOM_1.qid('newpostpassword');
+                    if (new_post_password) {
+                        // Load delete post password
+                        var password = Cookie.get('tinyib_password');
+                        new_post_password.value = password;
+                        var delete_post_password = DOM_1.qid('deletepostpassword');
+                        if (delete_post_password) {
+                            delete_post_password.value = password;
+                        }
+                        // Save delete post password on change
+                        new_post_password.addEventListener('change', function () {
+                            var expiration_date = new Date();
+                            expiration_date.setTime(expiration_date.getTime() + 365 * 24 * 60 * 60 * 1000);
+                            Cookie.set('tinyib_password', new_post_password.value, expiration_date);
+                        });
+                    }
+                };
+                return FormSave;
+            }());
+            exports_4("default", FormSave);
+        }
+    };
+});
+System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function (exports_5, context_5) {
+    "use strict";
+    var __moduleName = context_5 && context_5.id;
+    var DOM_2, Cookie, StyleSwitcher;
+    return {
+        setters: [
+            function (DOM_2_1) {
+                DOM_2 = DOM_2_1;
+            },
+            function (Cookie_2) {
+                Cookie = Cookie_2;
+            }
+        ],
+        execute: function () {
             StyleSwitcher = /** @class */ (function () {
                 function StyleSwitcher() {
                     var _this = this;
                     this.styles = {};
                     // Parse selectable styles from <head>
-                    var styles = DOM_1.qsa('link[title]');
+                    var styles = DOM_2.qsa('link[title]');
                     for (var i = 0; i < styles.length; ++i) {
                         var style = styles[i];
                         var title = style.title;
@@ -89,7 +143,7 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
                 }
                 StyleSwitcher.prototype.onLoad = function () {
                     var _this = this;
-                    var style_switcher = DOM_1.qid('style-switcher');
+                    var style_switcher = DOM_2.qid('style-switcher');
                     if (style_switcher) {
                         // Populate style switcher widget
                         var styles = Object.keys(this.styles);
@@ -105,12 +159,12 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
                     }
                 };
                 StyleSwitcher.prototype.setStyle = function (style) {
-                    var head = DOM_1.qs('head');
+                    var head = DOM_2.qs('head');
                     // If no <head> element, do nothing
                     if (!head) {
                         return;
                     }
-                    var selected_style = DOM_1.qs('link[data-selected]');
+                    var selected_style = DOM_2.qs('link[data-selected]');
                     if (selected_style) {
                         // If style already selected, do nothing
                         if (selected_style.title === style) {
@@ -129,24 +183,24 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
                 };
                 return StyleSwitcher;
             }());
-            exports_4("default", StyleSwitcher);
+            exports_5("default", StyleSwitcher);
         }
     };
 });
-System.register("index", ["modules/StyleSwitcher", "utils/DOM", "utils/Cookie"], function (exports_5, context_5) {
+System.register("index", ["modules/FormSave", "modules/StyleSwitcher", "utils/DOM"], function (exports_6, context_6) {
     "use strict";
-    var __moduleName = context_5 && context_5.id;
+    var __moduleName = context_6 && context_6.id;
     function quotePost(postID) {
-        var message = DOM_2.qid('message');
+        var message = DOM_3.qid('message');
         message.value = message.value + '>>' + postID + '\n';
         message.focus();
         return false;
     }
     function reloadCAPTCHA() {
-        var captcha = DOM_2.qid('captcha');
+        var captcha = DOM_3.qid('captcha');
         captcha.value = '';
         captcha.focus();
-        var captchaimage = DOM_2.qid('captchaimage');
+        var captchaimage = DOM_3.qid('captchaimage');
         captchaimage.src = captchaimage.src + '#new';
         return false;
     }
@@ -168,10 +222,10 @@ System.register("index", ["modules/StyleSwitcher", "utils/DOM", "utils/Cookie"],
     }
     function expandFile(e, id) {
         if (e == undefined || e.which == undefined || e.which == 1) {
-            var wrapper_1 = DOM_2.qid('thumbnail-wrapper_' + id);
-            var file_1 = DOM_2.qid('file_' + id);
+            var wrapper_1 = DOM_3.qid('thumbnail-wrapper_' + id);
+            var file_1 = DOM_3.qid('file_' + id);
             if (wrapper_1.getAttribute('expanded') != 'true') {
-                var expand = DOM_2.qid('expand_' + id);
+                var expand = DOM_3.qid('expand_' + id);
                 wrapper_1.setAttribute('expanded', 'true');
                 file_1.innerHTML = decodeURIComponent(expand.textContent);
                 file_1.style.visibility = 'hidden';
@@ -189,7 +243,7 @@ System.register("index", ["modules/StyleSwitcher", "utils/DOM", "utils/Cookie"],
                 file_1.innerHTML = '';
                 wrapper_1.style.display = '';
                 wrapper_1.setAttribute('expanded', 'false');
-                var thumbnail = DOM_2.qid('thumbnail_' + id);
+                var thumbnail = DOM_3.qid('thumbnail_' + id);
                 scrollIntoView(thumbnail);
             }
             return false;
@@ -197,7 +251,7 @@ System.register("index", ["modules/StyleSwitcher", "utils/DOM", "utils/Cookie"],
         return true;
     }
     function insertBBCode(code) {
-        var messageEl = DOM_2.qs('#message');
+        var messageEl = DOM_3.qs('#message');
         var str = messageEl.value;
         var begin = messageEl.selectionStart;
         var end = messageEl.selectionEnd;
@@ -213,59 +267,24 @@ System.register("index", ["modules/StyleSwitcher", "utils/DOM", "utils/Cookie"],
         messageEl.selectionEnd = begin + code.length + 2 + (end - begin);
         return false;
     }
-    var StyleSwitcher_1, DOM_2, Cookie, modules;
+    var FormSave_1, StyleSwitcher_1, DOM_3, modules;
     return {
         setters: [
+            function (FormSave_1_1) {
+                FormSave_1 = FormSave_1_1;
+            },
             function (StyleSwitcher_1_1) {
                 StyleSwitcher_1 = StyleSwitcher_1_1;
             },
-            function (DOM_2_1) {
-                DOM_2 = DOM_2_1;
-            },
-            function (Cookie_2) {
-                Cookie = Cookie_2;
+            function (DOM_3_1) {
+                DOM_3 = DOM_3_1;
             }
         ],
         execute: function () {
             modules = {};
+            modules['FormSave'] = new FormSave_1.default();
             modules['StyleSwitcher'] = new StyleSwitcher_1.default();
             document.addEventListener('DOMContentLoaded', function () {
-                // Save name on change
-                var nameEl = DOM_2.qs('input[name="name"]');
-                if (nameEl) {
-                    nameEl.addEventListener('change', function () {
-                        var expiration_date = new Date();
-                        expiration_date.setTime(expiration_date.getTime() + (365 * 24 * 60 * 60 * 1000));
-                        Cookie.set('tinyib_name', nameEl.value, expiration_date);
-                    }, false);
-                }
-                // Load name
-                var name = Cookie.get('tinyib_name');
-                if (name && name != '') {
-                    if (nameEl) {
-                        nameEl.value = name;
-                    }
-                }
-                // Save delete-password on change
-                var newpostpassword = DOM_2.qid('newpostpassword');
-                if (newpostpassword) {
-                    newpostpassword.addEventListener('change', function () {
-                        var expiration_date = new Date();
-                        expiration_date.setFullYear(expiration_date.getFullYear() + 7);
-                        Cookie.set('tinyib_password', newpostpassword.value, expiration_date);
-                    }, false);
-                }
-                // Load delete-password
-                var password = Cookie.get('tinyib_password');
-                if (password && password != '') {
-                    if (newpostpassword) {
-                        newpostpassword.value = password;
-                    }
-                    var deletepostpassword = DOM_2.qid('deletepostpassword');
-                    if (deletepostpassword) {
-                        deletepostpassword.value = password;
-                    }
-                }
                 // Quote post
                 if (window.location.hash) {
                     if (window.location.hash.match(/^#q\d+$/i) !== null) {

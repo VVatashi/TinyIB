@@ -1,9 +1,10 @@
 import IModule from './modules/IModule';
+import FormSave from './modules/FormSave';
 import StyleSwitcher from './modules/StyleSwitcher';
 import { qid, qs } from './utils/DOM';
-import * as Cookie from './utils/Cookie';
 
 const modules: { [key: string]: IModule } = {};
+modules['FormSave'] = new FormSave();
 modules['StyleSwitcher'] = new StyleSwitcher();
 
 function quotePost(postID: string) {
@@ -104,47 +105,6 @@ function insertBBCode(code: string) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-  // Save name on change
-  var nameEl = qs('input[name="name"]') as HTMLInputElement;
-  if (nameEl) {
-    nameEl.addEventListener('change', function () {
-      var expiration_date = new Date();
-      expiration_date.setTime(expiration_date.getTime() + (365 * 24 * 60 * 60 * 1000));
-      Cookie.set('tinyib_name', nameEl.value, expiration_date);
-    }, false);
-  }
-
-  // Load name
-  const name = Cookie.get('tinyib_name');
-  if (name && name != '') {
-    if (nameEl) {
-      nameEl.value = name;
-    }
-  }
-
-  // Save delete-password on change
-  const newpostpassword = qid('newpostpassword') as HTMLInputElement;
-  if (newpostpassword) {
-    newpostpassword.addEventListener('change', function () {
-      const expiration_date = new Date();
-      expiration_date.setFullYear(expiration_date.getFullYear() + 7);
-      Cookie.set('tinyib_password', newpostpassword.value, expiration_date);
-    }, false);
-  }
-
-  // Load delete-password
-  const password = Cookie.get('tinyib_password');
-  if (password && password != '') {
-    if (newpostpassword) {
-      newpostpassword.value = password;
-    }
-
-    const deletepostpassword = qid('deletepostpassword') as HTMLInputElement;
-    if (deletepostpassword) {
-      deletepostpassword.value = password;
-    }
-  }
-
   // Quote post
   if (window.location.hash) {
     if (window.location.hash.match(/^#q\d+$/i) !== null) {
