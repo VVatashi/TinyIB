@@ -7,7 +7,7 @@
   {% endif %}
 
   {% if is_embed %}
-    <a class="file-info__link" href="{{ direct_link }}"
+    <a class="file-info__link" href="#"
       onclick="return expandFile(event, '{{ post['id'] }}');">
       {{ post['file_original'] }}
     </a>
@@ -15,7 +15,7 @@
   {% elseif post['file'] %}
     {{ thumblink }}
 
-    <a class="file-info__link" href="{{ direct_link }}" target="_blank"
+    <a class="file-info__link" href="{{ url_prefix ~ 'src/' ~ post['file'] }}" target="_blank"
       {% if expand %}onclick="return expandFile(event, '{{ post['id'] }}');"{% endif %}>
       {{ post['file'] }}
     </a>
