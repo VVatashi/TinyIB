@@ -1,33 +1,10 @@
-declare interface Window {
-  styles: {
-    [key: string]: string,
-  };
-}
+import IModule from './modules/IModule';
+import StyleSwitcher from './modules/StyleSwitcher';
+import { qid, qs } from './utils/DOM';
+import * as Cookie from './utils/Cookie';
 
-function qid(id: string) {
-  return document.getElementById(id);
-}
-
-function qs(selector: string) {
-  return document.querySelector(selector);
-}
-
-function qsa(selector: string) {
-  return document.querySelectorAll(selector);
-}
-
-function getCookie(name: string) {
-  const value = '; ' + document.cookie;
-  const parts = value.split('; ' + name + '=');
-
-  if (parts.length == 2) {
-    return parts.pop().split(';').shift();
-  }
-}
-
-function setCookie(name: string, value: any, expiration: Date) {
-  document.cookie = name + '=' + value + '; path=/; expires=' + expiration.toUTCString();
-}
+const modules: { [key: string]: IModule } = {};
+modules['StyleSwitcher'] = new StyleSwitcher();
 
 function quotePost(postID: string) {
   const message = qid('message') as HTMLInputElement;
@@ -104,35 +81,6 @@ function expandFile(e: MouseEvent, id: number) {
   return true;
 }
 
-function setStyle(url: string) {
-  const headEl = qs('head');
-
-  if (!headEl) {
-    return;
-  }
-
-  const selectedStyleEl = qs('head > link[data-selected]');
-
-  if (selectedStyleEl) {
-    selectedStyleEl.remove();
-  }
-
-  headEl.innerHTML += '<link rel="stylesheet" type="text/css" href="' + url + '" data-selected="true" />';
-
-  let title = '';
-  const styles = Object.keys(window.styles);
-  for (let i = 0; i < styles.length; ++i) {
-    if (window.styles[styles[i]] === url) {
-      title = styles[i]
-      break;
-    }
-  }
-
-  const expiration_date = new Date();
-  expiration_date.setTime(expiration_date.getTime() + (365 * 24 * 60 * 60 * 1000));
-  setCookie('tinyib_style', encodeURIComponent(title), expiration_date);
-}
-
 function insertBBCode(code: string) {
   const messageEl = qs('#message') as HTMLTextAreaElement;
 
@@ -155,60 +103,22 @@ function insertBBCode(code: string) {
   return false;
 }
 
-(function () {
-  window.styles = {};
-
-  const styleEls = qsa('head > link[title]');
-  for (let i = 0; i < styleEls.length; ++i) {
-    const styleEl = styleEls[i] as HTMLElement;
-    const title = styleEl.title;
-    const url = styleEl.getAttribute('href');
-    window.styles[title] = url;
-    styleEl.remove();
-  }
-
-  const defaultStyleUrl = window.styles['Futaba'] || '';
-  let styleTitle = getCookie('tinyib_style');
-  if (styleTitle) {
-    styleTitle = decodeURIComponent(styleTitle);
-    const styleUrl = window.styles[styleTitle];
-    if (styleUrl) {
-      setStyle(styleUrl);
-    } else {
-      setStyle(defaultStyleUrl);
-    }
-  } else {
-    setStyle(defaultStyleUrl);
-  }
-})();
-
 document.addEventListener('DOMContentLoaded', function () {
-  // Load styles
-  const styleSwitcherEl = qid('style-switcher');
-  if (styleSwitcherEl) {
-    const styles = Object.keys(window.styles);
-    for (let i = 0; i < styles.length; ++i) {
-      const title = styles[i];
-      const url = window.styles[title];
-      styleSwitcherEl.innerHTML += '<option value="' + url + '">' + title + '</option>';
-    }
-  }
-
   // Save name on change
   var nameEl = qs('input[name="name"]') as HTMLInputElement;
   if (nameEl) {
     nameEl.addEventListener('change', function () {
       var expiration_date = new Date();
       expiration_date.setTime(expiration_date.getTime() + (365 * 24 * 60 * 60 * 1000));
-      setCookie('tinyib_name', encodeURIComponent(nameEl.value), expiration_date);
+      Cookie.set('tinyib_name', nameEl.value, expiration_date);
     }, false);
   }
 
   // Load name
-  const name = getCookie('tinyib_name');
+  const name = Cookie.get('tinyib_name');
   if (name && name != '') {
     if (nameEl) {
-      nameEl.value = decodeURIComponent(name);
+      nameEl.value = name;
     }
   }
 
@@ -218,12 +128,12 @@ document.addEventListener('DOMContentLoaded', function () {
     newpostpassword.addEventListener('change', function () {
       const expiration_date = new Date();
       expiration_date.setFullYear(expiration_date.getFullYear() + 7);
-      setCookie('tinyib_password', encodeURIComponent(newpostpassword.value), expiration_date);
+      Cookie.set('tinyib_password', newpostpassword.value, expiration_date);
     }, false);
   }
 
   // Load delete-password
-  const password = getCookie('tinyib_password');
+  const password = Cookie.get('tinyib_password');
   if (password && password != '') {
     if (newpostpassword) {
       newpostpassword.value = password;
