@@ -169,6 +169,7 @@ class PostController implements IPostController
                     'png' => 'image/png',
                     'gif' => 'image/gif',
                     'mp3' => 'audio/mpeg',
+                    'mp4' => 'video/mp4',
                     'webm' => 'video/webm',
                 ];
 
@@ -198,7 +199,8 @@ class PostController implements IPostController
                 return Response::serverError('File transfer failure. Please go back and try again.');
             }
 
-            if ($file_mime == "audio/webm" || $file_mime == "video/webm") {
+            if ($file_mime == "audio/webm" || $file_mime == "video/webm"
+                || $file_mime == "audio/mp4" || $file_mime == "video/mp4") {
                 $post['image_width'] = max(0, intval(shell_exec('mediainfo --Inform="Video;%Width%" ' . $file_location)));
                 $post['image_height'] = max(0, intval(shell_exec('mediainfo --Inform="Video;%Height%" ' . $file_location)));
 

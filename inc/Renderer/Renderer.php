@@ -122,7 +122,7 @@ class Renderer implements IRenderer
                 $post['file_type'] = 'image';
             } elseif (in_array($post['file_extension'], ['mp3'])) {
                 $post['file_type'] = 'audio';
-            } elseif (in_array($post['file_extension'], ['webm'])) {
+            } elseif (in_array($post['file_extension'], ['mp4', 'webm'])) {
                 $post['file_type'] = 'video';
             }
         }
