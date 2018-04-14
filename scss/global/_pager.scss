@@ -1,0 +1,15 @@
+.pager {
+  display: block;
+
+  &__item {
+    display: inline-block;
+
+    &::before {
+      content: '[';
+    }
+
+    &::after {
+      content: ']';
+    }
+  }
+}

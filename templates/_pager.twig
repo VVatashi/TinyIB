@@ -1,37 +1,23 @@
-{% if parent == constant('TINYIB_NEWTHREAD') %}
-  <table border="1">
-    <tbody>
-      <tr>
-          {% if this_page == 0 %}
-            <td>Previous</td>
-          {% else %}
-            <td>
-              <form method="get" action="{{ (this_page == 1) ? 'index' : this_page - 1 }}.html">
-                <input value="Previous" type="submit" />
-              </form>
-            </td>
-          {% endif %}
+{% if this_page > 0 %}
+  <li class="pager__item"><a href="index.html">First</a></li>
+  <li class="pager__item"><a href="{{ (this_page == 1) ? 'index' : this_page - 1 }}.html">Previous</a></li>
+{% else %}
+  <li class="pager__item">First</li>
+  <li class="pager__item">Previous</li>
+{% endif %}
 
-          <td>
-            {% for i in 0..pages %}
-              {% if this_page == i %}
-                &#91;{{ i }}&#93;
-              {% else %}
-                &#91;<a href="{{ (i == 0) ? 'index' : i }}.html">{{ i }}</a>&#93;
-              {% endif %}
-            {% endfor %}
-          </td>
+{% for i in 0..pages %}
+  {% if this_page != i %}
+    <li class="pager__item"><a href="{{ (i == 0) ? 'index' : i }}.html">{{ i }}</a></li>
+  {% else %}
+    <li class="pager__item">{{ i }}</li>
+  {% endif %}
+{% endfor %}
 
-          {% if pages <= this_page %}
-            <td>Next</td>
-          {% else %}
-            <td>
-              <form method="get" action="{{ this_page + 1 }}.html">
-                <input value="Next" type="submit" />
-              </form>
-            </td>
-          {% endif %}
-      </tr>
-    </tbody>
-  </table>
+{% if this_page < pages %}
+  <li class="pager__item"><a href="{{ this_page + 1 }}.html">Next</a></li>
+  <li class="pager__item"><a href="{{ pages }}.html">Last</a></li>
+{% else %}
+  <li class="pager__item">Next</li>
+  <li class="pager__item">Last</li>
 {% endif %}
