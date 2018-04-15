@@ -1,9 +1,11 @@
 import IModule from './modules/IModule';
+import FormMarkup from './modules/FormMarkup';
 import FormSave from './modules/FormSave';
 import StyleSwitcher from './modules/StyleSwitcher';
 import { qid, qs } from './utils/DOM';
 
 const modules: { [key: string]: IModule } = {};
+modules['FormMarkup'] = new FormMarkup();
 modules['FormSave'] = new FormSave();
 modules['StyleSwitcher'] = new StyleSwitcher();
 
@@ -80,28 +82,6 @@ function expandFile(e: MouseEvent, id: number) {
   }
 
   return true;
-}
-
-function insertBBCode(code: string) {
-  const messageEl = qs('#message') as HTMLTextAreaElement;
-
-  const str = messageEl.value;
-  const begin = messageEl.selectionStart;
-  const end = messageEl.selectionEnd;
-
-  messageEl.value = [
-    str.substring(0, begin),
-    '[', code, ']',
-    str.substring(begin, end),
-    '[/', code, ']',
-    str.substring(end),
-  ].join('');
-
-  messageEl.focus();
-  messageEl.selectionStart = begin + code.length + 2;
-  messageEl.selectionEnd = begin + code.length + 2 + (end - begin);
-
-  return false;
 }
 
 document.addEventListener('DOMContentLoaded', function () {

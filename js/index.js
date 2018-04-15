@@ -28,9 +28,73 @@ System.register("utils/DOM", [], function (exports_2, context_2) {
         }
     };
 });
-System.register("utils/Cookie", [], function (exports_3, context_3) {
+System.register("modules/FormMarkup", ["utils/DOM"], function (exports_3, context_3) {
     "use strict";
     var __moduleName = context_3 && context_3.id;
+    var DOM_1, FormMarkup;
+    return {
+        setters: [
+            function (DOM_1_1) {
+                DOM_1 = DOM_1_1;
+            }
+        ],
+        execute: function () {
+            FormMarkup = /** @class */ (function () {
+                function FormMarkup() {
+                    var _this = this;
+                    document.addEventListener('DOMContentLoaded', function () { return _this.onLoad(); });
+                }
+                FormMarkup.prototype.onLoad = function () {
+                    var _this = this;
+                    var buttons = {
+                        'markup_quote': function () { return _this.insertMarkup('\n>', '\n'); },
+                        'markup_b': function () { return _this.insertBBCode('b'); },
+                        'markup_i': function () { return _this.insertBBCode('i'); },
+                        'markup_u': function () { return _this.insertBBCode('u'); },
+                        'markup_s': function () { return _this.insertBBCode('s'); },
+                        'markup_sup': function () { return _this.insertBBCode('sup'); },
+                        'markup_sub': function () { return _this.insertBBCode('sub'); },
+                        'markup_spoiler': function () { return _this.insertBBCode('spoiler'); },
+                        'markup_code': function () { return _this.insertBBCode('code'); },
+                        'markup_rp': function () { return _this.insertBBCode('rp'); },
+                    };
+                    var ids = Object.keys(buttons);
+                    ids.forEach(function (id) {
+                        var button = DOM_1.qid(id);
+                        if (button) {
+                            button.addEventListener('click', buttons[id]);
+                        }
+                    });
+                };
+                FormMarkup.prototype.insertMarkup = function (before, after) {
+                    var message = DOM_1.qid('message');
+                    var str = message.value;
+                    var begin = message.selectionStart;
+                    var end = message.selectionEnd;
+                    message.value = [
+                        str.substring(0, begin),
+                        before,
+                        str.substring(begin, end),
+                        after,
+                        str.substring(end),
+                    ].join('');
+                    message.focus();
+                    message.selectionStart = begin + before.length;
+                    message.selectionEnd = begin + before.length + (end - begin);
+                    return false;
+                };
+                FormMarkup.prototype.insertBBCode = function (code) {
+                    return this.insertMarkup("[" + code + "]", "[/" + code + "]");
+                };
+                return FormMarkup;
+            }());
+            exports_3("default", FormMarkup);
+        }
+    };
+});
+System.register("utils/Cookie", [], function (exports_4, context_4) {
+    "use strict";
+    var __moduleName = context_4 && context_4.id;
     function get(name, _default) {
         if (_default === void 0) { _default = null; }
         var cookie_str = "; " + document.cookie;
@@ -41,27 +105,27 @@ System.register("utils/Cookie", [], function (exports_3, context_3) {
         }
         return _default;
     }
-    exports_3("get", get);
+    exports_4("get", get);
     function set(name, value, expiration) {
         var value_enc = encodeURIComponent(value);
         var expiration_str = expiration.toUTCString();
         document.cookie = name + "=" + value_enc + "; path=/; expires=" + expiration_str;
     }
-    exports_3("set", set);
+    exports_4("set", set);
     return {
         setters: [],
         execute: function () {
         }
     };
 });
-System.register("modules/FormSave", ["utils/DOM", "utils/Cookie"], function (exports_4, context_4) {
+System.register("modules/FormSave", ["utils/DOM", "utils/Cookie"], function (exports_5, context_5) {
     "use strict";
-    var __moduleName = context_4 && context_4.id;
-    var DOM_1, Cookie, FormSave;
+    var __moduleName = context_5 && context_5.id;
+    var DOM_2, Cookie, FormSave;
     return {
         setters: [
-            function (DOM_1_1) {
-                DOM_1 = DOM_1_1;
+            function (DOM_2_1) {
+                DOM_2 = DOM_2_1;
             },
             function (Cookie_1) {
                 Cookie = Cookie_1;
@@ -74,7 +138,7 @@ System.register("modules/FormSave", ["utils/DOM", "utils/Cookie"], function (exp
                     document.addEventListener('DOMContentLoaded', function () { return _this.onLoad(); });
                 }
                 FormSave.prototype.onLoad = function () {
-                    var name = DOM_1.qs('input[name="name"]');
+                    var name = DOM_2.qs('input[name="name"]');
                     if (name) {
                         // Load name
                         name.value = Cookie.get('tinyib_name', '');
@@ -85,12 +149,12 @@ System.register("modules/FormSave", ["utils/DOM", "utils/Cookie"], function (exp
                             Cookie.set('tinyib_name', name.value, expiration_date);
                         });
                     }
-                    var new_post_password = DOM_1.qid('newpostpassword');
+                    var new_post_password = DOM_2.qid('newpostpassword');
                     if (new_post_password) {
                         // Load delete post password
                         var password = Cookie.get('tinyib_password');
                         new_post_password.value = password;
-                        var delete_post_password = DOM_1.qid('deletepostpassword');
+                        var delete_post_password = DOM_2.qid('deletepostpassword');
                         if (delete_post_password) {
                             delete_post_password.value = password;
                         }
@@ -104,18 +168,18 @@ System.register("modules/FormSave", ["utils/DOM", "utils/Cookie"], function (exp
                 };
                 return FormSave;
             }());
-            exports_4("default", FormSave);
+            exports_5("default", FormSave);
         }
     };
 });
-System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function (exports_5, context_5) {
+System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function (exports_6, context_6) {
     "use strict";
-    var __moduleName = context_5 && context_5.id;
-    var DOM_2, Cookie, StyleSwitcher;
+    var __moduleName = context_6 && context_6.id;
+    var DOM_3, Cookie, StyleSwitcher;
     return {
         setters: [
-            function (DOM_2_1) {
-                DOM_2 = DOM_2_1;
+            function (DOM_3_1) {
+                DOM_3 = DOM_3_1;
             },
             function (Cookie_2) {
                 Cookie = Cookie_2;
@@ -127,7 +191,7 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
                     var _this = this;
                     this.styles = {};
                     // Parse selectable styles from <head>
-                    var styles = DOM_2.qsa('link[title]');
+                    var styles = DOM_3.qsa('link[title]');
                     for (var i = 0; i < styles.length; ++i) {
                         var style = styles[i];
                         var title = style.title;
@@ -143,7 +207,7 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
                 }
                 StyleSwitcher.prototype.onLoad = function () {
                     var _this = this;
-                    var style_switcher = DOM_2.qid('style-switcher');
+                    var style_switcher = DOM_3.qid('style-switcher');
                     if (style_switcher) {
                         // Populate style switcher widget
                         var styles = Object.keys(this.styles);
@@ -159,12 +223,12 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
                     }
                 };
                 StyleSwitcher.prototype.setStyle = function (style) {
-                    var head = DOM_2.qs('head');
+                    var head = DOM_3.qs('head');
                     // If no <head> element, do nothing
                     if (!head) {
                         return;
                     }
-                    var selected_style = DOM_2.qs('link[data-selected]');
+                    var selected_style = DOM_3.qs('link[data-selected]');
                     if (selected_style) {
                         // If style already selected, do nothing
                         if (selected_style.title === style) {
@@ -183,24 +247,24 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
                 };
                 return StyleSwitcher;
             }());
-            exports_5("default", StyleSwitcher);
+            exports_6("default", StyleSwitcher);
         }
     };
 });
-System.register("index", ["modules/FormSave", "modules/StyleSwitcher", "utils/DOM"], function (exports_6, context_6) {
+System.register("index", ["modules/FormMarkup", "modules/FormSave", "modules/StyleSwitcher", "utils/DOM"], function (exports_7, context_7) {
     "use strict";
-    var __moduleName = context_6 && context_6.id;
+    var __moduleName = context_7 && context_7.id;
     function quotePost(postID) {
-        var message = DOM_3.qid('message');
+        var message = DOM_4.qid('message');
         message.value = message.value + '>>' + postID + '\n';
         message.focus();
         return false;
     }
     function reloadCAPTCHA() {
-        var captcha = DOM_3.qid('captcha');
+        var captcha = DOM_4.qid('captcha');
         captcha.value = '';
         captcha.focus();
-        var captchaimage = DOM_3.qid('captchaimage');
+        var captchaimage = DOM_4.qid('captchaimage');
         captchaimage.src = captchaimage.src + '#new';
         return false;
     }
@@ -222,10 +286,10 @@ System.register("index", ["modules/FormSave", "modules/StyleSwitcher", "utils/DO
     }
     function expandFile(e, id) {
         if (e == undefined || e.which == undefined || e.which == 1) {
-            var wrapper_1 = DOM_3.qid('thumbnail-wrapper_' + id);
-            var file_1 = DOM_3.qid('file_' + id);
+            var wrapper_1 = DOM_4.qid('thumbnail-wrapper_' + id);
+            var file_1 = DOM_4.qid('file_' + id);
             if (wrapper_1.getAttribute('expanded') != 'true') {
-                var expand = DOM_3.qid('expand_' + id);
+                var expand = DOM_4.qid('expand_' + id);
                 wrapper_1.setAttribute('expanded', 'true');
                 file_1.innerHTML = decodeURIComponent(expand.textContent);
                 file_1.style.visibility = 'hidden';
@@ -243,45 +307,32 @@ System.register("index", ["modules/FormSave", "modules/StyleSwitcher", "utils/DO
                 file_1.innerHTML = '';
                 wrapper_1.style.display = '';
                 wrapper_1.setAttribute('expanded', 'false');
-                var thumbnail = DOM_3.qid('thumbnail_' + id);
+                var thumbnail = DOM_4.qid('thumbnail_' + id);
                 scrollIntoView(thumbnail);
             }
             return false;
         }
         return true;
     }
-    function insertBBCode(code) {
-        var messageEl = DOM_3.qs('#message');
-        var str = messageEl.value;
-        var begin = messageEl.selectionStart;
-        var end = messageEl.selectionEnd;
-        messageEl.value = [
-            str.substring(0, begin),
-            '[', code, ']',
-            str.substring(begin, end),
-            '[/', code, ']',
-            str.substring(end),
-        ].join('');
-        messageEl.focus();
-        messageEl.selectionStart = begin + code.length + 2;
-        messageEl.selectionEnd = begin + code.length + 2 + (end - begin);
-        return false;
-    }
-    var FormSave_1, StyleSwitcher_1, DOM_3, modules;
+    var FormMarkup_1, FormSave_1, StyleSwitcher_1, DOM_4, modules;
     return {
         setters: [
+            function (FormMarkup_1_1) {
+                FormMarkup_1 = FormMarkup_1_1;
+            },
             function (FormSave_1_1) {
                 FormSave_1 = FormSave_1_1;
             },
             function (StyleSwitcher_1_1) {
                 StyleSwitcher_1 = StyleSwitcher_1_1;
             },
-            function (DOM_3_1) {
-                DOM_3 = DOM_3_1;
+            function (DOM_4_1) {
+                DOM_4 = DOM_4_1;
             }
         ],
         execute: function () {
             modules = {};
+            modules['FormMarkup'] = new FormMarkup_1.default();
             modules['FormSave'] = new FormSave_1.default();
             modules['StyleSwitcher'] = new StyleSwitcher_1.default();
             document.addEventListener('DOMContentLoaded', function () {
