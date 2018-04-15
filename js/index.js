@@ -28,14 +28,107 @@ System.register("utils/DOM", [], function (exports_2, context_2) {
         }
     };
 });
-System.register("modules/FormMarkup", ["utils/DOM"], function (exports_3, context_3) {
+System.register("modules/ExpandFile", ["utils/DOM"], function (exports_3, context_3) {
     "use strict";
     var __moduleName = context_3 && context_3.id;
-    var DOM_1, FormMarkup;
+    var DOM_1, ExpandFile;
     return {
         setters: [
             function (DOM_1_1) {
                 DOM_1 = DOM_1_1;
+            }
+        ],
+        execute: function () {
+            ExpandFile = /** @class */ (function () {
+                function ExpandFile() {
+                    var _this = this;
+                    document.addEventListener('DOMContentLoaded', function () { return _this.onLoad(); });
+                }
+                ExpandFile.prototype.onLoad = function () {
+                    var _this = this;
+                    var links = DOM_1.qsa('.file-info__link, .thumbnail');
+                    var _loop_1 = function (i) {
+                        var id = Number(links[i].getAttribute('data-id'));
+                        links[i].addEventListener('click', function (e) { return _this.expandFile(e, id); });
+                    };
+                    for (var i = 0; i < links.length; ++i) {
+                        _loop_1(i);
+                    }
+                    var files = DOM_1.qsa('.original');
+                    var _loop_2 = function (i) {
+                        var id = Number(files[i].getAttribute('data-id'));
+                        files[i].addEventListener('click', function (e) { return _this.expandFile(e, id); });
+                    };
+                    for (var i = 0; i < files.length; ++i) {
+                        _loop_2(i);
+                    }
+                };
+                ExpandFile.prototype.scrollIntoView = function (element) {
+                    var window_pos = window.scrollY || window.pageYOffset;
+                    var window_height = window.innerHeight;
+                    var element_pos = 0;
+                    var element_height = element.offsetHeight;
+                    for (var p = element; p && p.tagName !== 'BODY'; p = p.offsetParent) {
+                        element_pos += p.offsetTop;
+                    }
+                    if (window_pos + window_height < element_pos + element_height) {
+                        element.scrollIntoView(false);
+                    }
+                    else if (element_pos < window_pos) {
+                        element.scrollIntoView(true);
+                    }
+                };
+                ExpandFile.prototype.expandFile = function (e, id) {
+                    var _this = this;
+                    if (e === undefined || e.which === undefined || e.which === 1) {
+                        if (e) {
+                            e.preventDefault();
+                        }
+                        var thumbnail_1 = DOM_1.qid("thumbnail_wrapper_" + id);
+                        var original_1 = DOM_1.qid("original_wrapper_" + id);
+                        if (thumbnail_1.getAttribute('data-expanded') !== 'true') {
+                            thumbnail_1.setAttribute('data-expanded', 'true');
+                            // Load original file
+                            var expand = DOM_1.qid("expand_" + id);
+                            original_1.innerHTML = decodeURIComponent(expand.textContent);
+                            original_1.style.visibility = 'hidden';
+                            setTimeout(function () {
+                                // Hide thumbnail
+                                thumbnail_1.style.display = 'none';
+                                // Show original file
+                                original_1.style.visibility = 'visible';
+                                original_1.style.display = '';
+                                _this.scrollIntoView(original_1);
+                            }, 100);
+                        }
+                        else {
+                            thumbnail_1.setAttribute('data-expanded', 'false');
+                            // Hide original file
+                            original_1.style.display = 'none';
+                            original_1.innerHTML = '';
+                            // Show thumbnail
+                            thumbnail_1.style.display = '';
+                            var thumbnail_content = DOM_1.qid("thumbnail_" + id);
+                            this.scrollIntoView(thumbnail_content);
+                        }
+                        return false;
+                    }
+                    return true;
+                };
+                return ExpandFile;
+            }());
+            exports_3("default", ExpandFile);
+        }
+    };
+});
+System.register("modules/FormMarkup", ["utils/DOM"], function (exports_4, context_4) {
+    "use strict";
+    var __moduleName = context_4 && context_4.id;
+    var DOM_2, FormMarkup;
+    return {
+        setters: [
+            function (DOM_2_1) {
+                DOM_2 = DOM_2_1;
             }
         ],
         execute: function () {
@@ -60,14 +153,14 @@ System.register("modules/FormMarkup", ["utils/DOM"], function (exports_3, contex
                     };
                     var ids = Object.keys(buttons);
                     ids.forEach(function (id) {
-                        var button = DOM_1.qid(id);
+                        var button = DOM_2.qid(id);
                         if (button) {
                             button.addEventListener('click', buttons[id]);
                         }
                     });
                 };
                 FormMarkup.prototype.insertMarkup = function (before, after) {
-                    var message = DOM_1.qid('message');
+                    var message = DOM_2.qid('message');
                     var str = message.value;
                     var begin = message.selectionStart;
                     var end = message.selectionEnd;
@@ -88,13 +181,13 @@ System.register("modules/FormMarkup", ["utils/DOM"], function (exports_3, contex
                 };
                 return FormMarkup;
             }());
-            exports_3("default", FormMarkup);
+            exports_4("default", FormMarkup);
         }
     };
 });
-System.register("utils/Cookie", [], function (exports_4, context_4) {
+System.register("utils/Cookie", [], function (exports_5, context_5) {
     "use strict";
-    var __moduleName = context_4 && context_4.id;
+    var __moduleName = context_5 && context_5.id;
     function get(name, _default) {
         if (_default === void 0) { _default = null; }
         var cookie_str = "; " + document.cookie;
@@ -105,27 +198,27 @@ System.register("utils/Cookie", [], function (exports_4, context_4) {
         }
         return _default;
     }
-    exports_4("get", get);
+    exports_5("get", get);
     function set(name, value, expiration) {
         var value_enc = encodeURIComponent(value);
         var expiration_str = expiration.toUTCString();
         document.cookie = name + "=" + value_enc + "; path=/; expires=" + expiration_str;
     }
-    exports_4("set", set);
+    exports_5("set", set);
     return {
         setters: [],
         execute: function () {
         }
     };
 });
-System.register("modules/FormSave", ["utils/DOM", "utils/Cookie"], function (exports_5, context_5) {
+System.register("modules/FormSave", ["utils/DOM", "utils/Cookie"], function (exports_6, context_6) {
     "use strict";
-    var __moduleName = context_5 && context_5.id;
-    var DOM_2, Cookie, FormSave;
+    var __moduleName = context_6 && context_6.id;
+    var DOM_3, Cookie, FormSave;
     return {
         setters: [
-            function (DOM_2_1) {
-                DOM_2 = DOM_2_1;
+            function (DOM_3_1) {
+                DOM_3 = DOM_3_1;
             },
             function (Cookie_1) {
                 Cookie = Cookie_1;
@@ -138,7 +231,7 @@ System.register("modules/FormSave", ["utils/DOM", "utils/Cookie"], function (exp
                     document.addEventListener('DOMContentLoaded', function () { return _this.onLoad(); });
                 }
                 FormSave.prototype.onLoad = function () {
-                    var name = DOM_2.qs('input[name="name"]');
+                    var name = DOM_3.qs('input[name="name"]');
                     if (name) {
                         // Load name
                         name.value = Cookie.get('tinyib_name', '');
@@ -149,12 +242,12 @@ System.register("modules/FormSave", ["utils/DOM", "utils/Cookie"], function (exp
                             Cookie.set('tinyib_name', name.value, expiration_date);
                         });
                     }
-                    var new_post_password = DOM_2.qid('newpostpassword');
+                    var new_post_password = DOM_3.qid('newpostpassword');
                     if (new_post_password) {
                         // Load delete post password
                         var password = Cookie.get('tinyib_password');
                         new_post_password.value = password;
-                        var delete_post_password = DOM_2.qid('deletepostpassword');
+                        var delete_post_password = DOM_3.qid('deletepostpassword');
                         if (delete_post_password) {
                             delete_post_password.value = password;
                         }
@@ -168,18 +261,18 @@ System.register("modules/FormSave", ["utils/DOM", "utils/Cookie"], function (exp
                 };
                 return FormSave;
             }());
-            exports_5("default", FormSave);
+            exports_6("default", FormSave);
         }
     };
 });
-System.register("modules/QuotePost", ["utils/DOM"], function (exports_6, context_6) {
+System.register("modules/QuotePost", ["utils/DOM"], function (exports_7, context_7) {
     "use strict";
-    var __moduleName = context_6 && context_6.id;
-    var DOM_3, QuotePost;
+    var __moduleName = context_7 && context_7.id;
+    var DOM_4, QuotePost;
     return {
         setters: [
-            function (DOM_3_1) {
-                DOM_3 = DOM_3_1;
+            function (DOM_4_1) {
+                DOM_4 = DOM_4_1;
             }
         ],
         execute: function () {
@@ -189,35 +282,44 @@ System.register("modules/QuotePost", ["utils/DOM"], function (exports_6, context
                     document.addEventListener('DOMContentLoaded', function () { return _this.onLoad(); });
                 }
                 QuotePost.prototype.onLoad = function () {
+                    var _this = this;
                     var hash = window.location.hash;
                     if (hash) {
                         var match = hash.match(/^#q\d+$/i);
                         if (match !== null) {
-                            var id = match[0].substr(2);
+                            var id = Number(match[0].substr(2));
                             this.quotePost(id);
                         }
                     }
+                    var links = DOM_4.qsa('.post-header__reflink');
+                    var _loop_3 = function (i) {
+                        var id = Number(links[i].getAttribute('data-id'));
+                        links[i].addEventListener('click', function () { return _this.quotePost(id); });
+                    };
+                    for (var i = 0; i < links.length; ++i) {
+                        _loop_3(i);
+                    }
                 };
                 QuotePost.prototype.quotePost = function (id) {
-                    var message = DOM_3.qid('message');
+                    var message = DOM_4.qid('message');
                     message.value = message.value + ">>" + id + "\n";
                     message.focus();
                     return false;
                 };
                 return QuotePost;
             }());
-            exports_6("default", QuotePost);
+            exports_7("default", QuotePost);
         }
     };
 });
-System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function (exports_7, context_7) {
+System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function (exports_8, context_8) {
     "use strict";
-    var __moduleName = context_7 && context_7.id;
-    var DOM_4, Cookie, StyleSwitcher;
+    var __moduleName = context_8 && context_8.id;
+    var DOM_5, Cookie, StyleSwitcher;
     return {
         setters: [
-            function (DOM_4_1) {
-                DOM_4 = DOM_4_1;
+            function (DOM_5_1) {
+                DOM_5 = DOM_5_1;
             },
             function (Cookie_2) {
                 Cookie = Cookie_2;
@@ -229,7 +331,7 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
                     var _this = this;
                     this.styles = {};
                     // Parse selectable styles from <head>
-                    var styles = DOM_4.qsa('link[title]');
+                    var styles = DOM_5.qsa('link[title]');
                     for (var i = 0; i < styles.length; ++i) {
                         var style = styles[i];
                         var title = style.title;
@@ -245,7 +347,7 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
                 }
                 StyleSwitcher.prototype.onLoad = function () {
                     var _this = this;
-                    var style_switcher = DOM_4.qid('style-switcher');
+                    var style_switcher = DOM_5.qid('style-switcher');
                     if (style_switcher) {
                         // Populate style switcher widget
                         var styles = Object.keys(this.styles);
@@ -261,12 +363,12 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
                     }
                 };
                 StyleSwitcher.prototype.setStyle = function (style) {
-                    var head = DOM_4.qs('head');
+                    var head = DOM_5.qs('head');
                     // If no <head> element, do nothing
                     if (!head) {
                         return;
                     }
-                    var selected_style = DOM_4.qs('link[data-selected]');
+                    var selected_style = DOM_5.qs('link[data-selected]');
                     if (selected_style) {
                         // If style already selected, do nothing
                         if (selected_style.title === style) {
@@ -285,70 +387,27 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
                 };
                 return StyleSwitcher;
             }());
-            exports_7("default", StyleSwitcher);
+            exports_8("default", StyleSwitcher);
         }
     };
 });
-System.register("index", ["modules/FormMarkup", "modules/FormSave", "modules/QuotePost", "modules/StyleSwitcher", "utils/DOM"], function (exports_8, context_8) {
+System.register("index", ["modules/ExpandFile", "modules/FormMarkup", "modules/FormSave", "modules/QuotePost", "modules/StyleSwitcher", "utils/DOM"], function (exports_9, context_9) {
     "use strict";
-    var __moduleName = context_8 && context_8.id;
+    var __moduleName = context_9 && context_9.id;
     function reloadCAPTCHA() {
-        var captcha = DOM_5.qid('captcha');
+        var captcha = DOM_6.qid('captcha');
         captcha.value = '';
         captcha.focus();
-        var captchaimage = DOM_5.qid('captchaimage');
+        var captchaimage = DOM_6.qid('captchaimage');
         captchaimage.src = captchaimage.src + '#new';
         return false;
     }
-    function scrollIntoView(el) {
-        var wY = window.scrollY || window.pageYOffset;
-        var wH = window.innerHeight;
-        var elY = 0;
-        var elH = 0;
-        for (var p = el; p && p.tagName != 'BODY'; p = p.offsetParent) {
-            elY += p.offsetTop;
-        }
-        elH = el.offsetHeight;
-        if (wY + wH < elY + elH) {
-            el.scrollIntoView(false);
-        }
-        else if (elY < wY) {
-            el.scrollIntoView(true);
-        }
-    }
-    function expandFile(e, id) {
-        if (e == undefined || e.which == undefined || e.which == 1) {
-            var wrapper_1 = DOM_5.qid('thumbnail-wrapper_' + id);
-            var file_1 = DOM_5.qid('file_' + id);
-            if (wrapper_1.getAttribute('expanded') != 'true') {
-                var expand = DOM_5.qid('expand_' + id);
-                wrapper_1.setAttribute('expanded', 'true');
-                file_1.innerHTML = decodeURIComponent(expand.textContent);
-                file_1.style.visibility = 'hidden';
-                setTimeout(function (id) {
-                    return function () {
-                        wrapper_1.style.display = 'none';
-                        file_1.style.visibility = 'visible';
-                        file_1.style.display = '';
-                        scrollIntoView(file_1);
-                    };
-                }(id), 100);
-            }
-            else {
-                file_1.style.display = 'none';
-                file_1.innerHTML = '';
-                wrapper_1.style.display = '';
-                wrapper_1.setAttribute('expanded', 'false');
-                var thumbnail = DOM_5.qid('thumbnail_' + id);
-                scrollIntoView(thumbnail);
-            }
-            return false;
-        }
-        return true;
-    }
-    var FormMarkup_1, FormSave_1, QuotePost_1, StyleSwitcher_1, DOM_5, modules;
+    var ExpandFile_1, FormMarkup_1, FormSave_1, QuotePost_1, StyleSwitcher_1, DOM_6, modules;
     return {
         setters: [
+            function (ExpandFile_1_1) {
+                ExpandFile_1 = ExpandFile_1_1;
+            },
             function (FormMarkup_1_1) {
                 FormMarkup_1 = FormMarkup_1_1;
             },
@@ -361,12 +420,13 @@ System.register("index", ["modules/FormMarkup", "modules/FormSave", "modules/Quo
             function (StyleSwitcher_1_1) {
                 StyleSwitcher_1 = StyleSwitcher_1_1;
             },
-            function (DOM_5_1) {
-                DOM_5 = DOM_5_1;
+            function (DOM_6_1) {
+                DOM_6 = DOM_6_1;
             }
         ],
         execute: function () {
             modules = {};
+            modules['ExpandFile'] = new ExpandFile_1.default();
             modules['FormMarkup'] = new FormMarkup_1.default();
             modules['FormSave'] = new FormSave_1.default();
             modules['QuotePost'] = new QuotePost_1.default();

@@ -1,22 +1,20 @@
 {% set thread_id = post['id'] %}
 
-<div class="content__post post post_oppost oppost">
+<div class="content__oppost post post_oppost oppost">
   {% if post['file_type'] %}
-    <span class="post__file-info file-info filesize">
-      {% include '_post_file_info.twig' %}
-    </span>
+    <div class="post__file-info file-info filesize">
+      {% include '_file_info.twig' %}
+    </div>
   {% endif %}
 
   <div class="post__header post-header">
     {% include '_post_header.twig' %}
-
-    {% if res == constant('TINYIB_INDEXPAGE') %}
-      &nbsp;[<a href="res/{{ post['id'] }}.html">Reply</a>]
-    {% endif %}
   </div>
 
   {% if post['file_type'] %}
-    {% include '_post_file.twig' %}
+    <div class="post__file file">
+      {% include '_file.twig' %}
+    </div>
   {% endif %}
 
   <div class="post__message message">

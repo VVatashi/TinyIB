@@ -7,15 +7,10 @@
   box-shadow: 3px 3px 5px rgba(0, 0, 0, .2);
   box-sizing: border-box;
   color: $main-text;
-
-  &_reply {
-    margin-bottom: 10px;
-    margin-top: 10px;
-  }
+  padding: 10px;
 
   &__inner {
     float: unset;
-    padding: 10px;
   }
 
   &__header {
@@ -31,11 +26,10 @@
     padding: 4px;
   }
 
-  &__thumbnail {
+  &__file {
     box-shadow: 5px 5px 5px rgba(0, 0, 0, .2);
     float: right;
     margin-right: 4px;
-    margin-top: -30px;
   }
 
   &__message {
@@ -45,6 +39,10 @@
     min-width: -moz-fit-content;
     min-width: min-content;
     overflow-wrap: break-word;
+  }
+
+  &__omitted {
+    color: #a88085;
   }
 
   &:hover {

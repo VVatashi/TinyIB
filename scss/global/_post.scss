@@ -1,6 +1,7 @@
 .post {
   &__inner {
     float: left;
+    margin: 2px 0;
     overflow: hidden;
   }
 
@@ -9,13 +10,12 @@
     margin-left: 20px;
   }
 
-  &__message {
-    margin: 1em 25px 5px;
-  }
-
-  &__thumbnail {
-    border: 0;
+  &__file {
     float: left;
     margin: 4px 20px;
+  }
+
+  &__message {
+    margin: 1em 25px 5px;
   }
 }

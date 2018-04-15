@@ -10,11 +10,11 @@
     margin: 0;
   }
 
-  &__thumbnail {
+  &__file {
     padding-right: 10px;
   }
 
-  &__thumbnail,
+  &__file,
   &__header,
   &__message {
     margin: 0;
@@ -23,5 +23,9 @@
   &__message {
     color: $post-text-color;
     margin-bottom: 10px
+  }
+
+  &__omitted {
+    color: #666;
   }
 }

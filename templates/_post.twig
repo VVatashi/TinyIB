@@ -8,10 +8,12 @@
 
     {% if post['file_type'] %}
       <div class="post__file-info file-info filesize">
-        {% include '_post_file_info.twig' %}
+        {% include '_file_info.twig' %}
       </div>
 
-      {% include '_post_file.twig' %}
+      <div class="post__file file">
+        {% include '_file.twig' %}
+      </div>
     {% endif %}
 
     <div class="post__message message">

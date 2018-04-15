@@ -1,0 +1,7 @@
+@import '../utils';
+
+.post-header {
+  &__reply-wrapper {
+    @include brackets;
+  }
+}

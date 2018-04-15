@@ -12,6 +12,18 @@
   }
 }
 
+@mixin brackets {
+  &::before {
+    content: '[';
+  }
+
+  &::after {
+    content: ']';
+  }
+}
+
+// Responsive utils
+
 $phone-up: 600px;
 $tablet-portrait-up: 900px;
 $tablet-landscape-up: 1200px;
