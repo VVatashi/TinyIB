@@ -10,6 +10,9 @@ module.exports = {
       exclude: /node_modules/,
     }],
   },
+  externals: {
+    luxon: 'luxon',
+  },
   resolve: {
     extensions: ['.ts'],
   },

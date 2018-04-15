@@ -25,19 +25,25 @@ export default class ExpandFile extends BaseModule {
     }, 1000);
   }
 
+  onPostInsert(post: Element) {
+    // Wait userscripts
+    setTimeout(() => {
+      // Attachs handlers
+      const elements = post.querySelectorAll('.file-info__link, .thumbnail, .original');
+
+      for (let i = 0; i < elements.length; ++i) {
+        const id = Number(elements[i].getAttribute('data-id'));
+        elements[i].addEventListener('click', (e) => this.expandFile(e as MouseEvent, id));
+      }
+    }, 100);
+  }
+
   protected setupHandlers() {
-    const links = qsa('.file-info__link, .thumbnail');
+    const elements = qsa('.file-info__link, .thumbnail, .original');
 
-    for (let i = 0; i < links.length; ++i) {
-      const id = Number(links[i].getAttribute('data-id'));
-      links[i].addEventListener('click', (e) => this.expandFile(e as MouseEvent, id));
-    }
-
-    const files = qsa('.original');
-
-    for (let i = 0; i < files.length; ++i) {
-      const id = Number(files[i].getAttribute('data-id'));
-      files[i].addEventListener('click', (e) => this.expandFile(e as MouseEvent, id));
+    for (let i = 0; i < elements.length; ++i) {
+      const id = Number(elements[i].getAttribute('data-id'));
+      elements[i].addEventListener('click', (e) => this.expandFile(e as MouseEvent, id));
     }
   }
 
