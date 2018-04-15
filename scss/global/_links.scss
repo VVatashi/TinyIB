@@ -1,0 +1,9 @@
+@import '../utils';
+
+.links {
+  &__item {
+    @include brackets;
+
+    display: inline-block;
+  }
+}

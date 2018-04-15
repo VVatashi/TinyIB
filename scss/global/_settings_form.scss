@@ -1,0 +1,25 @@
+.settings-form {
+  &__section,
+  &__buttons {
+    margin-bottom: 10px;
+  }
+
+  &__section-title {
+    padding: 0 4px;
+  }
+
+  &__row {
+    margin-bottom: 4px;
+  }
+
+  &__label {
+    &_hidden {
+      display: none;
+    }
+  }
+
+  &__buttons,
+  &__status {
+    text-align: center;
+  }
+}

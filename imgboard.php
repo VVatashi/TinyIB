@@ -8,6 +8,7 @@ require_once './vendor/autoload.php';
 
 use TinyIB\Controller\ManageController;
 use TinyIB\Controller\PostController;
+use TinyIB\Controller\SettingsController;
 use TinyIB\Renderer\Renderer;
 use TinyIB\Repository\PDOBanRepository;
 use TinyIB\Repository\PDOPostRepository;
@@ -106,6 +107,9 @@ $manage_controller = new ManageController($ban_repository, $post_repository, $re
 /** @var \TinyIB\Controller\IPostController $post_controller */
 $post_controller = new PostController($ban_repository, $post_repository, $renderer);
 
+/** @var \TinyIB\Controller\ISettingsController $settings_controller */
+$settings_controller = new SettingsController($renderer);
+
 // Check if the request is to make a post
 if (isset($_POST['message']) || isset($_POST['file'])) {
     $data = array_intersect_key($_POST, array_flip([
@@ -124,6 +128,8 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
     $password = isset($_POST['password']) ? $_POST['password'] : null;
 
     $post_controller->delete($id, $password)->send();
+} elseif (isset($_GET['settings'])) {
+    $settings_controller->settings()->send();
 // Check if the request is to access the management area
 } elseif (isset($_GET['manage'])) {
     if (isset($_GET['rebuildall'])) {

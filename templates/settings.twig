@@ -1,0 +1,36 @@
+{% extends '_html.twig' %}
+
+{% block body %}
+  <ul class="content__links links">
+    <li class="links__item"><a class="links__link" href="index.html">Return</a></li>
+  </ul>
+
+  <form class="content__settings-form settings-form" id="settings_form">
+    <fieldset class="settings-form__section">
+      <legend class="settings-form__section-title">Time settings</legend>
+
+      <fieldset class="settings-form__section">
+        <legend class="settings-form__section-title">Language</legend>
+
+        <p class="settings-form__row">
+          <input class="settings-form__radio" type="radio" id="time_locale_default" name="time_locale" value="default" checked />
+          <label class="settings-form__label" for="time_locale_default">Browser defaults</label>
+        </p>
+
+        <p class="settings-form__row">
+          <input class="settings-form__radio" type="radio" id="time_locale_custom" name="time_locale" value="custom" />
+          <label class="settings-form__label" for="time_locale_custom">Custom</label>
+
+          <input class="settings-form__text" type="text" id="time_locale_custom_value" name="time_locale_custom_value" value="" placeholder="en" />
+          <label class="settings-form__label settings-form__label_hidden" for="time_locale_custom_value">Custom</label>
+        </p>
+      </fieldset>
+    </fieldset>
+
+    <p class="settings-form__buttons">
+      <button class="settings-form__button" type="submit">Save</button>
+    </p>
+
+    <p class="settings-form__status" id="status"></p>
+  </form>
+{% endblock %}

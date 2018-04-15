@@ -6,6 +6,7 @@ import ExpandFile from './modules/ExpandFile';
 import FormMarkup from './modules/FormMarkup';
 import FormSave from './modules/FormSave';
 import QuotePost from './modules/QuotePost';
+import Settings from './modules/Settings';
 import StyleSwitcher from './modules/StyleSwitcher';
 
 const modules: { [key: string]: IModule } = {};
@@ -16,6 +17,7 @@ modules['ExpandFile'] = new ExpandFile();
 modules['FormMarkup'] = new FormMarkup();
 modules['FormSave'] = new FormSave();
 modules['QuotePost'] = new QuotePost();
+modules['Settings'] = new Settings();
 modules['StyleSwitcher'] = new StyleSwitcher();
 
 const observer = new MutationObserver(mutations => {

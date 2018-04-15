@@ -1,12 +1,6 @@
 @import '../utils';
 
 .content {
-  &__return-wrapper {
-    @include brackets;
-
-    display: inline-block;
-  }
-
   &__replymode,
   &__manageinfo {
     color: #fff;
@@ -47,5 +41,10 @@
     float: right;
     text-align: center;
     white-space: nowrap;
+  }
+
+  &__settings-form {
+    margin: 0 auto;
+    max-width: 600px;
   }
 }

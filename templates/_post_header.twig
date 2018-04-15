@@ -44,14 +44,14 @@
 
 <span class="post-header__reflink-wrapper reflink">
   {% if res == constant('TINYIB_RESPAGE') %}
-    <a class="post-header__reflink" href="{{ thread_id }}.html#q{{ post['id'] }}" data-id="{{ post['id'] }}">
-      No.{{ post['id'] }}
-    </a>
+    {% set url_prefix = '' %}
   {% else %}
-    <a class="post-header__reflink" href="res/{{ thread_id }}.html#q{{ post['id'] }}" data-id="{{ post['id'] }}">
-      No.{{ post['id'] }}
-    </a>
+    {% set url_prefix = 'res/' %}
   {% endif %}
+
+  <a class="post-header__reflink" href="{{ url_prefix }}{{ thread_id }}.html#q{{ post['id'] }}" data-id="{{ post['id'] }}">
+    №{{ post['id'] }}
+  </a>
 
   {% if post[stickied] %}
     <img src="sticky.png" alt="Stickied" title="Stickied" width="16" height="16" />
