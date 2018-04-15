@@ -81,7 +81,19 @@ System.register("modules/ExpandFile", ["utils/DOM"], function (exports_4, contex
             ExpandFile = /** @class */ (function () {
                 function ExpandFile() {
                     var _this = this;
-                    document.addEventListener('DOMContentLoaded', function () { return _this.onLoad(); });
+                    document.addEventListener('DOMContentLoaded', function () {
+                        _this.onLoad();
+                        // Wait one second for userscripts init
+                        // TODO: Try use MutationObserver instead?
+                        setTimeout(function () {
+                            // Try detect Dollchan Extension
+                            var de = DOM_2.qid('de-main');
+                            if (de) {
+                                // DE breaks some event handlers, so needs to reattach them
+                                _this.onLoad();
+                            }
+                        }, 1000);
+                    });
                 }
                 ExpandFile.prototype.onLoad = function () {
                     var _this = this;

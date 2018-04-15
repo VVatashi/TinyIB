@@ -3,7 +3,21 @@ import { qid, qsa } from '../utils/DOM';
 
 export default class ExpandFile implements IModule {
   public constructor() {
-    document.addEventListener('DOMContentLoaded', () => this.onLoad());
+    document.addEventListener('DOMContentLoaded', () => {
+      this.onLoad();
+
+      // Wait one second for userscripts init
+      // TODO: Try use MutationObserver instead?
+      setTimeout(() => {
+        // Try detect Dollchan Extension
+        const de = qid('de-main');
+  
+        if (de) {
+          // DE breaks some event handlers, so needs to reattach them
+          this.onLoad();
+        }
+      }, 1000);
+    });
   }
 
   protected onLoad() {
