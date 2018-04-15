@@ -1,21 +1,15 @@
 import IModule from './modules/IModule';
 import FormMarkup from './modules/FormMarkup';
 import FormSave from './modules/FormSave';
+import QuotePost from './modules/QuotePost';
 import StyleSwitcher from './modules/StyleSwitcher';
-import { qid, qs } from './utils/DOM';
+import { qid } from './utils/DOM';
 
 const modules: { [key: string]: IModule } = {};
 modules['FormMarkup'] = new FormMarkup();
 modules['FormSave'] = new FormSave();
+modules['QuotePost'] = new QuotePost();
 modules['StyleSwitcher'] = new StyleSwitcher();
-
-function quotePost(postID: string) {
-  const message = qid('message') as HTMLInputElement;
-  message.value = message.value + '>>' + postID + '\n';
-  message.focus();
-
-  return false;
-}
 
 function reloadCAPTCHA() {
   const captcha = qid('captcha') as HTMLInputElement;
@@ -83,15 +77,3 @@ function expandFile(e: MouseEvent, id: number) {
 
   return true;
 }
-
-document.addEventListener('DOMContentLoaded', function () {
-  // Quote post
-  if (window.location.hash) {
-    if (window.location.hash.match(/^#q\d+$/i) !== null) {
-      const quotePostID = window.location.hash.match(/^#q\d+$/i)[0].substr(2);
-      if (quotePostID != '') {
-        quotePost(quotePostID);
-      }
-    }
-  }
-}, false);

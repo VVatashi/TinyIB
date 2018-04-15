@@ -172,14 +172,52 @@ System.register("modules/FormSave", ["utils/DOM", "utils/Cookie"], function (exp
         }
     };
 });
-System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function (exports_6, context_6) {
+System.register("modules/QuotePost", ["utils/DOM"], function (exports_6, context_6) {
     "use strict";
     var __moduleName = context_6 && context_6.id;
-    var DOM_3, Cookie, StyleSwitcher;
+    var DOM_3, QuotePost;
     return {
         setters: [
             function (DOM_3_1) {
                 DOM_3 = DOM_3_1;
+            }
+        ],
+        execute: function () {
+            QuotePost = /** @class */ (function () {
+                function QuotePost() {
+                    var _this = this;
+                    document.addEventListener('DOMContentLoaded', function () { return _this.onLoad(); });
+                }
+                QuotePost.prototype.onLoad = function () {
+                    var hash = window.location.hash;
+                    if (hash) {
+                        var match = hash.match(/^#q\d+$/i);
+                        if (match !== null) {
+                            var id = match[0].substr(2);
+                            this.quotePost(id);
+                        }
+                    }
+                };
+                QuotePost.prototype.quotePost = function (id) {
+                    var message = DOM_3.qid('message');
+                    message.value = message.value + ">>" + id + "\n";
+                    message.focus();
+                    return false;
+                };
+                return QuotePost;
+            }());
+            exports_6("default", QuotePost);
+        }
+    };
+});
+System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function (exports_7, context_7) {
+    "use strict";
+    var __moduleName = context_7 && context_7.id;
+    var DOM_4, Cookie, StyleSwitcher;
+    return {
+        setters: [
+            function (DOM_4_1) {
+                DOM_4 = DOM_4_1;
             },
             function (Cookie_2) {
                 Cookie = Cookie_2;
@@ -191,7 +229,7 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
                     var _this = this;
                     this.styles = {};
                     // Parse selectable styles from <head>
-                    var styles = DOM_3.qsa('link[title]');
+                    var styles = DOM_4.qsa('link[title]');
                     for (var i = 0; i < styles.length; ++i) {
                         var style = styles[i];
                         var title = style.title;
@@ -207,7 +245,7 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
                 }
                 StyleSwitcher.prototype.onLoad = function () {
                     var _this = this;
-                    var style_switcher = DOM_3.qid('style-switcher');
+                    var style_switcher = DOM_4.qid('style-switcher');
                     if (style_switcher) {
                         // Populate style switcher widget
                         var styles = Object.keys(this.styles);
@@ -223,12 +261,12 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
                     }
                 };
                 StyleSwitcher.prototype.setStyle = function (style) {
-                    var head = DOM_3.qs('head');
+                    var head = DOM_4.qs('head');
                     // If no <head> element, do nothing
                     if (!head) {
                         return;
                     }
-                    var selected_style = DOM_3.qs('link[data-selected]');
+                    var selected_style = DOM_4.qs('link[data-selected]');
                     if (selected_style) {
                         // If style already selected, do nothing
                         if (selected_style.title === style) {
@@ -247,24 +285,18 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
                 };
                 return StyleSwitcher;
             }());
-            exports_6("default", StyleSwitcher);
+            exports_7("default", StyleSwitcher);
         }
     };
 });
-System.register("index", ["modules/FormMarkup", "modules/FormSave", "modules/StyleSwitcher", "utils/DOM"], function (exports_7, context_7) {
+System.register("index", ["modules/FormMarkup", "modules/FormSave", "modules/QuotePost", "modules/StyleSwitcher", "utils/DOM"], function (exports_8, context_8) {
     "use strict";
-    var __moduleName = context_7 && context_7.id;
-    function quotePost(postID) {
-        var message = DOM_4.qid('message');
-        message.value = message.value + '>>' + postID + '\n';
-        message.focus();
-        return false;
-    }
+    var __moduleName = context_8 && context_8.id;
     function reloadCAPTCHA() {
-        var captcha = DOM_4.qid('captcha');
+        var captcha = DOM_5.qid('captcha');
         captcha.value = '';
         captcha.focus();
-        var captchaimage = DOM_4.qid('captchaimage');
+        var captchaimage = DOM_5.qid('captchaimage');
         captchaimage.src = captchaimage.src + '#new';
         return false;
     }
@@ -286,10 +318,10 @@ System.register("index", ["modules/FormMarkup", "modules/FormSave", "modules/Sty
     }
     function expandFile(e, id) {
         if (e == undefined || e.which == undefined || e.which == 1) {
-            var wrapper_1 = DOM_4.qid('thumbnail-wrapper_' + id);
-            var file_1 = DOM_4.qid('file_' + id);
+            var wrapper_1 = DOM_5.qid('thumbnail-wrapper_' + id);
+            var file_1 = DOM_5.qid('file_' + id);
             if (wrapper_1.getAttribute('expanded') != 'true') {
-                var expand = DOM_4.qid('expand_' + id);
+                var expand = DOM_5.qid('expand_' + id);
                 wrapper_1.setAttribute('expanded', 'true');
                 file_1.innerHTML = decodeURIComponent(expand.textContent);
                 file_1.style.visibility = 'hidden';
@@ -307,14 +339,14 @@ System.register("index", ["modules/FormMarkup", "modules/FormSave", "modules/Sty
                 file_1.innerHTML = '';
                 wrapper_1.style.display = '';
                 wrapper_1.setAttribute('expanded', 'false');
-                var thumbnail = DOM_4.qid('thumbnail_' + id);
+                var thumbnail = DOM_5.qid('thumbnail_' + id);
                 scrollIntoView(thumbnail);
             }
             return false;
         }
         return true;
     }
-    var FormMarkup_1, FormSave_1, StyleSwitcher_1, DOM_4, modules;
+    var FormMarkup_1, FormSave_1, QuotePost_1, StyleSwitcher_1, DOM_5, modules;
     return {
         setters: [
             function (FormMarkup_1_1) {
@@ -323,29 +355,22 @@ System.register("index", ["modules/FormMarkup", "modules/FormSave", "modules/Sty
             function (FormSave_1_1) {
                 FormSave_1 = FormSave_1_1;
             },
+            function (QuotePost_1_1) {
+                QuotePost_1 = QuotePost_1_1;
+            },
             function (StyleSwitcher_1_1) {
                 StyleSwitcher_1 = StyleSwitcher_1_1;
             },
-            function (DOM_4_1) {
-                DOM_4 = DOM_4_1;
+            function (DOM_5_1) {
+                DOM_5 = DOM_5_1;
             }
         ],
         execute: function () {
             modules = {};
             modules['FormMarkup'] = new FormMarkup_1.default();
             modules['FormSave'] = new FormSave_1.default();
+            modules['QuotePost'] = new QuotePost_1.default();
             modules['StyleSwitcher'] = new StyleSwitcher_1.default();
-            document.addEventListener('DOMContentLoaded', function () {
-                // Quote post
-                if (window.location.hash) {
-                    if (window.location.hash.match(/^#q\d+$/i) !== null) {
-                        var quotePostID = window.location.hash.match(/^#q\d+$/i)[0].substr(2);
-                        if (quotePostID != '') {
-                            quotePost(quotePostID);
-                        }
-                    }
-                }
-            }, false);
         }
     };
 });
