@@ -1,15 +1,38 @@
 'use strict';
 
-var gulp = require('gulp');
-var ts = require("gulp-typescript");
-var sass = require('gulp-sass');
+const gulp = require('gulp');
+const gutil = require('gulp-util');
 
-var tsProject = ts.createProject("tsconfig.json");
+const webpack = require('webpack');
+const webpackConfig = require('./webpack.config.js');
 
-gulp.task('ts', function () {
-  return tsProject.src()
-    .pipe(tsProject())
-    .js.pipe(gulp.dest('./js'));
+const sass = require('gulp-sass');
+
+gulp.task('ts', function (done) {
+  function onError(error) {
+    done(new gutil.PluginError('webpack', error));
+  }
+
+  function onSuccess(info) {
+    gutil.log('[webpack]', info);
+    done();
+  }
+
+  webpack(webpackConfig, function (error, stats) {
+    if (error) {
+      onError(error);
+    } else if (stats.hasErrors()) {
+      onError(stats.toString({
+        colors: true,
+        reasons: true,
+      }));
+    } else {
+      onSuccess(stats.toString({
+        colors: true,
+        reasons: true,
+      }));
+    }
+  });
 });
 
 gulp.task('sass', function () {
