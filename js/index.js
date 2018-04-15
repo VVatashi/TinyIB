@@ -28,14 +28,53 @@ System.register("utils/DOM", [], function (exports_2, context_2) {
         }
     };
 });
-System.register("modules/ExpandFile", ["utils/DOM"], function (exports_3, context_3) {
+System.register("modules/Captcha", ["utils/DOM"], function (exports_3, context_3) {
     "use strict";
     var __moduleName = context_3 && context_3.id;
-    var DOM_1, ExpandFile;
+    var DOM_1, Captcha;
     return {
         setters: [
             function (DOM_1_1) {
                 DOM_1 = DOM_1_1;
+            }
+        ],
+        execute: function () {
+            Captcha = /** @class */ (function () {
+                function Captcha() {
+                    var _this = this;
+                    this.original_src = '';
+                    document.addEventListener('DOMContentLoaded', function () { return _this.onLoad(); });
+                }
+                Captcha.prototype.onLoad = function () {
+                    var _this = this;
+                    var image = DOM_1.qid('captchaimage');
+                    if (image) {
+                        this.original_src = image.src;
+                        image.addEventListener('click', function () { return _this.reload(); });
+                    }
+                };
+                Captcha.prototype.reload = function () {
+                    var captcha = DOM_1.qid('captcha');
+                    captcha.value = '';
+                    captcha.focus();
+                    var image = DOM_1.qid('captchaimage');
+                    image.src = this.original_src + "#" + new Date().getTime();
+                    return false;
+                };
+                return Captcha;
+            }());
+            exports_3("default", Captcha);
+        }
+    };
+});
+System.register("modules/ExpandFile", ["utils/DOM"], function (exports_4, context_4) {
+    "use strict";
+    var __moduleName = context_4 && context_4.id;
+    var DOM_2, ExpandFile;
+    return {
+        setters: [
+            function (DOM_2_1) {
+                DOM_2 = DOM_2_1;
             }
         ],
         execute: function () {
@@ -46,7 +85,7 @@ System.register("modules/ExpandFile", ["utils/DOM"], function (exports_3, contex
                 }
                 ExpandFile.prototype.onLoad = function () {
                     var _this = this;
-                    var links = DOM_1.qsa('.file-info__link, .thumbnail');
+                    var links = DOM_2.qsa('.file-info__link, .thumbnail');
                     var _loop_1 = function (i) {
                         var id = Number(links[i].getAttribute('data-id'));
                         links[i].addEventListener('click', function (e) { return _this.expandFile(e, id); });
@@ -54,7 +93,7 @@ System.register("modules/ExpandFile", ["utils/DOM"], function (exports_3, contex
                     for (var i = 0; i < links.length; ++i) {
                         _loop_1(i);
                     }
-                    var files = DOM_1.qsa('.original');
+                    var files = DOM_2.qsa('.original');
                     var _loop_2 = function (i) {
                         var id = Number(files[i].getAttribute('data-id'));
                         files[i].addEventListener('click', function (e) { return _this.expandFile(e, id); });
@@ -84,12 +123,12 @@ System.register("modules/ExpandFile", ["utils/DOM"], function (exports_3, contex
                         if (e) {
                             e.preventDefault();
                         }
-                        var thumbnail_1 = DOM_1.qid("thumbnail_wrapper_" + id);
-                        var original_1 = DOM_1.qid("original_wrapper_" + id);
+                        var thumbnail_1 = DOM_2.qid("thumbnail_wrapper_" + id);
+                        var original_1 = DOM_2.qid("original_wrapper_" + id);
                         if (thumbnail_1.getAttribute('data-expanded') !== 'true') {
                             thumbnail_1.setAttribute('data-expanded', 'true');
                             // Load original file
-                            var expand = DOM_1.qid("expand_" + id);
+                            var expand = DOM_2.qid("expand_" + id);
                             original_1.innerHTML = decodeURIComponent(expand.textContent);
                             original_1.style.visibility = 'hidden';
                             setTimeout(function () {
@@ -108,7 +147,7 @@ System.register("modules/ExpandFile", ["utils/DOM"], function (exports_3, contex
                             original_1.innerHTML = '';
                             // Show thumbnail
                             thumbnail_1.style.display = '';
-                            var thumbnail_content = DOM_1.qid("thumbnail_" + id);
+                            var thumbnail_content = DOM_2.qid("thumbnail_" + id);
                             this.scrollIntoView(thumbnail_content);
                         }
                         return false;
@@ -117,18 +156,18 @@ System.register("modules/ExpandFile", ["utils/DOM"], function (exports_3, contex
                 };
                 return ExpandFile;
             }());
-            exports_3("default", ExpandFile);
+            exports_4("default", ExpandFile);
         }
     };
 });
-System.register("modules/FormMarkup", ["utils/DOM"], function (exports_4, context_4) {
+System.register("modules/FormMarkup", ["utils/DOM"], function (exports_5, context_5) {
     "use strict";
-    var __moduleName = context_4 && context_4.id;
-    var DOM_2, FormMarkup;
+    var __moduleName = context_5 && context_5.id;
+    var DOM_3, FormMarkup;
     return {
         setters: [
-            function (DOM_2_1) {
-                DOM_2 = DOM_2_1;
+            function (DOM_3_1) {
+                DOM_3 = DOM_3_1;
             }
         ],
         execute: function () {
@@ -153,14 +192,14 @@ System.register("modules/FormMarkup", ["utils/DOM"], function (exports_4, contex
                     };
                     var ids = Object.keys(buttons);
                     ids.forEach(function (id) {
-                        var button = DOM_2.qid(id);
+                        var button = DOM_3.qid(id);
                         if (button) {
                             button.addEventListener('click', buttons[id]);
                         }
                     });
                 };
                 FormMarkup.prototype.insertMarkup = function (before, after) {
-                    var message = DOM_2.qid('message');
+                    var message = DOM_3.qid('message');
                     var str = message.value;
                     var begin = message.selectionStart;
                     var end = message.selectionEnd;
@@ -181,13 +220,13 @@ System.register("modules/FormMarkup", ["utils/DOM"], function (exports_4, contex
                 };
                 return FormMarkup;
             }());
-            exports_4("default", FormMarkup);
+            exports_5("default", FormMarkup);
         }
     };
 });
-System.register("utils/Cookie", [], function (exports_5, context_5) {
+System.register("utils/Cookie", [], function (exports_6, context_6) {
     "use strict";
-    var __moduleName = context_5 && context_5.id;
+    var __moduleName = context_6 && context_6.id;
     function get(name, _default) {
         if (_default === void 0) { _default = null; }
         var cookie_str = "; " + document.cookie;
@@ -198,27 +237,27 @@ System.register("utils/Cookie", [], function (exports_5, context_5) {
         }
         return _default;
     }
-    exports_5("get", get);
+    exports_6("get", get);
     function set(name, value, expiration) {
         var value_enc = encodeURIComponent(value);
         var expiration_str = expiration.toUTCString();
         document.cookie = name + "=" + value_enc + "; path=/; expires=" + expiration_str;
     }
-    exports_5("set", set);
+    exports_6("set", set);
     return {
         setters: [],
         execute: function () {
         }
     };
 });
-System.register("modules/FormSave", ["utils/DOM", "utils/Cookie"], function (exports_6, context_6) {
+System.register("modules/FormSave", ["utils/DOM", "utils/Cookie"], function (exports_7, context_7) {
     "use strict";
-    var __moduleName = context_6 && context_6.id;
-    var DOM_3, Cookie, FormSave;
+    var __moduleName = context_7 && context_7.id;
+    var DOM_4, Cookie, FormSave;
     return {
         setters: [
-            function (DOM_3_1) {
-                DOM_3 = DOM_3_1;
+            function (DOM_4_1) {
+                DOM_4 = DOM_4_1;
             },
             function (Cookie_1) {
                 Cookie = Cookie_1;
@@ -231,7 +270,7 @@ System.register("modules/FormSave", ["utils/DOM", "utils/Cookie"], function (exp
                     document.addEventListener('DOMContentLoaded', function () { return _this.onLoad(); });
                 }
                 FormSave.prototype.onLoad = function () {
-                    var name = DOM_3.qs('input[name="name"]');
+                    var name = DOM_4.qs('input[name="name"]');
                     if (name) {
                         // Load name
                         name.value = Cookie.get('tinyib_name', '');
@@ -242,12 +281,12 @@ System.register("modules/FormSave", ["utils/DOM", "utils/Cookie"], function (exp
                             Cookie.set('tinyib_name', name.value, expiration_date);
                         });
                     }
-                    var new_post_password = DOM_3.qid('newpostpassword');
+                    var new_post_password = DOM_4.qid('newpostpassword');
                     if (new_post_password) {
                         // Load delete post password
                         var password = Cookie.get('tinyib_password');
                         new_post_password.value = password;
-                        var delete_post_password = DOM_3.qid('deletepostpassword');
+                        var delete_post_password = DOM_4.qid('deletepostpassword');
                         if (delete_post_password) {
                             delete_post_password.value = password;
                         }
@@ -261,18 +300,18 @@ System.register("modules/FormSave", ["utils/DOM", "utils/Cookie"], function (exp
                 };
                 return FormSave;
             }());
-            exports_6("default", FormSave);
+            exports_7("default", FormSave);
         }
     };
 });
-System.register("modules/QuotePost", ["utils/DOM"], function (exports_7, context_7) {
+System.register("modules/QuotePost", ["utils/DOM"], function (exports_8, context_8) {
     "use strict";
-    var __moduleName = context_7 && context_7.id;
-    var DOM_4, QuotePost;
+    var __moduleName = context_8 && context_8.id;
+    var DOM_5, QuotePost;
     return {
         setters: [
-            function (DOM_4_1) {
-                DOM_4 = DOM_4_1;
+            function (DOM_5_1) {
+                DOM_5 = DOM_5_1;
             }
         ],
         execute: function () {
@@ -291,7 +330,7 @@ System.register("modules/QuotePost", ["utils/DOM"], function (exports_7, context
                             this.quotePost(id);
                         }
                     }
-                    var links = DOM_4.qsa('.post-header__reflink');
+                    var links = DOM_5.qsa('.post-header__reflink');
                     var _loop_3 = function (i) {
                         var id = Number(links[i].getAttribute('data-id'));
                         links[i].addEventListener('click', function () { return _this.quotePost(id); });
@@ -301,25 +340,25 @@ System.register("modules/QuotePost", ["utils/DOM"], function (exports_7, context
                     }
                 };
                 QuotePost.prototype.quotePost = function (id) {
-                    var message = DOM_4.qid('message');
+                    var message = DOM_5.qid('message');
                     message.value = message.value + ">>" + id + "\n";
                     message.focus();
                     return false;
                 };
                 return QuotePost;
             }());
-            exports_7("default", QuotePost);
+            exports_8("default", QuotePost);
         }
     };
 });
-System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function (exports_8, context_8) {
+System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function (exports_9, context_9) {
     "use strict";
-    var __moduleName = context_8 && context_8.id;
-    var DOM_5, Cookie, StyleSwitcher;
+    var __moduleName = context_9 && context_9.id;
+    var DOM_6, Cookie, StyleSwitcher;
     return {
         setters: [
-            function (DOM_5_1) {
-                DOM_5 = DOM_5_1;
+            function (DOM_6_1) {
+                DOM_6 = DOM_6_1;
             },
             function (Cookie_2) {
                 Cookie = Cookie_2;
@@ -331,7 +370,7 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
                     var _this = this;
                     this.styles = {};
                     // Parse selectable styles from <head>
-                    var styles = DOM_5.qsa('link[title]');
+                    var styles = DOM_6.qsa('link[title]');
                     for (var i = 0; i < styles.length; ++i) {
                         var style = styles[i];
                         var title = style.title;
@@ -347,7 +386,7 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
                 }
                 StyleSwitcher.prototype.onLoad = function () {
                     var _this = this;
-                    var style_switcher = DOM_5.qid('style-switcher');
+                    var style_switcher = DOM_6.qid('style-switcher');
                     if (style_switcher) {
                         // Populate style switcher widget
                         var styles = Object.keys(this.styles);
@@ -363,12 +402,12 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
                     }
                 };
                 StyleSwitcher.prototype.setStyle = function (style) {
-                    var head = DOM_5.qs('head');
+                    var head = DOM_6.qs('head');
                     // If no <head> element, do nothing
                     if (!head) {
                         return;
                     }
-                    var selected_style = DOM_5.qs('link[data-selected]');
+                    var selected_style = DOM_6.qs('link[data-selected]');
                     if (selected_style) {
                         // If style already selected, do nothing
                         if (selected_style.title === style) {
@@ -387,24 +426,19 @@ System.register("modules/StyleSwitcher", ["utils/DOM", "utils/Cookie"], function
                 };
                 return StyleSwitcher;
             }());
-            exports_8("default", StyleSwitcher);
+            exports_9("default", StyleSwitcher);
         }
     };
 });
-System.register("index", ["modules/ExpandFile", "modules/FormMarkup", "modules/FormSave", "modules/QuotePost", "modules/StyleSwitcher", "utils/DOM"], function (exports_9, context_9) {
+System.register("index", ["modules/Captcha", "modules/ExpandFile", "modules/FormMarkup", "modules/FormSave", "modules/QuotePost", "modules/StyleSwitcher"], function (exports_10, context_10) {
     "use strict";
-    var __moduleName = context_9 && context_9.id;
-    function reloadCAPTCHA() {
-        var captcha = DOM_6.qid('captcha');
-        captcha.value = '';
-        captcha.focus();
-        var captchaimage = DOM_6.qid('captchaimage');
-        captchaimage.src = captchaimage.src + '#new';
-        return false;
-    }
-    var ExpandFile_1, FormMarkup_1, FormSave_1, QuotePost_1, StyleSwitcher_1, DOM_6, modules;
+    var __moduleName = context_10 && context_10.id;
+    var Captcha_1, ExpandFile_1, FormMarkup_1, FormSave_1, QuotePost_1, StyleSwitcher_1, modules;
     return {
         setters: [
+            function (Captcha_1_1) {
+                Captcha_1 = Captcha_1_1;
+            },
             function (ExpandFile_1_1) {
                 ExpandFile_1 = ExpandFile_1_1;
             },
@@ -419,13 +453,11 @@ System.register("index", ["modules/ExpandFile", "modules/FormMarkup", "modules/F
             },
             function (StyleSwitcher_1_1) {
                 StyleSwitcher_1 = StyleSwitcher_1_1;
-            },
-            function (DOM_6_1) {
-                DOM_6 = DOM_6_1;
             }
         ],
         execute: function () {
             modules = {};
+            modules['Captcha'] = new Captcha_1.default();
             modules['ExpandFile'] = new ExpandFile_1.default();
             modules['FormMarkup'] = new FormMarkup_1.default();
             modules['FormSave'] = new FormSave_1.default();
