@@ -1,0 +1,17 @@
+.original {
+  &__content {
+    max-width: 100%;
+
+    &_image {
+      height: auto;
+    }
+
+    &_audio,
+    &_video {
+      display: inline;
+      max-height: 100%;
+      pointer-events: inherit;
+      position: static;
+    }
+  }
+}

@@ -21,7 +21,9 @@
 <link rel="alternate stylesheet" type="text/css" href="css/photon.css" title="Photon" />
 <link rel="alternate stylesheet" type="text/css" href="css/synthwave.css" title="Synthwave" />
 
-<script src="js/tinyib.js"></script>
+<script src="js/vendor/system-production.js"></script>
+<script src="js/index.js"></script>
+<script>System.import('index');</script>
 
 {% if constant('TINYIB_CAPTCHA') == 'recaptcha' %}
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>

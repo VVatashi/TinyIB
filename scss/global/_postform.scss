@@ -8,6 +8,12 @@
     margin-bottom: 5px;
     min-width: 25px;
     padding: 0;
+
+    .spoiler,
+    .rp {
+      background-color: #000;
+      color: #fff;
+    }
   }
 
   &__rules {

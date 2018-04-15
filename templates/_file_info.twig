@@ -1,0 +1,32 @@
+{% set is_thread = post['parent'] == constant('TINYIB_NEWTHREAD') %}
+{% set is_embed = post['file_type'] == 'embed' %}
+{% set has_size = post['image_width'] > 0 and post['image_height'] > 0 %}
+{% set show_name = constant('TINYIB_FILE_SHOW_ORIG_NAME') and post['file_original'] %}
+
+{% if is_embed %}
+  {% set direct_link = '#' %}
+{% elseif post['file_type'] %}
+  {% set direct_link = url_prefix ~ 'src/' ~ post['file'] %}
+{% endif %}
+
+{% if is_thread %}
+  {{ is_embed ? 'Embed: ' : 'File: ' }}
+{% endif %}
+
+{% if is_embed %}
+  <a class="file-info__link" href="{{ direct_link }}" data-id="{{ post['id'] }}">
+    {{ post['file_original'] }}
+  </a>
+  &ndash;
+  ({{ post['file_hex'] }})
+{% elseif post['file'] %}
+  <a class="file-info__link" href="{{ direct_link }}" data-id="{{ post['id'] }}" target="_blank">
+    {{ post['file'] }}
+  </a>
+  &ndash;
+  <span class="file-info__size">
+    ({{ post['file_size_formatted'] }}{% if has_size %},
+      {{ post['image_width'] }}x{{ post['image_height'] }}{% endif %}{% if show_name %},
+      {{ post['file_original'] }}{% endif %})
+  </span>
+{% endif %}

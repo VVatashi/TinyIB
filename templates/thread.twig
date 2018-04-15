@@ -1,7 +1,10 @@
 {% extends '_html.twig' %}
 
 {% block body %}
-  &#91;<a href="../">Return</a>&#93;
+  <div class="content__return-wrapper">
+    <a class="content__return-link" href="../">Return</a>
+  </div>
+
   <div class="content__replymode replymode">Posting mode: Reply</div>
 
   <form id="delform" action="imgboard.php?delete" method="post">

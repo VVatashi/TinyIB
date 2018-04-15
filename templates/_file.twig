@@ -1,0 +1,45 @@
+{% set is_embed = post['file_type'] == 'embed' %}
+{% set url_prefix = res == constant('TINYIB_RESPAGE') ? '../' : '' %}
+
+{% if is_embed %}
+  {% set direct_link = '#' %}
+{% elseif post['file_type'] %}
+  {% set direct_link = url_prefix ~ 'src/' ~ post['file'] %}
+{% endif %}
+
+{% if post['image_width'] > 0 and post['image_height'] > 0 %}
+  {% set dimensions = 'width="' ~ post['image_width'] ~ '" height="' ~ post['image_height'] ~ '"' %}
+{% else %}
+  {% set dimensions = 'width="500" height="50"' %}
+{% endif %}
+
+{% if post['thumb_width'] > 0 and post['thumb_height'] > 0 %}
+  <a class="file__thumbnail thumbnail" id="thumbnail_wrapper_{{ post['id'] }}"
+    href="{{ direct_link }}" data-id="{{ post['id'] }}" target="_blank">
+    <img src="thumb/{{ post['thumb'] }}" alt="{{ post['id'] }}"
+      class="thumbnail__content thumbnail__content_image" id="thumbnail_{{ post['id'] }}"
+      width="{{ post['thumb_width'] }}" height="{{ post['thumb_height'] }}" />
+  </a>
+{% endif %}
+
+{# Stores the encoded original file markup, so the browser doesn't load it until it's needed #}
+<div id="expand_{{ post['id'] }}" style="display: none;">
+  {% if is_embed %}
+    {{ post['file']|url_encode }}
+  {% elseif post['file_type'] == 'image' %}
+    {{ ('<img class="original__content original__content_image"'
+~ ' src="' ~ direct_link ~ '" width="' ~ post['image_width'] ~ '"/>')|url_encode }}
+  {% elseif post['file_type'] == 'audio' %}
+    {{ ('<audio class="original__content original__content_audio" controls autoplay loop ' ~ dimensions
+~ ' onclick="event.stopPropagation();">'
+~ '<source src="' ~ direct_link ~ '"></source>'
+~ '</audio>')|url_encode }}
+  {% elseif post['file_type'] == 'video' %}
+    {{ ('<video class="original__content original__content_video" controls autoplay loop ' ~ dimensions
+~ ' onclick="event.stopPropagation();">'
+~ '<source src="' ~ direct_link ~ '"></source>'
+~ '</video>')|url_encode }}
+  {% endif %}
+</div>
+
+<div class="file__original original" id="original_wrapper_{{ post['id'] }}" style="display: none;" data-id="{{ post['id'] }}"></div>

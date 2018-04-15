@@ -1,7 +1,10 @@
 .header {
   &__logo {
     color: $text-color;
-    font-size: 30pt;
     text-align: center;
+  }
+
+  &__title {
+    font-size: 2.15em;
   }
 }

@@ -1,3 +1,11 @@
+{% macro markup(id, content) %}
+  <button id="markup_{{ id }}" class="postform__button-markup postform__button-markup_{{ id }}" type="button">
+    {{ content }}
+  </button>
+{% endmacro %}
+
+{% import _self as self %}
+
 <form name="postform" id="postform" action="imgboard.php" method="post" enctype="multipart/form-data">
   {% if uploads and constant('TINYIB_MAXKB') > 0 %}
     <input type="hidden" name="MAX_FILE_SIZE" value="{{ constant('TINYIB_MAXKB') * 1024 }}" />
@@ -29,15 +37,16 @@
         <td class="postform__block">Message</td>
         <td>
           <div class="postform__markup">
-            <button class="postform__button-markup postform__button-markup_b" type="button" onclick="insertBBCode('b')"><strong>b</strong></button>
-            <button class="postform__button-markup postform__button-markup_i" type="button" onclick="insertBBCode('i')"><em>i</em></button>
-            <button class="postform__button-markup postform__button-markup_u" type="button" onclick="insertBBCode('u')"><span class="underline">u</span></button>
-            <button class="postform__button-markup postform__button-markup_s" type="button" onclick="insertBBCode('s')"><del>s</del></button>
-            <button class="postform__button-markup postform__button-markup_sup" type="button" onclick="insertBBCode('sup')"><sup>Sup</sup></button>
-            <button class="postform__button-markup postform__button-markup_sub" type="button" onclick="insertBBCode('sub')"><sub>Sub</sub></button>
-            <button class="postform__button-markup postform__button-markup_spoiler" type="button" onclick="insertBBCode('spoiler')"><span class="spoiler">Spoiler</span></button>
-            <button class="postform__button-markup postform__button-markup_code" type="button" onclick="insertBBCode('code')"><code>Code</code></button>
-            <button class="postform__button-markup postform__button-markup_rp" type="button" onclick="insertBBCode('rp')"><span class="spoiler">RP</span></button>
+            {{ self.markup('quote', '<span class="quote">&gt;</span>') }}
+            {{ self.markup('b', '<strong>b</strong>') }}
+            {{ self.markup('i', '<em>i</em>') }}
+            {{ self.markup('u', '<span class="underline">u</span>') }}
+            {{ self.markup('s', '<del>s</del>') }}
+            {{ self.markup('sup', '<sup>Sup</sup>') }}
+            {{ self.markup('sub', '<sub>Sub</sub>') }}
+            {{ self.markup('spoiler', '<span class="spoiler">Spoiler</span>') }}
+            {{ self.markup('code', '<code>Code</code>') }}
+            {{ self.markup('rp', '<span class="spoiler">RP</span>') }}
           </div>
           <textarea id="message" name="message" cols="48" rows="4" accesskey="m"></textarea>
         </td>

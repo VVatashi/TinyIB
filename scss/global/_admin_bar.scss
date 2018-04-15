@@ -1,15 +1,11 @@
+@import '../utils';
+
 .admin-bar {
   text-align: right;
 
   &__list-item {
+    @include brackets;
+
     display: inline;
-
-    &::before {
-      content: '[';
-    }
-
-    &::after {
-      content: ']';
-    }
   }
 }
