@@ -1,13 +1,13 @@
-import IModule from './IModule';
+import BaseModule from './BaseModule';
 import { qid, qs } from '../utils/DOM';
 import * as Cookie from '../utils/Cookie';
 
-export default class FormSave implements IModule {
-  public constructor() {
-    document.addEventListener('DOMContentLoaded', () => this.onLoad());
+export default class FormSave extends BaseModule {
+  constructor() {
+    super();
   }
 
-  protected onLoad() {
+  onReady() {
     const name = qs('input[name="name"]') as HTMLInputElement;
 
     if (name) {

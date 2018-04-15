@@ -12,9 +12,11 @@
   },
   "license": "GPL-3.0",
   "devDependencies": {
+    "@types/luxon": "^0.5.1",
     "gulp": "^3.9.1",
     "gulp-sass": "^3.1.0",
     "gulp-util": "^3.0.8",
+    "luxon": "^1.0.0",
     "node-sass": "^4.7.2",
     "ts-loader": "^4.2.0",
     "typescript": "^2.8.1",

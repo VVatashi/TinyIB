@@ -1,12 +1,12 @@
-import IModule from './IModule';
+import BaseModule from './BaseModule';
 import { qid, qsa } from '../utils/DOM';
 
-export default class QuotePost implements IModule {
-  public constructor() {
-    document.addEventListener('DOMContentLoaded', () => this.onLoad());
+export default class QuotePost extends BaseModule {
+  constructor() {
+    super();
   }
 
-  protected onLoad() {
+  onReady() {
     const hash = window.location.hash;
 
     if (hash) {

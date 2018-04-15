@@ -1,11 +1,13 @@
-import IModule from './IModule';
+import BaseModule from './BaseModule';
 import { qid, qs, qsa } from '../utils/DOM';
 import * as Cookie from '../utils/Cookie';
 
-export default class StyleSwitcher implements IModule {
+export default class StyleSwitcher extends BaseModule {
   protected readonly styles: { [key: string]: string } = {};
 
-  public constructor() {
+  constructor() {
+    super();
+
     // Parse selectable styles from <head>
     const styles = qsa('link[title]');
 
@@ -23,12 +25,9 @@ export default class StyleSwitcher implements IModule {
     // Get selected style
     const selected_style = Cookie.get('tinyib_style', 'Futaba');
     this.setStyle(selected_style);
-
-    // Setup events
-    document.addEventListener('DOMContentLoaded', () => this.onLoad());
   }
 
-  protected onLoad() {
+  onReady() {
     const style_switcher = qid('style-switcher') as HTMLSelectElement;
 
     if (style_switcher) {

@@ -1,12 +1,12 @@
-import IModule from './IModule';
+import BaseModule from './BaseModule';
 import { qid } from '../utils/DOM';
 
-export default class FormMarkup implements IModule {
-  public constructor() {
-    document.addEventListener('DOMContentLoaded', () => this.onLoad());
+export default class FormMarkup extends BaseModule {
+  constructor() {
+    super();
   }
 
-  protected onLoad() {
+  onReady() {
     const buttons: { [key: string]: EventListener } = {
       'markup_quote': () => this.insertMarkup('\n>', '\n'),
       'markup_b': () => this.insertBBCode('b'),

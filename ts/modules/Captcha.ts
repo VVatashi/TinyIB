@@ -1,14 +1,14 @@
-import IModule from './IModule';
+import BaseModule from './BaseModule';
 import { qid } from '../utils/DOM';
 
-export default class Captcha implements IModule {
+export default class Captcha extends BaseModule {
   protected original_src = '';
 
-  public constructor() {
-    document.addEventListener('DOMContentLoaded', () => this.onLoad());
+  constructor() {
+    super();
   }
 
-  protected onLoad() {
+  onReady() {
     const image = qid('captchaimage') as HTMLImageElement;
 
     if (image) {

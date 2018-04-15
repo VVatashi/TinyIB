@@ -1,26 +1,31 @@
-import IModule from './IModule';
+import BaseModule from './BaseModule';
 import { qid, qsa } from '../utils/DOM';
 
-export default class ExpandFile implements IModule {
-  public constructor() {
-    document.addEventListener('DOMContentLoaded', () => {
-      this.onLoad();
-
-      // Wait one second for userscripts init
-      // TODO: Try use MutationObserver instead?
-      setTimeout(() => {
-        // Try detect Dollchan Extension
-        const de = qid('de-main');
-  
-        if (de) {
-          // DE breaks some event handlers, so needs to reattach them
-          this.onLoad();
-        }
-      }, 1000);
-    });
+export default class ExpandFile extends BaseModule {
+  constructor() {
+    super();
   }
 
-  protected onLoad() {
+  onReady() {
+    this.setupHandlers();
+
+    // Wait one second for userscripts init
+    // TODO: Try use MutationObserver instead?
+    setTimeout(() => {
+      // Try detect Dollchan Extension
+      const de_buttons = qid('de-panel-buttons');
+
+      if (de_buttons) {
+        // Check Dollchan Extensions is enabled
+        if (de_buttons.querySelectorAll('.de-panel-button').length > 1) {
+          // DE breaks embeds event handlers, so needs to reattach them
+          this.setupHandlers();
+        }
+      }
+    }, 1000);
+  }
+
+  protected setupHandlers() {
     const links = qsa('.file-info__link, .thumbnail');
 
     for (let i = 0; i < links.length; ++i) {
