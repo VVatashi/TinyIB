@@ -18,6 +18,10 @@
     }
   }
 
+  &__text {
+    min-width: 200px;
+  }
+
   &__buttons,
   &__status {
     text-align: center;

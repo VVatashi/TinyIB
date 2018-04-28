@@ -17,7 +17,7 @@ export default class ExpandFile extends BaseModule {
 
       if (de_buttons) {
         // Check Dollchan Extensions is enabled
-        if (de_buttons.querySelectorAll('.de-panel-button').length > 1) {
+        if (qsa('.de-panel-button', de_buttons).length > 1) {
           // DE breaks embeds event handlers, so needs to reattach them
           this.setupHandlers();
         }
@@ -29,7 +29,7 @@ export default class ExpandFile extends BaseModule {
     // Wait userscripts
     setTimeout(() => {
       // Attachs handlers
-      const elements = post.querySelectorAll('.file-info__link, .thumbnail, .original');
+      const elements = qsa('.file-info__link, .thumbnail, .original', post);
 
       for (let i = 0; i < elements.length; ++i) {
         const id = Number(elements[i].getAttribute('data-id'));
