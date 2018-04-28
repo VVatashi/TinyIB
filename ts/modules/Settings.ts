@@ -1,5 +1,6 @@
 import BaseModule from './BaseModule';
 import ISettingsDto from '../ISettingsDto';
+import ModuleManager from '../ModuleManager';
 import { qid, qsa, qs } from '../utils/DOM';
 import * as Cookie from '../utils/Cookie';
 import Time from '../utils/Time';
@@ -8,8 +9,8 @@ import { DateTime } from 'luxon';
 export default class Settings extends BaseModule {
   protected readonly settings: ISettingsDto;
 
-  constructor() {
-    super();
+  constructor(manager: ModuleManager) {
+    super(manager);
 
     // Load settings from a cookie
     this.settings = JSON.parse(Cookie.get('tinyib_settings', '{}'));

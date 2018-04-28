@@ -1,9 +1,10 @@
 import BaseModule from './BaseModule';
+import ModuleManager from '../ModuleManager';
 import { qid, qsa } from '../utils/DOM';
 
 export default class QuotePost extends BaseModule {
-  constructor() {
-    super();
+  constructor(manager: ModuleManager) {
+    super(manager);
   }
 
   onReady() {

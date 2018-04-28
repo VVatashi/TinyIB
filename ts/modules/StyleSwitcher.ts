@@ -1,12 +1,13 @@
 import BaseModule from './BaseModule';
+import ModuleManager from '../ModuleManager';
 import { qid, qs, qsa } from '../utils/DOM';
 import * as Cookie from '../utils/Cookie';
 
 export default class StyleSwitcher extends BaseModule {
   protected readonly styles: { [key: string]: string } = {};
 
-  constructor() {
-    super();
+  constructor(manager: ModuleManager) {
+    super(manager);
 
     // Parse selectable styles from <head>
     const styles = qsa('link[title]');
@@ -70,11 +71,23 @@ export default class StyleSwitcher extends BaseModule {
 
     // Add currently selected style to <head>
     const url = this.styles[style];
-    head.innerHTML += `<link rel="stylesheet" type="text/css" href="${url}" data-selected="true" />`;
+    const link = document.createElement('link');
+    link.rel = "stylesheet";
+    link.type = "text/css";
+    link.href = url;
+    link.setAttribute('data-selected', 'true');
+
+    link.addEventListener('load', () => {
+      this.manager.emit('style loaded');
+    });
+
+    head.appendChild(link);
 
     // Save selected style
     const expiration_date = new Date();
     expiration_date.setTime(expiration_date.getTime() + 365 * 24 * 60 * 60 * 1000);
     Cookie.set('tinyib_style', style, expiration_date);
+
+    this.manager.emit('style changed');
   }
 }

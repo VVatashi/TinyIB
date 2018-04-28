@@ -1,9 +1,10 @@
 import BaseModule from './BaseModule';
+import ModuleManager from '../ModuleManager';
 import { qid } from '../utils/DOM';
 
 export default class FormMarkup extends BaseModule {
-  constructor() {
-    super();
+  constructor(manager: ModuleManager) {
+    super(manager);
   }
 
   onReady() {

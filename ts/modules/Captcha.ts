@@ -1,11 +1,12 @@
 import BaseModule from './BaseModule';
+import ModuleManager from '../ModuleManager';
 import { qid } from '../utils/DOM';
 
 export default class Captcha extends BaseModule {
   protected original_src = '';
 
-  constructor() {
-    super();
+  constructor(manager: ModuleManager) {
+    super(manager);
   }
 
   onReady() {

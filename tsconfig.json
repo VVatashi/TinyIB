@@ -9,6 +9,11 @@
         "noImplicitAny": true,
         "target": "es5",
         "module": "es6",
+        "lib": [
+            "dom",
+            "es2015",
+            "es2015.promise"
+        ],
         "outDir": "./"
     }
 }

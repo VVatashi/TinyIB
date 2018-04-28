@@ -1,6 +1,14 @@
 @import '../utils';
 
 .post-header {
+  position: relative;
+
+  &__delete,
+  &__name-block,
+  &__reflink-wrapper {
+    vertical-align: middle;
+  }
+
   &__reply-wrapper {
     @include brackets;
   }

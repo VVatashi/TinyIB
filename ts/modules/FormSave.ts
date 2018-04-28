@@ -1,10 +1,11 @@
 import BaseModule from './BaseModule';
+import ModuleManager from '../ModuleManager';
 import { qid, qs } from '../utils/DOM';
 import * as Cookie from '../utils/Cookie';
 
 export default class FormSave extends BaseModule {
-  constructor() {
-    super();
+  constructor(manager: ModuleManager) {
+    super(manager);
   }
 
   onReady() {
