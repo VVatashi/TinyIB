@@ -2,6 +2,11 @@
 
 namespace TinyIB\Renderer;
 
+use VVatashi\BBCode\HtmlTag;
+use VVatashi\BBCode\Tokenizer;
+use VVatashi\BBCode\Parser;
+use VVatashi\BBCode\HtmlGenerator;
+
 class Renderer implements IRenderer
 {
     /** @var \TinyIB\Repository\IPostRepository $post_repository */
@@ -84,23 +89,25 @@ class Renderer implements IRenderer
      */
     protected function bbcode($message)
     {
-        $patterns = array(
-            '/\[b\]([^[]*)\[\/b\]/si' => '<strong>\\1</strong>',
-            '/\[i\]([^[]*)\[\/i\]/si' => '<em>\\1</em>',
-            '/\[u\]([^[]*)\[\/u\]/si' => '<span style="text-decoration: underline;">\\1</span>',
-            '/\[s\]([^[]*)\[\/s\]/si' => '<del>\\1</del>',
-            '/\[sup\]([^[]*)\[\/sup\]/si' => '<sup>\\1</sup>',
-            '/\[sub\]([^[]*)\[\/sub\]/si' => '<sub>\\1</sub>',
-            '/\[spoiler\]([^[]*)\[\/spoiler\]/si' => '<span class="spoiler">\\1</span>',
-            '/\[code\]([^[]*)\[\/code\]/si' => '<code style="white-space: pre;">\\1</code>',
-            '/\[rp\]([^[]*)\[\/rp\]/si' => '<span class="rp">\\1</span>',
-        );
+        $tags = [
+            'b' => HtmlTag::create('strong'),
+            'i' => HtmlTag::create('em'),
+            'u' => HtmlTag::create('span', 'style="text-decoration: underline;"'),
+            's' => HtmlTag::create('del'),
+            'sup' => HtmlTag::create('sup'),
+            'sub' => HtmlTag::create('sub'),
+            'spoiler' => HtmlTag::create('span', 'class="spoiler"'),
+            'rp' => HtmlTag::create('span', 'class="rp"'),
+            'code' => HtmlTag::create('code', 'style="white-space: pre;"'),
+        ];
 
-        do {
-            $message = preg_replace(array_keys($patterns), array_values($patterns), $message, -1, $count);
-        } while ($count);
+        $tokenizer = new Tokenizer($tags);
+        $parser = new Parser();
+        $generator = new HtmlGenerator($tags);
 
-        return $message;
+        $tokens = $tokenizer->tokenize($message);
+        $nodes = $parser->parse($tokens);
+        return $generator->generate($nodes);
     }
 
     /**
