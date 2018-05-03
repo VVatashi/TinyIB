@@ -4,8 +4,6 @@
 #
 # https://github.com/tslocum/TinyIB
 
-require_once './vendor/autoload.php';
-
 use TinyIB\Controller\ManageController;
 use TinyIB\Controller\PostController;
 use TinyIB\Controller\SettingsController;
@@ -14,8 +12,52 @@ use TinyIB\Repository\PDOBanRepository;
 use TinyIB\Repository\PDOPostRepository;
 use TinyIB\Response;
 
+require_once './vendor/autoload.php';
+
 error_reporting(E_ALL);
-ini_set("display_errors", 1);
+ini_set('display_errors', 1);
+
+set_error_handler(function ($code, $message, $file, $line) {
+    throw new ErrorException($message, 0, $code, $file, $line);
+});
+
+set_exception_handler(function (Throwable $exception) {
+    $output = <<<EOF
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Server Error</title>
+</head>
+<body>
+    <pre>
+EOF;
+
+    $type = get_class($exception);
+    $message = $exception->getMessage();
+    $file = basename($exception->getFile());
+    $line = $exception->getLine();
+    $output .= "$type '$message' at $file:$line\n";
+    $output .= "Stack trace:\n";
+
+    $trace = $exception->getTrace();
+    foreach ($trace as $key => $value) {
+        $file = isset($value['file']) ? basename($value['file']) : '';
+        $line = isset($value['line']) ? $value['line'] : '';
+        $function = $value['function'];
+        $args = implode(', ', array_map('gettype', $value['args']));
+        $output .= "#$key $file:$line $function($args)\n";
+    }
+
+    $output .= <<<EOF
+    </pre>
+</body>
+</html>
+EOF;
+
+    Response::serverError($output)->send();
+});
+
 session_start();
 setcookie(session_name(), session_id(), time() + 2592000);
 
@@ -35,44 +77,36 @@ if (get_magic_quotes_gpc()) {
         $_POST[$key] = stripslashes($val);
     }
 }
+
 if (get_magic_quotes_runtime()) {
     set_magic_quotes_runtime(0);
 }
 
-function fancyDie($message)
-{
-    die('<body text="#800000" bgcolor="#FFFFEE" align="center"><br><div style="display: inline-block; background-color: #F0E0D6;font-size: 1.25em;font-family: Tahoma, Geneva, sans-serif;padding: 7px;border: 1px solid #D9BFB7;border-left: none;border-top: none;">' . $message . '</div><br><br>- <a href="javascript:history.go(-1)">Click here to go back</a> -</body>');
-}
-
 if (!file_exists('settings.php')) {
     $message = 'Please copy the file settings.default.php to settings.php';
-    Response::serverError($message)->send();
-    exit;
+    throw new Exception($message);
 }
 
 require_once 'settings.php';
 
 if (TINYIB_TRIPSEED == '' || TINYIB_ADMINPASS == '') {
     $message = 'TINYIB_TRIPSEED and TINYIB_ADMINPASS must be configured.';
-    Response::serverError($message)->send();
-    exit;
+    throw new Exception($message);
 }
 
 if (TINYIB_CAPTCHA === 'recaptcha'
     && (TINYIB_RECAPTCHA_SITE == '' || TINYIB_RECAPTCHA_SECRET == '')) {
     $message = 'TINYIB_RECAPTCHA_SITE and TINYIB_RECAPTCHA_SECRET  must be configured.';
-    Response::serverError($message)->send();
-    exit;
+    throw new Exception($message);
 }
 
 // Check directories are writable by the script
-$writedirs = ["res", "src", "thumb"];
+$writedirs = ['res', 'src', 'thumb'];
 
 foreach ($writedirs as $dir) {
     if (!is_writable($dir)) {
         $message = "Directory '" . $dir . "' can not be written to.  Please modify its permissions.";
-        Response::serverError($message)->send();
-        exit;
+        throw new Exception($message);
     }
 }
 
@@ -166,7 +200,7 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
         $manage_controller->moderate($id)->send();
     } elseif (isset($_GET['sticky']) && isset($_GET['setsticky'])) {
         $id = $_GET['sticky'];
-        $sticky = (bool) intval($_GET['setsticky']);
+        $sticky = (bool)intval($_GET['setsticky']);
 
         $manage_controller->setSticky($id, $sticky)->send();
     } elseif (isset($_GET["rawpost"])) {

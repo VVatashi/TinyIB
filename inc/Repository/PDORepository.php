@@ -25,7 +25,7 @@ abstract class PDORepository implements IRepository
                 static::$pdo = PDOHelper::createPDO();
             } catch (\PDOException $e) {
                 $msg = $e->getMessage();
-                fancyDie("Failed to connect to the database: $msg");
+                throw new \Exception("Failed to connect to the database: $msg");
             }
         }
     }

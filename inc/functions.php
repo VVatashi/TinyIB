@@ -189,16 +189,16 @@ function checkCAPTCHA()
                     $captcha_error .= '<br>' . $error;
                 }
             }
-            fancyDie($captcha_error);
+            throw new \Exception($captcha_error);
         }
     } elseif (TINYIB_CAPTCHA) { // Simple CAPTCHA
         $captcha = isset($_POST['captcha']) ? strtolower(trim($_POST['captcha'])) : '';
         $captcha_solution = isset($_SESSION['tinyibcaptcha']) ? strtolower(trim($_SESSION['tinyibcaptcha'])) : '';
 
         if ($captcha == '') {
-            fancyDie('Please enter the CAPTCHA text.');
+            throw new \Exception('Please enter the CAPTCHA text.');
         } elseif ($captcha != $captcha_solution) {
-            fancyDie('Incorrect CAPTCHA text entered.  Please try again.<br>Click the image to retrieve a new CAPTCHA.');
+            throw new \Exception('Incorrect CAPTCHA text entered.  Please try again.<br>Click the image to retrieve a new CAPTCHA.');
         }
     }
 }
@@ -212,7 +212,7 @@ function checkBanned()
         if ($ban['expire'] == 0 || $ban['expire'] > time()) {
             $expire = ($ban['expire'] > 0) ? ('<br>This ban will expire ' . date('y/m/d(D)H:i:s', $ban['expire'])) : '<br>This ban is permanent and will not expire.';
             $reason = ($ban['reason'] == '') ? '' : ('<br>Reason: ' . $ban['reason']);
-            fancyDie('Your IP address ' . $ban['ip'] . ' has been banned from posting on this image board.  ' . $expire . $reason);
+            throw new \Exception('Your IP address ' . $ban['ip'] . ' has been banned from posting on this image board.  ' . $expire . $reason);
         } else {
             $ban_repository->clearExpiredBans();
         }
@@ -227,7 +227,7 @@ function checkFlood()
         $lastpost = $post_repository->lastPostByIP();
         if ($lastpost) {
             if ((time() - $lastpost['timestamp']) < TINYIB_DELAY) {
-                fancyDie("Please wait a moment before posting again.  You will be able to make another post in " . (TINYIB_DELAY - (time() - $lastpost['timestamp'])) . " " . plural("second", (TINYIB_DELAY - (time() - $lastpost['timestamp']))) . ".");
+                throw new \Exception("Please wait a moment before posting again.  You will be able to make another post in " . (TINYIB_DELAY - (time() - $lastpost['timestamp'])) . " " . plural("second", (TINYIB_DELAY - (time() - $lastpost['timestamp']))) . ".");
             }
         }
     }
@@ -236,7 +236,7 @@ function checkFlood()
 function checkMessageSize()
 {
     if (strlen($_POST["message"]) > 8000) {
-        fancyDie("Please shorten your message, or post it in multiple parts. Your message is " . strlen($_POST["message"]) . " characters long, and the maximum allowed is 8000.");
+        throw new \Exception("Please shorten your message, or post it in multiple parts. Your message is " . strlen($_POST["message"]) . " characters long, and the maximum allowed is 8000.");
     }
 }
 
@@ -271,7 +271,7 @@ function setParent()
     if (isset($_POST["parent"])) {
         if ($_POST["parent"] != TINYIB_NEWTHREAD) {
             if (!$post_repository->threadExistsByID($_POST['parent'])) {
-                fancyDie("Invalid parent thread ID supplied, unable to create post.");
+                throw new \Exception("Invalid parent thread ID supplied, unable to create post.");
             }
 
             return $_POST["parent"];
@@ -299,25 +299,19 @@ function validateFileUpload()
         case UPLOAD_ERR_OK:
             break;
         case UPLOAD_ERR_FORM_SIZE:
-            fancyDie("That file is larger than " . TINYIB_MAXKBDESC . ".");
-            break;
+            throw new \Exception("That file is larger than " . TINYIB_MAXKBDESC . ".");
         case UPLOAD_ERR_INI_SIZE:
-            fancyDie("The uploaded file exceeds the upload_max_filesize directive (" . ini_get('upload_max_filesize') . ") in php.ini.");
-            break;
+            throw new \Exception("The uploaded file exceeds the upload_max_filesize directive (" . ini_get('upload_max_filesize') . ") in php.ini.");
         case UPLOAD_ERR_PARTIAL:
-            fancyDie("The uploaded file was only partially uploaded.");
-            break;
+            throw new \Exception("The uploaded file was only partially uploaded.");
         case UPLOAD_ERR_NO_FILE:
-            fancyDie("No file was uploaded.");
-            break;
+            throw new \Exception("No file was uploaded.");
         case UPLOAD_ERR_NO_TMP_DIR:
-            fancyDie("Missing a temporary folder.");
-            break;
+            throw new \Exception("Missing a temporary folder.");
         case UPLOAD_ERR_CANT_WRITE:
-            fancyDie("Failed to write file to disk");
-            break;
+            throw new \Exception("Failed to write file to disk");
         default:
-            fancyDie("Unable to save the uploaded file.");
+            throw new \Exception("Unable to save the uploaded file.");
     }
 }
 
@@ -328,7 +322,7 @@ function checkDuplicateFile($hex)
 
     if (count($hexmatches) > 0) {
         foreach ($hexmatches as $hexmatch) {
-            fancyDie("Duplicate file uploaded. That file has already been posted <a href=\"res/" . (($hexmatch["parent"] == TINYIB_NEWTHREAD) ? $hexmatch["id"] : $hexmatch["parent"]) . ".html#" . $hexmatch["id"] . "\">here</a>.");
+            throw new \Exception("Duplicate file uploaded. That file has already been posted <a href=\"res/" . (($hexmatch["parent"] == TINYIB_NEWTHREAD) ? $hexmatch["id"] : $hexmatch["parent"]) . ".html#" . $hexmatch["id"] . "\">here</a>.");
         }
     }
 }
@@ -361,7 +355,7 @@ function createThumbnail($file_location, $thumb_location, $new_w, $new_h)
         }
 
         if (!$src_img) {
-            fancyDie("Unable to read uploaded file during thumbnailing. A common cause for this is an incorrect extension when the file is actually of a different type.");
+            throw new \Exception("Unable to read uploaded file during thumbnailing. A common cause for this is an incorrect extension when the file is actually of a different type.");
         }
 
         $old_x = imageSX($src_img);
