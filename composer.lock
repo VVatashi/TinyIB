@@ -137,12 +137,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/VVatashi/BBCode.git",
-                "reference": "ae946b48283b99a2a40e0041b02b0ce10c9cda90"
+                "reference": "aee26e8c5d00f87a807921a43eb8145583d19f2b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/VVatashi/BBCode/zipball/ae946b48283b99a2a40e0041b02b0ce10c9cda90",
-                "reference": "ae946b48283b99a2a40e0041b02b0ce10c9cda90",
+                "url": "https://api.github.com/repos/VVatashi/BBCode/zipball/aee26e8c5d00f87a807921a43eb8145583d19f2b",
+                "reference": "aee26e8c5d00f87a807921a43eb8145583d19f2b",
                 "shasum": ""
             },
             "require-dev": {
@@ -164,7 +164,7 @@
                     "email": "vvatashi4259@gmail.com"
                 }
             ],
-            "time": "2018-05-02T17:04:40+00:00"
+            "time": "2018-05-05T12:24:39+00:00"
         }
     ],
     "packages-dev": [],
