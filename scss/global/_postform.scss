@@ -1,12 +1,55 @@
+@import '../utils';
+
 .postform {
+  &__control {
+    box-sizing: border-box;
+    display: block;
+    margin: 5px 0;
+    width: 100%;
+  }
+
   &__block {
-    padding: 3px;
-    vertical-align: top;
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+
+    &_label {
+      display: none;
+    }
+
+    &_file {
+      display: flex;
+      flex-flow: row wrap;
+    }
+
+    &_message {
+      display: block;
+    }
+  }
+
+  &__label {
+    display: none;
+  }
+
+  &__input {
+    box-sizing: border-box;
+    width: 100% !important;
+
+    &_file {
+      overflow: hidden;
+      max-width: 60% !important;
+    }
+  }
+
+  &__markup {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
   }
 
   &__button-markup {
-    margin-bottom: 5px;
-    min-width: 25px;
+    flex-grow: 1;
+    margin: 0 5px 5px 0;
     padding: 0;
 
     .spoiler,
@@ -16,7 +59,18 @@
     }
   }
 
+  &__submit {
+    flex-grow: 1;
+    order: 1;
+  }
+
   &__rules {
-    padding-left: 5px;
+    font-size: .8em;
+    text-align: center;
+  }
+
+  &__rules-list {
+    display: inline-block;
+    text-align: left;
   }
 }

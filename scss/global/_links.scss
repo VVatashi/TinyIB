@@ -1,9 +1,11 @@
 @import '../utils';
 
 .links {
+  text-align: center;
+
   &__item {
     @include brackets;
 
-    display: inline-block;
+    display: block;
   }
 }

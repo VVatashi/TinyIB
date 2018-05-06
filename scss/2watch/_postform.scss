@@ -1,7 +1,7 @@
 @import 'vars';
 
 .postform {
-  &__block {
+  &__block_label {
     background: $post-bg-color;
     border: 1px solid #666;
     color: #ccc;
@@ -9,6 +9,10 @@
     padding-left: 3px;
     padding-right: 3px;
     text-align: left;
+  }
+
+  &__markup {
+    margin-right: -5px;
   }
 
   &__rules {

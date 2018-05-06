@@ -20,12 +20,7 @@
 
 {% import _self as self %}
 
-<a id="{{ post['id'] }}" name="{{ post['id'] }}"></a>
-
-<input type="checkbox" class="post-header__delete" id="delete_{{ post['id'] }}"
-  name="delete" value="{{ post['id'] }}" />
-
-<label class="post-header__name-block" for="delete_{{ post['id'] }}">
+<span class="post-header__name-wrapper">
   {% if post['email'] %}
     <a class="post-header__email" href="mailto:{{ post['email'] }}">
       {{ self.nameblock(post) }}
@@ -33,33 +28,33 @@
   {% else %}
     {{ self.nameblock(post) }}
   {% endif %}
+</span>
 
-  {% set date_iso = post['timestamp']|date('c') %}
-  {% set date = post['timestamp']|date('l, dS F Y H:i:s') %}
+{% set date_iso = post['timestamp']|date('c') %}
+{% set date = post['timestamp']|date('l, dS F Y H:i:s') %}
 
-  <time class="post-header__datetime" datetime="{{ date_iso }}" title="{{ date_iso }}">
-    {{ date }}
-  </time>
-</label>
+<time class="post-header__datetime" datetime="{{ date_iso }}" title="{{ date_iso }}">
+  {{ date }}
+</time>
 
-<span class="post-header__reflink-wrapper reflink">
-  {% if res == constant('TINYIB_RESPAGE') %}
-    {% set url_prefix = '' %}
-  {% else %}
-    {% set url_prefix = 'res/' %}
-  {% endif %}
+{% if res == constant('TINYIB_RESPAGE') %}
+  {% set url_prefix = '' %}
+{% else %}
+  {% set url_prefix = 'res/' %}
+{% endif %}
 
-  <a class="post-header__reflink" href="{{ url_prefix }}{{ thread_id }}.html#q{{ post['id'] }}" data-id="{{ post['id'] }}">
-    №{{ post['id'] }}
+<span class="post-header__reflink-wrapper">
+  №<a class="post-header__reflink reflink" href="{{ url_prefix }}{{ thread_id }}.html#q{{ post['id'] }}" data-id="{{ post['id'] }}">
+    {{- post['id'] -}}
   </a>
 
   {% if post[stickied] %}
     <img src="sticky.png" alt="Stickied" title="Stickied" width="16" height="16" />
   {% endif %}
-</span>
 
-{% if res == constant('TINYIB_INDEXPAGE') and post['parent'] == constant('TINYIB_NEWTHREAD') %}
-  <span class="post-header__reply-wrapper">
-    <a class="post-header__reply-link" href="res/{{ post['id'] }}.html">Reply</a>
-  </span>
-{% endif %}
+  {% if res == constant('TINYIB_INDEXPAGE') and post['parent'] == constant('TINYIB_NEWTHREAD') %}
+    <span class="post-header__reply-wrapper">
+      <a class="post-header__reply-link" href="res/{{ post['id'] }}.html">Reply</a>
+    </span>
+  {% endif %}
+</span>

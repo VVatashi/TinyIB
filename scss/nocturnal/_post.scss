@@ -1,4 +1,5 @@
 @import 'vars';
+@import '../utils';
 
 .post {
   background: $post-bg;
@@ -7,38 +8,37 @@
   box-shadow: 3px 3px 5px rgba(0, 0, 0, .2);
   box-sizing: border-box;
   color: $main-text;
-  padding: 10px;
 
   &__inner {
     float: unset;
   }
 
-  &__header {
-    margin-right: 270px;
+  &__content {
+    padding: 10px;
   }
 
   &__file-info {
     color: $third-text;
     margin-left: -3px;
-    margin-right: 270px;
     margin-top: 0;
-    max-width: 440px;
     padding: 4px;
+
+    @include breakpoint($phone-up) {
+      padding: 4px 260px 4px 4px;
+    }
   }
 
   &__file {
-    box-shadow: 5px 5px 5px rgba(0, 0, 0, .2);
-    float: right;
-    margin-right: 4px;
+    @include breakpoint($phone-up) {
+      float: right;
+      margin-right: 4px;
+    }
   }
 
   &__message {
     border: 0;
     border-style: solid;
     max-width: 100%;
-    min-width: -moz-fit-content;
-    min-width: min-content;
-    overflow-wrap: break-word;
   }
 
   &__omitted {

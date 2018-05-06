@@ -1,5 +1,7 @@
+@import '../utils';
+
 .postform {
-  &__block {
+  &__block_label {
     text-align: right;
     font-size: 12pt;
     font-weight: bold;
@@ -12,14 +14,9 @@
     border: 1px solid;
     border-color: $text-color;
     color: inherit;
-    margin: 0 -2.5px 3px;
+    margin: 0 -.5px 3px;
     height: 25px;
     padding: 0 5px;
-
-    &_b {
-      border-radius: 4px 0 0 4px;
-      margin-left: 0;
-    }
 
     &_code {
       code {
@@ -27,13 +24,20 @@
       }
     }
 
-    &_rp {
-      border-radius: 0 4px 4px 0;
-    }
-
     &:hover {
       color: $input-text-color;
       text-shadow: 0 0 5px $text-color;
+    }
+
+    @include breakpoint($phone-up) {
+      &:first-child {
+        border-radius: 4px 0 0 4px;
+        margin-left: 0;
+      }
+  
+      &:last-child {
+        border-radius: 0 4px 4px 0;
+      }
     }
   }
 

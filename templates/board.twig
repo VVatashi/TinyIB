@@ -27,10 +27,12 @@
     <hr />
 
     <div class="content__userdelete">
-      Delete Post
-      <input type="password" name="password" id="deletepostpassword" size="8" placeholder="Password" />&nbsp;
-      <input name="deletepost" value="Delete" type="submit" />
+      <label class="content__userdelete-label" for="deletepostpassword">Delete Post</label>
+      <input type="text" class="content__userdelete-input" id="deletepostpassword" name="password" placeholder="Password" />
+      <input class="content__userdelete-submit" name="deletepost" value="Delete" type="submit" />
     </div>
+
+    <hr />
   </form>
 
   <ul class="content__pager pager">

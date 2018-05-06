@@ -5,6 +5,7 @@ import IModule from './modules/IModule';
 
 import Captcha from './modules/Captcha';
 import CorrectTime from './modules/CorrectTime';
+import DEFix from './modules/DEFix';
 import ExpandFile from './modules/ExpandFile';
 import FormMarkup from './modules/FormMarkup';
 import FormSave from './modules/FormSave';
@@ -18,6 +19,7 @@ export default class ModuleManager {
   constructor() {
     this.modules['Captcha'] = new Captcha(this);
     this.modules['CorrectTime'] = new CorrectTime(this);
+    this.modules['DEFix'] = new DEFix(this);
     this.modules['ExpandFile'] = new ExpandFile(this);
     this.modules['FormMarkup'] = new FormMarkup(this);
     this.modules['FormSave'] = new FormSave(this);

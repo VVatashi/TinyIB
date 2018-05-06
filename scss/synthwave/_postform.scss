@@ -1,5 +1,7 @@
+@import '../utils';
+
 .postform {
-  &__block {
+  &__block_label {
     color: #fff;
     text-align: right;
   }
@@ -16,7 +18,7 @@
     font: inherit;
     font-style: inherit;
     height: 25px;
-    margin: -2px;
+    margin: -.5px;
     min-width: 30px;
     text-align: center;
     text-shadow: none;
@@ -27,13 +29,15 @@
       text-shadow: 0 0 15px #aaa;
     }
 
-    &_b {
-      border-radius: 4px 0 0 4px;
-      margin-left: 0;
-    }
-
-    &_rp {
-      border-radius: 0 4px 4px 0;
+    @include breakpoint($phone-up) {
+      &:first-child {
+        border-radius: 4px 0 0 4px;
+        margin-left: 0;
+      }
+  
+      &:last-child {
+        border-radius: 0 4px 4px 0;
+      }
     }
   }
 

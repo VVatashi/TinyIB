@@ -1,15 +1,40 @@
 @import '../utils';
 
 .post-header {
+  background: inherit;
+  display: flex;
+  flex-flow: column nowrap;
   position: relative;
 
-  &__delete,
-  &__name-block,
+  &__name-wrapper,
+  &__datetime,
   &__reflink-wrapper {
-    vertical-align: middle;
+    display: block;
+    margin: 0 20px;
+    text-align: center;
+  }
+
+  &__reflink-wrapper {
+    order: -1;
   }
 
   &__reply-wrapper {
     @include brackets;
+  }
+
+  @include breakpoint($phone-up) {
+    display: block;
+
+    &__name-wrapper,
+    &__datetime,
+    &__reflink-wrapper {
+      display: inline-block;
+      margin: 0 5px;
+      text-align: left;
+    }
+
+    &__name-wrapper {
+      margin-left: 25px;
+    }
   }
 }

@@ -7,6 +7,11 @@
     background: $post-bg-color;
   }
 
+  &__content {
+    border-top: 1px solid rgba(128, 0, 0, .25);
+    padding:  1px 2px 2px;
+  }
+
   &__file-info {
     text-decoration: none;
   }

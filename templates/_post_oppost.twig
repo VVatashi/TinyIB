@@ -1,39 +1,47 @@
 {% set thread_id = post['id'] %}
 
 <div class="content__oppost post post_oppost oppost">
-  {% if post['file_type'] %}
-    <div class="post__file-info file-info filesize">
-      {% include '_file_info.twig' %}
-    </div>
-  {% endif %}
+  <a id="{{ post['id'] }}" name="{{ post['id'] }}"></a>
 
   <div class="post__header post-header">
+    <div class="post__delete">
+      <input type="checkbox" class="post__delete-input" id="delete_{{ post['id'] }}"
+        name="delete" value="{{ post['id'] }}" title="Mark to delete" />
+      <label class="post__delete-label" for="delete_{{ post['id'] }}">Delete post</label>
+    </div>
+
     {% include '_post_header.twig' %}
   </div>
 
-  {% if post['file_type'] %}
-    <div class="post__file file">
-      {% include '_file.twig' %}
+  <div class="post__content">
+    {% if post['file_type'] %}
+      <div class="post__file-info file-info filesize">
+        {% include '_file_info.twig' %}
+      </div>
+
+      <div class="post__file file">
+        {% include '_file.twig' %}
+      </div>
+    {% endif %}
+
+    <div class="post__message message">
+      {{ post['message'] }}
+
+      {% if post['is_truncated'] %}
+        <p>
+          <span class="post__omitted omittedposts">
+            Post truncated. Click Reply to view.
+          </span>
+        </p>
+      {% endif %}
+
+      {% if res == constant('TINYIB_INDEXPAGE') and post['omitted'] > 0 %}
+        <p>
+          <span class="post__omitted omittedposts">
+            {{ post['omitted'] }} post{{ post['omitted'] > 1 ? 's' }} omitted. Click Reply to view.
+          </span>
+        </p>
+      {% endif %}
     </div>
-  {% endif %}
-
-  <div class="post__message message">
-    {{ post['message'] }}
-
-    {% if post['is_truncated'] %}
-      <p>
-        <span class="post__omitted omittedposts">
-          Post truncated. Click Reply to view.
-        </span>
-      </p>
-    {% endif %}
-
-    {% if res == constant('TINYIB_INDEXPAGE') and post['omitted'] > 0 %}
-      <p>
-        <span class="post__omitted omittedposts">
-          {{ post['omitted'] }} post{{ post['omitted'] > 1 ? 's' }} omitted. Click Reply to view.
-        </span>
-      </p>
-    {% endif %}
   </div>
 </div>

@@ -7,6 +7,7 @@ body {
 
 body {
   margin: 0 0 auto;
+  min-width: 240px;
   padding: 8px;
 }
 
@@ -32,6 +33,15 @@ a {
   &:active,
   &:hover {
     text-decoration: none;
+  }
+}
+
+input[name='password'] {
+  color: transparent;
+
+  &:hover,
+  &:focus {
+    color: inherit;
   }
 }
 

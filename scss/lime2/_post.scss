@@ -2,7 +2,10 @@
   &__inner {
     background: $post-bg-color;
     border-radius: 10px;
-    min-width: 450px;
+  }
+
+  &__content {
+    border-top: 1px solid #bbb;
     padding: 10px;
   }
 

@@ -6,7 +6,11 @@
     background: $post-bg-color;
     border-radius: 5px;
     color: $post-text-color;
-    padding: 5px;
+  }
+
+  &__content {
+    border-top: solid 1px #707070;
+    padding: 0 5px 5px;
   }
 
   &__file-info {
