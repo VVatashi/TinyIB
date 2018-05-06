@@ -399,18 +399,22 @@ function createThumbnail($file_location, $thumb_location, $new_w, $new_h)
         $exit_status = 1;
         $extension = pathinfo($thumb_location, PATHINFO_EXTENSION);
 
-        $info = getimagesize($file_location);
+        $output = [];
+        exec("identify -format '%w %h' '$file_location'", $output);
+        $output = explode(' ', reset($output));
 
-        if (isset($info[0])) {
-            if ($info[0] > TINYIB_FILE_MAXW) {
-                return false;
-            }
+        if (count($output) < 2) {
+            return false;
         }
-        
-        if (isset($info[1])) {
-            if ($info[1] > TINYIB_FILE_MAXH) {
-                return false;
-            }
+
+        list($width, $height) = $output;
+
+        if (!is_numeric($width) || $width > TINYIB_FILE_MAXW) {
+            return false;
+        }
+
+        if (!is_numeric($height) || $height > TINYIB_FILE_MAXH) {
+            return false;
         }
 
         if ($extension === 'gif') {

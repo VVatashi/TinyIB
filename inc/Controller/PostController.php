@@ -232,10 +232,17 @@ class PostController implements IPostController
                     $post['file_original'] = "$mins:$secs" . ($post['file_original'] != '' ? (', ' . $post['file_original']) : '');
                 }
             } elseif (in_array($file_mime, ['image/jpeg', 'image/pjpeg', 'image/png', 'image/gif', 'application/x-shockwave-flash'])) {
-                $file_info = getimagesize($file_location);
+                $output = [];
+                exec("identify -format '%w %h' $file_location", $output);
+                $output = explode(' ', reset($output));
 
-                $post['image_width'] = $file_info[0];
-                $post['image_height'] = $file_info[1];
+                if (count($output) < 2) {
+                    return Response::badRequest('Image appears to be corrupt.');
+                }
+
+                list($width, $height) = $output;
+                $post['image_width'] = $width;
+                $post['image_height'] = $height;
             }
 
             if (isset($tinyib_uploads[$file_mime][1])) {
