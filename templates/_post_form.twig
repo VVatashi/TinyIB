@@ -6,79 +6,101 @@
 
 {% import _self as self %}
 
-<form name="postform" id="postform" action="imgboard.php" method="post" enctype="multipart/form-data">
+<form class="content__postform postform" id="postform" name="postform" action="imgboard.php" method="post" enctype="multipart/form-data">
   {% if uploads and constant('TINYIB_MAXKB') > 0 %}
     <input type="hidden" name="MAX_FILE_SIZE" value="{{ constant('TINYIB_MAXKB') * 1024 }}" />
   {% endif %}
 
   <input type="hidden" name="parent" value="{{ parent }}" />
 
-  <table class="content__postform postform">
+  {% spaceless %}
+
+  <table>
     <tbody>
-      <tr>
-        <td class="postform__block">Name</td>
-        <td><input type="text" name="name" size="28" maxlength="75" accesskey="n" /></td>
-      </tr>
-
-      <tr>
-        <td class="postform__block">E-mail</td>
-        <td><input type="text" name="email" size="28" maxlength="75" accesskey="e" /></td>
-      </tr>
-
-      <tr>
-        <td class="postform__block">Subject</td>
-        <td>
-          <input type="text" name="subject" size="40" maxlength="75" accesskey="s" autocomplete="off" />
-          <input type="submit" value="Submit" accesskey="z" />
+      <tr class="postform__control postform__control_subject">
+        <td class="postform__block postform__block_label">
+          <label class="postform__label" for="subject">Subject</label>
+        </td>
+        <td class="postform__block postform__block_input">
+          <input type="text" class="postform__input" id="subject" name="subject" placeholder="Subject" autocomplete="off" />
         </td>
       </tr>
 
-      <tr>
-        <td class="postform__block">Message</td>
-        <td>
+      <tr class="postform__control postform__control_email">
+        <td class="postform__block postform__block_label">
+          <label class="postform__label" for="email">E-mail</label>
+        </td>
+        <td class="postform__block postform__block_input">
+          <input type="text" class="postform__input" id="email" name="email" placeholder="E-mail" />
+        </td>
+      </tr>
+
+      <tr class="postform__control postform__control_name">
+        <td class="postform__block postform__block_label">
+          <label class="postform__label" for="name">Name</label>
+        </td>
+        <td class="postform__block postform__block_input">
+          <input type="text" class="postform__input" id="name" name="name" placeholder="Name" />
+        </td>
+      </tr>
+
+      <tr class="postform__control postform__control_message">
+        <td class="postform__block postform__block_label postform__block_message">
+          <label class="postform__label" for="message">Message</label>
+        </td>
+        <td class="postform__block postform__block_input">
           <div class="postform__markup">
-            {{ self.markup('quote', '<span class="quote">&gt;</span>') }}
             {{ self.markup('b', '<strong>b</strong>') }}
             {{ self.markup('i', '<em>i</em>') }}
             {{ self.markup('u', '<span class="underline">u</span>') }}
             {{ self.markup('s', '<del>s</del>') }}
             {{ self.markup('sup', '<sup>Sup</sup>') }}
             {{ self.markup('sub', '<sub>Sub</sub>') }}
-            {{ self.markup('spoiler', '<span class="spoiler">Spoiler</span>') }}
             {{ self.markup('code', '<code>Code</code>') }}
+            {{ self.markup('spoiler', '<span class="spoiler">Spoiler</span>') }}
             {{ self.markup('rp', '<span class="spoiler">RP</span>') }}
+            {{ self.markup('quote', '<span class="quote">&gt;</span>') }}
           </div>
-          <textarea id="message" name="message" cols="48" rows="4" accesskey="m"></textarea>
+          <textarea class="postform__input" id="message" name="message" placeholder="Message"></textarea>
         </td>
       </tr>
 
       {% include '_captcha.twig' %}
 
       {% if uploads %}
-        <tr>
-          <td class="postform__block">File</td>
-          <td><input type="file" name="file" size="35" accesskey="f" /></td>
-        </tr>
-      {% endif %}
-
-      {% if embeds %}
-        <tr>
-          <td class="postform__block">Embed</td>
-          <td>
-            <input type="text" name="embed" size="28" accesskey="x" autocomplete="off" />&nbsp;&nbsp;(paste a YouTube URL)
+        <tr class="postform__control">
+          <td class="postform__block postform__block_label">
+            <label class="postform__label" for="file">File</label>
+          </td>
+          <td class="postform__block postform__block_input postform__block_file">
+            <input type="file" class="postform__input postform__input_file" id="file" name="file" placeholder="File" />
+            <input type="submit" class="postform__submit" value="Submit" />
           </td>
         </tr>
       {% endif %}
 
-      <tr>
-        <td class="postform__block">Password</td>
-        <td>
-          <input type="password" name="password" id="newpostpassword" size="8" accesskey="p" />&nbsp;&nbsp;(for post and file deletion)
+      {% if embeds %}
+        <tr class="postform__control">
+          <td class="postform__block postform__block_label">
+            <label class="postform__label" for="embed">Embed</label>
+          </td>
+          <td class="postform__block postform__block_input">
+            <input type="text" class="postform__input" id="embed" name="embed" placeholder="Embed" autocomplete="off" />
+          </td>
+        </tr>
+      {% endif %}
+
+      <tr class="postform__control">
+        <td class="postform__block postform__block_label">
+          <label class="postform__label" for="newpostpassword">Password</label>
+        </td>
+        <td class="postform__block postform__block_input">
+          <input type="text" class="postform__input postform__input_password" id="newpostpassword" name="password" placeholder="Delete post password" />
         </td>
       </tr>
 
-      <tr>
-        <td colspan="2" class="postform__rules rules">
+      <tr class="postform__rules rules">
+        <td colspan="2">
           <ul class="postform__rules-list">
             {% if constant('TINYIB_REQMOD') == 'files' or constant('TINYIB_REQMOD') == 'all' %}
               <li class="postform__rules-list-item">All posts {{ constant('TINYIB_REQMOD') == 'files' ? ' with a file attached' }} will be moderated before being shown.</li>
@@ -114,4 +136,6 @@
       </tr>
     </tbody>
   </table>
+
+  {% endspaceless %}
 </form>

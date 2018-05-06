@@ -3,6 +3,10 @@
 .postform {
   color: $main-text;
 
+  &__markup {
+    margin-right: -5px;
+  }
+
   &__rules {
     display: none;
   }

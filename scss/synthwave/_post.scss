@@ -7,15 +7,17 @@
     border: 2px solid transparent;
     border-image: linear-gradient(to bottom right, #fb99f9 0%, #f632fe 100%);
     border-image-slice: 1;
-    margin: 1px 0 7px 1px;
-    max-width: 1280px;
-    min-width: 450px;
-    padding: 10px;
   }
 
   &__header {
     color: #9a9a9a;
     text-shadow: none;
+    padding: 10px;
+  }
+
+  &__content {
+    border-top: solid 1px #505050;
+    padding: 10px;
   }
 
   &__file-info {
@@ -33,6 +35,5 @@
 
   &__message {
     color: #fff;
-    margin: .5em;
   }
 }

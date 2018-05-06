@@ -6,7 +6,8 @@
 .de-menu,
 .de-popup,
 .de-pview,
-.de-win > .de-win-body {
+.de-win > .de-win-body,
+#de-cfg-buttons {
   background: $post-bg-color;
   color: $post-text-color;
 }

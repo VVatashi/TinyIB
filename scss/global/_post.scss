@@ -1,31 +1,56 @@
 .post {
+  position: relative;
+
   &__inner {
-    float: left;
-    margin: 2px 0;
     overflow: hidden;
     position: relative;
-    white-space: nowrap;
+  }
+
+  &__delete {
+    position: absolute;
+    z-index: 1;
+  }
+
+  &__delete-label {
+    display: none;
   }
 
   &__file-info {
     display: block;
-    margin-left: 20px;
+    text-align: center;
   }
 
   &__file {
-    float: left;
-    margin: 4px 20px;
+    margin: 5px;
+    text-align: center;
   }
 
   &__message {
-    margin: 1em 25px 5px;
-    white-space: initial;
-	max-height: 400px;
-    overflow-y: hidden;
-    overflow-x: hidden;
-    overflow-wrap: break-word;
+    margin: 5px;
+    word-wrap: break-word;
   }
-  &__inner{
-    max-width:100%;
+
+  @include breakpoint($phone-up) {
+    @include clearfix;
+
+    &__inner {
+      float: left;
+      max-width: 100%;
+    }
+
+    &__delete {
+      float: left;
+      vertical-align: middle;
+    }
+
+    &__file-info {
+      text-align: left;
+    }
+
+    &__file {
+      float: left;
+      margin: 5px 10px 10px 5px;
+      text-align: left;
+    }
   }
 }

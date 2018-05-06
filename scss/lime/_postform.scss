@@ -1,8 +1,12 @@
 .postform {
-  &__block {
+  &__block_label {
     color: #d0d0d0;
     font-weight: 800;
     text-align: right;
+  }
+
+  &__markup {
+    margin-right: -5px;
   }
 
   &__rules {

@@ -6,10 +6,10 @@
     border: 0;
     border-radius: 5px;
     box-sizing: border-box;
-    clear: both;
-    float: left;
-    margin: 3px;
-    min-width: 450px;
+  }
+
+  &__content {
+    border-top: 1px solid #bbb;
     padding: 5px;
   }
 
@@ -20,17 +20,10 @@
     text-decoration: none;
   }
 
-  &__delete {
-    display: none;
-  }
-
   &__name-block {
     color: #717171;
     font-family: sans-serif;
     font-size: .85em;
-    margin-bottom: 5px;
-    margin-left: 5px;
-    max-width: 100%;
   }
 
   &__message {

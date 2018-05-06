@@ -1,5 +1,9 @@
+@import '../utils';
+
 .file {
   &__thumbnail {
-    margin-top: -30px;
+    @include breakpoint($phone-up) {
+      margin-top: -30px;
+    }
   }
 }

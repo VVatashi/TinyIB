@@ -1,10 +1,14 @@
 @import 'burichan/vars';
 
 .postform {
-  &__block {
+  &__block_label {
     background: $form-bg-color;
     color: $text-color;
     font-weight: 800;
+  }
+
+  &__markup {
+    margin-right: -5px;
   }
 
   &__rules {

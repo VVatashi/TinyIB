@@ -1,23 +1,33 @@
 {% set thread_id = post['parent'] %}
 
-<div class="content__post post post_reply reply" id="reply_{{ post['id'] }}">
+<div id="reply_{{ post['id'] }}" class="content__post post post_reply reply">
   <div class="post__inner">
+    <a id="{{ post['id'] }}" name="{{ post['id'] }}"></a>
+
     <div class="post__header post-header">
+      <div class="post__delete">
+        <input type="checkbox" class="post__delete-input" id="delete_{{ post['id'] }}"
+          name="delete" value="{{ post['id'] }}" title="Mark to delete" />
+        <label class="post__delete-label" for="delete_{{ post['id'] }}">Delete post</label>
+      </div>
+
       {% include '_post_header.twig' %}
     </div>
 
-    {% if post['file_type'] %}
-      <div class="post__file-info file-info filesize">
-        {% include '_file_info.twig' %}
-      </div>
+    <div class="post__content">
+      {% if post['file_type'] %}
+        <div class="post__file-info file-info filesize">
+          {% include '_file_info.twig' %}
+        </div>
 
-      <div class="post__file file">
-        {% include '_file.twig' %}
-      </div>
-    {% endif %}
+        <div class="post__file file">
+          {% include '_file.twig' %}
+        </div>
+      {% endif %}
 
-    <div class="post__message message">
-      {{ post['message'] }}
+      <div class="post__message message">
+        {{ post['message'] }}
+      </div>
     </div>
   </div>
 </div>
