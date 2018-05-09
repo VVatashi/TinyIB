@@ -233,7 +233,14 @@ class PostController implements IPostController
                 }
             } elseif (in_array($file_mime, ['image/jpeg', 'image/pjpeg', 'image/png', 'image/gif', 'application/x-shockwave-flash'])) {
                 $output = [];
-                exec("identify -format '%w %h' $file_location", $output);
+
+                if ($file_mime === 'image/gif') {
+                    exec("identify -format '%w %h' ${file_location}[0]", $output);
+                }
+                else {
+                    exec("identify -format '%w %h' $file_location", $output);
+                }
+
                 $output = explode(' ', reset($output));
 
                 if (count($output) < 2) {

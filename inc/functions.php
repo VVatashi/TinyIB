@@ -409,7 +409,14 @@ function createThumbnail($file_location, $thumb_location, $new_w, $new_h)
         $extension = pathinfo($thumb_location, PATHINFO_EXTENSION);
 
         $output = [];
-        exec("identify -format '%w %h' '$file_location'", $output);
+
+        if ($extension === 'gif') {
+            exec("identify -format '%w %h' ${file_location}[0]", $output);
+        }
+        else {
+            exec("identify -format '%w %h' $file_location", $output);
+        }
+
         $output = explode(' ', reset($output));
 
         if (count($output) < 2) {
