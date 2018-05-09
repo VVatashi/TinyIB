@@ -150,11 +150,20 @@ function colorQuote($message)
 
 function deletePostImages($post)
 {
-    if (!isEmbed($post['file_hex']) && $post['file'] != '') {
-        @unlink('src/' . $post['file']);
+    // TODO: Exception handling & logging.
+
+    if (!isEmbed($post['file_hex']) && !empty($post['file'])) {
+        $path = 'src/' . $post['file'];
+        if (file_exists($path)) {
+            unlink($path);
+        }
     }
-    if ($post['thumb'] != '') {
-        @unlink('thumb/' . $post['thumb']);
+
+    if (!empty($post['thumb'])) {
+        $path = 'thumb/' . $post['thumb'];
+        if (file_exists($path)) {
+            unlink($path);
+        }
     }
 }
 
