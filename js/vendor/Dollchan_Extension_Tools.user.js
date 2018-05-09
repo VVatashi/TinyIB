@@ -22236,8 +22236,8 @@ true, true];
 
 				var _this110 = _possibleConstructorReturn(this, (TempLewdGa.__proto__ || Object.getPrototypeOf(TempLewdGa)).call(this, prot, dm));
 
-				_this110.qFormPassw = '.postform__input_password';
-				_this110.qFormSubm = '.postform__submit';
+				_this110.qFormPassw = '.field__input_password';
+				_this110.qFormSubm = '.field__input_submit';
 				_this110.qImgInfo = '.post__file-info';
 				_this110.qOmitted = '.post__omitted';
 				_this110.qOPost = '.post_oppost';
@@ -22251,7 +22251,6 @@ true, true];
 				_this110.qPostRef = '.post-header__reflink-wrapper';
 				_this110.qRPost = '.post_reply';
 				_this110.qTrunc = '.post__omitted';
-				_this110.formTd = 'div';
 				return _this110;
 			}
 

@@ -1,0 +1,35 @@
+.field {
+  &__label-wrapper {
+    display: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__input-wrapper {
+    display: block;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__input {
+    box-sizing: border-box;
+    height: 2em;
+    // Override DE style.
+    width: 100% !important;
+
+    &_markup {
+      min-width: 20px;
+
+      .spoiler,
+      .rp {
+        background-color: #000;
+        color: #fff;
+      }
+    }
+
+    &_message {
+      min-height: 130px;
+      min-width: 130px;
+    }
+  }
+}

@@ -1,7 +1,10 @@
 {% if constant('TINYIB_CAPTCHA') %}
-  <tr>
-    <td class="postblock">CAPTCHA</td>
-    <td>
+  <tr class="{{ class ? class ~ ' ' }}field field_captcha">
+    <td class="field__label-wrapper">
+      <label class="field__label" for="captcha">CAPTCHA</label>
+    </td>
+
+    <td class="field__input-wrapper">
       {% if constant('TINYIB_CAPTCHA') == 'recaptcha' %}
         <div style="min-height: 80px;">
           <div class="g-recaptcha" data-sitekey="{{ constant('TINYIB_RECAPTCHA_SITE') }}"></div>
@@ -21,7 +24,7 @@
           </noscript>
         </div>
       {% else %} <!-- Simple CAPTCHA -->
-        <input type="text" name="captcha" id="captcha" size="6" accesskey="c" autocomplete="off" />&nbsp;&nbsp;(enter the text below)<br />
+        <input type="text" class="field__input" name="captcha" id="captcha" autocomplete="off" />&nbsp;&nbsp;(enter the text below)<br />
         <img id="captchaimage" src="inc/captcha.php" width="175" height="55" alt="CAPTCHA" style="margin-top: 5px;cursor: pointer;">
       {% endif %}
     </td>

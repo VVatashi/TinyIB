@@ -1,0 +1,9 @@
+@import 'vars';
+
+.field {
+
+  &__input {
+    background: transparent;
+    color: $main-text;
+  }
+}

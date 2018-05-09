@@ -7,6 +7,7 @@ const webpack = require('webpack');
 const webpackConfig = require('./webpack.config.js');
 
 const sass = require('gulp-sass');
+const autoprefixer = require('gulp-autoprefixer');
 
 gulp.task('ts', function (done) {
   function onError(error) {
@@ -41,6 +42,10 @@ gulp.task('sass', function () {
         outputStyle: 'compressed',
       })
       .on('error', sass.logError))
+    .pipe(autoprefixer({
+        browsers: ['last 2 versions'],
+        cascade: false,
+    }))
     .pipe(gulp.dest('./css'));
 });
 

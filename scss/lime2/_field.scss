@@ -1,0 +1,27 @@
+@import '../utils';
+
+.field {
+  &__input {
+    &_markup {
+      background: transparent;
+      border: 1px solid;
+      border-color: $text-color;
+      border-radius: 4px;
+      color: inherit;
+      margin: 0 -.5px 3px;
+      height: 25px;
+      padding: 5px;
+
+      &:hover {
+        color: $input-text-color;
+        text-shadow: 0 0 5px $text-color;
+      }
+    }
+
+    &_markup-code {
+      code {
+        font-family: Monaco;
+      }
+    }
+  }
+}

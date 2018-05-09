@@ -8,6 +8,7 @@ body {
 body {
   margin: 0 0 auto;
   min-width: 240px;
+  overflow-x: hidden;
   padding: 8px;
 }
 
@@ -39,9 +40,13 @@ a {
 input[name='password'] {
   color: transparent;
 
+  &::placeholder {
+    color: unset;
+  }
+
   &:hover,
   &:focus {
-    color: inherit;
+    color: unset;
   }
 }
 
