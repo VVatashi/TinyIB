@@ -30,6 +30,8 @@
     &_message {
       min-height: 130px;
       min-width: 130px;
+      overflow-y: auto;
+      resize: none;
     }
   }
 }

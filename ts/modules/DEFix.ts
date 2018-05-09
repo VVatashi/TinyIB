@@ -11,6 +11,7 @@ export default class DEFix extends BaseModule {
     setTimeout(() => {
       // Reset the message size.
       const message = qid('message') as HTMLTextAreaElement;
+      message.setAttribute('style', '');
       message.classList.remove('de-textarea');
 
       // Fix file preview.
