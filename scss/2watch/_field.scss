@@ -1,0 +1,23 @@
+@import 'vars';
+
+.field {
+  &__input {
+    background: $input-bg-color;
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #a7a7a7;
+    transition-duration: .4s;
+    transition-property: background-color, border-color, box-shadow;
+  
+    &:hover {
+      background: rgb(45, 45, 45);
+    }
+  
+    &:focus {
+      background: rgb(45, 45, 45);
+      border: 1px solid rgba(216, 216, 216, .62);
+      box-shadow: inset 0 0 40px rgba(220, 220, 220, .32);
+      color: rgb(216, 216, 216);
+      outline: none;
+    }
+  }
+}

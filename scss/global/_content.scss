@@ -33,7 +33,9 @@
   }
 
   &__postform {
+    display: block;
     margin: 10px auto;
+    max-width: 580px;
     text-align: left;
   }
 
@@ -49,6 +51,6 @@
 
   &__settings-form {
     margin: 0 auto;
-    max-width: 600px;
+    max-width: 580px;
   }
 }

@@ -18,3 +18,26 @@
 .de-post-note {
   display: none;
 }
+
+#de-sagebtn {
+  position: absolute;
+  right: -24px;
+  top: 0px;
+}
+
+.de-file-txt-area {
+  order: 1;
+
+  &,
+  td {
+    display: block;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.de-file {
+  box-sizing: border-box;
+  margin: 0 !important;
+}

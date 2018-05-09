@@ -1,0 +1,23 @@
+.field {
+  &__input {
+    background: #6f6f6f;
+    border-color: transparent;
+    color: #fff;
+
+    &_button,
+    &_submit {
+      background-image: linear-gradient(#777, #6f6f6f);
+      border: 1px solid #6f6f6f;
+      color: #dedede;
+      cursor: pointer;
+      padding: 0;
+      position: relative;
+      width: 90px;
+      z-index: 1;
+    
+      &:hover {
+        background-image: linear-gradient(#6f6f6f, #888);
+      }
+    }
+  }
+}
