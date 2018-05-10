@@ -3,11 +3,14 @@
 
 .post {
   background: $post-bg;
-  border: 0px;
-  border-style: solid;
+  border: 0 solid;
   box-shadow: 3px 3px 5px rgba(0, 0, 0, .2);
   box-sizing: border-box;
   color: $main-text;
+
+  &:hover {
+    box-shadow: 8px 8px 8px rgba(0, 0, 0, .2);
+  }
 
   &__inner {
     float: unset;
@@ -36,16 +39,11 @@
   }
 
   &__message {
-    border: 0;
-    border-style: solid;
+    border: 0 solid;
     max-width: 100%;
   }
 
   &__omitted {
     color: #a88085;
-  }
-
-  &:hover {
-    box-shadow: 8px 8px 8px rgba(0, 0, 0, .2);
   }
 }

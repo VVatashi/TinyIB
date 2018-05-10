@@ -17,14 +17,22 @@
     // Override DE style.
     width: 100% !important;
 
+    &::placeholder {
+      color: #ccc;
+    }
+
     &_markup {
-      min-width: 20px;
+      min-width: 30px;
 
       .spoiler,
       .rp {
         background-color: #000;
         color: #fff;
       }
+    }
+
+    &_submit {
+      min-width: 90px;
     }
 
     &_message {

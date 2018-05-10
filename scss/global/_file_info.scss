@@ -1,11 +1,4 @@
 @import '../utils';
 
 .file-info {
-    &__size {
-        display: block;
-
-        @include breakpoint($phone-up) {
-            display: inline-block;
-        }
-    }
 }

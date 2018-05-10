@@ -3,19 +3,18 @@
 .post-header {
   background: inherit;
   display: flex;
-  flex-flow: column nowrap;
+  flex-flow: row wrap;
   position: relative;
 
   &__name-wrapper,
   &__datetime,
   &__reflink-wrapper {
-    display: block;
-    margin: 0 20px;
-    text-align: center;
+    display: inline-block;
+    margin: 0 2px;
   }
 
-  &__reflink-wrapper {
-    order: -1;
+  &__name-wrapper {
+    margin-left: 20px;
   }
 
   &__reply-wrapper {
@@ -24,17 +23,5 @@
 
   @include breakpoint($phone-up) {
     display: block;
-
-    &__name-wrapper,
-    &__datetime,
-    &__reflink-wrapper {
-      display: inline-block;
-      margin: 0 5px;
-      text-align: left;
-    }
-
-    &__name-wrapper {
-      margin-left: 25px;
-    }
   }
 }

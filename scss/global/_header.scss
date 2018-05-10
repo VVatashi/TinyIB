@@ -4,8 +4,13 @@
     float: right;
   }
 
-  &__title {
-    font-size: 2em;
+  &__logo {
     text-align: center;
+  }
+
+  &__title {
+    display: inline-block;
+    font-size: 2em;
+    margin: 0 auto;
   }
 }

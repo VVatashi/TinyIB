@@ -33,6 +33,10 @@ export default class DEFix extends BaseModule {
         const message_group = qs('.form__group_message');
         message_group.appendChild(preview_field);
       }
+
+      // Hide broken message resizer.
+      const resizer = qid('de-resizer-text');
+      resizer.setAttribute('style', 'display: none !important;');
     }, 1000);
   }
 }

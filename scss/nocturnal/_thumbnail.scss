@@ -1,5 +1,12 @@
 .thumbnail {
   &__content {
     box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
+
+    opacity: .7;
+    transition: opacity .333s ease;
+
+    &:hover {
+      opacity: 1.0;
+    }
   }
 }

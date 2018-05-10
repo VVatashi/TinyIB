@@ -9,7 +9,7 @@ export default class FormMarkup extends BaseModule {
 
   onReady() {
     const buttons: { [key: string]: EventListener } = {
-      'markup_quote': () => this.insertMarkup('\n>', '\n'),
+      'markup_quote': () => this.insertMarkup('>', ''),
       'markup_b': () => this.insertBBCode('b'),
       'markup_i': () => this.insertBBCode('i'),
       'markup_u': () => this.insertBBCode('u'),

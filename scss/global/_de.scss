@@ -5,16 +5,6 @@
   display: none !important;
 }
 
-.de-post-btns {
-  background: inherit;
-  position: absolute;
-  right: 0;
-
-  @include breakpoint($phone-up) {
-    position: initial;
-  }
-}
-
 .de-post-note {
   display: none;
 }
@@ -40,4 +30,8 @@
 .de-file {
   box-sizing: border-box;
   margin: 0 !important;
+}
+
+#de-pform {
+  padding-top: 10px !important;
 }

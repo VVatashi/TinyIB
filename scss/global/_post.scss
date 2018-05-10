@@ -17,12 +17,11 @@
 
   &__file-info {
     display: block;
-    text-align: center;
   }
 
   &__file {
+    display: inline-block;
     margin: 5px;
-    text-align: center;
   }
 
   &__message {
@@ -44,14 +43,9 @@
       vertical-align: middle;
     }
 
-    &__file-info {
-      text-align: left;
-    }
-
     &__file {
       float: left;
       margin: 5px 10px 10px 5px;
-      text-align: left;
     }
   }
 }
