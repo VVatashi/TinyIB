@@ -69,26 +69,40 @@ export default class PostForm extends BaseModule {
   }
 
   protected beginResize = (event: MouseEvent) => {
-    this.resize_width = event.pageX - this.form.offsetLeft > this.form.clientWidth - 10;
-    this.resize_height = event.pageY - this.form.offsetTop > this.form.clientHeight - 10;
+    const bodyRect = document.body.getBoundingClientRect();
+    const formRect = this.form.getBoundingClientRect();
+
+    const width = event.pageX - (formRect.left - bodyRect.left);
+    const height = event.pageY - (formRect.top - bodyRect.top);
+
+    const resize_padding = 10;
+
+    this.resize_width = width > this.form.clientWidth - resize_padding;
+    this.resize_height = height > this.form.clientHeight - resize_padding;
 
     window.addEventListener('mousemove', this.resize);
     window.addEventListener('mouseup', this.endResize);
   }
 
   protected resize = (event: MouseEvent) => {
+    const bodyRect = document.body.getBoundingClientRect();
+    const formRect = this.form.getBoundingClientRect();
+
+    const width = event.pageX - (formRect.left - bodyRect.left);
+    const height = event.pageY - (formRect.top - bodyRect.top);
+
     if (this.resize_width) {
-      const width = event.pageX - this.form.offsetLeft;
       this.form.style.width = `${width}px`;
     }
 
     if (this.resize_height) {
-      const height = event.pageY - this.form.offsetTop;
       this.form.style.height = `${height}px`;
     }
 
-    event.preventDefault();
-    event.stopPropagation();
+    if (this.resize_width || this.resize_height) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
   }
 
   protected endResize = (event: MouseEvent) => {
