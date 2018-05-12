@@ -9,10 +9,12 @@
     display: block;
     margin: 0;
     padding: 0;
+    height: 100%;
   }
 
   &__input {
     box-sizing: border-box;
+    padding: 0 5px;
     height: 2em;
     // Override DE style.
     width: 100% !important;
@@ -38,6 +40,7 @@
     &_message {
       min-height: 130px;
       min-width: 130px;
+      height: 100%;
       overflow-y: auto;
       resize: none;
     }

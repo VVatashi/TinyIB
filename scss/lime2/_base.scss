@@ -20,34 +20,6 @@ label {
   color: $file-info-color;
 }
 
-input[type="password"],
-input[type="text"],
-select,
-textarea {
-  background: $input-bg-color;
-  border-radius: 3px;
-  border: 0;
-  color: $input-text-color;
-  min-height: 22px;
-}
-
-input[type="text"] {
-  padding: 0;
-}
-
-input[type="submit"] {
-  background: linear-gradient(180deg, #777, $input-bg-color);
-  border: 0;
-  border-color: $text-color;
-  border-radius: 3px;
-  color: $input-text-color;
-  padding: 2px 10px;
-
-  &:hover {
-    background: linear-gradient(180deg, $input-bg-color, #888);
-  }
-}
-
 td {
   padding: 0;
 }

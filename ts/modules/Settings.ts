@@ -17,6 +17,7 @@ export default class Settings extends BaseModule {
   }
 
   protected getFormValues(): ISettingsDto {
+    const form_preview_align = qs('input[name="form_preview_align"]:checked') as HTMLInputElement;
     const time_locale = qs('input[name="time_locale"]:checked') as HTMLInputElement;
     const time_locale_custom_value = qid('time_locale_custom_value') as HTMLInputElement;
     const time_format = qs('input[name="time_format"]:checked') as HTMLInputElement;
@@ -25,6 +26,7 @@ export default class Settings extends BaseModule {
     const time_zone_fixed_offset = qid('time_zone_fixed_offset') as HTMLInputElement;
 
     return {
+      form_preview_align: form_preview_align.value,
       time_locale: time_locale.value,
       time_locale_custom_value: time_locale_custom_value.value,
       time_zone: time_zone.value,
@@ -36,7 +38,6 @@ export default class Settings extends BaseModule {
 
   onReady() {
     const settings_form = qid('settings_form');
-
     if (!settings_form) {
       return;
     }
@@ -51,6 +52,14 @@ export default class Settings extends BaseModule {
     const time_current_format = qid('time_current_format') as HTMLElement;
 
     // Set the initial settings form state
+    if (this.settings.form_preview_align) {
+      const element = qs(`input[name="form_preview_align"][value="${this.settings.form_preview_align}"]`) as HTMLInputElement;
+
+      if (element) {
+        element.checked = true;
+      }
+    }
+
     if (this.settings.time_locale) {
       const element = qs(`input[name="time_locale"][value="${this.settings.time_locale}"]`) as HTMLInputElement;
 

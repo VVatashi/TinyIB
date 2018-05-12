@@ -5,10 +5,9 @@ import IModule from './modules/IModule';
 
 import Captcha from './modules/Captcha';
 import CorrectTime from './modules/CorrectTime';
-import DEFix from './modules/DEFix';
+import DeleteForm from './modules/DeleteForm';
 import ExpandFile from './modules/ExpandFile';
-import FormMarkup from './modules/FormMarkup';
-import FormSave from './modules/FormSave';
+import PostForm from './modules/PostForm';
 import QuotePost from './modules/QuotePost';
 import Settings from './modules/Settings';
 import StyleSwitcher from './modules/StyleSwitcher';
@@ -19,10 +18,9 @@ export default class ModuleManager {
   constructor() {
     this.modules['Captcha'] = new Captcha(this);
     this.modules['CorrectTime'] = new CorrectTime(this);
-    this.modules['DEFix'] = new DEFix(this);
+    this.modules['DeleteForm'] = new DeleteForm(this);
     this.modules['ExpandFile'] = new ExpandFile(this);
-    this.modules['FormMarkup'] = new FormMarkup(this);
-    this.modules['FormSave'] = new FormSave(this);
+    this.modules['PostForm'] = new PostForm(this);
     this.modules['QuotePost'] = new QuotePost(this);
     this.modules['Settings'] = new Settings(this);
     this.modules['StyleSwitcher'] = new StyleSwitcher(this);
