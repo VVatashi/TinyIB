@@ -191,7 +191,6 @@ class Renderer implements IRenderer
             'parent' => $id,
             'res' => TINYIB_RESPAGE,
             'thumbnails' => true,
-            'unique_posts' => $this->post_repository->uniquePosts(),
         ]);
     }
 
@@ -226,7 +225,6 @@ class Renderer implements IRenderer
             'parent' => 0,
             'res' => TINYIB_INDEXPAGE,
             'thumbnails' => true,
-            'unique_posts' => $this->post_repository->uniquePosts(),
         ]);
     }
 

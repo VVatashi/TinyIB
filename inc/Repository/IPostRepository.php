@@ -5,11 +5,6 @@ namespace TinyIB\Repository;
 interface IPostRepository extends IRepository
 {
     /**
-     * @return int
-     */
-    public function uniquePosts();
-
-    /**
      * @param int $id
      *
      * @return array

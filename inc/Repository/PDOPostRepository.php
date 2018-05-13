@@ -96,14 +96,6 @@ class PDOPostRepository extends PDORepository implements IPostRepository
     /**
      * {@inheritDoc}
      */
-    public function uniquePosts()
-    {
-        return $this->getCount([], 'distinct(ip)');
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function postByID($id)
     {
         return $this->getOne(['id' => $id]);
