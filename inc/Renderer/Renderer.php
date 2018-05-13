@@ -240,12 +240,4 @@ class Renderer implements IRenderer
 
         return $text;
     }
-
-    public function rebuildIndexes()
-    {
-    }
-
-    public function rebuildThread($id)
-    {
-    }
 }

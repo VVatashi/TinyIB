@@ -4,6 +4,7 @@
 #
 # https://github.com/tslocum/TinyIB
 
+use TinyIB\Cache\InMemoryCache;
 use TinyIB\Controller\ManageController;
 use TinyIB\Controller\PostController;
 use TinyIB\Controller\SettingsController;
@@ -124,6 +125,9 @@ if (TINYIB_TIMEZONE != '') {
     date_default_timezone_set(TINYIB_TIMEZONE);
 }
 
+/** @var \TinyIB\Cache\ICache $cache */
+$cache = new InMemoryCache();
+
 /** @var \TinyIB\Repository\IBanRepository $ban_repository */
 $ban_repository = new PDOBanRepository(TINYIB_DBBANS);
 
@@ -138,30 +142,57 @@ $renderer = new Renderer($post_repository, [
 ]);
 
 /** @var \TinyIB\Controller\IManageController $manage_controller */
-$manage_controller = new ManageController($ban_repository, $post_repository, $renderer);
+$manage_controller = new ManageController($cache, $ban_repository, $post_repository, $renderer);
 
 /** @var \TinyIB\Controller\IPostController $post_controller */
-$post_controller = new PostController($ban_repository, $post_repository, $renderer);
+$post_controller = new PostController($cache, $ban_repository, $post_repository, $renderer);
 
 /** @var \TinyIB\Controller\ISettingsController $settings_controller */
-$settings_controller = new SettingsController($renderer);
+$settings_controller = new SettingsController($cache, $renderer);
 
 /** @var \TinyIB\Router\IRouter $router */
 $router = new TreeRouter();
 
 // Setup routing.
-$router->addRoute('/', function ($path) use ($renderer) {
-    Response::ok($renderer->renderBoardPage(0))->send();
+$router->addRoute('/', function ($path) use ($cache, $renderer) {
+    $key = TINYIB_BOARD . ':page:0';
+
+    if ($cache->exists($key)) {
+        $data = $cache->get($key);
+    } else {
+        $data = $renderer->renderBoardPage(0);
+        $cache->set($key, $data, 60 * 60);
+    }
+
+    Response::ok($data)->send();
 });
 
-$router->addRoute('/:int', function ($path) use ($renderer) {
+$router->addRoute('/:int', function ($path) use ($cache, $renderer) {
     $page = explode('/', $path)[1];
-    Response::ok($renderer->renderBoardPage($page))->send();
+    $key = TINYIB_BOARD . ':page:' . $page;
+
+    if ($cache->exists($key)) {
+        $data = $cache->get($key);
+    } else {
+        $data = $renderer->renderBoardPage($page);
+        $cache->set($key, $data, 60 * 60);
+    }
+
+    Response::ok($data)->send();
 });
 
-$router->addRoute('/res/:int', function ($path) use ($renderer) {
+$router->addRoute('/res/:int', function ($path) use ($cache, $renderer) {
     $id = explode('/', $path)[2];
-    Response::ok($renderer->renderThreadPage($id))->send();
+    $key = TINYIB_BOARD . ':thread:' . $id;
+
+    if ($cache->exists($key)) {
+        $data = $cache->get($key);
+    } else {
+        $data = $renderer->renderThreadPage($id);
+        $cache->set($key, $data, 60 * 60);
+    }
+
+    Response::ok($data)->send();
 });
 
 $router->addRoute('/manage', function ($path) use ($manage_controller) {

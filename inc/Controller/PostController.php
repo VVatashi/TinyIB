@@ -6,6 +6,9 @@ use TinyIB\Response;
 
 class PostController implements IPostController
 {
+    /** @var \TinyIB\Cache\ICache $cache */
+    protected $cache;
+
     /** @var \TinyIB\Repository\IBanRepository $ban_repository */
     protected $ban_repository;
 
@@ -18,12 +21,14 @@ class PostController implements IPostController
     /**
      * Constructs new post controller.
      *
+     * @param \TinyIB\Cache\ICache $cache
      * @param \TinyIB\Repository\IBanRepository $ban_repository
      * @param \TinyIB\Repository\IPostRepository $post_repository
      * @param \TinyIB\Renderer\IRenderer $renderer
      */
-    public function __construct($ban_repository, $post_repository, $renderer)
+    public function __construct($cache, $ban_repository, $post_repository, $renderer)
     {
+        $this->cache = $cache;
         $this->ban_repository = $ban_repository;
         $this->post_repository = $post_repository;
         $this->renderer = $renderer;
@@ -320,7 +325,7 @@ class PostController implements IPostController
             $this->post_repository->trimThreads();
 
             if ($post['parent'] != TINYIB_NEWTHREAD) {
-                $this->renderer->rebuildThread($post['parent']);
+                $this->cache->delete(TINYIB_BOARD . ':thread:' . $post['parent']);
 
                 if (strtolower($post['email']) != 'sage') {
                     if (TINYIB_MAXREPLIES == 0
@@ -329,10 +334,10 @@ class PostController implements IPostController
                     }
                 }
             } else {
-                $this->renderer->rebuildThread($post['id']);
+                $this->cache->delete(TINYIB_BOARD . ':thread:' . $post['id']);
             }
 
-            $this->renderer->rebuildIndexes();
+            $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
         }
 
         return Response::redirect($redirect_url);
@@ -360,14 +365,6 @@ class PostController implements IPostController
             return Response::notFound($message);
         }
 
-        // Disabled due to Dollchan Extension Tools breaks.
-        // list($logged_in, $is_admin) = manageCheckLogIn();
-        //
-        // if ($logged_in && empty($password)) {
-        //     $url = basename($_SERVER['PHP_SELF']) . '?manage&moderate=' . $id;
-        //     return Response::redirect($url);
-        // }
-
         $password_hash = md5(md5($password));
 
         if (empty($post['password']) || $post['password'] !== $password_hash) {
@@ -379,8 +376,8 @@ class PostController implements IPostController
         $is_thread = $post['parent'] == TINYIB_NEWTHREAD;
         $thread_id = $is_thread ? $post['id'] : $post['parent'];
 
-        $this->renderer->rebuildThread($thread_id);
-        $this->renderer->rebuildIndexes();
+        $this->cache->delete(TINYIB_BOARD . ':thread:' . $thread_id);
+        $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 
         return Response::ok('Post deleted.');
     }
