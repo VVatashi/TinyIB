@@ -115,21 +115,13 @@ function nameAndTripcode($name)
     return array($name, "");
 }
 
-function fixLinksInRes($html)
-{
-    $search = array(' href="css/', ' src="js/', ' href="src/', ' href="thumb/', ' href="res/', ' href="imgboard.php', ' href="favicon.ico', 'src="thumb/', 'src="inc/', 'src="sticky.png', ' action="imgboard.php');
-    $replace = array(' href="../css/', ' src="../js/', ' href="../src/', ' href="../thumb/', ' href="../res/', ' href="../imgboard.php', ' href="../favicon.ico', 'src="../thumb/', 'src="../inc/', 'src="../sticky.png', ' action="../imgboard.php');
-
-    return str_replace($search, $replace, $html);
-}
-
 function _postLink($matches)
 {
     global $post_repository;
     $post = $post_repository->postByID($matches[1]);
 
     if ($post) {
-        return '<a href="res/' . ($post['parent'] == TINYIB_NEWTHREAD ? $post['id'] : $post['parent']) . '.html#' . $matches[1] . '">' . $matches[0] . '</a>';
+        return '<a href="/' . TINYIB_BOARD . '/res/' . ($post['parent'] == TINYIB_NEWTHREAD ? $post['id'] : $post['parent']) . '#' . $matches[1] . '">' . $matches[0] . '</a>';
     }
 
     return $matches[0];

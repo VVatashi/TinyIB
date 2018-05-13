@@ -285,6 +285,6 @@ class Renderer implements IRenderer
             'unique_posts' => $this->post_repository->uniquePosts(),
         ]);
 
-        $this->writePage('res/' . $id . '.html', fixLinksInRes($html));
+        $this->writePage('res/' . $id . '.html', $html);
     }
 }
