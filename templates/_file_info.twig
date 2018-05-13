@@ -6,7 +6,7 @@
 {% if is_embed %}
   {% set direct_link = '#' %}
 {% elseif post['file_type'] %}
-  {% set direct_link = url_prefix ~ 'src/' ~ post['file'] %}
+  {% set direct_link = '/' ~ constant('TINYIB_BOARD') ~ '/src/' ~ post['file'] %}
 {% endif %}
 
 {% if is_thread %}

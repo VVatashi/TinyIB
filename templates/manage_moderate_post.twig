@@ -1,6 +1,7 @@
 {% extends '_manage.twig' %}
 
 {% set is_thread = post['parent'] == constant('TINYIB_NEWTHREAD') %}
+{% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
 
 {% block manage %}
   <fieldset>
@@ -12,9 +13,7 @@
       <table border="0" cellspacing="0" cellpadding="0" width="100%">
         <tr>
           <td align="right" width="50%;">
-            <form method="get" action="?">
-              <input type="hidden" name="manage" value="" />
-              <input type="hidden" name="delete" value="{{ post['id'] }}" />
+            <form method="get" action="{{ url_prefix }}manage/delete/{{ post['id'] }}">
               <input type="submit" value="Delete {{ is_thread ? 'Thread' : 'Post' }}"
                 class="managebutton" style="width: 50%;" />
             </form>
@@ -33,8 +32,7 @@
 
         <tr>
           <td align="right" width="50%;">
-            <form method="get" action="?">
-              <input type="hidden" name="manage" value="" />
+            <form method="get" action="{{ url_prefix }}manage/bans">
               <input type="hidden" name="bans" value="{{ post['ip'] }}" />
               <input type="submit" value="Ban Poster"
                 class="managebutton" style="width: 50%;"
@@ -57,29 +55,27 @@
           </td>
         </tr>
 
-        <tr><td colspan="2">&nbsp;</td></tr>
+        {% if is_thread %}
+          <tr>
+            <td align="right" width="50%;">
+              <form method="get" action="{{ url_prefix }}manage/sticky/{{ post['id'] }}">
+                <input type="hidden" name="setsticky" value="{{ post['stickied'] ? '0' : '1' }}" />
+                <input type="submit" value="{{ post['stickied'] ? 'Un-sticky' : 'Sticky' }} Thread"
+                  class="managebutton" style="width: 50%;" />
+              </form>
+            </td>
 
-        <tr>
-          <td align="right" width="50%;">
-            <form method="get" action="?">
-              <input type="hidden" name="manage" value="" />
-              <input type="hidden" name="sticky" value="{{ post['id'] }}" />
-              <input type="hidden" name="setsticky" value="{{ post['stickied'] ? '0' : '1' }}" />
-              <input type="submit" value="{{ post['stickied'] ? 'Un-sticky' : 'Sticky' }} Thread"
-                class="managebutton" style="width: 50%;" />
-            </form>
-          </td>
-
-          <td>
-            <small>
-              {% if post['stickied'] %}
-                Return this thread to a normal state.
-              {% else %}
-                Keep this thread at the top of the board.
-              {% endif %}
-            </small>
-          </td>
-        </tr>
+            <td>
+              <small>
+                {% if post['stickied'] %}
+                  Return this thread to a normal state.
+                {% else %}
+                  Keep this thread at the top of the board.
+                {% endif %}
+              </small>
+            </td>
+          </tr>
+        {% endif %}
       </table>
     </fieldset>
 

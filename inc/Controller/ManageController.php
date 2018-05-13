@@ -163,7 +163,7 @@ class ManageController implements IManageController
     /**
      * {@inheritDoc}
      */
-    public function moderate($id)
+    public function moderate($id = 0)
     {
         list($logged_in, $is_admin) = manageCheckLogIn();
 
@@ -415,7 +415,7 @@ class ManageController implements IManageController
         $_SESSION['tinyib'] = '';
         session_destroy();
 
-        $url = basename($_SERVER['PHP_SELF']);
+        $url = '/' . TINYIB_BOARD . '/manage';
         return Response::redirect($url);
     }
 }

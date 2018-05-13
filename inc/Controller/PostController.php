@@ -36,7 +36,7 @@ class PostController implements IPostController
     {
         global $tinyib_embeds, $tinyib_uploads;
 
-        $redirect_url = 'index.html';
+        $redirect_url = '/' . TINYIB_BOARD . '/';
 
         if (TINYIB_DBMIGRATE) {
             $message = "Posting is currently disabled.\nPlease try again in a few moments.";
@@ -236,8 +236,7 @@ class PostController implements IPostController
 
                 if ($file_mime === 'image/gif') {
                     exec("identify -format '%w %h' ${file_location}[0]", $output);
-                }
-                else {
+                } else {
                     exec("identify -format '%w %h' $file_location", $output);
                 }
 
@@ -315,7 +314,7 @@ class PostController implements IPostController
         if ($post['moderated'] == '1') {
             if (TINYIB_ALWAYSNOKO || strtolower($post['email']) == 'noko') {
                 $id = $post['parent'] == TINYIB_NEWTHREAD ? $post['id'] : $post['parent'];
-                $redirect_url = "res/$id.html#" . $post['id'];
+                $redirect_url = '/' . TINYIB_BOARD . "/res/$id#" . $post['id'];
             }
 
             $this->post_repository->trimThreads();

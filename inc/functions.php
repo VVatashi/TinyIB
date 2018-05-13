@@ -608,3 +608,37 @@ function dice($message)
         return "<span class=\"dice\" title=\"$info\">##${count}d$max## = $sum</span>";
     }, $message);
 }
+
+/**
+ * @param string $filename
+ * @param bool $as_attachment
+ *
+ * @return bool
+ */
+function sendFile ($filename, $as_attachment = false) {
+    if(!file_exists($filename)) {
+        return false;
+    }
+
+    // Set Content-Type.
+    $file_info = finfo_open(FILEINFO_MIME_TYPE);
+    header('Content-Type: ' . finfo_file($file_info, $filename));
+    finfo_close($file_info);
+
+    if ($as_attachment !== false) {
+        // Set Content-Disposition.
+        header('Content-Disposition: attachment; filename=' . basename($filename));
+    }
+
+    // Disable caching.
+    header('Expires: 0');
+    header('Cache-Control: must-revalidate');
+    header('Pragma: public');
+
+    // Set Content-Length.
+    header('Content-Length: ' . filesize($filename));
+
+    flush();
+    readfile($filename);
+    return true;
+}

@@ -8,22 +8,24 @@
 
 <title>{{ constant('TINYIB_BOARDDESC') }}</title>
 
+{% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
+
 <link rel="shortcut icon" href="favicon.ico" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans">
-<link rel="stylesheet" type="text/css" href="css/global.css" />
+<link rel="stylesheet" type="text/css" href="{{ url_prefix }}css/global.css" />
 
-<link rel="alternate stylesheet" type="text/css" href="css/2watch.css" title="2watch" />
-<link rel="alternate stylesheet" type="text/css" href="css/burichan.css" title="Burichan" />
-<link rel="stylesheet" type="text/css" href="css/futaba.css" title="Futaba" />
-<link rel="alternate stylesheet" type="text/css" href="css/lime.css" title="Lime" />
-<link rel="alternate stylesheet" type="text/css" href="css/lime2.css" title="Lime 2" />
-<link rel="alternate stylesheet" type="text/css" href="css/nocturnal.css" title="Nocturnal" />
-<link rel="alternate stylesheet" type="text/css" href="css/photon.css" title="Photon" />
-<link rel="alternate stylesheet" type="text/css" href="css/synthwave.css" title="Synthwave" />
+<link rel="alternate stylesheet" type="text/css" href="{{ url_prefix }}css/2watch.css" title="2watch" />
+<link rel="alternate stylesheet" type="text/css" href="{{ url_prefix }}css/burichan.css" title="Burichan" />
+<link rel="stylesheet" type="text/css" href="{{ url_prefix }}css/futaba.css" title="Futaba" />
+<link rel="alternate stylesheet" type="text/css" href="{{ url_prefix }}css/lime.css" title="Lime" />
+<link rel="alternate stylesheet" type="text/css" href="{{ url_prefix }}css/lime2.css" title="Lime 2" />
+<link rel="alternate stylesheet" type="text/css" href="{{ url_prefix }}css/nocturnal.css" title="Nocturnal" />
+<link rel="alternate stylesheet" type="text/css" href="{{ url_prefix }}css/photon.css" title="Photon" />
+<link rel="alternate stylesheet" type="text/css" href="{{ url_prefix }}css/synthwave.css" title="Synthwave" />
 
-<script src="js/vendor/Dollchan_Extension_Tools.user.js"></script>
-<script src="js/vendor/luxon.min.js"></script>
-<script src="js/index.js"></script>
+<script src="{{ url_prefix }}js/vendor/Dollchan_Extension_Tools.user.js"></script>
+<script src="{{ url_prefix }}js/vendor/luxon.min.js"></script>
+<script src="{{ url_prefix }}js/index.js"></script>
 
 {% if constant('TINYIB_CAPTCHA') == 'recaptcha' %}
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
