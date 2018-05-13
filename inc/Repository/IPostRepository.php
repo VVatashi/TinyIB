@@ -5,44 +5,44 @@ namespace TinyIB\Repository;
 interface IPostRepository extends IRepository
 {
     /**
-     * @return integer
+     * @return int
      */
     public function uniquePosts();
 
     /**
-     * @param integer $id
+     * @param int $id
      *
      * @return array
      */
     public function postByID($id);
 
     /**
-     * @param integer $id
+     * @param int $id
      *
-     * @return boolean
+     * @return bool
      */
     public function threadExistsByID($id);
 
     /**
      * @param array $post
      *
-     * @return integer
+     * @return int
      */
     public function insertPost($post);
 
     /**
-     * @param integer id
+     * @param int id
      */
     public function approvePostByID($id);
 
     /**
-     * @param integer id
-     * @param boolean sticky
+     * @param int id
+     * @param bool sticky
      */
     public function stickyThreadByID($id, $setsticky);
 
     /**
-     * @param integer id
+     * @param int id
      */
     public function bumpThreadByID($id);
 
@@ -57,15 +57,22 @@ interface IPostRepository extends IRepository
     public function allThreads();
 
     /**
-     * @param integer $id
+     * @param int $page
      *
-     * @return integer
+     * @return array
+     */
+    public function getThreadsByPage($page);
+
+    /**
+     * @param int $id
+     *
+     * @return int
      */
     public function numRepliesToThreadByID($id);
 
     /**
-     * @param integer $id
-     * @param boolean $moderated_only
+     * @param int $id
+     * @param bool $moderated_only
      *
      * @return array
      */
@@ -79,14 +86,14 @@ interface IPostRepository extends IRepository
     public function postsByHex($hex);
 
     /**
-     * @param boolean $moderated
+     * @param bool $moderated
      *
      * @return array
      */
     public function latestPosts($moderated = true);
 
     /**
-     * @param integer $id
+     * @param int $id
      */
     public function deletePostByID($id);
 

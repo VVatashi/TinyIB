@@ -201,6 +201,22 @@ class PDOPostRepository extends PDORepository implements IPostRepository
     /**
      * {@inheritDoc}
      */
+    public function getThreadsByPage($page)
+    {
+        $skip = $page * TINYIB_THREADSPERPAGE;
+        $take = TINYIB_THREADSPERPAGE;
+
+        return $this->getRange(
+            ['parent' => 0, 'moderated' => 1],
+            'stickied DESC, bumped DESC',
+            $take,
+            $skip
+        );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function numRepliesToThreadByID($id)
     {
         return $this->getCount(['parent' => $id, 'moderated' => 1]);

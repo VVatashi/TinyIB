@@ -29,16 +29,23 @@ interface IRenderer
     public function renderPost($post, $res);
 
     /**
+     * @param int $id
+     *
+     * @return string
+     */
+    public function renderThreadPage($id);
+
+    /**
+     * @param int $page
+     *
+     * @return string
+     */
+    public function renderBoardPage($page);
+
+    /**
      * @param string $text
      *
      * @return string
      */
     public function makeLinksClickable($text);
-
-    public function rebuildIndexes();
-
-    /**
-     * @param integer $id
-     */
-    public function rebuildThread($id);
 }
