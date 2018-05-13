@@ -9,21 +9,6 @@ export default class ExpandFile extends BaseModule {
 
   onReady() {
     this.setupHandlers();
-
-    // Wait one second for userscripts init
-    // TODO: Try use MutationObserver instead?
-    setTimeout(() => {
-      // Try detect Dollchan Extension
-      const de_buttons = qid('de-panel-buttons');
-
-      if (de_buttons) {
-        // Check Dollchan Extensions is enabled
-        if (qsa('.de-panel-button', de_buttons).length > 1) {
-          // DE breaks embeds event handlers, so needs to reattach them
-          this.setupHandlers();
-        }
-      }
-    }, 1000);
   }
 
   onPostInsert(post: Element) {

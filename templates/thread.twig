@@ -1,8 +1,10 @@
 {% extends '_html.twig' %}
 
+{% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
+
 {% block body %}
   <ul class="content__links links">
-    <li class="links__item"><a class="links__link" href="../imgboard.php?settings">Settings</a></li>
+    <li class="links__item"><a class="links__link" href="{{ url_prefix }}settings">Settings</a></li>
   </ul>
 
   <div class="content__replymode replymode">Posting mode: Reply</div>

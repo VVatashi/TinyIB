@@ -57,7 +57,7 @@ interface IManageController
      *
      * @return \TinyIB\Response
      */
-    public function moderate($id);
+    public function moderate($id = 0);
 
     /**
      * Delete post by ID.

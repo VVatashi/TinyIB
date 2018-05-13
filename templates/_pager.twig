@@ -1,6 +1,8 @@
+{% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
+
 {% if this_page > 0 %}
-  <li class="pager__item"><a href="index.html">First</a></li>
-  <li class="pager__item"><a href="{{ (this_page == 1) ? 'index' : this_page - 1 }}.html">Previous</a></li>
+  <li class="pager__item"><a href="{{ url_prefix }}">First</a></li>
+  <li class="pager__item"><a href="{{ url_prefix }}{{ this_page != 1 ? this_page - 1 }}">Previous</a></li>
 {% else %}
   <li class="pager__item">First</li>
   <li class="pager__item">Previous</li>
@@ -8,15 +10,15 @@
 
 {% for i in 0..pages %}
   {% if this_page != i %}
-    <li class="pager__item"><a href="{{ (i == 0) ? 'index' : i }}.html">{{ i }}</a></li>
+    <li class="pager__item"><a href="{{ url_prefix }}{{ i != 0 ? i }}">{{ i }}</a></li>
   {% else %}
     <li class="pager__item">{{ i }}</li>
   {% endif %}
 {% endfor %}
 
 {% if this_page < pages %}
-  <li class="pager__item"><a href="{{ this_page + 1 }}.html">Next</a></li>
-  <li class="pager__item"><a href="{{ pages }}.html">Last</a></li>
+  <li class="pager__item"><a href="{{ url_prefix }}{{ this_page + 1 }}">Next</a></li>
+  <li class="pager__item"><a href="{{ url_prefix }}{{ pages }}">Last</a></li>
 {% else %}
   <li class="pager__item">Next</li>
   <li class="pager__item">Last</li>

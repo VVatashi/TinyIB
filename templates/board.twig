@@ -1,15 +1,17 @@
 {% extends '_html.twig' %}
 
+{% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
+
 {% block body %}
   <ul class="content__links links">
-    <li class="links__item"><a class="links__link" href="imgboard.php?settings">Settings</a></li>
+    <li class="links__item"><a class="links__link" href="{{ url_prefix }}settings">Settings</a></li>
   </ul>
 
   <div class="content__postarea">
     {% include '_post_form.twig' %}
   </div>
 
-  <form id="delform" action="imgboard.php?delete" method="post">
+  <form id="delform" action="{{ url_prefix }}post/delete" method="post">
     <input type="hidden" name="board" value="{{ constant('TINYIB_BOARD') }}" />
 
     {% for post in posts %}

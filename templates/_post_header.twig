@@ -37,14 +37,10 @@
   {{ date }}
 </time>
 
-{% if res == constant('TINYIB_RESPAGE') %}
-  {% set url_prefix = '' %}
-{% else %}
-  {% set url_prefix = 'res/' %}
-{% endif %}
+{% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
 
 <span class="post-header__reflink-wrapper">
-  №<a class="post-header__reflink reflink" href="{{ url_prefix }}{{ thread_id }}.html#q{{ post['id'] }}" data-id="{{ post['id'] }}">
+  №<a class="post-header__reflink reflink" href="{{ url_prefix }}res/{{ thread_id }}#q{{ post['id'] }}" data-id="{{ post['id'] }}">
     {{- post['id'] -}}
   </a>
 
@@ -54,7 +50,7 @@
 
   {% if res == constant('TINYIB_INDEXPAGE') and post['parent'] == constant('TINYIB_NEWTHREAD') %}
     <span class="post-header__reply-wrapper">
-      <a class="post-header__reply-link" href="res/{{ post['id'] }}.html">Reply</a>
+      <a class="post-header__reply-link" href="{{ url_prefix }}res/{{ post['id'] }}">Reply</a>
     </span>
   {% endif %}
 </span>

@@ -13,7 +13,9 @@
 
 {% import _self as self %}
 
-<form class="content__postform form form_postform" id="postform" name="postform" action="imgboard.php" method="post" enctype="multipart/form-data">
+{% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
+
+<form class="content__postform form form_postform" id="postform" name="postform" action="{{ url_prefix }}post/create" method="post" enctype="multipart/form-data">
   {% if uploads and constant('TINYIB_MAXKB') > 0 %}
     <input type="hidden" name="MAX_FILE_SIZE" value="{{ constant('TINYIB_MAXKB') * 1024 }}" />
   {% endif %}
@@ -154,12 +156,10 @@
                 <li class="rules__list-item">
                   Images greater than
                   {{ constant('TINYIB_MAXWOP') }}x{{ constant('TINYIB_MAXHOP') }}
-
                   {% if constant('TINYIB_MAXW') != constant('TINYIB_MAXWOP')
                     or constant('TINYIB_MAXH') != constant('TINYIB_MAXHOP') %}
                     (new thread) or {{ constant('TINYIB_MAXW') }}x{{ constant('TINYIB_MAXH') }} (reply)
                   {% endif %}
-
                   will be thumbnailed.
                 </li>
               {% endif %}

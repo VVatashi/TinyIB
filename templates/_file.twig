@@ -1,10 +1,9 @@
 {% set is_embed = post['file_type'] == 'embed' %}
-{% set url_prefix = res == constant('TINYIB_RESPAGE') ? '../' : '' %}
 
 {% if is_embed %}
   {% set direct_link = '#' %}
 {% elseif post['file_type'] %}
-  {% set direct_link = url_prefix ~ 'src/' ~ post['file'] %}
+  {% set direct_link = '/' ~ constant('TINYIB_BOARD') ~ '/src/' ~ post['file'] %}
 {% endif %}
 
 {% if post['image_width'] > 0 and post['image_height'] > 0 %}

@@ -35,7 +35,7 @@ class TreeRouter implements IRouter
         $node = $this->tree;
         $part = array_shift($path_parts);
 
-        while(!empty($path_parts)) {
+        while (!empty($path_parts)) {
             $child = $node->getChild($part);
 
             if (!isset($child)) {
@@ -75,8 +75,7 @@ class TreeRouter implements IRouter
             }
 
             return null;
-        }
-        else {
+        } else {
             return $node->getData();
         }
     }

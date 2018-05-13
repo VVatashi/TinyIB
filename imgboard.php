@@ -11,9 +11,11 @@ use TinyIB\Renderer\Renderer;
 use TinyIB\Repository\PDOBanRepository;
 use TinyIB\Repository\PDOPostRepository;
 use TinyIB\Response;
+use TinyIB\Router\TreeRouter;
 
 require_once './vendor/autoload.php';
 
+// Setup error handling.
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -82,6 +84,7 @@ if (get_magic_quotes_runtime()) {
     set_magic_quotes_runtime(0);
 }
 
+// Include settings.php.
 if (!file_exists('settings.php')) {
     $message = 'Please copy the file settings.default.php to settings.php';
     throw new Exception($message);
@@ -89,6 +92,7 @@ if (!file_exists('settings.php')) {
 
 require_once 'settings.php';
 
+// Check settings.
 if (TINYIB_TRIPSEED == '' || TINYIB_ADMINPASS == '') {
     $message = 'TINYIB_TRIPSEED and TINYIB_ADMINPASS must be configured.';
     throw new Exception($message);
@@ -96,11 +100,11 @@ if (TINYIB_TRIPSEED == '' || TINYIB_ADMINPASS == '') {
 
 if (TINYIB_CAPTCHA === 'recaptcha'
     && (TINYIB_RECAPTCHA_SITE == '' || TINYIB_RECAPTCHA_SECRET == '')) {
-    $message = 'TINYIB_RECAPTCHA_SITE and TINYIB_RECAPTCHA_SECRET  must be configured.';
+    $message = 'TINYIB_RECAPTCHA_SITE and TINYIB_RECAPTCHA_SECRET must be configured.';
     throw new Exception($message);
 }
 
-// Check directories are writable by the script
+// Check directories are writable by the script.
 $writedirs = ['res', 'src', 'thumb'];
 
 foreach ($writedirs as $dir) {
@@ -144,8 +148,93 @@ $post_controller = new PostController($ban_repository, $post_repository, $render
 /** @var \TinyIB\Controller\ISettingsController $settings_controller */
 $settings_controller = new SettingsController($renderer);
 
-// Check if the request is to make a post
-if (isset($_POST['message']) || isset($_POST['file'])) {
+/** @var \TinyIB\Router\IRouter $router */
+$router = new TreeRouter();
+
+function createFileHandler($filename)
+{
+    return function () use ($filename) {
+        if (file_exists($filename)) {
+            sendFile($filename);
+        } else {
+            Response::notFound('The requested page is not found.')->send();
+        }
+    };
+}
+
+// Setup routing.
+$router->addRoute('/', createFileHandler('.index.html'));
+$router->addRoute('/:int', function ($path) {
+    createFileHandler('.' . $path . '.html')();
+});
+$router->addRoute('/res/:int', function ($path) {
+    createFileHandler('.' . $path . '.html')();
+});
+
+$router->addRoute('/manage', function ($path) use ($manage_controller) {
+    $manage_controller->status()->send();
+});
+
+$router->addRoute('/manage/rebuildall', function ($path) use ($manage_controller) {
+    $manage_controller->rebuildAll()->send();
+});
+
+$router->addRoute('/manage/approve/:int', function ($path) use ($manage_controller) {
+    $id = explode('/', $path)[3];
+    $manage_controller->approve($id)->send();
+});
+
+$router->addRoute('/manage/bans', function ($path) use ($manage_controller) {
+    $bans = !empty($_GET['bans']) ? $_GET['bans'] : '';
+
+    if (!empty($_POST['ip'])) {
+        $ip = $_POST['ip'];
+        $expire = isset($_POST['expire']) ? $_POST['expire'] : null;
+        $reason = isset($_POST['reason']) ? $_POST['reason'] : null;
+
+        $manage_controller->addBan($bans, $ip, $expire, $reason)->send();
+    } elseif (!empty($_GET['lift'])) {
+        $lift = $_GET['lift'];
+
+        $manage_controller->liftBan($bans, $lift)->send();
+    } else {
+        $manage_controller->listBans($bans)->send();
+    }
+});
+
+$router->addRoute('/manage/delete/:int', function ($path) use ($manage_controller) {
+    $id = explode('/', $path)[3];
+    $manage_controller->delete($id)->send();
+});
+
+$router->addRoute('/manage/logout', function ($path) use ($manage_controller) {
+    $manage_controller->logout()->send();
+});
+
+$router->addRoute('/manage/moderate', function ($path) use ($manage_controller) {
+    $manage_controller->moderate()->send();
+});
+
+$router->addRoute('/manage/moderate/:int', function ($path) use ($manage_controller) {
+    $id = explode('/', $path)[3];
+    $manage_controller->moderate($id)->send();
+});
+
+$router->addRoute('/manage/rawpost', function ($path) use ($manage_controller) {
+    $manage_controller->rawPost()->send();
+});
+
+$router->addRoute('/manage/sticky/:int', function ($path) use ($manage_controller) {
+    $id = explode('/', $path)[3];
+    $sticky = !empty($_GET['setsticky']) ? (bool)intval($_GET['setsticky']) : false;
+    $manage_controller->setSticky($id, $sticky)->send();
+});
+
+$router->addRoute('/manage/update', function ($path) use ($manage_controller) {
+    $manage_controller->update()->send();
+});
+
+$router->addRoute('/post/create', function ($path) use ($post_controller) {
     $data = array_intersect_key($_POST, array_flip([
         'name',
         'email',
@@ -154,65 +243,35 @@ if (isset($_POST['message']) || isset($_POST['file'])) {
         'password',
         'embed',
     ]));
-
     $post_controller->create($data)->send();
-// Check if the request is to delete a post and/or its associated image
-} elseif (isset($_GET['delete']) && !isset($_GET['manage'])) {
+});
+
+$router->addRoute('/post/delete', function ($path) use ($post_controller) {
     $id = isset($_POST['delete']) ? $_POST['delete'] : null;
     $password = isset($_POST['password']) ? $_POST['password'] : null;
-
     $post_controller->delete($id, $password)->send();
-} elseif (isset($_GET['settings'])) {
+});
+
+$router->addRoute('/settings', function ($path) use ($settings_controller) {
     $settings_controller->settings()->send();
-// Check if the request is to access the management area
-} elseif (isset($_GET['manage'])) {
-    if (isset($_GET['rebuildall'])) {
-        $manage_controller->rebuildAll()->send();
-    } elseif (isset($_GET['bans'])) {
-        $bans = $_GET['bans'];
+});
 
-        if (!empty($_POST['ip'])) {
-            $ip = $_POST['ip'];
-            $expire = isset($_POST['expire']) ? $_POST['expire'] : null;
-            $reason = isset($_POST['reason']) ? $_POST['reason'] : null;
+// Get request path without board and query.
+$path = $_SERVER['REQUEST_URI'];
+$prefix = '/' . TINYIB_BOARD;
+$prefix_length = strlen($prefix);
 
-            $manage_controller->addBan($bans, $ip, $expire, $reason)->send();
-        } elseif (!empty($_GET['lift'])) {
-            $lift = $_GET['lift'];
+if (strncmp($path, $prefix, $prefix_length) === 0) {
+    $path = substr($path, $prefix_length);
+}
 
-            $manage_controller->liftBan($bans, $lift)->send();
-        } else {
-            $manage_controller->listBans($bans)->send();
-        }
-    } elseif (isset($_GET['update'])) {
-        $manage_controller->update()->send();
-    } elseif (isset($_GET['delete'])) {
-        $id = $_GET['delete'];
+$path = strtok($path, '?#');
 
-        $manage_controller->delete($id)->send();
-    } elseif (isset($_GET['approve'])) {
-        $id = $_GET['approve'];
+// Resolve route.
+$handler = $router->resolve($path);
 
-        $manage_controller->approve($id)->send();
-    } elseif (isset($_GET['moderate'])) {
-        $id = $_GET['moderate'];
-
-        $manage_controller->moderate($id)->send();
-    } elseif (isset($_GET['sticky']) && isset($_GET['setsticky'])) {
-        $id = $_GET['sticky'];
-        $sticky = (bool)intval($_GET['setsticky']);
-
-        $manage_controller->setSticky($id, $sticky)->send();
-    } elseif (isset($_GET["rawpost"])) {
-        $manage_controller->rawPost()->send();
-    } elseif (isset($_GET["logout"])) {
-        $manage_controller->logout()->send();
-    } else {
-        $manage_controller->status()->send();
-    }
-} elseif (!file_exists('index.html') || $post_repository->countThreads() == 0) {
-    $renderer->rebuildIndexes();
-    Response::redirect('index.html')->send();
+if ($handler !== null) {
+    $handler($path);
 } else {
-    Response::redirect('index.html')->send();
+    Response::notFound('The requested page is not found.')->send();
 }
