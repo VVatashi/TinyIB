@@ -4,7 +4,7 @@
 #
 # https://github.com/tslocum/TinyIB
 
-use TinyIB\Cache\InMemoryCache;
+use TinyIB\Cache\RedisCache;
 use TinyIB\Controller\ManageController;
 use TinyIB\Controller\PostController;
 use TinyIB\Controller\SettingsController;
@@ -126,7 +126,7 @@ if (TINYIB_TIMEZONE != '') {
 }
 
 /** @var \TinyIB\Cache\ICache $cache */
-$cache = new InMemoryCache();
+$cache = new RedisCache();
 
 /** @var \TinyIB\Repository\IBanRepository $ban_repository */
 $ban_repository = new PDOBanRepository(TINYIB_DBBANS);

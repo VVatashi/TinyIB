@@ -200,7 +200,7 @@ class Renderer implements IRenderer
     public function renderBoardPage($page)
     {
         $threads = $this->post_repository->getThreadsByPage($page);
-        $pages = ceil(count($threads) / TINYIB_THREADSPERPAGE) - 1;
+        $pages = ceil($this->post_repository->countThreads() / TINYIB_THREADSPERPAGE) - 1;
         $posts = [];
 
         foreach ($threads as $thread) {

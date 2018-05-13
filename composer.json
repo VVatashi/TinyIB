@@ -8,6 +8,7 @@
     },
     "require": {
         "twig/twig": "~2.0",
-        "vvatashi/bbcode": "dev-master"
+        "vvatashi/bbcode": "dev-master",
+        "predis/predis": "^1.1"
     }
 }
