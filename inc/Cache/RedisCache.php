@@ -6,12 +6,33 @@ use \Predis\Client;
 
 class RedisCache implements ICache
 {
+    /** @var string $host */
+    protected $host;
+
     /** @var \Predis\Client $redis The redis client. */
     protected $redis;
 
+    /**
+     * Returns instance of the redis client.
+     * Initializes it if it is not already initialized.
+     *
+     * @return \Predis\Client
+     */
+    protected function getRedis()
+    {
+        if (!isset($this->redis)) {
+            $this->redis = new Client($this->host);
+        }
+
+        return $this->redis;
+    }
+
+    /**
+     * Creates the new RedisCache instance.
+     */
     public function __construct($host)
     {
-        $this->redis = new Client($host);
+        $this->host = $host;
     }
 
     /**
@@ -19,7 +40,7 @@ class RedisCache implements ICache
      */
     public function exists($key)
     {
-        return $this->redis->exists($key) != false;
+        return $this->getRedis()->exists($key) != false;
     }
 
     /**
@@ -27,7 +48,7 @@ class RedisCache implements ICache
      */
     public function get($key)
     {
-        $value = $this->exists($key) ? $this->redis->get($key) : null;
+        $value = $this->exists($key) ? $this->getRedis()->get($key) : null;
         return $value;
     }
 
@@ -36,10 +57,10 @@ class RedisCache implements ICache
      */
     public function set($key, $value, $expire = null)
     {
-        $this->redis->set($key, $value);
+        $this->getRedis()->set($key, $value);
 
         if (isset($expire)) {
-            $this->redis->expire($key, $expire);
+            $this->getRedis()->expire($key, $expire);
         }
 
         return $value;
@@ -51,7 +72,7 @@ class RedisCache implements ICache
     public function delete($key)
     {
         $value = $this->get($key);
-        $this->redis->del($key);
+        $this->getRedis()->del($key);
         return $value;
     }
 
@@ -64,11 +85,11 @@ class RedisCache implements ICache
         $iterator = 0;
 
         do {
-            list($iterator, $scan) = $this->redis->scan($iterator, 'match', $pattern);
+            list($iterator, $scan) = $this->getRedis()->scan($iterator, 'match', $pattern);
             $keys = array_merge($keys, $scan);
         } while ($iterator != 0);
 
-        $this->redis->transaction(function ($transaction) use ($keys) {
+        $this->getRedis()->transaction(function ($transaction) use ($keys) {
             foreach ($keys as $key) {
                 $transaction->del($key);
             }

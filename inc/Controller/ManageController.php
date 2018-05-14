@@ -276,7 +276,7 @@ class ManageController implements IManageController
 
         if (strtolower($post['email']) !== 'sage'
             && (TINYIB_MAXREPLIES === 0
-                || $this->post_repository->numRepliesToThreadByID($thread_id) <= TINYIB_MAXREPLIES)) {
+            || $this->post_repository->numRepliesToThreadByID($thread_id) <= TINYIB_MAXREPLIES)) {
             $this->post_repository->bumpThreadByID($thread_id);
         }
 
@@ -364,12 +364,7 @@ class ManageController implements IManageController
             return Response::ok($this->renderer->render('manage_login_form.twig', $data));
         }
 
-        $threads = $this->post_repository->allThreads();
-
-        foreach ($threads as $thread) {
-            $this->cache->delete(TINYIB_BOARD . ':thread:' . $thread['id']);
-        }
-
+        $this->cache->deletePattern(TINYIB_BOARD . ':thread:*');
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 
         $data['text'] = 'Rebuilt board.';
