@@ -155,3 +155,7 @@ define('TINYIB_DBDRIVER', 'mysql');   // PDO driver to use (mysql / sqlite / pgs
 define('TINYIB_DBDSN', '');           // Enter a custom DSN to override all of the connection/driver settings above  (see README for instructions)
 //                                         When changing this, you should still set TINYIB_DBDRIVER appropriately.
 //                                         If you're using PDO with a MySQL database, you should leave this blank.
+
+// Cache.
+define('TINYIB_CACHE', 'memory'); // memory/redis
+define('TINYIB_CACHE_REDIS_HOST', 'unix:/var/run/redis/redis.sock'); // Redis host.

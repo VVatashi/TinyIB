@@ -9,9 +9,9 @@ class RedisCache implements ICache
     /** @var \Predis\Client $redis The redis client. */
     protected $redis;
 
-    public function __construct()
+    public function __construct($host)
     {
-        $this->redis = new Client('unix:/var/run/redis/redis.sock');
+        $this->redis = new Client($host);
     }
 
     /**
