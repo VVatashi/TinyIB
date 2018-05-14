@@ -179,46 +179,33 @@ class Renderer implements IRenderer
     /**
      * {@inheritDoc}
      */
-    public function makeLinksClickable($text)
+    public function renderThreadPage($id)
     {
-        $text = preg_replace('!(((f|ht)tp(s)?://)[-a-zA-Zа-яА-Я()0-9@:%\!_+.,~#?&;//=]+)!i', '<a href="$1" target="_blank">$1</a>', $text);
-        $text = preg_replace('/\(\<a href\=\"(.*)\)"\ target\=\"\_blank\">(.*)\)\<\/a>/i', '(<a href="$1" target="_blank">$2</a>)', $text);
-        $text = preg_replace('/\<a href\=\"(.*)\."\ target\=\"\_blank\">(.*)\.\<\/a>/i', '<a href="$1" target="_blank">$2</a>.', $text);
-        $text = preg_replace('/\<a href\=\"(.*)\,"\ target\=\"\_blank\">(.*)\,\<\/a>/i', '<a href="$1" target="_blank">$2</a>,', $text);
+        $posts = array_map(function ($post) {
+            return $this->preprocessPost($post, TINYIB_RESPAGE);
+        }, $this->post_repository->postsInThreadByID($id));
 
-        return $text;
-    }
-
-    protected function writePage($filename, $contents)
-    {
-        $tempfile = tempnam('res/', TINYIB_BOARD . 'tmp'); /* Create the temporary file */
-        $fp = fopen($tempfile, 'w');
-        fwrite($fp, $contents);
-        fclose($fp);
-        /* If we aren't able to use the rename function, try the alternate method */
-        if (!@rename($tempfile, $filename)) {
-            copy($tempfile, $filename);
-            unlink($tempfile);
-        }
-
-        chmod($filename, 0664); /* it was created 0600 */
+        return $this->render('thread.twig', [
+            'filetypes' => $this->supportedFileTypes(),
+            'posts' => $posts,
+            'parent' => $id,
+            'res' => TINYIB_RESPAGE,
+            'thumbnails' => true,
+        ]);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function rebuildIndexes()
+    public function renderBoardPage($page)
     {
-        $page = 0;
-        $i = 0;
+        $threads = $this->post_repository->getThreadsByPage($page);
+        $pages = ceil($this->post_repository->countThreads() / TINYIB_THREADSPERPAGE) - 1;
         $posts = [];
-        $threads = $this->post_repository->allThreads();
-        $pages = ceil(count($threads) / TINYIB_THREADSPERPAGE) - 1;
 
         foreach ($threads as $thread) {
             $replies = $this->post_repository->postsInThreadByID($thread['id']);
             $thread['omitted'] = max(0, count($replies) - TINYIB_PREVIEWREPLIES - 1);
-
             $replies = array_slice($replies, -TINYIB_PREVIEWREPLIES);
 
             if (empty($replies) || $replies[0]['id'] !== $thread['id']) {
@@ -228,63 +215,29 @@ class Renderer implements IRenderer
             $posts = array_merge($posts, array_map(function ($post) {
                 return $this->preprocessPost($post, TINYIB_INDEXPAGE);
             }, $replies));
-
-            if (++$i >= TINYIB_THREADSPERPAGE) {
-                $file = ($page == 0) ? 'index.html' : $page . '.html';
-                $html = $this->render('board.twig', [
-                    'filetypes' => $this->supportedFileTypes(),
-                    'posts' => $posts,
-                    'pages' => max($pages, 0),
-                    'this_page' => $page,
-                    'parent' => 0,
-                    'res' => TINYIB_INDEXPAGE,
-                    'thumbnails' => true,
-                    'unique_posts' => $this->post_repository->uniquePosts(),
-                ]);
-
-                $this->writePage($file, $html);
-
-                $page++;
-                $i = 0;
-                $posts = [];
-            }
         }
 
-        if ($page == 0 || !empty($posts)) {
-            $file = ($page == 0) ? 'index.html' : $page . '.html';
-            $html = $this->render('board.twig', [
-                'filetypes' => $this->supportedFileTypes(),
-                'posts' => $posts,
-                'pages' => max($pages, 0),
-                'this_page' => $page,
-                'parent' => 0,
-                'res' => TINYIB_INDEXPAGE,
-                'thumbnails' => true,
-                'unique_posts' => $this->post_repository->uniquePosts(),
-            ]);
-
-            $this->writePage($file, $html);
-        }
+        return $this->render('board.twig', [
+            'filetypes' => $this->supportedFileTypes(),
+            'posts' => $posts,
+            'pages' => max($pages, 0),
+            'this_page' => $page,
+            'parent' => 0,
+            'res' => TINYIB_INDEXPAGE,
+            'thumbnails' => true,
+        ]);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function rebuildThread($id)
+    public function makeLinksClickable($text)
     {
-        $posts = array_map(function ($post) {
-            return $this->preprocessPost($post, TINYIB_RESPAGE);
-        }, $this->post_repository->postsInThreadByID($id));
+        $text = preg_replace('!(((f|ht)tp(s)?://)[-a-zA-Zа-яА-Я()0-9@:%\!_+.,~#?&;//=]+)!i', '<a href="$1" target="_blank">$1</a>', $text);
+        $text = preg_replace('/\(\<a href\=\"(.*)\)"\ target\=\"\_blank\">(.*)\)\<\/a>/i', '(<a href="$1" target="_blank">$2</a>)', $text);
+        $text = preg_replace('/\<a href\=\"(.*)\."\ target\=\"\_blank\">(.*)\.\<\/a>/i', '<a href="$1" target="_blank">$2</a>.', $text);
+        $text = preg_replace('/\<a href\=\"(.*)\,"\ target\=\"\_blank\">(.*)\,\<\/a>/i', '<a href="$1" target="_blank">$2</a>,', $text);
 
-        $html = $this->render('thread.twig', [
-            'filetypes' => $this->supportedFileTypes(),
-            'posts' => $posts,
-            'parent' => $id,
-            'res' => TINYIB_RESPAGE,
-            'thumbnails' => true,
-            'unique_posts' => $this->post_repository->uniquePosts(),
-        ]);
-
-        $this->writePage('res/' . $id . '.html', $html);
+        return $text;
     }
 }

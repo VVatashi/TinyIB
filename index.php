@@ -4,6 +4,8 @@
 #
 # https://github.com/tslocum/TinyIB
 
+use TinyIB\Cache\InMemoryCache;
+use TinyIB\Cache\RedisCache;
 use TinyIB\Controller\ManageController;
 use TinyIB\Controller\PostController;
 use TinyIB\Controller\SettingsController;
@@ -105,7 +107,7 @@ if (TINYIB_CAPTCHA === 'recaptcha'
 }
 
 // Check directories are writable by the script.
-$writedirs = ['res', 'src', 'thumb'];
+$writedirs = ['src', 'thumb'];
 
 foreach ($writedirs as $dir) {
     if (!is_writable($dir)) {
@@ -124,6 +126,13 @@ if (TINYIB_TIMEZONE != '') {
     date_default_timezone_set(TINYIB_TIMEZONE);
 }
 
+/** @var \TinyIB\Cache\ICache $cache */
+if (TINYIB_CACHE === 'redis') {
+    $cache = new RedisCache(TINYIB_CACHE_REDIS_HOST);
+} else {
+    $cache = new InMemoryCache();
+}
+
 /** @var \TinyIB\Repository\IBanRepository $ban_repository */
 $ban_repository = new PDOBanRepository(TINYIB_DBBANS);
 
@@ -134,41 +143,61 @@ $post_repository = new PDOPostRepository(TINYIB_DBPOSTS);
 $renderer = new Renderer($post_repository, [
     'embeds' => $tinyib_uploads,
     'is_installed_via_git' => installedViaGit(),
-    'manage_link' => basename($_SERVER['PHP_SELF']) . "?manage",
-    'return_link' => basename($_SERVER['PHP_SELF']),
     'uploads' => $tinyib_embeds,
 ]);
 
 /** @var \TinyIB\Controller\IManageController $manage_controller */
-$manage_controller = new ManageController($ban_repository, $post_repository, $renderer);
+$manage_controller = new ManageController($cache, $ban_repository, $post_repository, $renderer);
 
 /** @var \TinyIB\Controller\IPostController $post_controller */
-$post_controller = new PostController($ban_repository, $post_repository, $renderer);
+$post_controller = new PostController($cache, $ban_repository, $post_repository, $renderer);
 
 /** @var \TinyIB\Controller\ISettingsController $settings_controller */
-$settings_controller = new SettingsController($renderer);
+$settings_controller = new SettingsController($cache, $renderer);
 
 /** @var \TinyIB\Router\IRouter $router */
 $router = new TreeRouter();
 
-function createFileHandler($filename)
-{
-    return function () use ($filename) {
-        if (file_exists($filename)) {
-            sendFile($filename);
-        } else {
-            Response::notFound('The requested page is not found.')->send();
-        }
-    };
-}
-
 // Setup routing.
-$router->addRoute('/', createFileHandler('.index.html'));
-$router->addRoute('/:int', function ($path) {
-    createFileHandler('.' . $path . '.html')();
+$router->addRoute('/', function ($path) use ($cache, $renderer) {
+    $key = TINYIB_BOARD . ':page:0';
+
+    if ($cache->exists($key)) {
+        $data = $cache->get($key);
+    } else {
+        $data = $renderer->renderBoardPage(0);
+        $cache->set($key, $data, 60 * 60);
+    }
+
+    Response::ok($data)->send();
 });
-$router->addRoute('/res/:int', function ($path) {
-    createFileHandler('.' . $path . '.html')();
+
+$router->addRoute('/:int', function ($path) use ($cache, $renderer) {
+    $page = explode('/', $path)[1];
+    $key = TINYIB_BOARD . ':page:' . $page;
+
+    if ($cache->exists($key)) {
+        $data = $cache->get($key);
+    } else {
+        $data = $renderer->renderBoardPage($page);
+        $cache->set($key, $data, 60 * 60);
+    }
+
+    Response::ok($data)->send();
+});
+
+$router->addRoute('/res/:int', function ($path) use ($cache, $renderer) {
+    $id = explode('/', $path)[2];
+    $key = TINYIB_BOARD . ':thread:' . $id;
+
+    if ($cache->exists($key)) {
+        $data = $cache->get($key);
+    } else {
+        $data = $renderer->renderThreadPage($id);
+        $cache->set($key, $data, 60 * 60);
+    }
+
+    Response::ok($data)->send();
 });
 
 $router->addRoute('/manage', function ($path) use ($manage_controller) {
@@ -256,7 +285,7 @@ $router->addRoute('/settings', function ($path) use ($settings_controller) {
     $settings_controller->settings()->send();
 });
 
-// Get request path without board and query.
+// Get request path without board, query and html extension.
 $path = $_SERVER['REQUEST_URI'];
 $prefix = '/' . TINYIB_BOARD;
 $prefix_length = strlen($prefix);
@@ -266,6 +295,10 @@ if (strncmp($path, $prefix, $prefix_length) === 0) {
 }
 
 $path = strtok($path, '?#');
+
+if (substr($path, -5) === '.html') {
+    $path = substr($path, 0, -5);
+}
 
 // Resolve route.
 $handler = $router->resolve($path);

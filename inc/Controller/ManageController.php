@@ -6,6 +6,9 @@ use TinyIB\Response;
 
 class ManageController implements IManageController
 {
+    /** @var \TinyIB\Cache\ICache $cache */
+    protected $cache;
+
     /** @var \TinyIB\Repository\IBanRepository $ban_repository */
     protected $ban_repository;
 
@@ -18,12 +21,14 @@ class ManageController implements IManageController
     /**
      * Constructs new manage controller.
      *
+     * @param \TinyIB\Cache\ICache $cache
      * @param \TinyIB\Repository\IBanRepository $ban_repository
      * @param \TinyIB\Repository\IPostRepository $post_repository
      * @param \TinyIB\Renderer\IRenderer $renderer
      */
-    public function __construct($ban_repository, $post_repository, $renderer)
+    public function __construct($cache, $ban_repository, $post_repository, $renderer)
     {
+        $this->cache = $cache;
         $this->ban_repository = $ban_repository;
         $this->post_repository = $post_repository;
         $this->renderer = $renderer;
@@ -226,10 +231,10 @@ class ManageController implements IManageController
         }
 
         $this->post_repository->deletePostByID($post['id']);
-        $this->renderer->rebuildIndexes();
+        $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 
         if ($post['parent'] != TINYIB_NEWTHREAD) {
-            $this->renderer->rebuildThread($post['parent']);
+            $this->cache->delete(TINYIB_BOARD . ':thread:' . $post['parent']);
         }
 
         $id = $post['id'];
@@ -271,12 +276,12 @@ class ManageController implements IManageController
 
         if (strtolower($post['email']) !== 'sage'
             && (TINYIB_MAXREPLIES === 0
-                || $this->post_repository->numRepliesToThreadByID($thread_id) <= TINYIB_MAXREPLIES)) {
+            || $this->post_repository->numRepliesToThreadByID($thread_id) <= TINYIB_MAXREPLIES)) {
             $this->post_repository->bumpThreadByID($thread_id);
         }
 
-        $this->renderer->rebuildThread($thread_id);
-        $this->renderer->rebuildIndexes();
+        $this->cache->delete(TINYIB_BOARD . ':thread:' . $thread_id);
+        $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 
         $id = $post['id'];
         $data['text'] = "Post No.$id approved.";
@@ -313,8 +318,8 @@ class ManageController implements IManageController
         }
 
         $this->post_repository->stickyThreadByID($post['id'], $sticky);
-        $this->renderer->rebuildThread($post['id']);
-        $this->renderer->rebuildIndexes();
+        $this->cache->delete(TINYIB_BOARD . ':thread:' . $post['id']);
+        $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 
         $id = $post['id'];
         $action = $sticky ? 'stickied' : 'un-stickied';
@@ -359,13 +364,8 @@ class ManageController implements IManageController
             return Response::ok($this->renderer->render('manage_login_form.twig', $data));
         }
 
-        $threads = $this->post_repository->allThreads();
-
-        foreach ($threads as $thread) {
-            $this->renderer->rebuildThread($thread['id']);
-        }
-
-        $this->renderer->rebuildIndexes();
+        $this->cache->deletePattern(TINYIB_BOARD . ':thread:*');
+        $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 
         $data['text'] = 'Rebuilt board.';
         return Response::ok($this->renderer->render('manage_info.twig', $data));

@@ -96,14 +96,6 @@ class PDOPostRepository extends PDORepository implements IPostRepository
     /**
      * {@inheritDoc}
      */
-    public function uniquePosts()
-    {
-        return $this->getCount([], 'distinct(ip)');
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function postByID($id)
     {
         return $this->getOne(['id' => $id]);
@@ -195,6 +187,22 @@ class PDOPostRepository extends PDORepository implements IPostRepository
         return $this->getAll(
             ['parent' => 0, 'moderated' => 1],
             'stickied DESC, bumped DESC'
+        );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getThreadsByPage($page)
+    {
+        $skip = $page * TINYIB_THREADSPERPAGE;
+        $take = TINYIB_THREADSPERPAGE;
+
+        return $this->getRange(
+            ['parent' => 0, 'moderated' => 1],
+            'stickied DESC, bumped DESC',
+            $take,
+            $skip
         );
     }
 
