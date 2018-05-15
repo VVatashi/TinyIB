@@ -83,10 +83,14 @@
       <legend>{{ is_thread ? 'Thread' : 'Post' }}</legend>
 
       {% for post in posts %}
-        {% if post['parent'] == constant('TINYIB_NEWTHREAD') %}
-          {% include '_post_oppost.twig' %}
+        {% if post['rendered'] %}
+          {{ post['rendered'] }}
         {% else %}
-          {% include '_post.twig' %}
+          {% if post['parent'] == constant('TINYIB_NEWTHREAD') %}
+            {% include '_post_oppost.twig' %}
+          {% else %}
+            {% include '_post.twig' %}
+          {% endif %}
         {% endif %}
       {% endfor %}
     </fieldset>

@@ -140,7 +140,7 @@ $ban_repository = new PDOBanRepository(TINYIB_DBBANS);
 $post_repository = new PDOPostRepository(TINYIB_DBPOSTS);
 
 /** @var \TinyIB\Renderer\IRenderer $renderer */
-$renderer = new Renderer($post_repository, [
+$renderer = new Renderer($cache, $post_repository, [
     'embeds' => $tinyib_uploads,
     'is_installed_via_git' => installedViaGit(),
     'uploads' => $tinyib_embeds,
@@ -166,7 +166,7 @@ $router->addRoute('/', function ($path) use ($cache, $renderer) {
         $data = $cache->get($key);
     } else {
         $data = $renderer->renderBoardPage(0);
-        $cache->set($key, $data, 60 * 60);
+        $cache->set($key, $data, 4 * 60 * 60);
     }
 
     Response::ok($data)->send();
@@ -180,7 +180,7 @@ $router->addRoute('/:int', function ($path) use ($cache, $renderer) {
         $data = $cache->get($key);
     } else {
         $data = $renderer->renderBoardPage($page);
-        $cache->set($key, $data, 60 * 60);
+        $cache->set($key, $data, 4 * 60 * 60);
     }
 
     Response::ok($data)->send();
@@ -194,7 +194,7 @@ $router->addRoute('/res/:int', function ($path) use ($cache, $renderer) {
         $data = $cache->get($key);
     } else {
         $data = $renderer->renderThreadPage($id);
-        $cache->set($key, $data, 60 * 60);
+        $cache->set($key, $data, 4 * 60 * 60);
     }
 
     Response::ok($data)->send();

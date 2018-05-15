@@ -376,6 +376,7 @@ class PostController implements IPostController
         $is_thread = $post['parent'] == TINYIB_NEWTHREAD;
         $thread_id = $is_thread ? $post['id'] : $post['parent'];
 
+        $this->cache->delete(TINYIB_BOARD . ':post:' . $post['id']);
         $this->cache->delete(TINYIB_BOARD . ':thread:' . $thread_id);
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 

@@ -14,7 +14,7 @@ interface IRenderer
 
     /**
      * @param array $post
-     * @param boolean $res
+     * @param bool $res
      *
      * @return array
      */
@@ -22,11 +22,12 @@ interface IRenderer
 
     /**
      * @param array $post
-     * @param boolean $res
+     * @param bool $res
+     * @param bool $preprocessed
      *
      * @return string
      */
-    public function renderPost($post, $res);
+    public function renderPost($post, $res, $preprocessed = false);
 
     /**
      * @param int $id

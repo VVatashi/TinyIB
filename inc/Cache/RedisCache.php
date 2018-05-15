@@ -57,10 +57,11 @@ class RedisCache implements ICache
      */
     public function set($key, $value, $expire = null)
     {
-        $this->getRedis()->set($key, $value);
+        $redis = $this->getRedis();
+        $redis->set($key, $value);
 
         if (isset($expire)) {
-            $this->getRedis()->expire($key, $expire);
+            $redis->expire($key, $expire);
         }
 
         return $value;
@@ -81,17 +82,18 @@ class RedisCache implements ICache
      */
     public function deletePattern($pattern)
     {
+        $redis = $this->getRedis();
         $keys = [];
         $iterator = 0;
 
         do {
-            list($iterator, $scan) = $this->getRedis()->scan($iterator, 'match', $pattern);
+            list($iterator, $scan) = $redis->scan($iterator, 'match', $pattern);
             $keys = array_merge($keys, $scan);
         } while ($iterator != 0);
 
-        $this->getRedis()->transaction(function ($transaction) use ($keys) {
+        $redis->pipeline(function ($pipeline) use ($keys) {
             foreach ($keys as $key) {
-                $transaction->del($key);
+                $pipeline->del($key);
             }
         });
 

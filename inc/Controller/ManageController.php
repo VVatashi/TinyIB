@@ -58,12 +58,32 @@ class ManageController implements IManageController
 
         if (TINYIB_REQMOD === 'files' || TINYIB_REQMOD === 'all') {
             $data['reqmod_posts'] = array_map(function ($post) {
-                return $this->renderer->preprocessPost($post, TINYIB_INDEXPAGE);
+                $key = TINYIB_BOARD . ':post:' . $post['id'];
+
+                if ($this->cache->exists($key)) {
+                    $post['rendered'] = $this->cache->get($key);
+                } else {
+                    $post = $this->renderer->preprocessPost($post, TINYIB_INDEXPAGE);
+                    $post['rendered'] = $this->renderer->renderPost($post, TINYIB_INDEXPAGE, true);
+                    $this->cache->set($key, $post['rendered'], 4 * 60 * 60);
+                }
+
+                return $post;
             }, $this->post_repository->latestPosts(false));
         }
 
         $data['posts'] = array_map(function ($post) {
-            return $this->renderer->preprocessPost($post, TINYIB_INDEXPAGE);
+            $key = TINYIB_BOARD . ':post:' . $post['id'];
+
+            if ($this->cache->exists($key)) {
+                $post['rendered'] = $this->cache->get($key);
+            } else {
+                $post = $this->renderer->preprocessPost($post, TINYIB_INDEXPAGE);
+                $post['rendered'] = $this->renderer->renderPost($post, TINYIB_INDEXPAGE, true);
+                $this->cache->set($key, $post['rendered'], 4 * 60 * 60);
+            }
+
+            return $post;
         }, $this->post_repository->latestPosts(true));
 
         return Response::ok($this->renderer->render('manage_status.twig', $data));
@@ -200,7 +220,17 @@ class ManageController implements IManageController
         $posts = $is_thread ? $this->post_repository->postsInThreadByID($post['id']) : [$post];
 
         $data['posts'] = array_map(function ($post) {
-            return $this->renderer->preprocessPost($post, TINYIB_INDEXPAGE);
+            $key = TINYIB_BOARD . ':post:' . $post['id'];
+
+            if ($this->cache->exists($key)) {
+                $post['rendered'] = $this->cache->get($key);
+            } else {
+                $post = $this->renderer->preprocessPost($post, TINYIB_INDEXPAGE);
+                $post['rendered'] = $this->renderer->renderPost($post, TINYIB_INDEXPAGE, true);
+                $this->cache->set($key, $post['rendered'], 4 * 60 * 60);
+            }
+
+            return $post;
         }, $posts);
 
         return Response::ok($this->renderer->render('manage_moderate_post.twig', $data));
@@ -230,7 +260,8 @@ class ManageController implements IManageController
             return Response::notFound($message);
         }
 
-        $this->post_repository->deletePostByID($post['id']);
+        $this->post_repository->deletePostByID($id);
+        $this->cache->delete(TINYIB_BOARD . ':post:' . $id);
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 
         if ($post['parent'] != TINYIB_NEWTHREAD) {
@@ -280,6 +311,7 @@ class ManageController implements IManageController
             $this->post_repository->bumpThreadByID($thread_id);
         }
 
+        $this->cache->delete(TINYIB_BOARD . ':post:' . $id);
         $this->cache->delete(TINYIB_BOARD . ':thread:' . $thread_id);
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 
@@ -317,8 +349,9 @@ class ManageController implements IManageController
             return Response::notFound($message);
         }
 
-        $this->post_repository->stickyThreadByID($post['id'], $sticky);
-        $this->cache->delete(TINYIB_BOARD . ':thread:' . $post['id']);
+        $this->post_repository->stickyThreadByID($id, $sticky);
+        $this->cache->delete(TINYIB_BOARD . ':post:' . $id);
+        $this->cache->delete(TINYIB_BOARD . ':thread:' . $id);
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 
         $id = $post['id'];
@@ -364,6 +397,7 @@ class ManageController implements IManageController
             return Response::ok($this->renderer->render('manage_login_form.twig', $data));
         }
 
+        $this->cache->deletePattern(TINYIB_BOARD . ':post:*');
         $this->cache->deletePattern(TINYIB_BOARD . ':thread:*');
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 

@@ -9,6 +9,9 @@ use VVatashi\BBCode\HtmlGenerator;
 
 class Renderer implements IRenderer
 {
+    /** @var \TinyIB\Cache\ICache */
+    protected $cache;
+
     /** @var \TinyIB\Repository\IPostRepository $post_repository */
     protected $post_repository;
 
@@ -19,8 +22,9 @@ class Renderer implements IRenderer
      * @param \TinyIB\Repository\IPostRepository $post_repository
      * @param array $variables
      */
-    public function __construct($post_repository, $variables)
+    public function __construct($cache, $post_repository, $variables)
     {
+        $this->cache = $cache;
         $this->post_repository = $post_repository;
 
         $loader = new \Twig_Loader_Filesystem('./templates');
@@ -149,9 +153,12 @@ class Renderer implements IRenderer
     /**
      * {@inheritDoc}
      */
-    public function renderPost($post, $res)
+    public function renderPost($post, $res, $preprocessed = false)
     {
-        $post = $this->preprocessPost($post, $res);
+        if ($preprocessed === false) {
+            $post = $this->preprocessPost($post, $res);
+        }
+
         $is_thread = $post['parent'] == TINYIB_NEWTHREAD;
 
         return $this->render($is_thread ? '_post_oppost.twig' : '_post.twig', [
@@ -182,7 +189,17 @@ class Renderer implements IRenderer
     public function renderThreadPage($id)
     {
         $posts = array_map(function ($post) {
-            return $this->preprocessPost($post, TINYIB_RESPAGE);
+            $key = TINYIB_BOARD . ':post:' . $post['id'];
+
+            if ($this->cache->exists($key)) {
+                $post['rendered'] = $this->cache->get($key);
+            } else {
+                $post = $this->preprocessPost($post, TINYIB_RESPAGE);
+                $post['rendered'] = $this->renderPost($post, TINYIB_RESPAGE, true);
+                $this->cache->set($key, $post['rendered'], 4 * 60 * 60);
+            }
+
+            return $post;
         }, $this->post_repository->postsInThreadByID($id));
 
         return $this->render('thread.twig', [
@@ -213,7 +230,17 @@ class Renderer implements IRenderer
             }
 
             $posts = array_merge($posts, array_map(function ($post) {
-                return $this->preprocessPost($post, TINYIB_INDEXPAGE);
+                $key = TINYIB_BOARD . ':post:' . $post['id'];
+
+                if ($this->cache->exists($key)) {
+                    $post['rendered'] = $this->cache->get($key);
+                } else {
+                    $post = $this->preprocessPost($post, TINYIB_INDEXPAGE);
+                    $post['rendered'] = $this->renderPost($post, TINYIB_INDEXPAGE, true);
+                    $this->cache->set($key, $post['rendered'], 4 * 60 * 60);
+                }
+
+                return $post;
             }, $replies));
         }
 
