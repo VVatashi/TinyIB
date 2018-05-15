@@ -262,21 +262,8 @@ class PDOPostRepository extends PDORepository implements IPostRepository
         $posts = $this->postsInThreadByID($id, false);
 
         foreach ($posts as $post) {
-            if ($post['id'] != $id) {
-                deletePostImages($post);
-                $this->delete(['id' => $id]);
-            } else {
-                $thispost = $post;
-            }
-        }
-
-        if (isset($thispost)) {
-            if ($thispost['parent'] == TINYIB_NEWTHREAD) {
-                @unlink('res/' . $thispost['id'] . '.html');
-            }
-
-            deletePostImages($thispost);
-            $this->delete(['id' => $thispost['id']]);
+            deletePostImages($post);
+            $this->delete(['id' => $id]);
         }
     }
 
