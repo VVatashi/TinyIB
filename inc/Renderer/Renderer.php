@@ -230,7 +230,7 @@ class Renderer implements IRenderer
             }
 
             $posts = array_merge($posts, array_map(function ($post) {
-                $key = TINYIB_BOARD . ':post:' . $post['id'];
+                $key = TINYIB_BOARD . ':index_post:' . $post['id'];
 
                 if ($this->cache->exists($key)) {
                     $post['rendered'] = $this->cache->get($key);

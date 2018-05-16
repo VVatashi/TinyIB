@@ -58,7 +58,7 @@ class ManageController implements IManageController
 
         if (TINYIB_REQMOD === 'files' || TINYIB_REQMOD === 'all') {
             $data['reqmod_posts'] = array_map(function ($post) {
-                $key = TINYIB_BOARD . ':post:' . $post['id'];
+                $key = TINYIB_BOARD . ':index_post:' . $post['id'];
 
                 if ($this->cache->exists($key)) {
                     $post['rendered'] = $this->cache->get($key);
@@ -73,7 +73,7 @@ class ManageController implements IManageController
         }
 
         $data['posts'] = array_map(function ($post) {
-            $key = TINYIB_BOARD . ':post:' . $post['id'];
+            $key = TINYIB_BOARD . ':index_post:' . $post['id'];
 
             if ($this->cache->exists($key)) {
                 $post['rendered'] = $this->cache->get($key);
@@ -220,7 +220,7 @@ class ManageController implements IManageController
         $posts = $is_thread ? $this->post_repository->postsInThreadByID($post['id']) : [$post];
 
         $data['posts'] = array_map(function ($post) {
-            $key = TINYIB_BOARD . ':post:' . $post['id'];
+            $key = TINYIB_BOARD . ':index_post:' . $post['id'];
 
             if ($this->cache->exists($key)) {
                 $post['rendered'] = $this->cache->get($key);
