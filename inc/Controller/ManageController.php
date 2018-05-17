@@ -265,6 +265,7 @@ class ManageController implements IManageController
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 
         if ($post['parent'] != TINYIB_NEWTHREAD) {
+            $this->cache->delete(TINYIB_BOARD . ':index_post:' . $post['parent']);
             $this->cache->delete(TINYIB_BOARD . ':thread:' . $post['parent']);
         }
 
@@ -312,6 +313,7 @@ class ManageController implements IManageController
         }
 
         $this->cache->delete(TINYIB_BOARD . ':post:' . $id);
+        $this->cache->delete(TINYIB_BOARD . ':index_post:' . $thread_id);
         $this->cache->delete(TINYIB_BOARD . ':thread:' . $thread_id);
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 
@@ -351,6 +353,7 @@ class ManageController implements IManageController
 
         $this->post_repository->stickyThreadByID($id, $sticky);
         $this->cache->delete(TINYIB_BOARD . ':post:' . $id);
+        $this->cache->delete(TINYIB_BOARD . ':index_post:' . $id);
         $this->cache->delete(TINYIB_BOARD . ':thread:' . $id);
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 
@@ -398,6 +401,7 @@ class ManageController implements IManageController
         }
 
         $this->cache->deletePattern(TINYIB_BOARD . ':post:*');
+        $this->cache->deletePattern(TINYIB_BOARD . ':index_post:*');
         $this->cache->deletePattern(TINYIB_BOARD . ':thread:*');
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 

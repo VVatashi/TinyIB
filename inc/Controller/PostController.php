@@ -325,6 +325,7 @@ class PostController implements IPostController
             $this->post_repository->trimThreads();
 
             if ($post['parent'] != TINYIB_NEWTHREAD) {
+                $this->cache->delete(TINYIB_BOARD . ':index_post:' . $post['parent']);
                 $this->cache->delete(TINYIB_BOARD . ':thread:' . $post['parent']);
 
                 if (strtolower($post['email']) != 'sage') {
@@ -334,6 +335,7 @@ class PostController implements IPostController
                     }
                 }
             } else {
+                $this->cache->delete(TINYIB_BOARD . ':index_post:' . $post['id']);
                 $this->cache->delete(TINYIB_BOARD . ':thread:' . $post['id']);
             }
 
@@ -377,6 +379,7 @@ class PostController implements IPostController
         $thread_id = $is_thread ? $post['id'] : $post['parent'];
 
         $this->cache->delete(TINYIB_BOARD . ':post:' . $post['id']);
+        $this->cache->delete(TINYIB_BOARD . ':index_post:' . $thread_id);
         $this->cache->delete(TINYIB_BOARD . ':thread:' . $thread_id);
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 
