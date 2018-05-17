@@ -103,7 +103,7 @@ abstract class PDORepository implements IRepository
         $params = array_values($data);
         $statement = static::$pdo->prepare($query);
         $statement->execute($params);
-        return static::$pdo->lastInsertId();
+        return $statement->rowCount();
     }
 
     /**
@@ -121,6 +121,7 @@ abstract class PDORepository implements IRepository
         $params = array_merge(array_values($data), SQLHelper::createWhereParams($conditions));
         $statement = static::$pdo->prepare($query);
         $statement->execute($params);
+        return $statement->rowCount();
     }
 
     /**
@@ -134,5 +135,22 @@ abstract class PDORepository implements IRepository
         $params = SQLHelper::createWhereParams($conditions);
         $statement = static::$pdo->prepare($query);
         $statement->execute($params);
+        return $statement->rowCount();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function beginTransaction()
+    {
+        return static::$pdo->beginTransaction();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function commit()
+    {
+        return static::$pdo->commit();
     }
 }

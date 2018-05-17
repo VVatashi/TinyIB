@@ -15,8 +15,8 @@ interface IRepository
     /**
      * @param array $conditions
      * @param string|null $order
-     * @param integer $take
-     * @param integer $skip
+     * @param int $take
+     * @param int $skip
      * @param string $columns
      *
      * @return array
@@ -36,23 +36,39 @@ interface IRepository
      * @param array $conditions
      * @param string $columns
      *
-     * @return integer
+     * @return int
      */
     public function getCount($conditions, $columns = '*');
 
     /**
      * @param array $data
+     *
+     * @return int Row affected count.
      */
     public function insert($data);
 
     /**
      * @param array $conditions
      * @param array $data
+     *
+     * @return int Row affected count.
      */
     public function update($conditions, $data);
 
     /**
      * @param array $conditions
+     *
+     * @return int Row affected count.
      */
     public function delete($conditions);
+
+    /**
+     * @return bool
+     */
+    public function beginTransaction();
+
+    /**
+     * @return bool
+     */
+    public function commit();
 }

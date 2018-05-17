@@ -141,6 +141,7 @@ define('TINYIB_RECAPTCHA_SECRET', '');// Secret key
 // Database
 define('TINYIB_DBMIGRATE', false);    // Enable database migration tool  (see README for instructions)
 define('TINYIB_DBBANS', 'bans');      // Bans table name (use the same bans table across boards for global bans)
+define('TINYIB_DBCACHE', TINYIB_BOARD . '_cache'); // Cache table name
 define('TINYIB_DBPOSTS', TINYIB_BOARD . '_posts'); // Posts table name
 
 // Database configuration - MySQL
@@ -157,5 +158,9 @@ define('TINYIB_DBDSN', '');           // Enter a custom DSN to override all of t
 //                                         If you're using PDO with a MySQL database, you should leave this blank.
 
 // Cache.
-define('TINYIB_CACHE', 'memory'); // memory/redis
+// TINYIB_CACHE possible values:
+//   memory - For tests only. Not stores anything between requests actually.
+//   database - Default. Uses cache table in the database.
+//   redis - Preferred if possible.
+define('TINYIB_CACHE', 'database');
 define('TINYIB_CACHE_REDIS_HOST', 'unix:/var/run/redis/redis.sock'); // Redis host.

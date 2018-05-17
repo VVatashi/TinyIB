@@ -4,6 +4,7 @@
 #
 # https://github.com/tslocum/TinyIB
 
+use TinyIB\Cache\DatabaseCache;
 use TinyIB\Cache\InMemoryCache;
 use TinyIB\Cache\RedisCache;
 use TinyIB\Controller\ManageController;
@@ -11,6 +12,7 @@ use TinyIB\Controller\PostController;
 use TinyIB\Controller\SettingsController;
 use TinyIB\Renderer\Renderer;
 use TinyIB\Repository\PDOBanRepository;
+use TinyIB\Repository\PDOCacheRepository;
 use TinyIB\Repository\PDOPostRepository;
 use TinyIB\Response;
 use TinyIB\Router\TreeRouter;
@@ -126,18 +128,23 @@ if (TINYIB_TIMEZONE != '') {
     date_default_timezone_set(TINYIB_TIMEZONE);
 }
 
+/** @var \TinyIB\Repository\ICacheRepository $cache_repository */
+$cache_repository = new PDOCacheRepository();
+
 /** @var \TinyIB\Cache\ICache $cache */
-if (TINYIB_CACHE === 'redis') {
+if (TINYIB_CACHE === 'memory') {
+    $cache = new InMemoryCache();
+} elseif (TINYIB_CACHE === 'redis') {
     $cache = new RedisCache(TINYIB_CACHE_REDIS_HOST);
 } else {
-    $cache = new InMemoryCache();
+    $cache = new DatabaseCache($cache_repository);
 }
 
 /** @var \TinyIB\Repository\IBanRepository $ban_repository */
-$ban_repository = new PDOBanRepository(TINYIB_DBBANS);
+$ban_repository = new PDOBanRepository();
 
 /** @var \TinyIB\Repository\IPostRepository $post_repository */
-$post_repository = new PDOPostRepository(TINYIB_DBPOSTS);
+$post_repository = new PDOPostRepository();
 
 /** @var \TinyIB\Renderer\IRenderer $renderer */
 $renderer = new Renderer($cache, $post_repository, [

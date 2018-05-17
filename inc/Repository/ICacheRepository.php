@@ -1,33 +1,22 @@
 <?php
 
-namespace TinyIB\Cache;
+namespace TinyIB\Repository;
 
-interface ICache
+interface ICacheRepository extends IRepository
 {
     /**
-     * Checks if the specified key exists.
-     *
      * @param string $key
      *
-     * @return bool Is value stored.
+     * @return string|null
      */
-    public function exists($key);
-
-    /**
-     * Returns the specified key.
-     *
-     * @param string $key
-     *
-     * @return string|null Stored value.
-     */
-    public function get($key);
+    public function getByKey($key);
 
     /**
      * @param string $key
      * @param string $value
-     * @param int|null $expire Expiration time.
+     * @param int|null $expire Expiration delay.
      *
-     * @return string Stored value.
+     * @return bool Is successful.
      */
     public function set($key, $value, $expire = null);
 
@@ -38,7 +27,7 @@ interface ICache
      *
      * @return string
      */
-    public function delete($key);
+    public function deleteByKey($key);
 
     /**
      * Deletes the keys that matches the specified pattern.
