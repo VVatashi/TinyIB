@@ -206,8 +206,12 @@ class PostController implements IPostController
 
             if ($file_mime == "audio/webm" || $file_mime == "video/webm"
                 || $file_mime == "audio/mp4" || $file_mime == "video/mp4") {
-                $post['image_width'] = max(0, intval(shell_exec('mediainfo --Inform="Video;%Width%" ' . $file_location)));
-                $post['image_height'] = max(0, intval(shell_exec('mediainfo --Inform="Video;%Height%" ' . $file_location)));
+                $width = explode("\n", shell_exec('mediainfo --Inform="Video;%Width%\n" ' . $file_location));
+                $height = explode("\n", shell_exec('mediainfo --Inform="Video;%Height%\n" ' . $file_location));
+                $width = (int) reset($width);
+                $height = (int) reset($height);
+                $post['image_width'] = max(0, $width);
+                $post['image_height'] = max(0, $height);
 
                 if ($post['image_width'] > 0 && $post['image_height'] > 0) {
                     list($thumb_maxwidth, $thumb_maxheight) = thumbnailDimensions($post);
