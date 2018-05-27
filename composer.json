@@ -10,6 +10,7 @@
         "twig/twig": "~2.0",
         "vvatashi/bbcode": "dev-master",
         "predis/predis": "^1.1",
-        "vvatashi/di": "dev-master"
+        "vvatashi/di": "dev-master",
+        "monolog/monolog": "^1.23"
     }
 }

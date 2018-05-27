@@ -3,6 +3,10 @@
 namespace TinyIB\Controller;
 
 use TinyIB\Response;
+use TinyIB\Cache\ICache;
+use TinyIB\Repository\IBanRepository;
+use TinyIB\Repository\IPostRepository;
+use TinyIB\Renderer\IRenderer;
 
 class ManageController implements IManageController
 {
@@ -26,7 +30,7 @@ class ManageController implements IManageController
      * @param \TinyIB\Repository\IPostRepository $post_repository
      * @param \TinyIB\Renderer\IRenderer $renderer
      */
-    public function __construct($cache, $ban_repository, $post_repository, $renderer)
+    public function __construct(ICache $cache, IBanRepository $ban_repository, IPostRepository $post_repository, IRenderer $renderer)
     {
         $this->cache = $cache;
         $this->ban_repository = $ban_repository;

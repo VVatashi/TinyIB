@@ -2,6 +2,8 @@
 
 namespace TinyIB\Cache;
 
+use TinyIB\Repository\ICacheRepository;
+
 class DatabaseCache implements ICache
 {
     /** @var \TinyIB\Repository\ICacheRepository $repository */
@@ -12,7 +14,7 @@ class DatabaseCache implements ICache
      *
      * @param \TinyIB\Repository\ICacheRepository $repository
      */
-    public function __construct($repository)
+    public function __construct(ICacheRepository $repository)
     {
         $this->repository = $repository;
     }

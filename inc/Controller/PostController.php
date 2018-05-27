@@ -3,6 +3,10 @@
 namespace TinyIB\Controller;
 
 use TinyIB\Response;
+use TinyIB\Cache\ICache;
+use TinyIB\Repository\IBanRepository;
+use TinyIB\Repository\IPostRepository;
+use TinyIB\Renderer\IRenderer;
 
 class PostController implements IPostController
 {
@@ -26,7 +30,7 @@ class PostController implements IPostController
      * @param \TinyIB\Repository\IPostRepository $post_repository
      * @param \TinyIB\Renderer\IRenderer $renderer
      */
-    public function __construct($cache, $ban_repository, $post_repository, $renderer)
+    public function __construct(ICache $cache, IBanRepository $ban_repository, IPostRepository $post_repository, IRenderer $renderer)
     {
         $this->cache = $cache;
         $this->ban_repository = $ban_repository;
@@ -208,8 +212,8 @@ class PostController implements IPostController
                 || $file_mime == "audio/mp4" || $file_mime == "video/mp4") {
                 $width = explode("\n", shell_exec('mediainfo --Inform="Video;%Width%\n" ' . $file_location));
                 $height = explode("\n", shell_exec('mediainfo --Inform="Video;%Height%\n" ' . $file_location));
-                $width = (int) reset($width);
-                $height = (int) reset($height);
+                $width = (int)reset($width);
+                $height = (int)reset($height);
                 $post['image_width'] = max(0, $width);
                 $post['image_height'] = max(0, $height);
 

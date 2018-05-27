@@ -4,18 +4,33 @@
 #
 # https://github.com/tslocum/TinyIB
 
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Processor\PsrLogMessageProcessor;
+use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
+use TinyIB\Response;
 use TinyIB\Cache\DatabaseCache;
+use TinyIB\Cache\ICache;
 use TinyIB\Cache\InMemoryCache;
 use TinyIB\Cache\RedisCache;
+use TinyIB\Controller\IManageController;
+use TinyIB\Controller\IPostController;
+use TinyIB\Controller\ISettingsController;
 use TinyIB\Controller\ManageController;
 use TinyIB\Controller\PostController;
 use TinyIB\Controller\SettingsController;
+use TinyIB\Renderer\IRenderer;
 use TinyIB\Renderer\Renderer;
+use TinyIB\Repository\IBanRepository;
+use TinyIB\Repository\ICacheRepository;
+use TinyIB\Repository\IPostRepository;
 use TinyIB\Repository\PDOBanRepository;
 use TinyIB\Repository\PDOCacheRepository;
 use TinyIB\Repository\PDOPostRepository;
-use TinyIB\Response;
+use TinyIB\Router\IRouter;
 use TinyIB\Router\TreeRouter;
+use VVatashi\DI\Container;
 
 require_once './vendor/autoload.php';
 
@@ -128,50 +143,62 @@ if (TINYIB_TIMEZONE != '') {
     date_default_timezone_set(TINYIB_TIMEZONE);
 }
 
-/** @var \TinyIB\Repository\ICacheRepository $cache_repository */
-$cache_repository = new PDOCacheRepository();
+// Create DIC and register services.
+$container = new Container();
+$container->registerInstance(ContainerInterface::class, $container);
+$container->registerCallback(LoggerInterface::class, function ($container) {
+    $logger = new Logger('name');
+    $logger->pushHandler(new StreamHandler('log'));
+    $logger->pushProcessor(new PsrLogMessageProcessor());
+    return $logger;
+});
 
-/** @var \TinyIB\Cache\ICache $cache */
+$container->registerType(IBanRepository::class, PDOBanRepository::class);
+$container->registerType(ICacheRepository::class, PDOCacheRepository::class);
+$container->registerType(IPostRepository::class, PDOPostRepository::class);
+
 if (TINYIB_CACHE === 'memory') {
-    $cache = new InMemoryCache();
+    $container->registerType(ICache::class, InMemoryCache::class);
 } elseif (TINYIB_CACHE === 'redis') {
-    $cache = new RedisCache(TINYIB_CACHE_REDIS_HOST);
+    $container->registerCallback(ICache::class, function ($container) {
+        return new RedisCache(TINYIB_CACHE_REDIS_HOST);
+    });
 } else {
-    $cache = new DatabaseCache($cache_repository);
+    $container->registerType(ICache::class, DatabaseCache::class);
 }
 
-/** @var \TinyIB\Repository\IBanRepository $ban_repository */
-$ban_repository = new PDOBanRepository();
+$container->registerCallback(IRenderer::class, function ($container) use ($tinyib_uploads, $tinyib_embeds) {
+    $cache = $container->get(ICache::class);
+    $post_repository = $container->get(IPostRepository::class);
 
-/** @var \TinyIB\Repository\IPostRepository $post_repository */
-$post_repository = new PDOPostRepository();
+    return new Renderer($cache, $post_repository, [
+        'embeds' => $tinyib_uploads,
+        'is_installed_via_git' => installedViaGit(),
+        'uploads' => $tinyib_embeds,
+    ]);
+});
 
-/** @var \TinyIB\Renderer\IRenderer $renderer */
-$renderer = new Renderer($cache, $post_repository, [
-    'embeds' => $tinyib_uploads,
-    'is_installed_via_git' => installedViaGit(),
-    'uploads' => $tinyib_embeds,
-]);
+$container->registerType(IManageController::class, ManageController::class);
+$container->registerType(IPostController::class, PostController::class);
+$container->registerType(ISettingsController::class, SettingsController::class);
 
-/** @var \TinyIB\Controller\IManageController $manage_controller */
-$manage_controller = new ManageController($cache, $ban_repository, $post_repository, $renderer);
-
-/** @var \TinyIB\Controller\IPostController $post_controller */
-$post_controller = new PostController($cache, $ban_repository, $post_repository, $renderer);
-
-/** @var \TinyIB\Controller\ISettingsController $settings_controller */
-$settings_controller = new SettingsController($cache, $renderer);
-
-/** @var \TinyIB\Router\IRouter $router */
-$router = new TreeRouter();
+$container->registerCallback(IRouter::class, function ($container) {
+    return new TreeRouter();
+});
 
 // Setup routing.
-$router->addRoute('/', function ($path) use ($cache, $renderer) {
+/** @var \TinyIB\Router\IRouter $router */
+$router = $container->get(IRouter::class);
+
+// Setup routing.
+$router->addRoute('/', function ($path) use ($container) {
+    $cache = $container->get(ICache::class);
     $key = TINYIB_BOARD . ':page:0';
 
     if ($cache->exists($key)) {
         $data = $cache->get($key);
     } else {
+        $renderer = $container->get(IRenderer::class);
         $data = $renderer->renderBoardPage(0);
         $cache->set($key, $data, 4 * 60 * 60);
     }
@@ -179,13 +206,15 @@ $router->addRoute('/', function ($path) use ($cache, $renderer) {
     Response::ok($data)->send();
 });
 
-$router->addRoute('/:int', function ($path) use ($cache, $renderer) {
+$router->addRoute('/:int', function ($path) use ($container) {
+    $cache = $container->get(ICache::class);
     $page = explode('/', $path)[1];
     $key = TINYIB_BOARD . ':page:' . $page;
 
     if ($cache->exists($key)) {
         $data = $cache->get($key);
     } else {
+        $renderer = $container->get(IRenderer::class);
         $data = $renderer->renderBoardPage($page);
         $cache->set($key, $data, 4 * 60 * 60);
     }
@@ -193,13 +222,15 @@ $router->addRoute('/:int', function ($path) use ($cache, $renderer) {
     Response::ok($data)->send();
 });
 
-$router->addRoute('/res/:int', function ($path) use ($cache, $renderer) {
+$router->addRoute('/res/:int', function ($path) use ($container) {
+    $cache = $container->get(ICache::class);
     $id = explode('/', $path)[2];
     $key = TINYIB_BOARD . ':thread:' . $id;
 
     if ($cache->exists($key)) {
         $data = $cache->get($key);
     } else {
+        $renderer = $container->get(IRenderer::class);
         $data = $renderer->renderThreadPage($id);
         $cache->set($key, $data, 4 * 60 * 60);
     }
@@ -207,20 +238,24 @@ $router->addRoute('/res/:int', function ($path) use ($cache, $renderer) {
     Response::ok($data)->send();
 });
 
-$router->addRoute('/manage', function ($path) use ($manage_controller) {
+$router->addRoute('/manage', function ($path) use ($container) {
+    $manage_controller = $container->get(IManageController::class);
     $manage_controller->status()->send();
 });
 
-$router->addRoute('/manage/rebuildall', function ($path) use ($manage_controller) {
+$router->addRoute('/manage/rebuildall', function ($path) use ($container) {
+    $manage_controller = $container->get(IManageController::class);
     $manage_controller->rebuildAll()->send();
 });
 
-$router->addRoute('/manage/approve/:int', function ($path) use ($manage_controller) {
+$router->addRoute('/manage/approve/:int', function ($path) use ($container) {
+    $manage_controller = $container->get(IManageController::class);
     $id = explode('/', $path)[3];
     $manage_controller->approve($id)->send();
 });
 
-$router->addRoute('/manage/bans', function ($path) use ($manage_controller) {
+$router->addRoute('/manage/bans', function ($path) use ($container) {
+    $manage_controller = $container->get(IManageController::class);
     $bans = !empty($_GET['bans']) ? $_GET['bans'] : '';
 
     if (!empty($_POST['ip'])) {
@@ -238,39 +273,47 @@ $router->addRoute('/manage/bans', function ($path) use ($manage_controller) {
     }
 });
 
-$router->addRoute('/manage/delete/:int', function ($path) use ($manage_controller) {
+$router->addRoute('/manage/delete/:int', function ($path) use ($container) {
+    $manage_controller = $container->get(IManageController::class);
     $id = explode('/', $path)[3];
     $manage_controller->delete($id)->send();
 });
 
-$router->addRoute('/manage/logout', function ($path) use ($manage_controller) {
+$router->addRoute('/manage/logout', function ($path) use ($container) {
+    $manage_controller = $container->get(IManageController::class);
     $manage_controller->logout()->send();
 });
 
-$router->addRoute('/manage/moderate', function ($path) use ($manage_controller) {
+$router->addRoute('/manage/moderate', function ($path) use ($container) {
+    $manage_controller = $container->get(IManageController::class);
     $manage_controller->moderate()->send();
 });
 
-$router->addRoute('/manage/moderate/:int', function ($path) use ($manage_controller) {
+$router->addRoute('/manage/moderate/:int', function ($path) use ($container) {
+    $manage_controller = $container->get(IManageController::class);
     $id = explode('/', $path)[3];
     $manage_controller->moderate($id)->send();
 });
 
-$router->addRoute('/manage/rawpost', function ($path) use ($manage_controller) {
+$router->addRoute('/manage/rawpost', function ($path) use ($container) {
+    $manage_controller = $container->get(IManageController::class);
     $manage_controller->rawPost()->send();
 });
 
-$router->addRoute('/manage/sticky/:int', function ($path) use ($manage_controller) {
+$router->addRoute('/manage/sticky/:int', function ($path) use ($container) {
+    $manage_controller = $container->get(IManageController::class);
     $id = explode('/', $path)[3];
     $sticky = !empty($_GET['setsticky']) ? (bool)intval($_GET['setsticky']) : false;
     $manage_controller->setSticky($id, $sticky)->send();
 });
 
-$router->addRoute('/manage/update', function ($path) use ($manage_controller) {
+$router->addRoute('/manage/update', function ($path) use ($container) {
+    $manage_controller = $container->get(IManageController::class);
     $manage_controller->update()->send();
 });
 
-$router->addRoute('/post/create', function ($path) use ($post_controller) {
+$router->addRoute('/post/create', function ($path) use ($container) {
+    $post_controller = $container->get(IPostController::class);
     $data = array_intersect_key($_POST, array_flip([
         'name',
         'email',
@@ -282,13 +325,15 @@ $router->addRoute('/post/create', function ($path) use ($post_controller) {
     $post_controller->create($data)->send();
 });
 
-$router->addRoute('/post/delete', function ($path) use ($post_controller) {
+$router->addRoute('/post/delete', function ($path) use ($container) {
+    $post_controller = $container->get(IPostController::class);
     $id = isset($_POST['delete']) ? $_POST['delete'] : null;
     $password = isset($_POST['password']) ? $_POST['password'] : null;
     $post_controller->delete($id, $password)->send();
 });
 
-$router->addRoute('/settings', function ($path) use ($settings_controller) {
+$router->addRoute('/settings', function ($path) use ($container) {
+    $settings_controller = $container->get(ISettingsController::class);
     $settings_controller->settings()->send();
 });
 

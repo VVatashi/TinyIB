@@ -28,6 +28,13 @@ abstract class PDORepository implements IRepository
                 throw new \Exception("Failed to connect to the database: $msg");
             }
         }
+
+        if (!$this->inTransaction()) {
+            $this->beginTransaction();
+            register_shutdown_function(function () {
+                $this->commit();
+            });
+        }
     }
 
     /**
@@ -136,6 +143,14 @@ abstract class PDORepository implements IRepository
         $statement = static::$pdo->prepare($query);
         $statement->execute($params);
         return $statement->rowCount();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function inTransaction()
+    {
+        return static::$pdo->inTransaction();
     }
 
     /**

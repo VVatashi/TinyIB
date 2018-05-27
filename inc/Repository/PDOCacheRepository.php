@@ -43,11 +43,6 @@ class PDOCacheRepository extends PDORepository implements ICacheRepository
 
             static::$pdo->exec($sql);
         }
-
-        $this->beginTransaction();
-        register_shutdown_function(function () {
-            $this->commit();
-        });
     }
 
     /**
