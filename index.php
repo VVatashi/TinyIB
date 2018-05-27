@@ -321,6 +321,7 @@ $router->addRoute('/post/create', function ($path) use ($container) {
         'message',
         'password',
         'embed',
+        'parent',
     ]));
     $post_controller->create($data)->send();
 });

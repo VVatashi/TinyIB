@@ -38,6 +38,199 @@ class PostController implements IPostController
         $this->renderer = $renderer;
     }
 
+    protected function isRawPost()
+    {
+        if (isset($_POST['rawpost'])) {
+            list($loggedin, $isadmin) = manageCheckLogIn();
+            if ($loggedin) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function checkCAPTCHA()
+    {
+        if (TINYIB_CAPTCHA === 'recaptcha') {
+            require_once 'inc/recaptcha/autoload.php';
+
+            $captcha = isset($_POST['g-recaptcha-response']) ? $_POST['g-recaptcha-response'] : '';
+            $failed_captcha = true;
+
+            $recaptcha = new \ReCaptcha\ReCaptcha(TINYIB_RECAPTCHA_SECRET);
+            $resp = $recaptcha->verify($captcha, $_SERVER['REMOTE_ADDR']);
+            if ($resp->isSuccess()) {
+                $failed_captcha = false;
+            }
+
+            if ($failed_captcha) {
+                $captcha_error = 'Failed CAPTCHA.';
+                $error_reason = '';
+
+                if (count($resp->getErrorCodes()) == 1) {
+                    $error_codes = $resp->getErrorCodes();
+                    $error_reason = $error_codes[0];
+                }
+
+                if ($error_reason == 'missing-input-response') {
+                    $captcha_error .= ' Please click the checkbox labeled "I\'m not a robot".';
+                } else {
+                    $captcha_error .= ' Reason:';
+                    foreach ($resp->getErrorCodes() as $error) {
+                        $captcha_error .= '<br>' . $error;
+                    }
+                }
+                throw new \Exception($captcha_error);
+            }
+        } elseif (TINYIB_CAPTCHA) { // Simple CAPTCHA
+            $captcha = isset($_POST['captcha']) ? strtolower(trim($_POST['captcha'])) : '';
+            $captcha_solution = isset($_SESSION['tinyibcaptcha']) ? strtolower(trim($_SESSION['tinyibcaptcha'])) : '';
+
+            if ($captcha == '') {
+                throw new \Exception('Please enter the CAPTCHA text.');
+            } elseif ($captcha != $captcha_solution) {
+                throw new \Exception('Incorrect CAPTCHA text entered.  Please try again.<br>Click the image to retrieve a new CAPTCHA.');
+            }
+        }
+    }
+
+    protected function checkBanned()
+    {
+        $ban = $this->ban_repository->banByIP($_SERVER['REMOTE_ADDR']);
+
+        if ($ban) {
+            if ($ban['expire'] == 0 || $ban['expire'] > time()) {
+                $expire = ($ban['expire'] > 0) ? ('<br>This ban will expire ' . date('y/m/d(D)H:i:s', $ban['expire'])) : '<br>This ban is permanent and will not expire.';
+                $reason = ($ban['reason'] == '') ? '' : ('<br>Reason: ' . $ban['reason']);
+                throw new \Exception('Your IP address ' . $ban['ip'] . ' has been banned from posting on this image board.  ' . $expire . $reason);
+            } else {
+                $this->ban_repository->clearExpiredBans();
+            }
+        }
+    }
+
+    protected function checkMessageSize($message)
+    {
+        $length = strlen($message);
+        if ($length > 8000) {
+            throw new \Exception("Please shorten your message, or post it in multiple parts. Your message is $length characters long, and the maximum allowed is 8000.");
+        }
+    }
+
+    protected function checkFlood()
+    {
+        if (TINYIB_DELAY > 0) {
+            $lastpost = $this->post_repository->lastPostByIP();
+            if ($lastpost) {
+                if ((time() - $lastpost['timestamp']) < TINYIB_DELAY) {
+                    throw new \Exception("Please wait a moment before posting again.  You will be able to make another post in " . (TINYIB_DELAY - (time() - $lastpost['timestamp'])) . " " . plural("second", (TINYIB_DELAY - (time() - $lastpost['timestamp']))) . ".");
+                }
+            }
+        }
+    }
+
+    protected function setParent($parent)
+    {
+        if (isset($_POST["parent"])) {
+            if ($_POST["parent"] != TINYIB_NEWTHREAD) {
+                if (!$this->post_repository->threadExistsByID($_POST['parent'])) {
+                    throw new \Exception("Invalid parent thread ID supplied, unable to create post.");
+                }
+
+                return $_POST["parent"];
+            }
+        }
+
+        return TINYIB_NEWTHREAD;
+    }
+
+    protected function newPost($parent = TINYIB_NEWTHREAD)
+    {
+        return [
+            'parent' => $parent,
+            'timestamp' => '0',
+            'bumped' => '0',
+            'ip' => '',
+            'name' => '',
+            'tripcode' => '',
+            'email' => '',
+            'nameblock' => '',
+            'subject' => '',
+            'message' => '',
+            'password' => '',
+            'file' => '',
+            'file_hex' => '',
+            'file_original' => '',
+            'file_size' => '0',
+            'file_size_formatted' => '',
+            'image_width' => '0',
+            'image_height' => '0',
+            'thumb' => '',
+            'thumb_width' => '0',
+            'thumb_height' => '0',
+            'stickied' => '0',
+            'moderated' => '1'
+        ];
+    }
+
+    protected function _postLink($matches)
+    {
+        $post = $this->post_repository->postByID($matches[1]);
+
+        if ($post) {
+            return '<a href="/' . TINYIB_BOARD . '/res/' . ($post['parent'] == TINYIB_NEWTHREAD ? $post['id'] : $post['parent']) . '#' . $matches[1] . '">' . $matches[0] . '</a>';
+        }
+
+        return $matches[0];
+    }
+
+    protected function postLink($message)
+    {
+        return preg_replace_callback('/&gt;&gt;([0-9]+)/', [$this, '_postLink'], $message);
+    }
+
+    protected function colorQuote($message)
+    {
+        if (substr($message, -1, 1) != "\n") {
+            $message .= "\n";
+        }
+        return preg_replace('/^(&gt;[^\>](.*))\n/m', '<span class="unkfunc">\\1</span>' . "\n", $message);
+    }
+
+    protected function dice($message)
+    {
+        return preg_replace_callback('/##(\d+)d(\d+)##/si', function ($matches) {
+            $count = min(max((int)$matches[1], 1), TINYIB_DICE_MAX_COUNT);
+            $max = min(max((int)$matches[2], 1), TINYIB_DICE_MAX_VALUE);
+
+            $sum = 0;
+            $results = [];
+
+            for ($i = 0; $i < $count; ++$i) {
+                $value = mt_rand(1, $max);
+
+                $sum += $value;
+                $results[] = $value;
+            }
+
+            $info = implode(', ', $results);
+
+            return "<span class=\"dice\" title=\"$info\">##${count}d$max## = $sum</span>";
+        }, $message);
+    }
+
+    protected function checkDuplicateFile($hex)
+    {
+        $hexmatches = $this->post_repository->postsByHex($hex);
+
+        if (count($hexmatches) > 0) {
+            foreach ($hexmatches as $hexmatch) {
+                throw new \Exception("Duplicate file uploaded. That file has already been posted <a href=\"res/" . (($hexmatch["parent"] == TINYIB_NEWTHREAD) ? $hexmatch["id"] : $hexmatch["parent"]) . ".html#" . $hexmatch["id"] . "\">here</a>.");
+            }
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -53,16 +246,16 @@ class PostController implements IPostController
         }
 
         list($logged_in, $is_admin) = manageCheckLogIn();
-        $rawpost = isRawPost();
+        $rawpost = $this->isRawPost();
 
         if (!$logged_in) {
-            checkCAPTCHA();
-            checkBanned();
-            checkMessageSize();
-            checkFlood();
+            $this->checkCAPTCHA();
+            $this->checkBanned();
+            $this->checkMessageSize($data['message']);
+            $this->checkFlood();
         }
 
-        $post = newPost(setParent());
+        $post = $this->newPost($this->setParent($data['parent']));
         $post['ip'] = $_SERVER['REMOTE_ADDR'];
 
         list($post['name'], $post['tripcode']) = nameAndTripcode($data['name']);
@@ -78,12 +271,12 @@ class PostController implements IPostController
             $post['message'] = $data['message']; // Treat message as raw HTML
         } else {
             $rawposttext = '';
-            $message = colorQuote(postLink(cleanString(rtrim($data['message']))));
+            $message = $this->colorQuote($this->postLink(cleanString(rtrim($data['message']))));
             $message = $this->renderer->makeLinksClickable($message);
             $post['message'] = str_replace("\n", '<br>', $message);
 
             if (TINYIB_DICE_ENABLED) {
-                $post['message'] = dice($post['message']);
+                $post['message'] = $this->dice($post['message']);
             }
         }
 
@@ -152,7 +345,7 @@ class PostController implements IPostController
             $post['file_size_formatted'] = convertBytes($post['file_size']);
 
             if (TINYIB_FILE_ALLOW_DUPLICATE === false) {
-                checkDuplicateFile($post['file_hex']);
+                $this->checkDuplicateFile($post['file_hex']);
             }
 
             $file_mime_split = explode(' ', trim(mime_content_type($_FILES['file']['tmp_name'])));
