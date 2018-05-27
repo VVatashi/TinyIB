@@ -65,6 +65,11 @@ interface IRepository
     /**
      * @return bool
      */
+    public function inTransaction();
+
+    /**
+     * @return bool
+     */
     public function beginTransaction();
 
     /**

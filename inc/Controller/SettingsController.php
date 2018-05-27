@@ -3,6 +3,8 @@
 namespace TinyIB\Controller;
 
 use TinyIB\Response;
+use TinyIB\Cache\ICache;
+use TinyIB\Renderer\IRenderer;
 
 class SettingsController implements ISettingsController
 {
@@ -18,7 +20,7 @@ class SettingsController implements ISettingsController
      * @param \TinyIB\Cache\ICache $cache
      * @param \TinyIB\Renderer\IRenderer $renderer
      */
-    public function __construct($cache, $renderer)
+    public function __construct(ICache $cache, IRenderer $renderer)
     {
         $this->cache = $cache;
         $this->renderer = $renderer;
