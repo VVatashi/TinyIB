@@ -143,7 +143,12 @@ class PDOPostRepository extends PDORepository implements IPostRepository
             'thumb_height' => $post['thumb_height'],
             'moderated' => $post['moderated'],
         ]);
-        return static::$pdo->lastInsertId();
+
+        if (TINYIB_DBDRIVER === 'pgsql') {
+            return static::$pdo->lastInsertId(TINYIB_DBPOSTS . '_id_seq');
+        } else {
+            return static::$pdo->lastInsertId();
+        }
     }
 
     /**
