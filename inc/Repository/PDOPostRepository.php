@@ -263,7 +263,7 @@ class PDOPostRepository extends PDORepository implements IPostRepository
 
         foreach ($posts as $post) {
             deletePostImages($post);
-            $this->delete(['id' => $id]);
+            $this->delete(['id' => $post['id']]);
         }
     }
 
