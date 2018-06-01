@@ -31,6 +31,7 @@ abstract class PDORepository implements IRepository
 
         if (!$this->inTransaction()) {
             $this->beginTransaction();
+            static::$pdo->query('SET TRANSACTION ISOLATION LEVEL SERIALIZABLE');
             register_shutdown_function(function () {
                 $this->commit();
             });
