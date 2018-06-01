@@ -5,6 +5,7 @@
 # https://github.com/tslocum/TinyIB
 
 use Monolog\Logger;
+use \Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 use Psr\Container\ContainerInterface;
@@ -42,8 +43,31 @@ set_error_handler(function ($code, $message, $file, $line) {
     throw new ErrorException($message, 0, $code, $file, $line);
 });
 
-set_exception_handler(function (Throwable $exception) {
-    $output = <<<EOF
+$logger = new Logger('log');
+$log_formatter = new LineFormatter(null, null, true, true);
+$log_handler = new StreamHandler('log');
+$log_handler->setFormatter($log_formatter);
+$logger->pushHandler($log_handler);
+$logger->pushProcessor(new PsrLogMessageProcessor());
+
+set_exception_handler(function (Throwable $exception) use ($logger) {
+    $trace = $exception->getTrace();
+    $trace_lines = array_map(function ($key, $value) {
+        $file = isset($value['file']) ? basename($value['file']) : '';
+        $line = isset($value['line']) ? $value['line'] : '';
+        $function = $value['function'];
+        $args = implode(', ', array_map('gettype', $value['args']));
+        return "#$key $file:$line $function($args)";
+    }, array_keys($trace), $trace);
+
+    $type = get_class($exception);
+    $exception_message = $exception->getMessage();
+    $file = basename($exception->getFile());
+    $line = $exception->getLine();
+    $message = "$type '$exception_message' at $file:$line. Stack trace:\n" . implode("\n", $trace_lines);
+    $logger->crit($message);
+
+    $html = <<<EOF
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -51,32 +75,12 @@ set_exception_handler(function (Throwable $exception) {
     <title>Server Error</title>
 </head>
 <body>
-    <pre>
-EOF;
-
-    $type = get_class($exception);
-    $message = $exception->getMessage();
-    $file = basename($exception->getFile());
-    $line = $exception->getLine();
-    $output .= "$type '$message' at $file:$line\n";
-    $output .= "Stack trace:\n";
-
-    $trace = $exception->getTrace();
-    foreach ($trace as $key => $value) {
-        $file = isset($value['file']) ? basename($value['file']) : '';
-        $line = isset($value['line']) ? $value['line'] : '';
-        $function = $value['function'];
-        $args = implode(', ', array_map('gettype', $value['args']));
-        $output .= "#$key $file:$line $function($args)\n";
-    }
-
-    $output .= <<<EOF
-    </pre>
+    <pre>$message</pre>
 </body>
 </html>
 EOF;
 
-    Response::serverError($output)->send();
+    Response::serverError($html)->send();
 });
 
 session_start();
@@ -146,12 +150,7 @@ if (TINYIB_TIMEZONE != '') {
 // Create DIC and register services.
 $container = new Container();
 $container->registerInstance(ContainerInterface::class, $container);
-$container->registerCallback(LoggerInterface::class, function ($container) {
-    $logger = new Logger('name');
-    $logger->pushHandler(new StreamHandler('log'));
-    $logger->pushProcessor(new PsrLogMessageProcessor());
-    return $logger;
-});
+$container->registerInstance(LoggerInterface::class, $logger);
 
 $container->registerType(IBanRepository::class, PDOBanRepository::class);
 $container->registerType(ICacheRepository::class, PDOCacheRepository::class);
