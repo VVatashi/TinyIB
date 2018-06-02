@@ -189,6 +189,11 @@ class Renderer implements IRenderer
     public function renderThreadPage($id)
     {
         $posts = array_map(function ($post) {
+            if (TINYIB_CACHE === 'database') {
+                // Do not cache individual posts in database mode.
+                return $this->preprocessPost($post, TINYIB_RESPAGE);
+            }
+
             $key = TINYIB_BOARD . ':post:' . $post['id'];
 
             if ($this->cache->exists($key)) {
@@ -230,6 +235,11 @@ class Renderer implements IRenderer
             }
 
             $posts = array_merge($posts, array_map(function ($post) {
+                if (TINYIB_CACHE === 'database') {
+                    // Do not cache individual posts in database mode.
+                    return $this->preprocessPost($post, TINYIB_INDEXPAGE);
+                }
+
                 $key = TINYIB_BOARD . ':index_post:' . $post['id'];
 
                 if ($this->cache->exists($key)) {
