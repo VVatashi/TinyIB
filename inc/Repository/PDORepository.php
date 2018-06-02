@@ -107,7 +107,14 @@ abstract class PDORepository implements IRepository
         $table_name = $this->table_name;
         $columns = implode(', ', array_keys($data));
         $values = implode(', ', array_fill(0, count($data), '?'));
-        $query = "INSERT INTO $table_name ($columns) VALUES ($values)";
+
+        if (TINYIB_DBDRIVER === 'pgsql') {
+            $query = "INSERT INTO $table_name ($columns) VALUES ($values) ON CONFLICT DO NOTHING";
+        } else {
+            // TODO: Any simple standard SQL way to do it?
+            $query = "INSERT INTO $table_name ($columns) VALUES ($values)";
+        }
+
         $params = array_values($data);
         $statement = static::$pdo->prepare($query);
         $statement->execute($params);
