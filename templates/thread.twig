@@ -9,7 +9,7 @@
 
   <div class="content__replymode replymode">Posting mode: Reply</div>
 
-  <form id="delform" action="imgboard.php?delete" method="post">
+  <form id="delform" action="{{ url_prefix }}post/delete" method="post">
     <input type="hidden" name="board" value="{{ constant('TINYIB_BOARD') }}" />
 
     {% for post in posts %}
