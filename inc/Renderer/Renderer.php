@@ -195,10 +195,9 @@ class Renderer implements IRenderer
             }
 
             $key = TINYIB_BOARD . ':post:' . $post['id'];
+            $post['rendered'] = $this->cache->get($key);
 
-            if ($this->cache->exists($key)) {
-                $post['rendered'] = $this->cache->get($key);
-            } else {
+            if ($post['rendered'] === null) {
                 $post = $this->preprocessPost($post, TINYIB_RESPAGE);
                 $post['rendered'] = $this->renderPost($post, TINYIB_RESPAGE, true);
                 $this->cache->set($key, $post['rendered'], 4 * 60 * 60);
@@ -241,10 +240,9 @@ class Renderer implements IRenderer
                 }
 
                 $key = TINYIB_BOARD . ':index_post:' . $post['id'];
+                $post['rendered'] = $this->cache->get($key);
 
-                if ($this->cache->exists($key)) {
-                    $post['rendered'] = $this->cache->get($key);
-                } else {
+                if ($post['rendered'] === null) {
                     $post = $this->preprocessPost($post, TINYIB_INDEXPAGE);
                     $post['rendered'] = $this->renderPost($post, TINYIB_INDEXPAGE, true);
                     $this->cache->set($key, $post['rendered'], 4 * 60 * 60);

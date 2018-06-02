@@ -193,10 +193,9 @@ $router = $container->get(IRouter::class);
 $router->addRoute('/', function ($path) use ($container) {
     $cache = $container->get(ICache::class);
     $key = TINYIB_BOARD . ':page:0';
+    $data = $cache->get($key);
 
-    if ($cache->exists($key)) {
-        $data = $cache->get($key);
-    } else {
+    if ($data === null) {
         $renderer = $container->get(IRenderer::class);
         $data = $renderer->renderBoardPage(0);
         $cache->set($key, $data, 4 * 60 * 60);
@@ -209,10 +208,9 @@ $router->addRoute('/:int', function ($path) use ($container) {
     $cache = $container->get(ICache::class);
     $page = explode('/', $path)[1];
     $key = TINYIB_BOARD . ':page:' . $page;
+    $data = $cache->get($key);
 
-    if ($cache->exists($key)) {
-        $data = $cache->get($key);
-    } else {
+    if ($data === null) {
         $renderer = $container->get(IRenderer::class);
         $data = $renderer->renderBoardPage($page);
         $cache->set($key, $data, 4 * 60 * 60);
@@ -225,10 +223,9 @@ $router->addRoute('/res/:int', function ($path) use ($container) {
     $cache = $container->get(ICache::class);
     $id = explode('/', $path)[2];
     $key = TINYIB_BOARD . ':thread:' . $id;
+    $data = $cache->get($key);
 
-    if ($cache->exists($key)) {
-        $data = $cache->get($key);
-    } else {
+    if ($data === null) {
         $renderer = $container->get(IRenderer::class);
         $data = $renderer->renderThreadPage($id);
         $cache->set($key, $data, 4 * 60 * 60);

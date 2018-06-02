@@ -9,8 +9,11 @@ class RedisCache implements ICache
     /** @var string $host */
     protected $host;
 
-    /** @var \Predis\Client $redis The redis client. */
-    protected $redis;
+    /** @var \Predis\Client $client The redis client. */
+    protected $client;
+
+    /** @var \Predis\Pipeline\Pipeline $pipeline */
+    protected $pipeline;
 
     /**
      * Returns instance of the redis client.
@@ -18,13 +21,31 @@ class RedisCache implements ICache
      *
      * @return \Predis\Client
      */
-    protected function getRedis()
+    protected function getClient()
     {
-        if (!isset($this->redis)) {
-            $this->redis = new Client($this->host);
+        if (!isset($this->client)) {
+            $this->client = new Client($this->host, ['cas']);
         }
 
-        return $this->redis;
+        return $this->client;
+    }
+
+    /**
+     * Returns instance of the redis client pipeline.
+     * Initializes it if it is not already initialized.
+     *
+     * @return \Predis\Pipeline\Pipeline
+     */
+    protected function getPipeline()
+    {
+        if (!isset($this->pipeline)) {
+            $this->pipeline = $this->getClient()->pipeline();
+            register_shutdown_function(function () {
+                $this->pipeline->execute();
+            });
+        }
+
+        return $this->pipeline;
     }
 
     /**
@@ -40,7 +61,7 @@ class RedisCache implements ICache
      */
     public function exists($key)
     {
-        return $this->getRedis()->exists($key) != false;
+        return $this->getClient()->exists($key) != false;
     }
 
     /**
@@ -48,7 +69,8 @@ class RedisCache implements ICache
      */
     public function get($key)
     {
-        $value = $this->exists($key) ? $this->getRedis()->get($key) : null;
+        $client = $this->getClient();
+        $value = $client->exists($key) != false ? $client->get($key) : null;
         return $value;
     }
 
@@ -57,11 +79,11 @@ class RedisCache implements ICache
      */
     public function set($key, $value, $expire = null)
     {
-        $redis = $this->getRedis();
-        $redis->set($key, $value);
+        $pipeline = $this->getPipeline();
+        $pipeline->set($key, $value);
 
         if (isset($expire)) {
-            $redis->expire($key, $expire);
+            $pipeline->expire($key, $expire);
         }
 
         return $value;
@@ -73,7 +95,7 @@ class RedisCache implements ICache
     public function delete($key)
     {
         $value = $this->get($key);
-        $this->getRedis()->del($key);
+        $this->getPipeline()->del($key);
         return $value;
     }
 
@@ -82,20 +104,20 @@ class RedisCache implements ICache
      */
     public function deletePattern($pattern)
     {
-        $redis = $this->getRedis();
+        $client = $this->getClient();
         $keys = [];
         $iterator = 0;
 
         do {
-            list($iterator, $scan) = $redis->scan($iterator, 'match', $pattern);
+            list($iterator, $scan) = $client->scan($iterator, 'match', $pattern);
             $keys = array_merge($keys, $scan);
         } while ($iterator != 0);
 
-        $redis->pipeline(function ($pipeline) use ($keys) {
-            foreach ($keys as $key) {
-                $pipeline->del($key);
-            }
-        });
+        $transaction = $client->transaction();
+        foreach ($keys as $key) {
+            $transaction->del($key);
+        }
+        $transaction->execute();
 
         return count($keys);
     }

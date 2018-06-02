@@ -63,10 +63,9 @@ class ManageController implements IManageController
         if (TINYIB_REQMOD === 'files' || TINYIB_REQMOD === 'all') {
             $data['reqmod_posts'] = array_map(function ($post) {
                 $key = TINYIB_BOARD . ':index_post:' . $post['id'];
+                $post['rendered'] = $this->cache->get($key);
 
-                if ($this->cache->exists($key)) {
-                    $post['rendered'] = $this->cache->get($key);
-                } else {
+                if ($post['rendered'] === null) {
                     $post = $this->renderer->preprocessPost($post, TINYIB_INDEXPAGE);
                     $post['rendered'] = $this->renderer->renderPost($post, TINYIB_INDEXPAGE, true);
                     $this->cache->set($key, $post['rendered'], 4 * 60 * 60);
@@ -78,10 +77,9 @@ class ManageController implements IManageController
 
         $data['posts'] = array_map(function ($post) {
             $key = TINYIB_BOARD . ':index_post:' . $post['id'];
+            $post['rendered'] = $this->cache->get($key);
 
-            if ($this->cache->exists($key)) {
-                $post['rendered'] = $this->cache->get($key);
-            } else {
+            if ($post['rendered'] === null) {
                 $post = $this->renderer->preprocessPost($post, TINYIB_INDEXPAGE);
                 $post['rendered'] = $this->renderer->renderPost($post, TINYIB_INDEXPAGE, true);
                 $this->cache->set($key, $post['rendered'], 4 * 60 * 60);
@@ -225,10 +223,9 @@ class ManageController implements IManageController
 
         $data['posts'] = array_map(function ($post) {
             $key = TINYIB_BOARD . ':index_post:' . $post['id'];
+            $post['rendered'] = $this->cache->get($key);
 
-            if ($this->cache->exists($key)) {
-                $post['rendered'] = $this->cache->get($key);
-            } else {
+            if ($post['rendered'] === null) {
                 $post = $this->renderer->preprocessPost($post, TINYIB_INDEXPAGE);
                 $post['rendered'] = $this->renderer->renderPost($post, TINYIB_INDEXPAGE, true);
                 $this->cache->set($key, $post['rendered'], 4 * 60 * 60);
