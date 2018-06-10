@@ -72,25 +72,6 @@ class Renderer implements IRenderer
      *
      * @return string
      */
-    protected function wakabamark($message)
-    {
-        // Converts wakabamark to bbcodes
-        $patterns = array(
-            '/\*\*(.*?)\*\*/si' => '[b]\\1[/b]',
-            '/\*(.*?)\*/si' => '[i]\\1[/i]',
-            '/~~(.*?)~~/si' => '[s]\\1[/s]',
-            '/%%(.*?)%%/si' => '[spoiler]\\1[/spoiler]',
-            '/`(.*?)`/si' => '[code]\\1[/code]',
-        );
-
-        return preg_replace(array_keys($patterns), array_values($patterns), $message);
-    }
-
-    /**
-     * @param string $message
-     *
-     * @return string
-     */
     protected function bbcode($message)
     {
         $tags = [
@@ -129,7 +110,6 @@ class Renderer implements IRenderer
     public function preprocessPost($post, $res)
     {
         $post = $this->truncateMessage($post, $res);
-        $post['message'] = $this->wakabamark($post['message']);
         $post['message'] = $this->bbcode($post['message']);
 
         if (isset($post['file'])) {
