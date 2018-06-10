@@ -41,6 +41,6 @@ class CryptographyService implements CryptographyServiceInterface
     public function generateSecureTripcode(string $password, string $salt) : string
     {
         // Use base64 of the md5 of the user password concatenated with the server salt.
-        return substr(base64_encode(md5($password . $salt)), 2, 10);
+        return substr(base64_encode(md5($password . $salt, true)), 2, 10);
     }
 }

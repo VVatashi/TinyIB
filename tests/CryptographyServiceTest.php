@@ -45,9 +45,9 @@ final class CryptographyServiceTest extends TestCase
         // Test against pre-calculated values.
         // Input => expected result.
         $tests = [
-            '' => 'QxZDhjZDk4',
-            'qwerty' => 'g1NzhlZGY4',
-            '12345678' => 'VkNTVhZDI4',
+            '' => '2M2Y8AsgTp',
+            'qwerty' => 'eO34RYzgb7',
+            '12345678' => 'Va0oOqQAr0',
         ];
 
         foreach ($tests as $input => $expected) {
