@@ -7,8 +7,10 @@
 .vscode/
 *.db
 *.html
-*error_log 
-/vendor/
+*error_log
+*log
+clover.xml
 node_modules/
 npm-debug.log*
+vendor/
 settings.php

@@ -31,6 +31,10 @@ use TinyIB\Repository\PDOCacheRepository;
 use TinyIB\Repository\PDOPostRepository;
 use TinyIB\Router\IRouter;
 use TinyIB\Router\TreeRouter;
+use TinyIB\Service\CryptographyService;
+use TinyIB\Service\CryptographyServiceInterface;
+use TinyIB\Service\PostService;
+use TinyIB\Service\PostServiceInterface;
 use VVatashi\DI\Container;
 
 require_once './vendor/autoload.php';
@@ -38,19 +42,15 @@ require_once './vendor/autoload.php';
 // Setup error handling.
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-
 set_error_handler(function ($code, $message, $file, $line) {
     throw new ErrorException($message, 0, $code, $file, $line);
 });
 
-$logger = new Logger('log');
-$log_formatter = new LineFormatter(null, null, true, true);
-$log_handler = new StreamHandler('log');
-$log_handler->setFormatter($log_formatter);
-$logger->pushHandler($log_handler);
-$logger->pushProcessor(new PsrLogMessageProcessor());
+// Create DIC.
+$container = new Container();
 
-set_exception_handler(function (Throwable $exception) use ($logger) {
+// Setup exception handling.
+set_exception_handler(function (Throwable $exception) use ($container) {
     $trace = $exception->getTrace();
     $trace_lines = array_map(function ($key, $value) {
         $file = isset($value['file']) ? basename($value['file']) : '';
@@ -65,7 +65,12 @@ set_exception_handler(function (Throwable $exception) use ($logger) {
     $file = basename($exception->getFile());
     $line = $exception->getLine();
     $message = "$type '$exception_message' at $file:$line. Stack trace:\n" . implode("\n", $trace_lines);
-    $logger->crit($message);
+
+    if ($container->has(LoggerInterface::class)) {
+        /** @var LoggerInterface $logger */
+        $logger = $container->get(LoggerInterface::class);
+        $logger->critical($message);
+    }
 
     $html = <<<EOF
 <!DOCTYPE html>
@@ -132,7 +137,7 @@ $writedirs = ['src', 'thumb'];
 
 foreach ($writedirs as $dir) {
     if (!is_writable($dir)) {
-        $message = "Directory '" . $dir . "' can not be written to.  Please modify its permissions.";
+        $message = "Directory '$dir' can not be written to.  Please modify its permissions.";
         throw new Exception($message);
     }
 }
@@ -143,14 +148,21 @@ define('TINYIB_RESPAGE', true);
 
 include 'inc/functions.php';
 
-if (TINYIB_TIMEZONE != '') {
+if (!empty(TINYIB_TIMEZONE)) {
     date_default_timezone_set(TINYIB_TIMEZONE);
 }
 
-// Create DIC and register services.
-$container = new Container();
+// Register services in the DIC.
 $container->registerInstance(ContainerInterface::class, $container);
-$container->registerInstance(LoggerInterface::class, $logger);
+$container->registerCallback(LoggerInterface::class, function ($container) {
+    $logger = new Logger('log');
+    $log_handler = new StreamHandler('log');
+    $log_formatter = new LineFormatter(null, null, true, true);
+    $log_handler->setFormatter($log_formatter);
+    $logger->pushHandler($log_handler);
+    $logger->pushProcessor(new PsrLogMessageProcessor());
+    return $logger;
+});
 
 $container->registerType(IBanRepository::class, PDOBanRepository::class);
 $container->registerType(ICacheRepository::class, PDOCacheRepository::class);
@@ -177,13 +189,14 @@ $container->registerCallback(IRenderer::class, function ($container) use ($tinyi
     ]);
 });
 
+$container->registerType(CryptographyServiceInterface::class, CryptographyService::class);
+$container->registerType(PostServiceInterface::class, PostService::class);
+
 $container->registerType(IManageController::class, ManageController::class);
 $container->registerType(IPostController::class, PostController::class);
 $container->registerType(ISettingsController::class, SettingsController::class);
 
-$container->registerCallback(IRouter::class, function ($container) {
-    return new TreeRouter();
-});
+$container->registerType(IRouter::class, TreeRouter::class);
 
 // Setup routing.
 /** @var \TinyIB\Router\IRouter $router */

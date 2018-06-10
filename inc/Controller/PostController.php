@@ -7,6 +7,7 @@ use TinyIB\Cache\ICache;
 use TinyIB\Repository\IBanRepository;
 use TinyIB\Repository\IPostRepository;
 use TinyIB\Renderer\IRenderer;
+use TinyIB\Service\PostServiceInterface;
 
 class PostController implements IPostController
 {
@@ -19,6 +20,9 @@ class PostController implements IPostController
     /** @var \TinyIB\Repository\IPostRepository $post_repository */
     protected $post_repository;
 
+    /** @var \TinyIB\Service\PostServiceInterface $post_service */
+    protected $post_service;
+
     /** @var \TinyIB\Renderer\IRenderer $renderer */
     protected $renderer;
 
@@ -30,11 +34,17 @@ class PostController implements IPostController
      * @param \TinyIB\Repository\IPostRepository $post_repository
      * @param \TinyIB\Renderer\IRenderer $renderer
      */
-    public function __construct(ICache $cache, IBanRepository $ban_repository, IPostRepository $post_repository, IRenderer $renderer)
-    {
+    public function __construct(
+        ICache $cache,
+        IBanRepository $ban_repository,
+        IPostRepository $post_repository,
+        PostServiceInterface $post_service,
+        IRenderer $renderer
+    ) {
         $this->cache = $cache;
         $this->ban_repository = $ban_repository;
         $this->post_repository = $post_repository;
+        $this->post_service = $post_service;
         $this->renderer = $renderer;
     }
 
@@ -258,7 +268,8 @@ class PostController implements IPostController
         $post = $this->newPost($this->setParent($data['parent']));
         $post['ip'] = $_SERVER['REMOTE_ADDR'];
 
-        list($post['name'], $post['tripcode']) = nameAndTripcode($data['name']);
+        $nameAndTripcode = $this->post_service->processName($data['name']);
+        $post = array_merge($post, $nameAndTripcode);
 
         $post['name'] = cleanString(substr($post['name'], 0, 75));
         $post['email'] = cleanString(str_replace('"', '&quot;', substr($data['email'], 0, 75)));

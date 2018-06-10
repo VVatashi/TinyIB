@@ -1,16 +1,24 @@
 {
     "name": "vvatashi/tinyib",
     "type": "project",
-    "autoload": {
-        "psr-4": {
-            "TinyIB\\": "inc/"
-        }
-    },
     "require": {
+        "monolog/monolog": "^1.23",
+        "predis/predis": "^1.1",
         "twig/twig": "~2.0",
         "vvatashi/bbcode": "dev-master",
-        "predis/predis": "^1.1",
-        "vvatashi/di": "dev-master",
-        "monolog/monolog": "^1.23"
+        "vvatashi/di": "dev-master"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "TinyIB\\": "inc"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "TinyIB\\Tests\\": "tests"
+        }
     }
 }
