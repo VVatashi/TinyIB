@@ -396,12 +396,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/VVatashi/DI.git",
-                "reference": "8dc2991c6962a23a14be7fcde0070f5802158c96"
+                "reference": "17056642b6886ed641ace20cd4572dc90f33f5a4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/VVatashi/DI/zipball/8dc2991c6962a23a14be7fcde0070f5802158c96",
-                "reference": "8dc2991c6962a23a14be7fcde0070f5802158c96",
+                "url": "https://api.github.com/repos/VVatashi/DI/zipball/17056642b6886ed641ace20cd4572dc90f33f5a4",
+                "reference": "17056642b6886ed641ace20cd4572dc90f33f5a4",
                 "shasum": ""
             },
             "require": {
@@ -430,7 +430,7 @@
                     "email": "vvatashi4259@gmail.com"
                 }
             ],
-            "time": "2018-05-27T04:04:51+00:00"
+            "time": "2018-06-09T07:13:03+00:00"
         }
     ],
     "packages-dev": [],
