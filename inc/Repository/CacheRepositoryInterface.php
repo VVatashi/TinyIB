@@ -2,7 +2,7 @@
 
 namespace TinyIB\Repository;
 
-interface ICacheRepository extends IRepository
+interface CacheRepositoryInterface extends RepositoryInterface
 {
     /**
      * @param string $key

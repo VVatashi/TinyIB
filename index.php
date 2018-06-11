@@ -12,29 +12,29 @@ use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use TinyIB\Response;
 use TinyIB\Cache\DatabaseCache;
-use TinyIB\Cache\ICache;
+use TinyIB\Cache\CacheInterface;
 use TinyIB\Cache\InMemoryCache;
 use TinyIB\Cache\RedisCache;
-use TinyIB\Controller\IManageController;
-use TinyIB\Controller\IPostController;
-use TinyIB\Controller\ISettingsController;
 use TinyIB\Controller\ManageController;
+use TinyIB\Controller\ManageControllerInterface;
 use TinyIB\Controller\PostController;
+use TinyIB\Controller\PostControllerInterface;
 use TinyIB\Controller\SettingsController;
-use TinyIB\Renderer\IRenderer;
-use TinyIB\Renderer\Renderer;
-use TinyIB\Repository\IBanRepository;
-use TinyIB\Repository\ICacheRepository;
-use TinyIB\Repository\IPostRepository;
+use TinyIB\Controller\SettingsControllerInterface;
+use TinyIB\Repository\BanRepositoryInterface;
+use TinyIB\Repository\CacheRepositoryInterface;
+use TinyIB\Repository\PostRepositoryInterface;
 use TinyIB\Repository\PDOBanRepository;
 use TinyIB\Repository\PDOCacheRepository;
 use TinyIB\Repository\PDOPostRepository;
-use TinyIB\Router\IRouter;
+use TinyIB\Router\RouterInterface;
 use TinyIB\Router\TreeRouter;
 use TinyIB\Service\CryptographyService;
 use TinyIB\Service\CryptographyServiceInterface;
 use TinyIB\Service\PostService;
 use TinyIB\Service\PostServiceInterface;
+use TinyIB\Service\RendererServiceInterface;
+use TinyIB\Service\RendererService;
 use VVatashi\DI\Container;
 
 require_once './vendor/autoload.php';
@@ -164,25 +164,25 @@ $container->registerCallback(LoggerInterface::class, function ($container) {
     return $logger;
 });
 
-$container->registerType(IBanRepository::class, PDOBanRepository::class);
-$container->registerType(ICacheRepository::class, PDOCacheRepository::class);
-$container->registerType(IPostRepository::class, PDOPostRepository::class);
+$container->registerType(BanRepositoryInterface::class, PDOBanRepository::class);
+$container->registerType(CacheRepositoryInterface::class, PDOCacheRepository::class);
+$container->registerType(PostRepositoryInterface::class, PDOPostRepository::class);
 
 if (TINYIB_CACHE === 'memory') {
-    $container->registerType(ICache::class, InMemoryCache::class);
+    $container->registerType(CacheInterface::class, InMemoryCache::class);
 } elseif (TINYIB_CACHE === 'redis') {
-    $container->registerCallback(ICache::class, function ($container) {
+    $container->registerCallback(CacheInterface::class, function ($container) {
         return new RedisCache(TINYIB_CACHE_REDIS_HOST);
     });
 } else {
-    $container->registerType(ICache::class, DatabaseCache::class);
+    $container->registerType(CacheInterface::class, DatabaseCache::class);
 }
 
-$container->registerCallback(IRenderer::class, function ($container) use ($tinyib_uploads, $tinyib_embeds) {
-    $cache = $container->get(ICache::class);
-    $post_repository = $container->get(IPostRepository::class);
+$container->registerCallback(RendererServiceInterface::class, function ($container) use ($tinyib_uploads, $tinyib_embeds) {
+    $cache = $container->get(CacheInterface::class);
+    $post_repository = $container->get(PostRepositoryInterface::class);
 
-    return new Renderer($cache, $post_repository, [
+    return new RendererService($cache, $post_repository, [
         'embeds' => $tinyib_uploads,
         'is_installed_via_git' => installedViaGit(),
         'uploads' => $tinyib_embeds,
@@ -192,24 +192,24 @@ $container->registerCallback(IRenderer::class, function ($container) use ($tinyi
 $container->registerType(CryptographyServiceInterface::class, CryptographyService::class);
 $container->registerType(PostServiceInterface::class, PostService::class);
 
-$container->registerType(IManageController::class, ManageController::class);
-$container->registerType(IPostController::class, PostController::class);
-$container->registerType(ISettingsController::class, SettingsController::class);
+$container->registerType(ManageControllerInterface::class, ManageController::class);
+$container->registerType(PostControllerInterface::class, PostController::class);
+$container->registerType(SettingsControllerInterface::class, SettingsController::class);
 
-$container->registerType(IRouter::class, TreeRouter::class);
+$container->registerType(RouterInterface::class, TreeRouter::class);
 
 // Setup routing.
-/** @var \TinyIB\Router\IRouter $router */
-$router = $container->get(IRouter::class);
+/** @var \TinyIB\Router\RouterInterface $router */
+$router = $container->get(RouterInterface::class);
 
 // Setup routing.
 $router->addRoute('/', function ($path) use ($container) {
-    $cache = $container->get(ICache::class);
+    $cache = $container->get(CacheInterface::class);
     $key = TINYIB_BOARD . ':page:0';
     $data = $cache->get($key);
 
     if ($data === null) {
-        $renderer = $container->get(IRenderer::class);
+        $renderer = $container->get(RendererServiceInterface::class);
         $data = $renderer->renderBoardPage(0);
         $cache->set($key, $data, 4 * 60 * 60);
     }
@@ -218,13 +218,13 @@ $router->addRoute('/', function ($path) use ($container) {
 });
 
 $router->addRoute('/:int', function ($path) use ($container) {
-    $cache = $container->get(ICache::class);
+    $cache = $container->get(CacheInterface::class);
     $page = explode('/', $path)[1];
     $key = TINYIB_BOARD . ':page:' . $page;
     $data = $cache->get($key);
 
     if ($data === null) {
-        $renderer = $container->get(IRenderer::class);
+        $renderer = $container->get(RendererServiceInterface::class);
         $data = $renderer->renderBoardPage($page);
         $cache->set($key, $data, 4 * 60 * 60);
     }
@@ -233,13 +233,13 @@ $router->addRoute('/:int', function ($path) use ($container) {
 });
 
 $router->addRoute('/res/:int', function ($path) use ($container) {
-    $cache = $container->get(ICache::class);
+    $cache = $container->get(CacheInterface::class);
     $id = explode('/', $path)[2];
     $key = TINYIB_BOARD . ':thread:' . $id;
     $data = $cache->get($key);
 
     if ($data === null) {
-        $renderer = $container->get(IRenderer::class);
+        $renderer = $container->get(RendererServiceInterface::class);
         $data = $renderer->renderThreadPage($id);
         $cache->set($key, $data, 4 * 60 * 60);
     }
@@ -248,23 +248,23 @@ $router->addRoute('/res/:int', function ($path) use ($container) {
 });
 
 $router->addRoute('/manage', function ($path) use ($container) {
-    $manage_controller = $container->get(IManageController::class);
+    $manage_controller = $container->get(ManageControllerInterface::class);
     $manage_controller->status()->send();
 });
 
 $router->addRoute('/manage/rebuildall', function ($path) use ($container) {
-    $manage_controller = $container->get(IManageController::class);
+    $manage_controller = $container->get(ManageControllerInterface::class);
     $manage_controller->rebuildAll()->send();
 });
 
 $router->addRoute('/manage/approve/:int', function ($path) use ($container) {
-    $manage_controller = $container->get(IManageController::class);
+    $manage_controller = $container->get(ManageControllerInterface::class);
     $id = explode('/', $path)[3];
     $manage_controller->approve($id)->send();
 });
 
 $router->addRoute('/manage/bans', function ($path) use ($container) {
-    $manage_controller = $container->get(IManageController::class);
+    $manage_controller = $container->get(ManageControllerInterface::class);
     $bans = !empty($_GET['bans']) ? $_GET['bans'] : '';
 
     if (!empty($_POST['ip'])) {
@@ -283,46 +283,46 @@ $router->addRoute('/manage/bans', function ($path) use ($container) {
 });
 
 $router->addRoute('/manage/delete/:int', function ($path) use ($container) {
-    $manage_controller = $container->get(IManageController::class);
+    $manage_controller = $container->get(ManageControllerInterface::class);
     $id = explode('/', $path)[3];
     $manage_controller->delete($id)->send();
 });
 
 $router->addRoute('/manage/logout', function ($path) use ($container) {
-    $manage_controller = $container->get(IManageController::class);
+    $manage_controller = $container->get(ManageControllerInterface::class);
     $manage_controller->logout()->send();
 });
 
 $router->addRoute('/manage/moderate', function ($path) use ($container) {
-    $manage_controller = $container->get(IManageController::class);
+    $manage_controller = $container->get(ManageControllerInterface::class);
     $manage_controller->moderate()->send();
 });
 
 $router->addRoute('/manage/moderate/:int', function ($path) use ($container) {
-    $manage_controller = $container->get(IManageController::class);
+    $manage_controller = $container->get(ManageControllerInterface::class);
     $id = explode('/', $path)[3];
     $manage_controller->moderate($id)->send();
 });
 
 $router->addRoute('/manage/rawpost', function ($path) use ($container) {
-    $manage_controller = $container->get(IManageController::class);
+    $manage_controller = $container->get(ManageControllerInterface::class);
     $manage_controller->rawPost()->send();
 });
 
 $router->addRoute('/manage/sticky/:int', function ($path) use ($container) {
-    $manage_controller = $container->get(IManageController::class);
+    $manage_controller = $container->get(ManageControllerInterface::class);
     $id = explode('/', $path)[3];
     $sticky = !empty($_GET['setsticky']) ? (bool)intval($_GET['setsticky']) : false;
     $manage_controller->setSticky($id, $sticky)->send();
 });
 
 $router->addRoute('/manage/update', function ($path) use ($container) {
-    $manage_controller = $container->get(IManageController::class);
+    $manage_controller = $container->get(ManageControllerInterface::class);
     $manage_controller->update()->send();
 });
 
 $router->addRoute('/post/create', function ($path) use ($container) {
-    $post_controller = $container->get(IPostController::class);
+    $post_controller = $container->get(PostControllerInterface::class);
     $data = array_intersect_key($_POST, array_flip([
         'name',
         'email',
@@ -336,14 +336,14 @@ $router->addRoute('/post/create', function ($path) use ($container) {
 });
 
 $router->addRoute('/post/delete', function ($path) use ($container) {
-    $post_controller = $container->get(IPostController::class);
+    $post_controller = $container->get(PostControllerInterface::class);
     $id = isset($_POST['delete']) ? $_POST['delete'] : null;
     $password = isset($_POST['password']) ? $_POST['password'] : null;
     $post_controller->delete($id, $password)->send();
 });
 
 $router->addRoute('/settings', function ($path) use ($container) {
-    $settings_controller = $container->get(ISettingsController::class);
+    $settings_controller = $container->get(SettingsControllerInterface::class);
     $settings_controller->settings()->send();
 });
 

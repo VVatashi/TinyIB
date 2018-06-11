@@ -2,7 +2,7 @@
 
 namespace TinyIB\Repository;
 
-class PDOCacheRepository extends PDORepository implements ICacheRepository
+class PDOCacheRepository extends PDORepository implements CacheRepositoryInterface
 {
     public function __construct()
     {

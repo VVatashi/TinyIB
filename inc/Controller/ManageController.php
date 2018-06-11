@@ -3,35 +3,39 @@
 namespace TinyIB\Controller;
 
 use TinyIB\Response;
-use TinyIB\Cache\ICache;
-use TinyIB\Repository\IBanRepository;
-use TinyIB\Repository\IPostRepository;
-use TinyIB\Renderer\IRenderer;
+use TinyIB\Cache\CacheInterface;
+use TinyIB\Repository\BanRepositoryInterface;
+use TinyIB\Repository\PostRepositoryInterface;
+use TinyIB\Service\RendererServiceInterface;
 
-class ManageController implements IManageController
+class ManageController implements ManageControllerInterface
 {
-    /** @var \TinyIB\Cache\ICache $cache */
+    /** @var \TinyIB\Cache\CacheInterface $cache */
     protected $cache;
 
-    /** @var \TinyIB\Repository\IBanRepository $ban_repository */
+    /** @var \TinyIB\Repository\BanRepositoryInterface $ban_repository */
     protected $ban_repository;
 
-    /** @var \TinyIB\Repository\IPostRepository $post_repository */
+    /** @var \TinyIB\Repository\PostRepositoryInterface $post_repository */
     protected $post_repository;
 
-    /** @var \TinyIB\Renderer\IRenderer $renderer */
+    /** @var \TinyIB\Service\RendererServiceInterface $renderer */
     protected $renderer;
 
     /**
      * Constructs new manage controller.
      *
-     * @param \TinyIB\Cache\ICache $cache
-     * @param \TinyIB\Repository\IBanRepository $ban_repository
-     * @param \TinyIB\Repository\IPostRepository $post_repository
-     * @param \TinyIB\Renderer\IRenderer $renderer
+     * @param \TinyIB\Cache\CacheInterface $cache
+     * @param \TinyIB\Repository\BanRepositoryInterface $ban_repository
+     * @param \TinyIB\Repository\PostRepositoryInterface $post_repository
+     * @param \TinyIB\Service\RendererServiceInterface $renderer
      */
-    public function __construct(ICache $cache, IBanRepository $ban_repository, IPostRepository $post_repository, IRenderer $renderer)
-    {
+    public function __construct(
+        CacheInterface $cache,
+        BanRepositoryInterface $ban_repository,
+        PostRepositoryInterface $post_repository,
+        RendererServiceInterface $renderer
+    ) {
         $this->cache = $cache;
         $this->ban_repository = $ban_repository;
         $this->post_repository = $post_repository;

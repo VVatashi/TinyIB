@@ -3,43 +3,43 @@
 namespace TinyIB\Controller;
 
 use TinyIB\Response;
-use TinyIB\Cache\ICache;
-use TinyIB\Repository\IBanRepository;
-use TinyIB\Repository\IPostRepository;
-use TinyIB\Renderer\IRenderer;
+use TinyIB\Cache\CacheInterface;
+use TinyIB\Repository\BanRepositoryInterface;
+use TinyIB\Repository\PostRepositoryInterface;
 use TinyIB\Service\PostServiceInterface;
+use TinyIB\Service\RendererServiceInterface;
 
-final class PostController implements IPostController
+final class PostController implements PostControllerInterface
 {
-    /** @var \TinyIB\Cache\ICache $cache */
+    /** @var \TinyIB\Cache\CacheInterface $cache */
     protected $cache;
 
-    /** @var \TinyIB\Repository\IBanRepository $ban_repository */
+    /** @var \TinyIB\Repository\BanRepositoryInterface $ban_repository */
     protected $ban_repository;
 
-    /** @var \TinyIB\Repository\IPostRepository $post_repository */
+    /** @var \TinyIB\Repository\PostRepositoryInterface $post_repository */
     protected $post_repository;
 
     /** @var \TinyIB\Service\PostServiceInterface $post_service */
     protected $post_service;
 
-    /** @var \TinyIB\Renderer\IRenderer $renderer */
+    /** @var \TinyIB\Service\RendererServiceInterface $renderer */
     protected $renderer;
 
     /**
      * Constructs new post controller.
      *
-     * @param \TinyIB\Cache\ICache $cache
-     * @param \TinyIB\Repository\IBanRepository $ban_repository
-     * @param \TinyIB\Repository\IPostRepository $post_repository
-     * @param \TinyIB\Renderer\IRenderer $renderer
+     * @param \TinyIB\Cache\CacheInterface $cache
+     * @param \TinyIB\Repository\BanRepositoryInterface $ban_repository
+     * @param \TinyIB\Repository\PostRepositoryInterface $post_repository
+     * @param \TinyIB\Service\RendererServiceInterface $renderer
      */
     public function __construct(
-        ICache $cache,
-        IBanRepository $ban_repository,
-        IPostRepository $post_repository,
+        CacheInterface $cache,
+        BanRepositoryInterface $ban_repository,
+        PostRepositoryInterface $post_repository,
         PostServiceInterface $post_service,
-        IRenderer $renderer
+        RendererServiceInterface $renderer
     ) {
         $this->cache = $cache;
         $this->ban_repository = $ban_repository;

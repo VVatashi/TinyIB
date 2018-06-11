@@ -2,7 +2,7 @@
 
 namespace TinyIB\Router;
 
-interface IRouter
+interface RouterInterface
 {
     /**
      * Adds new route handler for the path.

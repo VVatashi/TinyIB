@@ -2,7 +2,7 @@
 
 namespace TinyIB\Controller;
 
-interface IManageController
+interface ManageControllerInterface
 {
 
     /**

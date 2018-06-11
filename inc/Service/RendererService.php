@@ -1,29 +1,34 @@
 <?php
 
-namespace TinyIB\Renderer;
+namespace TinyIB\Service;
 
+use TinyIB\Cache\CacheInterface;
+use TinyIB\Repository\PostRepositoryInterface;
 use VVatashi\BBCode\BBCode;
 use VVatashi\BBCode\Tokenizer;
 use VVatashi\BBCode\Parser;
 use VVatashi\BBCode\HtmlGenerator;
 
-class Renderer implements IRenderer
+class RendererService implements RendererServiceInterface
 {
-    /** @var \TinyIB\Cache\ICache */
+    /** @var \TinyIB\Cache\CacheInterface */
     protected $cache;
 
-    /** @var \TinyIB\Repository\IPostRepository $post_repository */
+    /** @var \TinyIB\Repository\PostRepositoryInterface $post_repository */
     protected $post_repository;
 
-    /** @var string $twig */
+    /** @var \Twig_Environment $twig */
     protected $twig;
 
     /**
-     * @param \TinyIB\Repository\IPostRepository $post_repository
+     * @param \TinyIB\Repository\PostRepositoryInterface $post_repository
      * @param array $variables
      */
-    public function __construct($cache, $post_repository, $variables)
-    {
+    public function __construct(
+        CacheInterface $cache,
+        PostRepositoryInterface $post_repository,
+        $variables = []
+    ) {
         $this->cache = $cache;
         $this->post_repository = $post_repository;
 

@@ -4,7 +4,7 @@ namespace TinyIB\Cache;
 
 use \Predis\Client;
 
-class RedisCache implements ICache
+class RedisCache implements CacheInterface
 {
     /** @var string $host */
     protected $host;

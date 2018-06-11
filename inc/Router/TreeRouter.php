@@ -7,7 +7,7 @@ use TinyIB\Router\TreeNode;
 /**
  * Implements a tree to traverse routes.
  */
-class TreeRouter implements IRouter
+class TreeRouter implements RouterInterface
 {
     /** @var string $path_separator */
     protected $path_separator;

@@ -2,7 +2,7 @@
 
 namespace TinyIB\Repository;
 
-interface IPostRepository extends IRepository
+interface PostRepositoryInterface extends RepositoryInterface
 {
     /**
      * @param int $id

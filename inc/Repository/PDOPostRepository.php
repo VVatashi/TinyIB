@@ -2,7 +2,7 @@
 
 namespace TinyIB\Repository;
 
-class PDOPostRepository extends PDORepository implements IPostRepository
+class PDOPostRepository extends PDORepository implements PostRepositoryInterface
 {
     public function __construct()
     {

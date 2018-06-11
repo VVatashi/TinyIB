@@ -2,19 +2,19 @@
 
 namespace TinyIB\Cache;
 
-use TinyIB\Repository\ICacheRepository;
+use TinyIB\Repository\CacheRepositoryInterface;
 
-class DatabaseCache implements ICache
+class DatabaseCache implements CacheInterface
 {
-    /** @var \TinyIB\Repository\ICacheRepository $repository */
+    /** @var \TinyIB\Repository\CacheRepositoryInterface $repository */
     protected $repository;
 
     /**
      * Creates the new RedisCache instance.
      *
-     * @param \TinyIB\Repository\ICacheRepository $repository
+     * @param \TinyIB\Repository\CacheRepositoryInterface $repository
      */
-    public function __construct(ICacheRepository $repository)
+    public function __construct(CacheRepositoryInterface $repository)
     {
         $this->repository = $repository;
     }

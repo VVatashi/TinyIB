@@ -2,7 +2,7 @@
 
 namespace TinyIB\Cache;
 
-interface ICache
+interface CacheInterface
 {
     /**
      * Checks if the specified key exists.

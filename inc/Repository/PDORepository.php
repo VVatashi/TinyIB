@@ -5,7 +5,7 @@ namespace TinyIB\Repository;
 use \TinyIB\Repository\PDOHelper;
 use \TinyIB\Repository\SQLHelper;
 
-abstract class PDORepository implements IRepository
+abstract class PDORepository implements RepositoryInterface
 {
     /** @var \PDO $pdo */
     protected static $pdo;

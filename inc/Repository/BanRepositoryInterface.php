@@ -2,7 +2,7 @@
 
 namespace TinyIB\Repository;
 
-interface IBanRepository extends IRepository
+interface BanRepositoryInterface extends RepositoryInterface
 {
     /**
      * @param integer $id

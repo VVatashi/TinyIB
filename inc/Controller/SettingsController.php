@@ -3,24 +3,24 @@
 namespace TinyIB\Controller;
 
 use TinyIB\Response;
-use TinyIB\Cache\ICache;
-use TinyIB\Renderer\IRenderer;
+use TinyIB\Cache\CacheInterface;
+use TinyIB\Service\RendererServiceInterface;
 
-class SettingsController implements ISettingsController
+class SettingsController implements SettingsControllerInterface
 {
-    /** @var \TinyIB\Cache\ICache $cache */
+    /** @var \TinyIB\Cache\CacheInterface $cache */
     protected $cache;
 
-    /** @var \TinyIB\Renderer\IRenderer $renderer */
+    /** @var \TinyIB\RendererService\RendererServiceInterface $renderer */
     protected $renderer;
 
     /**
      * Constructs new settings controller.
      *
-     * @param \TinyIB\Cache\ICache $cache
-     * @param \TinyIB\Renderer\IRenderer $renderer
+     * @param \TinyIB\Cache\CacheInterface $cache
+     * @param \TinyIB\Service\RendererServiceInterface $renderer
      */
-    public function __construct(ICache $cache, IRenderer $renderer)
+    public function __construct(CacheInterface $cache, RendererServiceInterface $renderer)
     {
         $this->cache = $cache;
         $this->renderer = $renderer;

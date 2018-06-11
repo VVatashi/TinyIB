@@ -2,7 +2,7 @@
 
 namespace TinyIB\Controller;
 
-interface ISettingsController
+interface SettingsControllerInterface
 {
     /**
      * Shows settings form.

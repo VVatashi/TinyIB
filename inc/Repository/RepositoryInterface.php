@@ -2,7 +2,7 @@
 
 namespace TinyIB\Repository;
 
-interface IRepository
+interface RepositoryInterface
 {
     /**
      * @param array $conditions

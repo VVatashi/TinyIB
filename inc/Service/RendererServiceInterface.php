@@ -1,8 +1,8 @@
 <?php
 
-namespace TinyIB\Renderer;
+namespace TinyIB\Service;
 
-interface IRenderer
+interface RendererServiceInterface
 {
     /**
      * @param string $template

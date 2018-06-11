@@ -2,7 +2,7 @@
 
 namespace TinyIB\Controller;
 
-interface IPostController
+interface PostControllerInterface
 {
     /**
      * Create post.

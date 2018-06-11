@@ -2,7 +2,7 @@
 
 namespace TinyIB\Repository;
 
-class PDOBanRepository extends PDORepository implements IBanRepository
+class PDOBanRepository extends PDORepository implements BanRepositoryInterface
 {
     public function __construct()
     {

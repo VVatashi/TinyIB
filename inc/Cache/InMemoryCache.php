@@ -5,7 +5,7 @@ namespace TinyIB\Cache;
 /**
  * Stores data in the memory. Not persisting between the requests.
  */
-class InMemoryCache implements ICache
+class InMemoryCache implements CacheInterface
 {
     protected $data = [];
 
