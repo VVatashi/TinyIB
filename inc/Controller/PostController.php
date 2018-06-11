@@ -9,7 +9,7 @@ use TinyIB\Repository\IPostRepository;
 use TinyIB\Renderer\IRenderer;
 use TinyIB\Service\PostServiceInterface;
 
-class PostController implements IPostController
+final class PostController implements IPostController
 {
     /** @var \TinyIB\Cache\ICache $cache */
     protected $cache;

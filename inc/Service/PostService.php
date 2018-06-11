@@ -2,7 +2,7 @@
 
 namespace TinyIB\Service;
 
-class PostService implements PostServiceInterface
+final class PostService implements PostServiceInterface
 {
     /** @var CryptographyServiceInterface $cryptography_service */
     protected $cryptography_service;

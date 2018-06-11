@@ -2,7 +2,7 @@
 
 namespace TinyIB\Service;
 
-class CryptographyService implements CryptographyServiceInterface
+final class CryptographyService implements CryptographyServiceInterface
 {
     /**
      * {@inheritDoc}
