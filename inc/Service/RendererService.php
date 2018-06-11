@@ -4,6 +4,7 @@ namespace TinyIB\Service;
 
 use TinyIB\Cache\CacheInterface;
 use TinyIB\Repository\PostRepositoryInterface;
+use Twig_Environment;
 use VVatashi\BBCode\BBCode;
 use VVatashi\BBCode\Tokenizer;
 use VVatashi\BBCode\Parser;
@@ -27,22 +28,11 @@ class RendererService implements RendererServiceInterface
     public function __construct(
         CacheInterface $cache,
         PostRepositoryInterface $post_repository,
-        $variables = []
+        Twig_Environment $twig
     ) {
         $this->cache = $cache;
         $this->post_repository = $post_repository;
-
-        $loader = new \Twig_Loader_Filesystem('./templates');
-
-        $this->twig = new \Twig_Environment($loader, array(
-            'autoescape' => false,
-            'cache' => './templates/cache',
-            'debug' => true,
-        ));
-
-        foreach ($variables as $key => $value) {
-            $this->twig->addGlobal($key, $value);
-        }
+        $this->twig = $twig;
     }
 
     /**

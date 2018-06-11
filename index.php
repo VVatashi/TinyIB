@@ -5,7 +5,7 @@
 # https://github.com/tslocum/TinyIB
 
 use Monolog\Logger;
-use \Monolog\Formatter\LineFormatter;
+use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 use Psr\Container\ContainerInterface;
@@ -178,19 +178,25 @@ if (TINYIB_CACHE === 'memory') {
     $container->registerType(CacheInterface::class, DatabaseCache::class);
 }
 
-$container->registerCallback(RendererServiceInterface::class, function ($container) use ($tinyib_uploads, $tinyib_embeds) {
-    $cache = $container->get(CacheInterface::class);
-    $post_repository = $container->get(PostRepositoryInterface::class);
+$container->registerCallback(Twig_Environment::class, function ($container) use ($tinyib_uploads, $tinyib_embeds) {
+    $loader = new Twig_Loader_Filesystem('./templates');
 
-    return new RendererService($cache, $post_repository, [
-        'embeds' => $tinyib_uploads,
-        'is_installed_via_git' => installedViaGit(),
-        'uploads' => $tinyib_embeds,
+    $twig = new Twig_Environment($loader, [
+        'autoescape' => false,
+        'cache' => './templates/cache',
+        'debug' => true,
     ]);
+
+    $twig->addGlobal('embeds', $tinyib_embeds);
+    $twig->addGlobal('uploads', $tinyib_uploads);
+    $twig->addGlobal('is_installed_via_git', installedViaGit());
+
+    return $twig;
 });
 
 $container->registerType(CryptographyServiceInterface::class, CryptographyService::class);
 $container->registerType(PostServiceInterface::class, PostService::class);
+$container->registerType(RendererServiceInterface::class, RendererService::class);
 
 $container->registerType(ManageControllerInterface::class, ManageController::class);
 $container->registerType(PostControllerInterface::class, PostController::class);
