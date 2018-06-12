@@ -3,12 +3,9 @@
 namespace TinyIB\Service;
 
 use TinyIB\Cache\CacheInterface;
+use TinyIB\Model\PostInterface;
 use TinyIB\Repository\PostRepositoryInterface;
 use Twig_Environment;
-use VVatashi\BBCode\BBCode;
-use VVatashi\BBCode\Tokenizer;
-use VVatashi\BBCode\Parser;
-use VVatashi\BBCode\HtmlGenerator;
 
 class RendererService implements RendererServiceInterface
 {
@@ -38,111 +35,44 @@ class RendererService implements RendererServiceInterface
     /**
      * {@inheritDoc}
      */
-    public function render($template, $variables = [])
+    public function render(string $template, array $variables = []) : string
     {
         return $this->twig->render($template, $variables);
     }
 
     /**
-     * @param array $message
-     * @param boolean $res
+     * Renders the post view model.
      *
-     * @return array
-     */
-    protected function truncateMessage($post, $res)
-    {
-        // Truncate messages on board index pages for readability
-        if (TINYIB_TRUNCATE > 0 && !$res
-            && substr_count($post['message'], '<br>') > TINYIB_TRUNCATE) {
-            $br_offsets = strallpos($post['message'], '<br>');
-            $post['message'] = substr($post['message'], 0, $br_offsets[TINYIB_TRUNCATE - 1]);
-            $post['is_truncated'] = true;
-        }
-
-        return $post;
-    }
-
-    /**
-     * @param string $message
+     * @param array $viewModel
      *
      * @return string
      */
-    protected function bbcode($message)
+    public function renderPostViewModel(array $view_model, bool $res) : string
     {
-        $tags = [
-            'b' => BBCode::create('strong'),
-            'i' => BBCode::create('em'),
-            'u' => BBCode::create('span', 'style="text-decoration: underline;"'),
-            's' => BBCode::create('del'),
-            'color' => BBCode::create('span', function ($attribute) {
-                $matches = [];
-                if (preg_match('/#[0-9a-f]{6}/i', $attribute, $matches)) {
-                    $color = $matches[0];
-                    return "style=\"color: $color;\"";
-                }
-
-                return '';
-            }),
-            'sup' => BBCode::create('sup'),
-            'sub' => BBCode::create('sub'),
-            'spoiler' => BBCode::create('span', 'class="spoiler"'),
-            'rp' => BBCode::create('span', 'class="rp"'),
-            'code' => BBCode::create('code', 'style="white-space: pre;"', false),
-        ];
-
-        $tokenizer = new Tokenizer($tags);
-        $parser = new Parser($tags);
-        $generator = new HtmlGenerator($tags);
-
-        $tokens = $tokenizer->tokenize($message);
-        $nodes = $parser->parse($tokens);
-        return $generator->generate($nodes);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function preprocessPost($post, $res)
-    {
-        $post = $this->truncateMessage($post, $res);
-        $post['message'] = $this->bbcode($post['message']);
-
-        if (isset($post['file'])) {
-            $file_parts = explode('.', $post['file']);
-            $post['file_extension'] = end($file_parts);
-
-            if (isEmbed($post["file_hex"])) {
-                $post['file_type'] = 'embed';
-            } elseif (in_array($post['file_extension'], ['jpg', 'png', 'gif'])) {
-                $post['file_type'] = 'image';
-            } elseif (in_array($post['file_extension'], ['mp3'])) {
-                $post['file_type'] = 'audio';
-            } elseif (in_array($post['file_extension'], ['mp4', 'webm'])) {
-                $post['file_type'] = 'video';
-            }
+        if (!isset($view_model['parent'])) {
+            echo '<pre>';
+            var_dump($view_model);
+            die();
         }
 
-        return $post;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function renderPost($post, $res, $preprocessed = false)
-    {
-        if ($preprocessed === false) {
-            $post = $this->preprocessPost($post, $res);
-        }
-
-        $is_thread = $post['parent'] == TINYIB_NEWTHREAD;
-
-        return $this->render($is_thread ? '_post_oppost.twig' : '_post.twig', [
-            'post' => $post,
+        $is_thread = $view_model['parent'] === 0;
+        $template = $is_thread ? '_post_oppost.twig' : '_post.twig';
+        return $this->render($template, [
+            'post' => $view_model,
             'res' => $res,
         ]);
     }
 
-    public function supportedFileTypes()
+    /**
+     * {@inheritDoc}
+     */
+    public function renderPost(PostInterface $post, bool $res) : string
+    {
+        $view_model = $post->createViewModel($res);
+        return $this->renderPostViewModel($view_model, $res);
+    }
+
+    public function supportedFileTypes() : string
     {
         global $tinyib_uploads;
         if (empty($tinyib_uploads)) {
@@ -161,29 +91,32 @@ class RendererService implements RendererServiceInterface
     /**
      * {@inheritDoc}
      */
-    public function renderThreadPage($id)
+    public function renderThreadPage(int $id) : string
     {
-        $posts = array_map(function ($post) {
+        /** @var \TinyIB\Models\PostInterface[] $posts */
+        $posts = $this->post_repository->getPostsByThreadID($id);
+        $post_vms = array_map(function ($post) {
+            /** @var \TinyIB\Models\PostInterface $post */
+            $view_model = $post->createViewModel(TINYIB_RESPAGE);
             if (TINYIB_CACHE === 'database') {
                 // Do not cache individual posts in database mode.
-                return $this->preprocessPost($post, TINYIB_RESPAGE);
+                $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_RESPAGE);
+                return $view_model;
             }
 
-            $key = TINYIB_BOARD . ':post:' . $post['id'];
-            $post['rendered'] = $this->cache->get($key);
-
-            if ($post['rendered'] === null) {
-                $post = $this->preprocessPost($post, TINYIB_RESPAGE);
-                $post['rendered'] = $this->renderPost($post, TINYIB_RESPAGE, true);
-                $this->cache->set($key, $post['rendered'], 4 * 60 * 60);
+            $key = TINYIB_BOARD . ':post:' . $post->getID();
+            $view_model['rendered'] = $this->cache->get($key);
+            if ($view_model['rendered'] === null) {
+                $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_RESPAGE);
+                $this->cache->set($key, $view_model['rendered'], 4 * 60 * 60);
             }
 
-            return $post;
-        }, $this->post_repository->postsInThreadByID($id));
+            return $view_model;
+        }, $posts);
 
         return $this->render('thread.twig', [
             'filetypes' => $this->supportedFileTypes(),
-            'posts' => $posts,
+            'posts' => $post_vms,
             'parent' => $id,
             'res' => TINYIB_RESPAGE,
             'thumbnails' => true,
@@ -193,43 +126,45 @@ class RendererService implements RendererServiceInterface
     /**
      * {@inheritDoc}
      */
-    public function renderBoardPage($page)
+    public function renderBoardPage(int $page) : string
     {
+        /** @var \TinyIB\Model\PostInterface[] $threads */
         $threads = $this->post_repository->getThreadsByPage($page);
-        $pages = ceil($this->post_repository->countThreads() / TINYIB_THREADSPERPAGE) - 1;
-        $posts = [];
+        $pages = ceil($this->post_repository->getThreadCount() / TINYIB_THREADSPERPAGE) - 1;
+        $post_vms = [];
 
         foreach ($threads as $thread) {
-            $replies = $this->post_repository->postsInThreadByID($thread['id']);
-            $thread['omitted'] = max(0, count($replies) - TINYIB_PREVIEWREPLIES - 1);
+            $replies = $this->post_repository->getPostsByThreadID($thread->getID());
+            $omitted_count = max(0, count($replies) - TINYIB_PREVIEWREPLIES - 1);
+            // TODO: add $omitted_count to the thread view model.
             $replies = array_slice($replies, -TINYIB_PREVIEWREPLIES);
-
-            if (empty($replies) || $replies[0]['id'] !== $thread['id']) {
+            if (empty($replies) || $replies[0]->getID() !== $thread->getID()) {
                 array_unshift($replies, $thread);
             }
 
-            $posts = array_merge($posts, array_map(function ($post) {
+            $post_vms = array_merge($post_vms, array_map(function ($post) {
+                /** @var \TinyIB\Models\PostInterface $post */
+                $view_model = $post->createViewModel(TINYIB_INDEXPAGE);
                 if (TINYIB_CACHE === 'database') {
                     // Do not cache individual posts in database mode.
-                    return $this->preprocessPost($post, TINYIB_INDEXPAGE);
+                    $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
+                    return $view_model;
                 }
 
-                $key = TINYIB_BOARD . ':index_post:' . $post['id'];
-                $post['rendered'] = $this->cache->get($key);
-
-                if ($post['rendered'] === null) {
-                    $post = $this->preprocessPost($post, TINYIB_INDEXPAGE);
-                    $post['rendered'] = $this->renderPost($post, TINYIB_INDEXPAGE, true);
-                    $this->cache->set($key, $post['rendered'], 4 * 60 * 60);
+                $key = TINYIB_BOARD . ':index_post:' . $post->getID();
+                $view_model['rendered'] = $this->cache->get($key);
+                if ($view_model['rendered'] === null) {
+                    $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
+                    $this->cache->set($key, $view_model['rendered'], 4 * 60 * 60);
                 }
 
-                return $post;
+                return $view_model;
             }, $replies));
         }
 
         return $this->render('board.twig', [
             'filetypes' => $this->supportedFileTypes(),
-            'posts' => $posts,
+            'posts' => $post_vms,
             'pages' => max($pages, 0),
             'this_page' => $page,
             'parent' => 0,
@@ -241,7 +176,7 @@ class RendererService implements RendererServiceInterface
     /**
      * {@inheritDoc}
      */
-    public function makeLinksClickable($text)
+    public function makeLinksClickable(string $text)
     {
         $text = preg_replace('!(((f|ht)tp(s)?://)[-a-zA-Zа-яА-Я()0-9@:%\!_+.,~#?&;//=]+)!i', '<a href="$1" target="_blank">$1</a>', $text);
         $text = preg_replace('/\(\<a href\=\"(.*)\)"\ target\=\"\_blank\">(.*)\)\<\/a>/i', '(<a href="$1" target="_blank">$2</a>)', $text);

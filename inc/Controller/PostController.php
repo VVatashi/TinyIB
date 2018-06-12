@@ -4,6 +4,7 @@ namespace TinyIB\Controller;
 
 use TinyIB\Response;
 use TinyIB\Cache\CacheInterface;
+use TinyIB\Model\Post;
 use TinyIB\Repository\BanRepositoryInterface;
 use TinyIB\Repository\PostRepositoryInterface;
 use TinyIB\Service\PostServiceInterface;
@@ -46,6 +47,14 @@ final class PostController implements PostControllerInterface
         $this->post_repository = $post_repository;
         $this->post_service = $post_service;
         $this->renderer = $renderer;
+    }
+
+    protected function cleanString($string)
+    {
+        $search = array("<", ">");
+        $replace = array("&lt;", "&gt;");
+
+        return str_replace($search, $replace, $string);
     }
 
     protected function isRawPost()
@@ -131,10 +140,13 @@ final class PostController implements PostControllerInterface
     protected function checkFlood()
     {
         if (TINYIB_DELAY > 0) {
-            $lastpost = $this->post_repository->lastPostByIP();
-            if ($lastpost) {
-                if ((time() - $lastpost['timestamp']) < TINYIB_DELAY) {
-                    throw new \Exception("Please wait a moment before posting again.  You will be able to make another post in " . (TINYIB_DELAY - (time() - $lastpost['timestamp'])) . " " . plural("second", (TINYIB_DELAY - (time() - $lastpost['timestamp']))) . ".");
+            $ip = $_SERVER['REMOTE_ADDR'];
+            /** @var \TinyIB\Model\PostInterface $last_post */
+            $last_post = $this->post_repository->getLastPostByIP($ip);
+            if ($last_post !== null) {
+                $timestamp = $last_post->getCreateTime();
+                if (time() - $timestamp < TINYIB_DELAY) {
+                    throw new \Exception("Please wait a moment before posting again.  You will be able to make another post in " . (TINYIB_DELAY - (time() - $timestamp)) . " " . plural("second", (TINYIB_DELAY - (time() - $timestamp))) . ".");
                 }
             }
         }
@@ -144,7 +156,7 @@ final class PostController implements PostControllerInterface
     {
         if (isset($_POST["parent"])) {
             if ($_POST["parent"] != TINYIB_NEWTHREAD) {
-                if (!$this->post_repository->threadExistsByID($_POST['parent'])) {
+                if (!$this->post_repository->isThreadExistsByID($_POST['parent'])) {
                     throw new \Exception("Invalid parent thread ID supplied, unable to create post.");
                 }
 
@@ -155,41 +167,13 @@ final class PostController implements PostControllerInterface
         return TINYIB_NEWTHREAD;
     }
 
-    protected function newPost($parent = TINYIB_NEWTHREAD)
-    {
-        return [
-            'parent' => $parent,
-            'timestamp' => '0',
-            'bumped' => '0',
-            'ip' => '',
-            'name' => '',
-            'tripcode' => '',
-            'email' => '',
-            'nameblock' => '',
-            'subject' => '',
-            'message' => '',
-            'password' => '',
-            'file' => '',
-            'file_hex' => '',
-            'file_original' => '',
-            'file_size' => '0',
-            'file_size_formatted' => '',
-            'image_width' => '0',
-            'image_height' => '0',
-            'thumb' => '',
-            'thumb_width' => '0',
-            'thumb_height' => '0',
-            'stickied' => '0',
-            'moderated' => '1'
-        ];
-    }
-
     protected function _postLink($matches)
     {
-        $post = $this->post_repository->postByID($matches[1]);
-
-        if ($post) {
-            return '<a href="/' . TINYIB_BOARD . '/res/' . ($post['parent'] == TINYIB_NEWTHREAD ? $post['id'] : $post['parent']) . '#' . $matches[1] . '">' . $matches[0] . '</a>';
+        /** @var \TinyIB\Model\PostInterface $post */
+        $post = $this->post_repository->getPostByID($matches[1]);
+        if ($post !== null) {
+            $id = $post->isThread() ? $post->getID() : $post->getParentID();
+            return '<a href="/' . TINYIB_BOARD . "/res/$id#" . $matches[1] . '">' . $matches[0] . '</a>';
         }
 
         return $matches[0];
@@ -230,9 +214,9 @@ final class PostController implements PostControllerInterface
         }, $message);
     }
 
-    protected function checkDuplicateFile($hex)
+    protected function checkDuplicateFile($hash)
     {
-        $hexmatches = $this->post_repository->postsByHex($hex);
+        $hexmatches = $this->post_repository->getPostsByHex($hash);
 
         if (count($hexmatches) > 0) {
             foreach ($hexmatches as $hexmatch) {
@@ -265,35 +249,36 @@ final class PostController implements PostControllerInterface
             $this->checkFlood();
         }
 
-        $post = $this->newPost($this->setParent($data['parent']));
-        $post['ip'] = $_SERVER['REMOTE_ADDR'];
+        $post = new Post((int)$data['parent']);
+        $post->setIP($_SERVER['REMOTE_ADDR']);
 
         $nameAndTripcode = $this->post_service->processName($data['name']);
-        $post = array_merge($post, $nameAndTripcode);
-
-        $post['name'] = cleanString(substr($post['name'], 0, 75));
-        $post['email'] = cleanString(str_replace('"', '&quot;', substr($data['email'], 0, 75)));
-        $post['subject'] = cleanString(substr($data['subject'], 0, 75));
+        $post->setName($this->cleanString(substr($nameAndTripcode['name'], 0, 75)));
+        $post->setTripcode($nameAndTripcode['tripcode']);
+        $post->setEmail($this->cleanString(str_replace('"', '&quot;', substr($data['email'], 0, 75))));
+        $post->setSubject($this->cleanString(substr($data['subject'], 0, 75)));
 
         if ($rawpost) {
             $rawposttext = ($is_admin)
                 ? ' <span style="color: red;">## Admin</span>'
                 : ' <span style="color: purple;">## Mod</span>';
-            $post['message'] = $data['message']; // Treat message as raw HTML
+            $post->setMessage($data['message']); // Treat message as raw HTML
         } else {
             $rawposttext = '';
-            $message = $this->colorQuote($this->postLink(cleanString(rtrim($data['message']))));
+            $message = $this->colorQuote($this->postLink($this->cleanString(rtrim($data['message']))));
             $message = $this->renderer->makeLinksClickable($message);
-            $post['message'] = str_replace("\n", '<br>', $message);
+            $message = str_replace("\n", '<br>', $message);
 
             if (TINYIB_DICE_ENABLED) {
-                $post['message'] = $this->dice($post['message']);
+                $message = $this->dice($message);
             }
+
+            $post->setMessage($message);
         }
 
-        $post['password'] = ($data['password'] != '') ? md5(md5($data['password'])) : '';
+        $post->setPassword(!empty($data['password']) ? md5(md5($data['password'])) : '');
 
-        if (isset($data['embed']) && trim($data['embed']) != '') {
+        if (isset($data['embed']) && trim(!empty($data['embed']))) {
             list($service, $embed) = getEmbed(trim($data['embed']));
 
             if (empty($embed) || !isset($embed['html']) || !isset($embed['title']) || !isset($embed['thumbnail_url'])) {
@@ -302,26 +287,26 @@ final class PostController implements PostControllerInterface
                 return Response::badRequest($message);
             }
 
-            $post['file_hex'] = $service;
+            $post->setFileHash($service);
             $temp_file = time() . substr(microtime(), 2, 3);
             $file_location = 'thumb/' . $temp_file;
             file_put_contents($file_location, url_get_contents($embed['thumbnail_url']));
 
             $file_info = getimagesize($file_location);
             $file_mime = mime_content_type($file_location);
-            $post['image_width'] = $file_info[0];
-            $post['image_height'] = $file_info[1];
+            $post->setImageWidth($file_info[0]);
+            $post->setImageHeight($file_info[1]);
 
-            if ($file_mime == 'image/jpeg') {
-                $post['thumb'] = $temp_file . '.jpg';
-            } elseif ($file_mime == 'image/gif') {
-                $post['thumb'] = $temp_file . '.gif';
-            } elseif ($file_mime == 'image/png') {
-                $post['thumb'] = $temp_file . '.png';
+            if ($file_mime === 'image/jpeg') {
+                $post->setThumbnailName($temp_file . '.jpg');
+            } elseif ($file_mime === 'image/gif') {
+                $post->setThumbnailName($temp_file . '.gif');
+            } elseif ($file_mime === 'image/png') {
+                $post->setThumbnailName($temp_file . '.png');
             } else {
                 return Response::serverError('Error while processing audio/video.');
             }
-            $thumb_location = 'thumb/' . $post['thumb'];
+            $thumb_location = 'thumb/' . $post->getThumbnailName();
 
             list($thumb_maxwidth, $thumb_maxheight) = thumbnailDimensions($post);
 
@@ -334,12 +319,12 @@ final class PostController implements PostControllerInterface
             }
 
             $thumb_info = getimagesize($thumb_location);
-            $post['thumb_width'] = $thumb_info[0];
-            $post['thumb_height'] = $thumb_info[1];
+            $post->setThumbnailWidth($thumb_info[0]);
+            $post->setThumbnailHeight($thumb_info[1]);
 
-            $post['file_original'] = cleanString($embed['title']);
-            $post['file'] = $embed['html'];
-        } elseif (isset($_FILES['file']) && $_FILES['file']['name'] != '') {
+            $post->setOriginalFileName($this->cleanString($embed['title']));
+            $post->setFileName($embed['html']);
+        } elseif (isset($_FILES['file']) && !empty($_FILES['file']['name'])) {
             validateFileUpload();
 
             if (!is_file($_FILES['file']['tmp_name']) || !is_readable($_FILES['file']['tmp_name'])) {
@@ -350,17 +335,15 @@ final class PostController implements PostControllerInterface
                 return Response::badRequest('That file is larger than ' . TINYIB_MAXKBDESC . '.');
             }
 
-            $post['file_original'] = trim(htmlentities(substr($_FILES['file']['name'], 0, 50), ENT_QUOTES));
-            $post['file_hex'] = md5_file($_FILES['file']['tmp_name']);
-            $post['file_size'] = $_FILES['file']['size'];
-            $post['file_size_formatted'] = convertBytes($post['file_size']);
+            $post->setOriginalFileName(trim(htmlentities(substr($_FILES['file']['name'], 0, 50), ENT_QUOTES)));
+            $post->setFileHash(md5_file($_FILES['file']['tmp_name']));
+            $post->setFileSize($_FILES['file']['size']);
 
             if (TINYIB_FILE_ALLOW_DUPLICATE === false) {
-                $this->checkDuplicateFile($post['file_hex']);
+                $this->checkDuplicateFile($post->getFileHash());
             }
 
             $file_mime_split = explode(' ', trim(mime_content_type($_FILES['file']['tmp_name'])));
-
             if (count($file_mime_split) > 0) {
                 $file_mime = strtolower(array_pop($file_mime_split));
             } else {
@@ -399,16 +382,15 @@ final class PostController implements PostControllerInterface
             }
 
             $file_name = time() . substr(microtime(), 2, 3);
-            $post['file'] = $file_name . '.' . $tinyib_uploads[$file_mime][0];
+            $post->setFileName($file_name . '.' . $tinyib_uploads[$file_mime][0]);
 
-            $file_location = 'src/' . $post['file'];
-
+            $file_location = 'src/' . $post->getFileName();
             if (!move_uploaded_file($_FILES['file']['tmp_name'], $file_location)) {
                 return Response::serverError("Could not copy uploaded file.");
             }
 
-            if ($_FILES['file']['size'] != filesize($file_location)) {
-                @unlink($file_location);
+            if ($_FILES['file']['size'] !== filesize($file_location)) {
+                unlink($file_location);
                 return Response::serverError('File transfer failure. Please go back and try again.');
             }
 
@@ -418,26 +400,27 @@ final class PostController implements PostControllerInterface
                 $height = explode("\n", shell_exec('mediainfo --Inform="Video;%Height%\n" ' . $file_location));
                 $width = (int)reset($width);
                 $height = (int)reset($height);
-                $post['image_width'] = max(0, $width);
-                $post['image_height'] = max(0, $height);
+                $post->setImageWidth(max(0, $width));
+                $post->setImageHeight(max(0, $height));
 
-                if ($post['image_width'] > 0 && $post['image_height'] > 0) {
+                if ($post->getImageWidth() > 0 && $post->getImageHeight() > 0) {
                     list($thumb_maxwidth, $thumb_maxheight) = thumbnailDimensions($post);
-                    $post['thumb'] = "${file_name}s.jpg";
+                    $post->setThumbnailName("${file_name}s.jpg");
                     $size = max($thumb_maxwidth, $thumb_maxheight);
-                    shell_exec("ffmpegthumbnailer -s $size -i $file_location -o thumb/{$post['thumb']}");
+                    $thumb = $post->getThumbnailName();
+                    shell_exec("ffmpegthumbnailer -s $size -i $file_location -o thumb/$thumb");
 
-                    $thumb_info = getimagesize("thumb/" . $post['thumb']);
-                    $post['thumb_width'] = $thumb_info[0];
-                    $post['thumb_height'] = $thumb_info[1];
+                    $thumb_info = getimagesize("thumb/$thumb");
+                    $post->setThumbnailWidth($thumb_info[0]);
+                    $post->setThumbnailHeight($thumb_info[1]);
 
-                    if ($post['thumb_width'] <= 0 || $post['thumb_height'] <= 0) {
-                        @unlink($file_location);
-                        @unlink('thumb/' . $post['thumb']);
+                    if ($post->getThumbnailWidth() <= 0 || $post->getThumbnailHeight() <= 0) {
+                        unlink($file_location);
+                        unlink("thumb/$thumb");
                         return Response::badRequest('Sorry, your video appears to be corrupt.');
                     }
 
-                    addVideoOverlay("thumb/" . $post['thumb']);
+                    addVideoOverlay("thumb/$thumb");
                 }
 
                 $duration = intval(shell_exec('mediainfo --Inform="General;%Duration%" ' . $file_location));
@@ -445,10 +428,15 @@ final class PostController implements PostControllerInterface
                 if ($duration > 0) {
                     $mins = floor(round($duration / 1000) / 60);
                     $secs = str_pad(floor(round($duration / 1000) % 60), 2, "0", STR_PAD_LEFT);
-
-                    $post['file_original'] = "$mins:$secs" . ($post['file_original'] != '' ? (', ' . $post['file_original']) : '');
+                    $post->setFileName(implode(', ', "$mins:$secs", $post->getFileName()));
                 }
-            } elseif (in_array($file_mime, ['image/jpeg', 'image/pjpeg', 'image/png', 'image/gif', 'application/x-shockwave-flash'])) {
+            } elseif (in_array($file_mime, [
+                'image/jpeg',
+                'image/pjpeg',
+                'image/png',
+                'image/gif',
+                'application/x-shockwave-flash',
+            ])) {
                 $output = [];
 
                 if ($file_mime === 'image/gif') {
@@ -464,42 +452,49 @@ final class PostController implements PostControllerInterface
                 }
 
                 list($width, $height) = $output;
-                $post['image_width'] = $width;
-                $post['image_height'] = $height;
+                $post->setImageWidth($width);
+                $post->setImageHeight($height);
             }
 
             if (isset($tinyib_uploads[$file_mime][1])) {
                 $thumbfile_split = explode('.', $tinyib_uploads[$file_mime][1]);
-                $post['thumb'] = $file_name . 's.' . array_pop($thumbfile_split);
+                $post->setThumbnailName($file_name . 's.' . array_pop($thumbfile_split));
 
-                if (!copy($tinyib_uploads[$file_mime][1], 'thumb/' . $post['thumb'])) {
-                    @unlink($file_location);
+                $thumb = $post->getThumbnailName();
+                if (!copy($tinyib_uploads[$file_mime][1], "thumb/$thumb")) {
+                    unlink($file_location);
                     return Response::serverError('Could not create thumbnail.');
                 }
 
-                if ($file_mime == 'application/x-shockwave-flash') {
-                    addVideoOverlay('thumb/' . $post['thumb']);
+                if ($file_mime === 'application/x-shockwave-flash') {
+                    addVideoOverlay("thumb/$thumb");
                 }
-            } elseif (in_array($file_mime, ['image/jpeg', 'image/pjpeg', 'image/png', 'image/gif'])) {
-                $post['thumb'] = $file_name . 's.' . $tinyib_uploads[$file_mime][0];
+            } elseif (in_array($file_mime, [
+                'image/jpeg',
+                'image/pjpeg',
+                'image/png',
+                'image/gif',
+            ])) {
+                $post->setThumbnailName($file_name . 's.' . $tinyib_uploads[$file_mime][0]);
                 list($thumb_maxwidth, $thumb_maxheight) = thumbnailDimensions($post);
 
-                if (!createThumbnail($file_location, 'thumb/' . $post['thumb'], $thumb_maxwidth, $thumb_maxheight)) {
-                    @unlink($file_location);
+                $thumb = $post->getThumbnailName();
+                if (!createThumbnail($file_location, "thumb/$thumb", $thumb_maxwidth, $thumb_maxheight)) {
+                    unlink($file_location);
                     return Response::serverError('Could not create thumbnail.');
                 }
             }
 
-            if ($post['thumb'] != '') {
-                $thumb_info = getimagesize('thumb/' . $post['thumb']);
-                $post['thumb_width'] = $thumb_info[0];
-                $post['thumb_height'] = $thumb_info[1];
+            $thumb = $post->getThumbnailName();
+            if (!empty($thumb)) {
+                $thumb_info = getimagesize("thumb/$thumb");
+                $post->setThumbnailWidth($thumb_info[0]);
+                $post->setThumbnailHeight($thumb_info[1]);
             }
         }
 
-        if ($post['file'] == '') { // No file uploaded
-            $allowed = "";
-
+        if (empty($post->getFileName())) { // No file uploaded
+            $allowed = '';
             if (!empty($tinyib_uploads)) {
                 $allowed = 'file';
             }
@@ -512,48 +507,54 @@ final class PostController implements PostControllerInterface
                 $allowed .= 'embed URL';
             }
 
-            if ($post['parent'] == TINYIB_NEWTHREAD && $allowed != '' && !TINYIB_NOFILEOK) {
+            if ($post->isThread() && !empty($allowed) && !TINYIB_NOFILEOK) {
                 return Response::badRequest("A $allowed is required to start a thread.");
             }
 
-            if (str_replace('<br>', '', $post['message']) == '') {
+            if (empty(str_replace('<br>', '', $post->getMessage()))) {
                 $allowed = $allowed != '' ? " and/or upload a $allowed" : '';
                 return Response::badRequest('Please enter a message' . $allowed . '.');
             }
         }
 
-        if (!$logged_in && (($post['file'] != '' && TINYIB_REQMOD == 'files') || TINYIB_REQMOD == 'all')) {
-            $post['moderated'] = '0';
+        if (!$logged_in && ((empty($post->getFileName()) && TINYIB_REQMOD == 'files') || TINYIB_REQMOD == 'all')) {
+            $post->setModerated(false);
         }
 
-        $post['id'] = $this->post_repository->insertPost($post);
+        $now = (new \DateTime())->getTimestamp();
+        $post->setCreateTime($now);
+        $post->setBumpTime($now);
+        $post->setID($this->post_repository->insertPost($post));
 
-        if ($post['moderated'] == '1') {
-            if (TINYIB_ALWAYSNOKO || strtolower($post['email']) == 'noko') {
-                $id = $post['parent'] == TINYIB_NEWTHREAD ? $post['id'] : $post['parent'];
-                $redirect_url = '/' . TINYIB_BOARD . "/res/$id#" . $post['id'];
+        if ($post->isModerated()) {
+            if (TINYIB_ALWAYSNOKO || strtolower($post->getEmail()) === 'noko') {
+                $id = $post->isThread() ? $post->getID() : $post->getParentID();
+                $redirect_url = '/' . TINYIB_BOARD . "/res/$id#" . $post->getID();
             }
 
             $this->post_repository->trimThreads();
 
-            if ($post['parent'] != TINYIB_NEWTHREAD) {
-                $this->cache->delete(TINYIB_BOARD . ':post:' . $post['id']);
-                $this->cache->delete(TINYIB_BOARD . ':index_post:' . $post['id']);
+            if ($post->isReply()) {
+                $id = $post->getID();
+                $this->cache->delete(TINYIB_BOARD . ":post:$id");
+                $this->cache->delete(TINYIB_BOARD . ":index_post:$id");
 
-                $this->cache->delete(TINYIB_BOARD . ':post:' . $post['parent']);
-                $this->cache->delete(TINYIB_BOARD . ':index_post:' . $post['parent']);
-                $this->cache->delete(TINYIB_BOARD . ':thread:' . $post['parent']);
+                $parent = $post->getParentID();
+                $this->cache->delete(TINYIB_BOARD . ":post:$parent");
+                $this->cache->delete(TINYIB_BOARD . ":index_post:$parent");
+                $this->cache->delete(TINYIB_BOARD . ":thread:$parent");
 
-                if (strtolower($post['email']) != 'sage') {
+                if (strtolower($post->getEmail()) !== 'sage') {
                     if (TINYIB_MAXREPLIES == 0
-                        || $this->post_repository->numRepliesToThreadByID($post['parent']) <= TINYIB_MAXREPLIES) {
-                        $this->post_repository->bumpThreadByID($post['parent']);
+                        || $this->post_repository->getReplyCountByThreadID($parent) <= TINYIB_MAXREPLIES) {
+                        $this->post_repository->bumpThreadByID($parent);
                     }
                 }
             } else {
-                $this->cache->delete(TINYIB_BOARD . ':post:' . $post['id']);
-                $this->cache->delete(TINYIB_BOARD . ':index_post:' . $post['id']);
-                $this->cache->delete(TINYIB_BOARD . ':thread:' . $post['id']);
+                $id = $post->getID();
+                $this->cache->delete(TINYIB_BOARD . ":post:$id");
+                $this->cache->delete(TINYIB_BOARD . ":index_post:$id");
+                $this->cache->delete(TINYIB_BOARD . ":thread:$id");
             }
 
             $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
@@ -577,25 +578,22 @@ final class PostController implements PostControllerInterface
             return Response::serviceUnavailable($message);
         }
 
-        $post = $this->post_repository->postByID($id);
-
-        if (empty($post)) {
+        /** @var \TinyIB\Model\PostInterface $post */
+        $post = $this->post_repository->getPostByID($id);
+        if ($post === null) {
             $message = "Sorry, an invalid post identifier was sent.\nPlease go back, refresh the page, and try again.";
             return Response::notFound($message);
         }
 
         $password_hash = md5(md5($password));
-
-        if (empty($post['password']) || $post['password'] !== $password_hash) {
+        if ($password_hash !== $post->getPassword()) {
             return Response::forbidden('Invalid password.');
         }
 
-        $this->post_repository->deletePostByID($post['id']);
+        $this->post_repository->deletePostByID($post->getID());
 
-        $is_thread = $post['parent'] == TINYIB_NEWTHREAD;
-        $thread_id = $is_thread ? $post['id'] : $post['parent'];
-
-        $this->cache->delete(TINYIB_BOARD . ':post:' . $post['id']);
+        $thread_id = $post->isThread() ? $post->getID() : $post->getParentID();
+        $this->cache->delete(TINYIB_BOARD . ':post:' . $post->getID());
         $this->cache->delete(TINYIB_BOARD . ':index_post:' . $thread_id);
         $this->cache->delete(TINYIB_BOARD . ':thread:' . $thread_id);
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');

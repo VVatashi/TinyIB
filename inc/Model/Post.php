@@ -2,6 +2,11 @@
 
 namespace TinyIB\Model;
 
+use VVatashi\BBCode\BBCode;
+use VVatashi\BBCode\Tokenizer;
+use VVatashi\BBCode\Parser;
+use VVatashi\BBCode\HtmlGenerator;
+
 final class Post implements PostInterface
 {
     /** @var int $id */
@@ -76,6 +81,15 @@ final class Post implements PostInterface
     public function getID() : int
     {
         return $this->id;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setID(int $id) : PostInterface
+    {
+        $this->id = $id;
+        return $this;
     }
 
     /**
@@ -505,5 +519,102 @@ final class Post implements PostInterface
 
         $this->stickied = 0;
         $this->moderated = 1;
+    }
+
+    /**
+     * @param string $message
+     *
+     * @return string
+     */
+    protected function bbcode(string $message) : string
+    {
+        $tags = [
+            'b' => BBCode::create('strong'),
+            'i' => BBCode::create('em'),
+            'u' => BBCode::create('span', 'style="text-decoration: underline;"'),
+            's' => BBCode::create('del'),
+            'color' => BBCode::create('span', function ($attribute) {
+                $matches = [];
+                if (preg_match('/#[0-9a-f]{6}/i', $attribute, $matches)) {
+                    $color = $matches[0];
+                    return "style=\"color: $color;\"";
+                }
+
+                return '';
+            }),
+            'sup' => BBCode::create('sup'),
+            'sub' => BBCode::create('sub'),
+            'spoiler' => BBCode::create('span', 'class="spoiler"'),
+            'rp' => BBCode::create('span', 'class="rp"'),
+            'code' => BBCode::create('code', 'style="white-space: pre;"', false),
+        ];
+
+        $tokenizer = new Tokenizer($tags);
+        $parser = new Parser($tags);
+        $generator = new HtmlGenerator($tags);
+
+        $tokens = $tokenizer->tokenize($message);
+        $nodes = $parser->parse($tokens);
+        return $generator->generate($nodes);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function createViewModel(bool $res) : array
+    {
+        $post = [
+            'id' => $this->getID(),
+            'parent' => $this->getParentID(),
+            'timestamp' => $this->getCreateTime(),
+            'bumped' => $this->getBumpTime(),
+            'ip' => $this->getIP(),
+            'name' => $this->getName(),
+            'tripcode' => $this->getTripcode(),
+            'email' => $this->getEmail(),
+            'subject' => $this->getSubject(),
+            'message' => $this->getMessage(),
+            'password' => $this->getPassword(),
+            'file' => $this->getFileName(),
+            'file_hex' => $this->getFileHash(),
+            'file_original' => $this->getOriginalFileName(),
+            'file_size' => $this->getFileSize(),
+            'image_width' => $this->getImageWidth(),
+            'image_height' => $this->getImageHeight(),
+            'thumb' => $this->getThumbnailName(),
+            'thumb_width' => $this->getThumbnailWidth(),
+            'thumb_height' => $this->getThumbnailHeight(),
+            'stickied' => $this->isSticky() ? 1 : 0,
+            'moderated' => $this->isModerated() ? 1 : 0,
+        ];
+
+        // Truncate messages on board index pages for readability
+        if (TINYIB_TRUNCATE > 0 && !$res
+            && substr_count($post['message'], '<br>') > TINYIB_TRUNCATE) {
+            $br_offsets = strallpos($post['message'], '<br>');
+            $post['message'] = substr($post['message'], 0, $br_offsets[TINYIB_TRUNCATE - 1]);
+            $post['is_truncated'] = true;
+        }
+
+        // Process post message.
+        $post['message'] = $this->bbcode($post['message']);
+
+        // Process post file.
+        if (isset($post['file'])) {
+            $file_parts = explode('.', $post['file']);
+            $post['file_extension'] = end($file_parts);
+
+            if (isEmbed($post["file_hex"])) {
+                $post['file_type'] = 'embed';
+            } elseif (in_array($post['file_extension'], ['jpg', 'png', 'gif'])) {
+                $post['file_type'] = 'image';
+            } elseif (in_array($post['file_extension'], ['mp3'])) {
+                $post['file_type'] = 'audio';
+            } elseif (in_array($post['file_extension'], ['mp4', 'webm'])) {
+                $post['file_type'] = 'video';
+            }
+        }
+
+        return $post;
     }
 }

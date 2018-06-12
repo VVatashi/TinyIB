@@ -2,6 +2,9 @@
 
 namespace TinyIB\Service;
 
+use TinyIB\Model\PostInterface;
+
+
 interface RendererServiceInterface
 {
     /**
@@ -10,43 +13,35 @@ interface RendererServiceInterface
      *
      * @return string
      */
-    public function render($template, $variables = []);
+    public function render(string $template, array $variables = []) : string;
 
     /**
-     * @param array $post
-     * @param bool $res
-     *
-     * @return array
-     */
-    public function preprocessPost($post, $res);
-
-    /**
-     * @param array $post
+     * @param \TinyIB\Model\PostInterface $post
      * @param bool $res
      * @param bool $preprocessed
      *
      * @return string
      */
-    public function renderPost($post, $res, $preprocessed = false);
+    public function renderPost(PostInterface $post, bool $res) : string;
 
     /**
      * @param int $id
      *
      * @return string
      */
-    public function renderThreadPage($id);
+    public function renderThreadPage(int $id) : string;
 
     /**
      * @param int $page
      *
      * @return string
      */
-    public function renderBoardPage($page);
+    public function renderBoardPage(int $page) : string;
 
     /**
      * @param string $text
      *
      * @return string
      */
-    public function makeLinksClickable($text);
+    public function makeLinksClickable(string $text);
 }

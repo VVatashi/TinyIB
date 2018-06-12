@@ -2,100 +2,146 @@
 
 namespace TinyIB\Repository;
 
+use TinyIB\Model\PostInterface;
+
 interface PostRepositoryInterface extends RepositoryInterface
 {
     /**
-     * @param int $id
+     * Loads a post from the repository by ID.
      *
-     * @return array
+     * @param int $id
+     *   Post ID.
+     *
+     * @return PostInterface|null
+     *   Post instance.
      */
-    public function postByID($id);
+    public function getPostByID(int $id);
 
     /**
+     * Checks if a thread with given ID exists.
+     *
      * @param int $id
+     *   Post ID.
      *
      * @return bool
      */
-    public function threadExistsByID($id);
+    public function isThreadExistsByID(int $id) : bool;
 
     /**
-     * @param array $post
+     * Saves a post to the repository.
+     *
+     * @param PostInterface $post
+     *   Post instance.
+     *
+     * @return int
+     *   Post ID.
+     */
+    public function insertPost(PostInterface $post) : int;
+
+    /**
+     * Approves post by ID.
+     *
+     * @param int $id
+     *   Post ID.
+     */
+    public function approvePostByID(int $id);
+
+    /**
+     * Sticky/unsticky post by ID.
+     *
+     * @param int $id
+     *   Post ID.
+     * @param bool $sticky
+     */
+    public function stickyThreadByID(int $id, bool $sticky);
+
+    /**
+     * Bumps thread by ID.
+     *
+     * @param int $id
+     *   Thread ID.
+     */
+    public function bumpThreadByID(int $id);
+
+    /**
+     * Returns thread count.
      *
      * @return int
      */
-    public function insertPost($post);
+    public function getThreadCount() : int;
 
     /**
-     * @param int id
+     * Returns all threads.
+     *
+     * @return PostInterface[]
      */
-    public function approvePostByID($id);
+    public function getAllThreads() : array;
 
     /**
-     * @param int id
-     * @param bool sticky
-     */
-    public function stickyThreadByID($id, $setsticky);
-
-    /**
-     * @param int id
-     */
-    public function bumpThreadByID($id);
-
-    /**
-     * @return integer
-     */
-    public function countThreads();
-
-    /**
-     * @return array
-     */
-    public function allThreads();
-
-    /**
+     * Returns threads by a board page.
+     *
      * @param int $page
      *
-     * @return array
+     * @return PostInterface[]
      */
-    public function getThreadsByPage($page);
+    public function getThreadsByPage(int $page) : array;
 
     /**
+     * Returns the thread reply count by thread ID.
+     *
      * @param int $id
+     *   Thread ID.
      *
      * @return int
      */
-    public function numRepliesToThreadByID($id);
+    public function getReplyCountByThreadID(int $id) : int;
 
     /**
+     * Returns posts by thread ID.
+     *
      * @param int $id
+     *   Thread ID.
      * @param bool $moderated_only
      *
-     * @return array
+     * @return PostInterface[]
      */
-    public function postsInThreadByID($id, $moderated_only = true);
+    public function getPostsByThreadID(int $id, bool $moderated_only = true) : array;
 
     /**
-     * @param string $hex
+     * Returns posts by the hash of the attached file.
      *
-     * @return array
+     * @param string $hash
+     *
+     * @return PostInterface[]
      */
-    public function postsByHex($hex);
+    public function getPostsByHex(string $hash) : array;
 
     /**
+     * Returns latest posts.
+     *
      * @param bool $moderated
      *
-     * @return array
+     * @return PostInterface[]
      */
-    public function latestPosts($moderated = true);
+    public function getLatestPosts(bool $moderated = true) : array;
 
     /**
+     * Deletes a post by ID.
+     *
      * @param int $id
+     *   Post ID.
      */
-    public function deletePostByID($id);
+    public function deletePostByID(int $id);
 
+    /**
+     * Removes old threads.
+     */
     public function trimThreads();
 
     /**
-     * @return array
+     * Returns the last post by the poster IP.
+     *
+     * @return PostInterface
      */
-    public function lastPostByIP();
+    public function getLastPostByIP(string $ip) : PostInterface;
 }

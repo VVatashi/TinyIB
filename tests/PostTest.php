@@ -54,6 +54,16 @@ final class PostTest extends TestCase
         $this->assertEquals(true, $is_reply);
     }
 
+    public function testPostId() : void
+    {
+        $post = new Post();
+
+        // Try set & get the ID of the post.
+        $post->setID(1);
+        $id = $post->getID();
+        $this->assertEquals(1, $id);
+    }
+
     public function testPostParentId() : void
     {
         $post = new Post();

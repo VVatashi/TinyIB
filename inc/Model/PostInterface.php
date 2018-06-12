@@ -5,12 +5,23 @@ namespace TinyIB\Model;
 interface PostInterface
 {
     /**
-     * Returns id of the post.
+     * Returns ID of the post.
      *
      * @return int
      *   Post ID.
      */
     public function getID() : int;
+
+    /**
+     * Changes ID of the post.
+     *
+     * @param int $id
+     *   The new ID for the post.
+     *
+     * @return PostInterface
+     *   Post itself.
+     */
+    public function setID(int $id) : PostInterface;
 
     /**
      * Checks if post instance is not saved to the database.
@@ -442,4 +453,12 @@ interface PostInterface
      *   Post itself.
      */
     public function setModerated(bool $moderated) : PostInterface;
+
+    /**
+     * Creates a post view model from this post model.
+     *
+     * @param bool $res
+     *   False for index pages, true for res pages.
+     */
+    public function createViewModel(bool $res) : array;
 }

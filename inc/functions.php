@@ -1,12 +1,6 @@
 <?php
 
-function cleanString($string)
-{
-    $search = array("<", ">");
-    $replace = array("&lt;", "&gt;");
-
-    return str_replace($search, $replace, $string);
-}
+use TinyIB\Model\PostInterface;
 
 function plural($singular, $count, $plural = 's')
 {
@@ -16,33 +10,19 @@ function plural($singular, $count, $plural = 's')
     return ($count == 1 ? $singular : $plural);
 }
 
-function convertBytes($number)
-{
-    $len = strlen($number);
-    if ($len < 4) {
-        return sprintf("%dB", $number);
-    } elseif ($len <= 6) {
-        return sprintf("%0.2fKB", $number / 1024);
-    } elseif ($len <= 9) {
-        return sprintf("%0.2fMB", $number / 1024 / 1024);
-    }
-
-    return sprintf("%0.2fGB", $number / 1024 / 1024 / 1024);
-}
-
-function deletePostImages($post)
+function deletePostImages(PostInterface $post)
 {
     // TODO: Exception handling & logging.
 
-    if (!isEmbed($post['file_hex']) && !empty($post['file'])) {
-        $path = 'src/' . $post['file'];
+    if (!isEmbed($post->getFileHash()) && !empty($post->getFileName())) {
+        $path = 'src/' . $post->getFileName();
         if (file_exists($path)) {
             unlink($path);
         }
     }
 
-    if (!empty($post['thumb'])) {
-        $path = 'thumb/' . $post['thumb'];
+    if (!empty($post->getThumbnailName())) {
+        $path = 'thumb/' . $post->getThumbnailName();
         if (file_exists($path)) {
             unlink($path);
         }
@@ -95,16 +75,21 @@ function validateFileUpload()
     }
 }
 
-function thumbnailDimensions($post)
+function thumbnailDimensions(PostInterface $post)
 {
-    if ($post['parent'] == TINYIB_NEWTHREAD) {
+    if ($post->isThread()) {
         $max_width = TINYIB_MAXWOP;
         $max_height = TINYIB_MAXHOP;
     } else {
         $max_width = TINYIB_MAXW;
         $max_height = TINYIB_MAXH;
     }
-    return ($post['image_width'] > $max_width || $post['image_height'] > $max_height) ? array($max_width, $max_height) : array($post['image_width'], $post['image_height']);
+
+    $width = $post->getImageWidth();
+    $height = $post->getImageHeight();
+    return $width > $max_width || $height > $max_height
+        ? [$max_width, $max_height]
+        : [$width, $height];
 }
 
 function createThumbnail($file_location, $thumb_location, $new_w, $new_h)
