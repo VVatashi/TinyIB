@@ -359,9 +359,15 @@ final class Post implements PostInterface
      */
     public function getFileSizeFormatted() : string
     {
-        // TODO: Implement adequate file size formatting.
         $size = $this->file_size;
-        return "$size bytes";
+        $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'];
+        for ($i = 0; $i < count($units) && $size >= 1000; ++$i) {
+            $size /= 1000;
+        }
+
+        $size = round($size, 2, PHP_ROUND_HALF_DOWN);
+        $unit = $units[$i];
+        return "$size $unit";
     }
 
     /**
@@ -579,6 +585,7 @@ final class Post implements PostInterface
             'file_hex' => $this->getFileHash(),
             'file_original' => $this->getOriginalFileName(),
             'file_size' => $this->getFileSize(),
+            'file_size_formatted' => $this->getFileSizeFormatted(),
             'image_width' => $this->getImageWidth(),
             'image_height' => $this->getImageHeight(),
             'thumb' => $this->getThumbnailName(),

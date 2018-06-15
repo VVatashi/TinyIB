@@ -12,7 +12,7 @@
     box-shadow: 8px 8px 8px rgba(0, 0, 0, .2);
   }
 
-  &__inner {
+  &_reply &__inner {
     float: unset;
   }
 
@@ -25,10 +25,6 @@
     margin-left: -3px;
     margin-top: 0;
     padding: 4px;
-
-    @include breakpoint($phone-up) {
-      padding: 4px 260px 4px 4px;
-    }
   }
 
   &__file {

@@ -26,15 +26,7 @@
 
             <tr>
               <td>
-                {% if post['rendered'] %}
-                  {{ post['rendered'] }}
-                {% else %}
-                  {% if post['parent'] == constant('TINYIB_NEWTHREAD') %}
-                    {% include '_post_oppost.twig' %}
-                  {% else %}
-                    {% include '_post.twig' %}
-                  {% endif %}
-                {% endif %}
+                {% include '_post.twig' %}
               </td>
               <td valign="top" align="right">
                 <table border="0">
@@ -78,15 +70,7 @@
 
           <tr>
             <td>
-              {% if post['rendered'] %}
-                {{ post['rendered'] }}
-              {% else %}
-                {% if post['parent'] == constant('TINYIB_NEWTHREAD') %}
-                  {% include '_post_oppost.twig' %}
-                {% else %}
-                  {% include '_post.twig' %}
-                {% endif %}
-              {% endif %}
+              {% include '_post.twig' %}
             </td>
             <td valign="top" align="right">
               <form method="get" action="{{ url_prefix }}manage/moderate/{{ post['id'] }}">

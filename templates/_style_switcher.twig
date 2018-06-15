@@ -1,3 +1,5 @@
-<select class="style-switcher" id="style-switcher">
-  <option class="style-switcher__option" disabled selected>Switch theme</option>
-</select>
+<div class="{{ class is defined ? class ~ ' ' }}style-switcher">
+  <select class="style-switcher__input" id="style-switcher">
+    <option class="style-switcher__option" disabled selected>Switch theme</option>
+  </select>
+</div>

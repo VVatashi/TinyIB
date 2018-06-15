@@ -2,8 +2,5 @@
 
 .file {
   &__thumbnail {
-    @include breakpoint($phone-up) {
-      margin-top: -30px;
-    }
   }
 }

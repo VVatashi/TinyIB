@@ -2,7 +2,7 @@
   background: transparent;
   color: #fff;
 
-  &__inner {
+  &_reply &__inner {
     background-image: url('synthwave/bgpostnew.jpg');
     border: 2px solid transparent;
     border-image: linear-gradient(to bottom right, #fb99f9 0%, #f632fe 100%);
@@ -34,5 +34,9 @@
 
   &__message {
     color: #fff;
+  }
+
+  &__omitted {
+    color: #0ff;
   }
 }

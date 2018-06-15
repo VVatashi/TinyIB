@@ -3,7 +3,7 @@
 .post {
   color: $text-color;
 
-  &__inner {
+  &_reply &__inner {
     background: $post-bg-color;
   }
 

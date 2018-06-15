@@ -6,8 +6,10 @@
 
 {% import _self as self %}
 
-<ul class="footer__list">
-  {{ self.link('futaba', 'http://www.2chan.net') }}
-  {{ self.link('futallaby', 'http://www.1chan.net') }}
-  {{ self.link('tinyib', 'https://github.com/tslocum/TinyIB') }}
-</ul>
+<footer class="{{ class is defined ? class ~ ' ' }}footer">
+  <ul class="footer__list">
+    {{ self.link('futaba', 'http://www.2chan.net') }}
+    {{ self.link('futallaby', 'http://www.1chan.net') }}
+    {{ self.link('tinyib', 'https://github.com/tslocum/TinyIB') }}
+  </ul>
+</footer>

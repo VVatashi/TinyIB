@@ -49,15 +49,7 @@ class RendererService implements RendererServiceInterface
      */
     public function renderPostViewModel(array $view_model, bool $res) : string
     {
-        if (!isset($view_model['parent'])) {
-            echo '<pre>';
-            var_dump($view_model);
-            die();
-        }
-
-        $is_thread = $view_model['parent'] === 0;
-        $template = $is_thread ? '_post_oppost.twig' : '_post.twig';
-        return $this->render($template, [
+        return $this->render('_post.twig', [
             'post' => $view_model,
             'res' => $res,
         ]);
@@ -136,15 +128,18 @@ class RendererService implements RendererServiceInterface
         foreach ($threads as $thread) {
             $replies = $this->post_repository->getPostsByThreadID($thread->getID());
             $omitted_count = max(0, count($replies) - TINYIB_PREVIEWREPLIES - 1);
-            // TODO: add $omitted_count to the thread view model.
             $replies = array_slice($replies, -TINYIB_PREVIEWREPLIES);
             if (empty($replies) || $replies[0]->getID() !== $thread->getID()) {
                 array_unshift($replies, $thread);
             }
 
-            $post_vms = array_merge($post_vms, array_map(function ($post) {
+            $thread_reply_vms = array_map(function ($post) use ($omitted_count) {
                 /** @var \TinyIB\Models\PostInterface $post */
                 $view_model = $post->createViewModel(TINYIB_INDEXPAGE);
+                if ($post->isThread() && $omitted_count > 0) {
+                    $view_model['omitted'] = $omitted_count;
+                }
+
                 if (TINYIB_CACHE === 'database') {
                     // Do not cache individual posts in database mode.
                     $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
@@ -159,7 +154,9 @@ class RendererService implements RendererServiceInterface
                 }
 
                 return $view_model;
-            }, $replies));
+            }, $replies);
+
+            $post_vms = array_merge($post_vms, $thread_reply_vms);
         }
 
         return $this->render('board.twig', [
