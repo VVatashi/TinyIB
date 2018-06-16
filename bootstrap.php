@@ -1,9 +1,5 @@
 <?php
 
-# TinyIB
-#
-# https://github.com/tslocum/TinyIB
-
 use Monolog\Logger;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
@@ -37,7 +33,7 @@ use TinyIB\Service\RendererServiceInterface;
 use TinyIB\Service\RendererService;
 use VVatashi\DI\Container;
 
-require_once './vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 // Setup error handling.
 error_reporting(E_ALL);
@@ -56,7 +52,7 @@ set_exception_handler(function (Throwable $exception) use ($container) {
         $file = isset($value['file']) ? basename($value['file']) : '';
         $line = isset($value['line']) ? $value['line'] : '';
         $function = $value['function'];
-        $args = implode(', ', array_map('gettype', $value['args']));
+        $args = isset($value['args']) ? implode(', ', array_map('gettype', $value['args'])) : '';
         return "#$key $file:$line $function($args)";
     }, array_keys($trace), $trace);
 
@@ -113,12 +109,12 @@ if (get_magic_quotes_runtime()) {
 }
 
 // Include settings.php.
-if (!file_exists('settings.php')) {
+if (!file_exists(__DIR__ . '/settings.php')) {
     $message = 'Please copy the file settings.default.php to settings.php';
     throw new Exception($message);
 }
 
-require_once 'settings.php';
+require_once __DIR__ . '/settings.php';
 
 // Check settings.
 if (TINYIB_TRIPSEED == '' || TINYIB_ADMINPASS == '') {
@@ -133,10 +129,10 @@ if (TINYIB_CAPTCHA === 'recaptcha'
 }
 
 // Check directories are writable by the script.
-$writedirs = ['src', 'thumb'];
+$writedirs = ['logs', 'templates/cache', 'webroot/src', 'webroot/thumb'];
 
 foreach ($writedirs as $dir) {
-    if (!is_writable($dir)) {
+    if (!is_writable(__DIR__ . '/' . $dir)) {
         $message = "Directory '$dir' can not be written to.  Please modify its permissions.";
         throw new Exception($message);
     }
@@ -146,7 +142,7 @@ define('TINYIB_NEWTHREAD', 0);
 define('TINYIB_INDEXPAGE', false);
 define('TINYIB_RESPAGE', true);
 
-include 'inc/functions.php';
+require_once __DIR__ . '/src/functions.php';
 
 if (!empty(TINYIB_TIMEZONE)) {
     date_default_timezone_set(TINYIB_TIMEZONE);
@@ -155,8 +151,8 @@ if (!empty(TINYIB_TIMEZONE)) {
 // Register services in the DIC.
 $container->registerInstance(ContainerInterface::class, $container);
 $container->registerCallback(LoggerInterface::class, function ($container) {
-    $logger = new Logger('log');
-    $log_handler = new StreamHandler('log');
+    $logger = new Logger('app');
+    $log_handler = new StreamHandler(__DIR__ . '/logs/app.log');
     $log_formatter = new LineFormatter(null, null, true, true);
     $log_handler->setFormatter($log_formatter);
     $logger->pushHandler($log_handler);
@@ -179,11 +175,11 @@ if (TINYIB_CACHE === 'memory') {
 }
 
 $container->registerCallback(Twig_Environment::class, function ($container) use ($tinyib_uploads, $tinyib_embeds) {
-    $loader = new Twig_Loader_Filesystem('./templates');
+    $loader = new Twig_Loader_Filesystem(__DIR__ . '/templates');
 
     $twig = new Twig_Environment($loader, [
         'autoescape' => false,
-        'cache' => './templates/cache',
+        'cache' => __DIR__ . '/templates/cache',
         'debug' => true,
     ]);
 

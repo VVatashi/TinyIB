@@ -52,7 +52,7 @@
     </a>
 
     {% if post[stickied] %}
-      <img src="sticky.png" alt="Stickied" title="Stickied" width="16" height="16" />
+      <img src="{{url_prefix}}images/sticky.png" alt="Stickied" title="Stickied" width="16" height="16" />
     {% endif %}
 
     {% if res == constant('TINYIB_INDEXPAGE') and post['parent'] == constant('TINYIB_NEWTHREAD') %}

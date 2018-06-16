@@ -38,18 +38,18 @@ $tinyib_uploads = array(
     'image/png' => array('png'),
     'image/gif' => array('gif'),
 
-    'audio/mpeg' => array('mp3', 'audio_thumbnail.png'),
-    'audio/mp3' => array('mp3', 'audio_thumbnail.png'),
-    'audio/x-mpeg' => array('mp3', 'audio_thumbnail.png'),
-    'audio/x-mpeg-3' => array('mp3', 'audio_thumbnail.png'),
-    'audio/mp4' => array('mp4', 'audio_thumbnail.png'),
+    'audio/mpeg' => array('mp3', 'images/audio_thumbnail.png'),
+    'audio/mp3' => array('mp3', 'images/audio_thumbnail.png'),
+    'audio/x-mpeg' => array('mp3', 'images/audio_thumbnail.png'),
+    'audio/x-mpeg-3' => array('mp3', 'images/audio_thumbnail.png'),
+    'audio/mp4' => array('mp4', 'images/audio_thumbnail.png'),
     //'audio/webm' => array('webm', 'audio_thumbnail.png'),
 
     // Video upload requires mediainfo and ffmpegthumbnailer  (see README for instructions)
     'video/mp4' => array('mp4'),
     //'video/webm' => array('webm'),
 
-    //'application/x-shockwave-flash' => array('swf', 'swf_thumbnail.png'));
+    //'application/x-shockwave-flash' => array('swf', 'images/swf_thumbnail.png'));
 );
 
 function buildEmbedHtml($url, $extension)

@@ -72,7 +72,7 @@ final class PostController implements PostControllerInterface
     protected function checkCAPTCHA()
     {
         if (TINYIB_CAPTCHA === 'recaptcha') {
-            require_once 'inc/recaptcha/autoload.php';
+            require_once 'src/recaptcha/autoload.php';
 
             $captcha = isset($_POST['g-recaptcha-response']) ? $_POST['g-recaptcha-response'] : '';
             $failed_captcha = true;

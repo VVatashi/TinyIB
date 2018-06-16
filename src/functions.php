@@ -230,7 +230,8 @@ function fastimagecopyresampled(&$dst_image, &$src_image, $dst_x, $dst_y, $src_x
 
 function addVideoOverlay($thumb_location)
 {
-    if (file_exists('video_overlay.png')) {
+    $overlay = 'images/video_overlay.png';
+    if (file_exists($overlay)) {
         if (substr($thumb_location, -4) == ".jpg") {
             $thumbnail = imagecreatefromjpeg($thumb_location);
         } else {
@@ -238,10 +239,10 @@ function addVideoOverlay($thumb_location)
         }
         list($width, $height, $type, $attr) = getimagesize($thumb_location);
 
-        $overlay_play = imagecreatefrompng('video_overlay.png');
+        $overlay_play = imagecreatefrompng($overlay);
         imagealphablending($overlay_play, false);
         imagesavealpha($overlay_play, true);
-        list($overlay_width, $overlay_height, $overlay_type, $overlay_attr) = getimagesize('video_overlay.png');
+        list($overlay_width, $overlay_height, $overlay_type, $overlay_attr) = getimagesize($overlay);
 
         if (substr($thumb_location, -4) == ".png") {
             imagecolortransparent($thumbnail, imagecolorallocatealpha($thumbnail, 0, 0, 0, 127));
