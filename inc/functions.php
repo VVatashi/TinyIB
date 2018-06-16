@@ -187,7 +187,9 @@ function createThumbnail($file_location, $thumb_location, $new_w, $new_h)
         }
 
         if ($extension === 'png') {
-            exec("pngoptimizercl -file:$thumb_location", $discard, $exit_status);
+            if (TINYIB_FILE_OPTIMIZE_PNG) {
+                exec("pngoptimizercl -file:$thumb_location", $discard, $exit_status);
+            }
         }
 
         if ($exit_status != 0) {
