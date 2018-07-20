@@ -1,15 +1,12 @@
-<div class="header__admin-bar admin-bar adminbar">
-  {% include '_admin_bar.twig' %}
-</div>
+<header class="{{ class is defined ? class ~ ' ' }}header">
+  {% include '_admin_bar.twig' with {'class': 'header__admin-bar'} %}
+  {% include '_style_switcher.twig' with {'class': 'header__style-switcher'} %}
 
-<div class="header__style-switcher">
-  {% include '_style_switcher.twig' %}
-</div>
+  <div class="header__logo">
+    {{ constant('TINYIB_LOGO') }}
 
-<div class="header__logo">
-  {{ constant('TINYIB_LOGO') }}
-
-  <a class="header__title-link" href="/{{ constant('TINYIB_BOARD') }}">
-    <h1 class="header__title">{{ constant('TINYIB_BOARDDESC') }}</h1>
-  </a>
-</div>
+    <a class="header__title-link" href="/{{ constant('TINYIB_BOARD') }}">
+      <h1 class="header__title">{{ constant('TINYIB_BOARDDESC') }}</h1>
+    </a>
+  </div>
+</header>

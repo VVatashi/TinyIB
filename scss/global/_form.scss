@@ -1,10 +1,13 @@
 .form {
-  border: 2px solid !important;
   box-sizing: border-box;
-  cursor: pointer;
   overflow-x: hidden;
   overflow-y: auto;
   padding: 2px !important;
+
+  &_resizable {
+    border: 2px solid !important;
+    cursor: pointer;
+  }
 
   &__inner {
     box-sizing: border-box;

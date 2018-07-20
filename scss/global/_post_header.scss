@@ -2,26 +2,22 @@
 
 .post-header {
   background: inherit;
-  display: flex;
-  flex-flow: row wrap;
-  position: relative;
+  display: block;
 
+  &__delete-label {
+    display: none;
+  }
+
+  &__delete,
   &__name-wrapper,
   &__datetime,
   &__reflink-wrapper {
     display: inline-block;
     margin: 0 2px;
-  }
-
-  &__name-wrapper {
-    margin-left: 20px;
+    vertical-align: middle;
   }
 
   &__reply-wrapper {
     @include brackets;
-  }
-
-  @include breakpoint($phone-up) {
-    display: block;
   }
 }

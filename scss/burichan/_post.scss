@@ -4,7 +4,7 @@
   color: $text-color;
   font-family: sans-serif;
 
-  &__inner {
+  &_reply &__inner {
     background: $post-bg-color;
   }
 

@@ -7,7 +7,7 @@
   </testsuites>
   <filter>
     <whitelist processUncoveredFilesFromWhitelist="true">
-      <directory>inc</directory>
+      <directory>src</directory>
       <exclude>
         <directory>tests</directory>
         <directory>vendor</directory>

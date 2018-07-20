@@ -2,48 +2,30 @@
 
 {% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
 
-{% block body %}
+{% block content %}
   <ul class="content__links links">
     <li class="links__item"><a class="links__link" href="{{ url_prefix }}settings">Settings</a></li>
   </ul>
 
-  <div class="content__postarea">
-    {% include '_post_form.twig' %}
-  </div>
+  {% include '_post_form.twig' with {'class': 'content__postarea'} %}
 
   <form id="delform" action="{{ url_prefix }}post/delete" method="post">
     <input type="hidden" name="board" value="{{ constant('TINYIB_BOARD') }}" />
 
     {% for post in posts %}
-      {% if post['rendered'] %}
-        {% if post['parent'] == constant('TINYIB_NEWTHREAD') %}
-          <hr />
-        {% endif %}
-
-        {{ post['rendered'] }}
-      {% else %}
-        {% if post['parent'] == constant('TINYIB_NEWTHREAD') %}
-          <hr />
-
-          {% include '_post_oppost.twig' %}
-        {% else %}
-          {% include '_post.twig' %}
-        {% endif %}
+      {% if post['parent'] == constant('TINYIB_NEWTHREAD') %}
+        <hr />
       {% endif %}
+
+      {% include '_post.twig' %}
     {% endfor %}
 
     <hr />
 
-    <div class="content__userdelete">
-      <label class="content__userdelete-label" for="deletepostpassword">Delete Post</label>
-      <input type="text" class="content__userdelete-input" id="deletepostpassword" name="password" placeholder="Password" />
-      <input class="content__userdelete-submit" name="deletepost" value="Delete" type="submit" />
-    </div>
+    {% include '_userdelete.twig' with {'class': 'content__userdelete'} %}
 
     <hr />
   </form>
 
-  <ul class="content__pager pager">
-    {% include '_pager.twig' %}
-  </ul>
+  {% include '_pager.twig' with {'class': 'content__pager'} %}
 {% endblock %}

@@ -1,24 +1,17 @@
 <!DOCTYPE html>
 
 <html>
-  <head>
-    {% include '_head.twig' %}
-  </head>
+  {% include '_head.twig' %}
 
   <body {{ body_attribs }}>
     <div class="layout">
-      <header class="layout__header header">
-        {% include '_header.twig' %}
-      </header>
+      {% include '_header.twig' with {'class': 'layout__header'} %}
 
       <main class="layout__content content">
-        {% block body %}
-        {% endblock %}
+        {% block content %}{% endblock %}
       </main>
 
-      <footer class="layout__footer footer">
-        {% include '_footer.twig' %}
-      </footer>
+      {% include '_footer.twig' with {'class': 'layout__footer'} %}
     </div>
   </body>
 </html>

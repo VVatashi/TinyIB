@@ -11,162 +11,150 @@
   </tr>
 {% endmacro %}
 
+{% macro field(id, title) %}
+  <tr class="form__field form__field_{{ id }} field field_{{ id }}">
+    <td class="field__label-wrapper">
+      <label class="field__label field__label_hidden" for="{{ id }}">{{ title }}</label>
+    </td>
+
+    <td class="field__input-wrapper">
+      <input type="text" class="field__input" id="{{ id }}" name="{{ id }}" placeholder="{{ title }}" autocomplete="off" />
+    </td>
+  </tr>
+{% endmacro %}
+
 {% import _self as self %}
 
 {% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
 
-<form class="content__postform form form_postform" id="postform" name="postform" action="{{ url_prefix }}post/create" method="post" enctype="multipart/form-data">
-  {% if uploads and constant('TINYIB_MAXKB') > 0 %}
-    <input type="hidden" name="MAX_FILE_SIZE" value="{{ constant('TINYIB_MAXKB') * 1024 }}" />
-  {% endif %}
+<div class="{{ class is defined ? class }}">
+  <form class="content__postform form form_resizable form_postform" id="postform" name="postform" action="{{ url_prefix }}post/create" method="post" enctype="multipart/form-data">
+    {% if uploads and constant('TINYIB_MAXKB') > 0 %}
+      <input type="hidden" name="MAX_FILE_SIZE" value="{{ constant('TINYIB_MAXKB') * 1024 }}" />
+    {% endif %}
 
-  <input type="hidden" name="parent" value="{{ parent }}" />
+    <input type="hidden" name="parent" value="{{ parent }}" />
 
-  {% spaceless %}
-    <table class="form__inner">
-      <tbody class="form__group form__group_inline form__group_name">
-        <tr class="form__field form__field_subject field field_subject">
-          <td class="field__label-wrapper">
-            <label class="field__label" for="subject">Subject</label>
-          </td>
+    {% spaceless %}
+      <table class="form__inner">
+        <tbody class="form__group form__group_inline form__group_name">
+          {{ self.field('subject', 'Subject') }}
+          {{ self.field('email', 'E-mail') }}
+          {{ self.field('name', 'Name') }}
 
-          <td class="field__input-wrapper">
-            <input type="text" class="field__input" id="subject" name="subject" placeholder="Subject" autocomplete="off" />
-          </td>
-        </tr>
+          <tr class="form__field form__field_actions field field_actions">
+            <td class="field__label-wrapper"></td>
 
-        <tr class="form__field form__field_email field field_email">
-          <td class="field__label-wrapper">
-            <label class="field__label" for="email">E-mail</label>
-          </td>
+            <td class="field__input-wrapper">
+              <input type="submit" class="field__input field__input_button field__input_submit" value="Submit" />
+            </td>
+          </tr>
+        </tbody>
 
-          <td class="field__input-wrapper">
-            <input type="text" class="field__input" id="email" name="email" placeholder="E-mail" autocomplete="off" />
-          </td>
-        </tr>
+        <tbody class="form__group form__group_inline form__group_markup">
+          {{ self.markup('b', '<strong>b</strong>') }}
+          {{ self.markup('i', '<em>i</em>') }}
+          {{ self.markup('u', '<span class="underline">u</span>') }}
+          {{ self.markup('s', '<del>s</del>') }}
+          {{ self.markup('sup', '<sup>Sup</sup>') }}
+          {{ self.markup('sub', '<sub>Sub</sub>') }}
+          {{ self.markup('code', '<code>Code</code>') }}
+          {{ self.markup('spoiler', '<span class="spoiler">Spoiler</span>') }}
+          {{ self.markup('rp', '<span class="spoiler">RP</span>') }}
+          {{ self.markup('quote', '<span class="quote">&gt;</span>') }}
+        </tbody>
 
-        <tr class="form__field form__field_name field field_name">
-          <td class="field__label-wrapper">
-            <label class="field__label" for="name">Name</label>
-          </td>
-
-          <td class="field__input-wrapper">
-            <input type="text" class="field__input" id="name" name="name" placeholder="Name" autocomplete="off" />
-          </td>
-        </tr>
-
-        <tr class="form__field form__field_actions field field_actions">
-          <td class="field__label-wrapper"></td>
-
-          <td class="field__input-wrapper">
-            <input type="submit" class="field__input field__input_button field__input_submit" value="Submit" />
-          </td>
-        </tr>
-      </tbody>
-
-      <tbody class="form__group form__group_inline form__group_markup">
-        {{ self.markup('b', '<strong>b</strong>') }}
-        {{ self.markup('i', '<em>i</em>') }}
-        {{ self.markup('u', '<span class="underline">u</span>') }}
-        {{ self.markup('s', '<del>s</del>') }}
-        {{ self.markup('sup', '<sup>Sup</sup>') }}
-        {{ self.markup('sub', '<sub>Sub</sub>') }}
-        {{ self.markup('code', '<code>Code</code>') }}
-        {{ self.markup('spoiler', '<span class="spoiler">Spoiler</span>') }}
-        {{ self.markup('rp', '<span class="spoiler">RP</span>') }}
-        {{ self.markup('quote', '<span class="quote">&gt;</span>') }}
-      </tbody>
-
-      <tbody class="form__group form__group_inline form__group_message">
-        <tr class="form__field form__field_message field field_message">
-          <td class="field__label-wrapper">
-            <label class="field__label" for="message">Message</label>
-          </td>
-
-          <td class="field__input-wrapper">
-            <textarea class="field__input field__input_message" id="message" name="message" placeholder="Message">
-            </textarea>
-          </td>
-        </tr>
-      </tbody>
-
-      <tbody class="form__group form__group_inline form__group_attachment">
-        {% include '_captcha.twig' with { 'class': 'form__field form__field_captcha' } %}
-
-        {% if uploads %}
-          <tr class="form__field form__field_attachment field field_attachment">
+        <tbody class="form__group form__group_inline form__group_message">
+          <tr class="form__field form__field_message field field_message">
             <td class="field__label-wrapper">
-              <label class="field__label" for="file">File</label>
+              <label class="field__label field__label_hidden" for="message">Message</label>
             </td>
 
             <td class="field__input-wrapper">
-              <input type="file" class="field__input" id="file" name="file" placeholder="File" />
+              <textarea class="field__input field__input_message" id="message" name="message" placeholder="Message">
+              </textarea>
             </td>
           </tr>
-        {% endif %}
+        </tbody>
 
-        {% if embeds %}
-          <tr class="form__field form__field_embed field field_embed">
+        <tbody class="form__group form__group_inline form__group_attachment">
+          {% include '_captcha.twig' with { 'class': 'form__field form__field_captcha' } %}
+
+          {% if uploads %}
+            <tr class="form__field form__field_attachment field field_attachment">
+              <td class="field__label-wrapper">
+                <label class="field__label field__label_hidden" for="file">File</label>
+              </td>
+
+              <td class="field__input-wrapper">
+                <input type="file" class="field__input" id="file" name="file" placeholder="File" />
+              </td>
+            </tr>
+          {% endif %}
+
+          {% if embeds %}
+            <tr class="form__field form__field_embed field field_embed">
+              <td class="field__label-wrapper">
+                <label class="field__label field__label_hidden" for="embed">Embed</label>
+              </td>
+
+              <td class="field__input-wrapper">
+                <input type="text" class="field__input" id="embed" name="embed" placeholder="Embed (YouTube/SoundCloud/Imgur link)" autocomplete="off" />
+              </td>
+            </tr>
+          {% endif %}
+
+          <tr class="form__field form__field_password field field_password">
             <td class="field__label-wrapper">
-              <label class="field__label" for="embed">Embed</label>
+              <label class="field__label field__label_hidden" for="newpostpassword">Password</label>
             </td>
 
             <td class="field__input-wrapper">
-              <input type="text" class="field__input" id="embed" name="embed" placeholder="Embed (YouTube/SoundCloud/Imgur link)" autocomplete="off" />
+              <input type="text" class="field__input field__input_password" id="newpostpassword" name="password" placeholder="Delete post password" autocomplete="off" />
             </td>
           </tr>
-        {% endif %}
+        </tbody>
 
-        <tr class="form__field form__field_password field field_password">
-          <td class="field__label-wrapper">
-            <label class="field__label" for="newpostpassword">Password</label>
-          </td>
+        <tbody class="form__group form__group_rules">
+          <tr class="form__field form__field_rules field field_rules">
+            <td class="field__label-wrapper"></td>
 
-          <td class="field__input-wrapper">
-            <input type="text" class="field__input field__input_password" id="newpostpassword" name="password" placeholder="Delete post password" autocomplete="off" />
-          </td>
-        </tr>
-      </tbody>
+            <td class="field__input-wrapper rules">
+              <ul class="rules__list">
+                {% if constant('TINYIB_REQMOD') == 'files' or constant('TINYIB_REQMOD') == 'all' %}
+                  <li class="rules__list-item">
+                    All posts {{ constant('TINYIB_REQMOD') == 'files' ? ' with a file attached' }} will be moderated before being shown.
+                  </li>
+                {% endif %}
 
-      <tbody class="form__group form__group_rules">
-        <tr class="form__field form__field_rules field field_rules">
-          <td class="field__label-wrapper"></td>
+                {% if uploads %}
+                  <li class="rules__list-item">
+                    {{ filetypes }}
+                  </li>
+                {% endif %}
 
-          <td class="field__input-wrapper rules">
-            <ul class="rules__list">
-              {% if constant('TINYIB_REQMOD') == 'files' or constant('TINYIB_REQMOD') == 'all' %}
-                <li class="rules__list-item">
-                  All posts {{ constant('TINYIB_REQMOD') == 'files' ? ' with a file attached' }} will be moderated before being shown.
-                </li>
-              {% endif %}
+                {% if uploads and constant('TINYIB_MAXKB') > 0 %}
+                  <li class="rules__list-item">
+                    Maximum file size allowed is {{ constant('TINYIB_MAXKBDESC') }}.
+                  </li>
+                {% endif %}
 
-              {% if uploads %}
-                <li class="rules__list-item">
-                  {{ filetypes }}
-                </li>
-              {% endif %}
-
-              {% if uploads and constant('TINYIB_MAXKB') > 0 %}
-                <li class="rules__list-item">
-                  Maximum file size allowed is {{ constant('TINYIB_MAXKBDESC') }}.
-                </li>
-              {% endif %}
-
-              {% if thumbnails %}
-                <li class="rules__list-item">
-                  Images greater than
-                  {{ constant('TINYIB_MAXWOP') }}x{{ constant('TINYIB_MAXHOP') }}
-                  {% if constant('TINYIB_MAXW') != constant('TINYIB_MAXWOP')
-                    or constant('TINYIB_MAXH') != constant('TINYIB_MAXHOP') %}
-                    (new thread) or {{ constant('TINYIB_MAXW') }}x{{ constant('TINYIB_MAXH') }} (reply)
-                  {% endif %}
-                  will be thumbnailed.
-                </li>
-              {% endif %}
-            </ul>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  {% endspaceless %}
-</form>
+                {% if thumbnails %}
+                  <li class="rules__list-item">
+                    Images greater than
+                    {{ constant('TINYIB_MAXWOP') }}x{{ constant('TINYIB_MAXHOP') }}
+                    {% if constant('TINYIB_MAXW') != constant('TINYIB_MAXWOP')
+                      or constant('TINYIB_MAXH') != constant('TINYIB_MAXHOP') %}
+                      (new thread) or {{ constant('TINYIB_MAXW') }}x{{ constant('TINYIB_MAXH') }} (reply)
+                    {% endif %}
+                    will be thumbnailed.
+                  </li>
+                {% endif %}
+              </ul>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    {% endspaceless %}
+  </form>
+</div>

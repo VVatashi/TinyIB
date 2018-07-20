@@ -1,3 +1,5 @@
+@import '../utils';
+
 .post {
   position: relative;
 
@@ -6,17 +8,9 @@
     position: relative;
   }
 
-  &__delete {
-    position: absolute;
-    z-index: 1;
-  }
-
-  &__delete-label {
-    display: none;
-  }
-
   &__file-info {
     display: block;
+    max-width: 250px;
   }
 
   &__file {
@@ -32,15 +26,10 @@
   @include breakpoint($phone-up) {
     @include clearfix;
 
-    &__inner {
+    &_reply &__inner {
       float: left;
       min-width: 560px;
       max-width: 100%;
-    }
-
-    &__delete {
-      float: left;
-      vertical-align: middle;
     }
 
     &__file {
