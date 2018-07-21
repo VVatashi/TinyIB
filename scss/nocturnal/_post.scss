@@ -16,6 +16,10 @@
     float: unset;
   }
 
+  &__header {
+    float: left;
+  }
+
   &__content {
     padding: 10px;
   }
@@ -35,6 +39,7 @@
   }
 
   &__message {
+    clear: left;
     border: 0 solid;
     max-width: 100%;
   }
