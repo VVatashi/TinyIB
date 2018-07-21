@@ -2,7 +2,7 @@
 
 namespace TinyIB\Model;
 
-use VVatashi\BBCode\BBCode;
+use VVatashi\BBCode\BBCodeDefinition;
 use VVatashi\BBCode\Tokenizer;
 use VVatashi\BBCode\Parser;
 use VVatashi\BBCode\HtmlGenerator;
@@ -535,11 +535,11 @@ final class Post implements PostInterface
     protected function bbcode(string $message) : string
     {
         $tags = [
-            'b' => BBCode::create('strong'),
-            'i' => BBCode::create('em'),
-            'u' => BBCode::create('span', 'style="text-decoration: underline;"'),
-            's' => BBCode::create('del'),
-            'color' => BBCode::create('span', function ($attribute) {
+            'b' => BBCodeDefinition::create('strong'),
+            'i' => BBCodeDefinition::create('em'),
+            'u' => BBCodeDefinition::create('span', 'style="text-decoration: underline;"'),
+            's' => BBCodeDefinition::create('del'),
+            'color' => BBCodeDefinition::create('span', function ($attribute) {
                 $matches = [];
                 if (preg_match('/#[0-9a-f]{6}/i', $attribute, $matches)) {
                     $color = $matches[0];
@@ -548,11 +548,11 @@ final class Post implements PostInterface
 
                 return '';
             }),
-            'sup' => BBCode::create('sup'),
-            'sub' => BBCode::create('sub'),
-            'spoiler' => BBCode::create('span', 'class="spoiler"'),
-            'rp' => BBCode::create('span', 'class="rp"'),
-            'code' => BBCode::create('code', 'style="white-space: pre;"', false),
+            'sup' => BBCodeDefinition::create('sup'),
+            'sub' => BBCodeDefinition::create('sub'),
+            'spoiler' => BBCodeDefinition::create('span', 'class="spoiler"'),
+            'rp' => BBCodeDefinition::create('span', 'class="rp"'),
+            'code' => BBCodeDefinition::create('code', 'style="white-space: pre;"', false),
         ];
 
         $tokenizer = new Tokenizer($tags);
