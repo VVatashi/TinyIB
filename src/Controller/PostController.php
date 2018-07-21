@@ -428,7 +428,7 @@ final class PostController implements PostControllerInterface
                 if ($duration > 0) {
                     $mins = floor(round($duration / 1000) / 60);
                     $secs = str_pad(floor(round($duration / 1000) % 60), 2, "0", STR_PAD_LEFT);
-                    $post->setFileName(implode(', ', "$mins:$secs", $post->getFileName()));
+                    $post->setFileName(implode(', ', "$mins:$secs"), $post->getFileName());
                 }
             } elseif (in_array($file_mime, [
                 'image/jpeg',
