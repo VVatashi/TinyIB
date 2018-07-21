@@ -367,7 +367,7 @@ final class Post implements PostInterface
 
         $size = round($size, 2, PHP_ROUND_HALF_DOWN);
         $unit = $units[$i];
-        return "$size $unit";
+        return "$size&nbsp;$unit";
     }
 
     /**
