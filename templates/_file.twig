@@ -15,7 +15,7 @@
 
 <div class="{{ class is defined ? class ~ ' ' }}file"
   {% if post['thumb_width'] > 0 %}
-    style="width: {{ post['thumb_width'] }}px;"
+    style="max-width: {{ max(120, post['thumb_width']) }}px;"
   {% endif %}
 >
   {% include '_file_info.twig' with {'class': 'post__file-info'} %}

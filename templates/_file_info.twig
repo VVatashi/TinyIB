@@ -10,21 +10,22 @@
 {% endif %}
 
 <div class="{{ class is defined ? class ~ ' ' }}file-info filesize">
-  {% if is_embed %}
-    <a class="file-info__link" href="{{ direct_link }}" data-id="{{ post['id'] }}">
-      {{ post['file_original'] }}
-    </a>
-    &ndash;
-    ({{ post['file_hex'] }})
-  {% elseif post['file'] %}
-    <a class="file-info__link" href="{{ direct_link }}" data-id="{{ post['id'] }}" target="_blank">
-      {{ post['file'] }}
-    </a>
-    &ndash;
-    <span class="file-info__size">
-      ({{ post['file_size_formatted'] }}{% if has_size %},
-        {{ post['image_width'] }}x{{ post['image_height'] }}{% endif %}{% if show_name %},
+  {% spaceless %}
+    {% if is_embed %}
+      <a class="file-info__link" href="{{ direct_link }}" data-id="{{ post['id'] }}">
+        {{ post['file_original'] }}
+      </a>
+      &ndash;
+      ({{ post['file_hex'] }})
+    {% elseif post['file'] %}
+      <a class="file-info__link" href="{{ direct_link }}" data-id="{{ post['id'] }}" target="_blank">
+        {{ post['file'] }}
+      </a>
+      &ndash;
+      <span class="file-info__size">
+        ({{ post['file_size_formatted'] }}{% if has_size %},&nbsp;{{ post['image_width'] }}x{{ post['image_height'] }}{% endif %}{% if show_name %},
         {{ post['file_original'] }}{% endif %})
-    </span>
-  {% endif %}
+      </span>
+    {% endif %}
+  {% endspaceless %}
 </div>
