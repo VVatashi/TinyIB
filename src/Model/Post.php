@@ -3,9 +3,10 @@
 namespace TinyIB\Model;
 
 use VVatashi\BBCode\BBCodeDefinition;
-use VVatashi\BBCode\Tokenizer;
-use VVatashi\BBCode\Parser;
 use VVatashi\BBCode\HtmlGenerator;
+use VVatashi\BBCode\Parser;
+use VVatashi\BBCode\Token;
+use VVatashi\BBCode\Tokenizer;
 
 final class Post implements PostInterface
 {
@@ -532,6 +533,37 @@ final class Post implements PostInterface
      *
      * @return string
      */
+    protected function wakabamark(string $message) : string
+    {
+        $patterns = array(
+            '/\*\*(.*?)\*\*/si' => '[b]\\1[/b]',
+            '/\*(.*?)\*/si' => '[i]\\1[/i]',
+            '/~~(.*?)~~/si' => '[s]\\1[/s]',
+            '/%%(.*?)%%/si' => '[spoiler]\\1[/spoiler]',
+        );
+
+        $tags = [
+            'b' => BBCodeDefinition::create('strong'),
+            'i' => BBCodeDefinition::create('em'),
+            's' => BBCodeDefinition::create('del'),
+            'spoiler' => BBCodeDefinition::create('span', 'class="spoiler"'),
+        ];
+
+        $tokenizer = new Tokenizer($tags);
+        $parser = new Parser($tags);
+        $generator = new HtmlGenerator($tags);
+
+        $message = preg_replace(array_keys($patterns), array_values($patterns), $message);
+        $tokens = $tokenizer->tokenize($message);
+        $nodes = $parser->parse($tokens);
+        return $generator->generate($nodes);
+    }
+
+    /**
+     * @param string $message
+     *
+     * @return string
+     */
     protected function bbcode(string $message) : string
     {
         $tags = [
@@ -560,8 +592,56 @@ final class Post implements PostInterface
         $generator = new HtmlGenerator($tags);
 
         $tokens = $tokenizer->tokenize($message);
+
+        // Process wakabamark.
+        $tags = [];
+        $is_code = false;
+        $count = count($tokens);
+        for ($i = 0; $i < $count; ++$i) {
+            /** @var \VVatashi\BBCode\Token $token */
+            $token = $tokens[$i];
+            $type = $token->getType();
+            switch ($type) {
+                case Token::TEXT:
+                    if (!$is_code) {
+                        $text = $token->getText();
+                        $text = $this->wakabamark($text);
+                        $tokens[$i] = Token::text($text);
+                    }
+                    break;
+
+                case Token::OPENING_TAG:
+                    $text = $token->getText();
+                    $tags[] = $text;
+                    if ($text === 'code') {
+                        $is_code = true;
+                    }
+                    break;
+
+                case Token::CLOSING_TAG:
+                    if (!empty($tags)) {
+                        array_pop($tags);
+                        $text = $token->getText();
+                        if ($text === 'code') {
+                            $is_code = array_search('code', $tags, true) !== false;
+                        }
+                    }
+                    break;
+            }
+        }
+
         $nodes = $parser->parse($tokens);
         return $generator->generate($nodes);
+    }
+
+    /**
+     * @param string $message
+     *
+     * @return string
+     */
+    protected function markup(string $message) : string
+    {
+        return $this->bbcode($message);
     }
 
     /**
@@ -604,7 +684,7 @@ final class Post implements PostInterface
         }
 
         // Process post message.
-        $post['message'] = $this->bbcode($post['message']);
+        $post['message'] = $this->markup($post['message']);
 
         // Process post file.
         if (isset($post['file'])) {
