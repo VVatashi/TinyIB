@@ -422,14 +422,6 @@ final class PostController implements PostControllerInterface
 
                     addVideoOverlay("thumb/$thumb");
                 }
-
-                $duration = intval(shell_exec('mediainfo --Inform="General;%Duration%" ' . $file_location));
-
-                if ($duration > 0) {
-                    $mins = floor(round($duration / 1000) / 60);
-                    $secs = str_pad(floor(round($duration / 1000) % 60), 2, "0", STR_PAD_LEFT);
-                    $post->setFileName(implode(', ', "$mins:$secs"), $post->getFileName());
-                }
             } elseif (in_array($file_mime, [
                 'image/jpeg',
                 'image/pjpeg',
