@@ -358,9 +358,12 @@ final class PDOPostRepository extends PDORepository implements PostRepositoryInt
     /**
      * {@inheritDoc}
      */
-    public function getLastPostByIP(string $ip) : PostInterface
+    public function getLastPostByIP(string $ip)
     {
         $data = $this->getOne(['ip' => $ip], 'id DESC');
+        if ($data === false) {
+            return null;
+        }
         return $this->createModel($data);
     }
 }

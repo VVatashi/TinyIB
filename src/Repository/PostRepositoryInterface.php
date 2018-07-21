@@ -141,7 +141,7 @@ interface PostRepositoryInterface extends RepositoryInterface
     /**
      * Returns the last post by the poster IP.
      *
-     * @return PostInterface
+     * @return null|PostInterface
      */
-    public function getLastPostByIP(string $ip) : PostInterface;
+    public function getLastPostByIP(string $ip);
 }
