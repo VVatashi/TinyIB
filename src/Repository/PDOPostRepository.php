@@ -349,8 +349,8 @@ final class PDOPostRepository extends PDORepository implements PostRepositoryInt
                 'id'
             );
 
-            foreach ($results as $post) {
-                $this->deletePostByID($post->getID());
+            foreach ($results as $row) {
+                $this->deletePostByID($row['id']);
             }
         }
     }
