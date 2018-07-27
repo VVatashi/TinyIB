@@ -4,7 +4,7 @@ namespace TinyIB;
 
 class Response
 {
-    /** @var integer $status_code */
+    /** @var int $status_code */
     protected $status_code;
 
     /** @var array $headers */
@@ -25,6 +25,16 @@ class Response
         $this->content = $content;
         $this->headers = $headers;
         $this->status_code = $status_code;
+    }
+
+    /**
+     * Returns status code.
+     *
+     * @return int
+     */
+    public function getStatusCode() : int
+    {
+        return $this->status_code;
     }
 
     public function send()
