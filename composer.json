@@ -6,7 +6,8 @@
         "predis/predis": "^1.1",
         "twig/twig": "~2.0",
         "vvatashi/bbcode": "dev-master",
-        "vvatashi/di": "dev-master"
+        "vvatashi/di": "dev-master",
+        "vvatashi/router": "dev-master"
     },
     "require-dev": {
         "phpunit/phpunit": "^7.2"

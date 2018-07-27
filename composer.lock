@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "c512b4de03b9012fb400c2cdf62521b0",
+    "content-hash": "6324478a90ba6ccdcac1f3fcf4dc95dd",
     "packages": [
         {
             "name": "monolog/monolog",
@@ -487,6 +487,41 @@
                 }
             ],
             "time": "2018-06-09T07:13:03+00:00"
+        },
+        {
+            "name": "vvatashi/router",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/VVatashi/Router.git",
+                "reference": "48215ae984ad2436ff98683e78abe065cb4fded7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/VVatashi/Router/zipball/48215ae984ad2436ff98683e78abe065cb4fded7",
+                "reference": "48215ae984ad2436ff98683e78abe065cb4fded7",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^7.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "VVatashi\\Router\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nina Lisitsinskaya",
+                    "email": "vvatashi4259@gmail.com"
+                }
+            ],
+            "time": "2018-07-27T18:25:32+00:00"
         }
     ],
     "packages-dev": [
@@ -1900,7 +1935,8 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "vvatashi/bbcode": 20,
-        "vvatashi/di": 20
+        "vvatashi/di": 20,
+        "vvatashi/router": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
