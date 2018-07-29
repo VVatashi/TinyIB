@@ -232,7 +232,7 @@ class ManageController implements ManageControllerInterface
         }
 
         $data['has_ban'] = $this->ban_repository->banByIP($post->getIP());
-        $data['post'] = $post;
+        $data['post'] = $post->createViewModel(TINYIB_INDEXPAGE);
 
         $posts = $post->isThread() ? $this->post_repository->getPostsByThreadID($post->getID()) : [$post];
 
