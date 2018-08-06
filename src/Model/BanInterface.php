@@ -77,12 +77,31 @@ interface BanInterface
     public function setExpiresDate(int $expires_at) : BanInterface;
 
     /**
+     * Checks if ban is a permanent.
+     *
+     * @return bool
+     */
+    public function isPermanent() : bool;
+
+    /**
+     * Checks if ban is expired.
+     *
+     * @return bool
+     */
+    public function isExpired() : bool;
+
+    /**
      * Returns reason string of the ban.
      *
      * @return string
      *   Ban reason string.
      */
     public function getReason() : string;
+
+    /**
+     * Checks if ban has a reason phrase.
+     */
+    public function hasReason() : bool;
 
     /**
      * Sets IP for the ban.

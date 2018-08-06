@@ -25,6 +25,8 @@ use TinyIB\Repository\PDOPostRepository;
 use TinyIB\Repository\PostRepositoryInterface;
 use TinyIB\Request;
 use TinyIB\Response;
+use TinyIB\Service\BanService;
+use TinyIB\Service\BanServiceInterface;
 use TinyIB\Service\CryptographyService;
 use TinyIB\Service\CryptographyServiceInterface;
 use TinyIB\Service\PostService;
@@ -194,6 +196,7 @@ $container->registerCallback(Twig_Environment::class, function ($container) use 
 
 $container->registerType(RouterInterface::class, Router::class);
 
+$container->registerType(BanServiceInterface::class, BanService::class);
 $container->registerType(CryptographyServiceInterface::class, CryptographyService::class);
 $container->registerType(PostServiceInterface::class, PostService::class);
 $container->registerType(RendererServiceInterface::class, RendererService::class);

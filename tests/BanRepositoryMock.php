@@ -91,46 +91,8 @@ class BanRepositoryMock implements BanRepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function banByID(int $id)
+    public function getLastInsertId() : string
     {
-        return new Ban(0, '', 0, 0, '');
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function banByIP(string $ip)
-    {
-        return new Ban(0, '', 0, 0, '');
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function allBans() : array
-    {
-        return new Ban(0, '', 0, 0, '');
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function insertBan(BanInterface $ban) : int
-    {
-        return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function clearExpiredBans()
-    {
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function deleteBanByID(int $id)
-    {
+        return '0';
     }
 }

@@ -5,10 +5,10 @@ namespace TinyIB\Controller;
 use TinyIB\Cache\CacheInterface;
 use TinyIB\Functions;
 use TinyIB\Model\Post;
-use TinyIB\Repository\BanRepositoryInterface;
 use TinyIB\Repository\PostRepositoryInterface;
 use TinyIB\Request;
 use TinyIB\Response;
+use TinyIB\Service\BanServiceInterface;
 use TinyIB\Service\PostServiceInterface;
 use TinyIB\Service\RendererServiceInterface;
 
@@ -17,11 +17,11 @@ final class PostController implements PostControllerInterface
     /** @var \TinyIB\Cache\CacheInterface $cache */
     protected $cache;
 
-    /** @var \TinyIB\Repository\BanRepositoryInterface $ban_repository */
-    protected $ban_repository;
-
     /** @var \TinyIB\Repository\PostRepositoryInterface $post_repository */
     protected $post_repository;
+
+    /** @var \TinyIB\Service\BanServiceInterface $ban_service */
+    protected $ban_service;
 
     /** @var \TinyIB\Service\PostServiceInterface $post_service */
     protected $post_service;
@@ -33,20 +33,21 @@ final class PostController implements PostControllerInterface
      * Constructs new post controller.
      *
      * @param \TinyIB\Cache\CacheInterface $cache
-     * @param \TinyIB\Repository\BanRepositoryInterface $ban_repository
      * @param \TinyIB\Repository\PostRepositoryInterface $post_repository
+     * @param \TinyIB\Service\BanServiceInterface $renderer
+     * @param \TinyIB\Service\PostServiceInterface $renderer
      * @param \TinyIB\Service\RendererServiceInterface $renderer
      */
     public function __construct(
         CacheInterface $cache,
-        BanRepositoryInterface $ban_repository,
         PostRepositoryInterface $post_repository,
+        BanServiceInterface $ban_service,
         PostServiceInterface $post_service,
         RendererServiceInterface $renderer
     ) {
         $this->cache = $cache;
-        $this->ban_repository = $ban_repository;
         $this->post_repository = $post_repository;
+        $this->ban_service = $ban_service;
         $this->post_service = $post_service;
         $this->renderer = $renderer;
     }
@@ -118,15 +119,16 @@ final class PostController implements PostControllerInterface
 
     protected function checkBanned()
     {
-        $ban = $this->ban_repository->banByIP($_SERVER['REMOTE_ADDR']);
-
-        if ($ban) {
-            if ($ban['expire'] == 0 || $ban['expire'] > time()) {
-                $expire = ($ban['expire'] > 0) ? ('<br>This ban will expire ' . date('y/m/d(D)H:i:s', $ban['expire'])) : '<br>This ban is permanent and will not expire.';
-                $reason = ($ban['reason'] == '') ? '' : ('<br>Reason: ' . $ban['reason']);
-                throw new \Exception('Your IP address ' . $ban['ip'] . ' has been banned from posting on this image board.  ' . $expire . $reason);
+        $ban = $this->ban_service->getByIP($_SERVER['REMOTE_ADDR']);
+        if (isset($ban)) {
+            if (!$ban->isExpired()) {
+                $expire = $ban->isPermanent()
+                    ? '<br>This ban is permanent and will not expire.'
+                    : '<br>This ban will expire ' . date('y/m/d(D)H:i:s', $ban->getExpiresDate());
+                $reason = $ban->hasReason() ? '<br>Reason: ' . $ban->getReason() : '';
+                throw new \Exception('Your IP address ' . $ban->getIP() . ' has been banned from posting on this image board.  ' . $expire . $reason);
             } else {
-                $this->ban_repository->clearExpiredBans();
+                $this->ban_service->removeExpired();
             }
         }
     }
@@ -244,13 +246,6 @@ final class PostController implements PostControllerInterface
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
         $rawpost = $this->isRawPost();
 
-        if (!$logged_in) {
-            $this->checkCAPTCHA();
-            $this->checkBanned();
-            $this->checkMessageSize($data['message']);
-            $this->checkFlood();
-        }
-
         $data = array_intersect_key($request->getData(), array_flip([
             'name',
             'email',
@@ -260,6 +255,13 @@ final class PostController implements PostControllerInterface
             'embed',
             'parent',
         ]));
+
+        if (!$logged_in) {
+            $this->checkCAPTCHA();
+            $this->checkBanned();
+            $this->checkMessageSize($data['message']);
+            $this->checkFlood();
+        }
 
         $post = new Post((int)$data['parent']);
         $post->setIP($_SERVER['REMOTE_ADDR']);

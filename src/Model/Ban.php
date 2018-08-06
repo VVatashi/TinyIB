@@ -96,6 +96,22 @@ final class Ban implements BanInterface
     /**
      * {@inheritDoc}
      */
+    public function isPermanent() : bool
+    {
+        return $this->expires_at === 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function isExpired() : bool
+    {
+        return !$this->isPermanent() && $this->expires_at < time();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function setExpiresDate(int $expires_at) : BanInterface
     {
         return new Ban(
@@ -113,6 +129,14 @@ final class Ban implements BanInterface
     public function getReason() : string
     {
         return $this->reason;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function hasReason() : bool
+    {
+        return !empty($this->reason);
     }
 
     /**

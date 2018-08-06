@@ -176,4 +176,16 @@ abstract class PDORepository implements RepositoryInterface
     {
         return static::$pdo->commit();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getLastInsertId() : string
+    {
+        if (TINYIB_DBDRIVER === 'pgsql') {
+            return static::$pdo->lastInsertId($this->table_name . '_id_seq');
+        } else {
+            return static::$pdo->lastInsertId();
+        }
+    }
 }

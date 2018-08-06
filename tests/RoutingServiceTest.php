@@ -7,13 +7,14 @@ use TinyIB\Cache\InMemoryCache;
 use TinyIB\Controller\ManageController;
 use TinyIB\Controller\PostController;
 use TinyIB\Controller\SettingsController;
+use TinyIB\Request;
+use TinyIB\Service\BanService;
 use TinyIB\Service\CryptographyService;
 use TinyIB\Service\PostService;
 use TinyIB\Service\RendererService;
 use TinyIB\Service\RoutingService;
 use TinyIB\Service\RoutingServiceInterface;
 use VVatashi\Router\Router;
-use TinyIB\Request;
 
 final class RoutingServiceTest extends TestCase
 {
@@ -78,11 +79,12 @@ final class RoutingServiceTest extends TestCase
         $twig->addGlobal('is_installed_via_git', false);
         $renderer = new RendererService($cache, $post_repository, $twig);
 
+        $ban_service = new BanService($ban_repository);
         $cryptography_service = new CryptographyService();
         $post_service = new PostService($cryptography_service);
 
-        $manage_controller = new ManageController($cache, $ban_repository, $post_repository, $renderer);
-        $post_controller = new PostController($cache, $ban_repository, $post_repository, $post_service, $renderer);
+        $manage_controller = new ManageController($cache, $post_repository, $ban_service, $renderer);
+        $post_controller = new PostController($cache, $post_repository, $ban_service, $post_service, $renderer);
         $settings_controller = new SettingsController($cache, $renderer);
 
         $routing_service = new RoutingService(
