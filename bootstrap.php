@@ -23,6 +23,7 @@ use TinyIB\Repository\PDOBanRepository;
 use TinyIB\Repository\PDOCacheRepository;
 use TinyIB\Repository\PDOPostRepository;
 use TinyIB\Repository\PostRepositoryInterface;
+use TinyIB\Request;
 use TinyIB\Response;
 use TinyIB\Service\CryptographyService;
 use TinyIB\Service\CryptographyServiceInterface;
@@ -202,23 +203,9 @@ $container->registerType(ManageControllerInterface::class, ManageController::cla
 $container->registerType(PostControllerInterface::class, PostController::class);
 $container->registerType(SettingsControllerInterface::class, SettingsController::class);
 
-// Get request path without board, query and html extension.
-$path = $_SERVER['REQUEST_URI'];
-$prefix = '/' . TINYIB_BOARD . '/';
-$prefix_length = strlen($prefix);
-
-if (strncmp($path, $prefix, $prefix_length) === 0) {
-    $path = substr($path, $prefix_length);
-}
-
-$path = strtok($path, '?#');
-
-if (substr($path, -5) === '.html') {
-    $path = substr($path, 0, -5);
-}
-
 // Resolve route.
+$request = Request::getCurrentRequest();
 /** @var \TinyIB\Service\RoutingServiceInterface $routing_service */
 $routing_service = $container->get(RoutingServiceInterface::class);
-$response = $routing_service->resolve($path);
+$response = $routing_service->resolve($request);
 $response->send();

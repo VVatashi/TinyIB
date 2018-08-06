@@ -6,6 +6,7 @@ use TinyIB\Cache\CacheInterface;
 use TinyIB\Functions;
 use TinyIB\Repository\BanRepositoryInterface;
 use TinyIB\Repository\PostRepositoryInterface;
+use TinyIB\Request;
 use TinyIB\Response;
 use TinyIB\Service\RendererServiceInterface;
 
@@ -46,7 +47,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function status()
+    public function status(Request $request) : Response
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -111,7 +112,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function listBans($bans)
+    public function listBans(Request $request) : Response
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -127,7 +128,8 @@ class ManageController implements ManageControllerInterface
 
         $this->ban_repository->clearExpiredBans();
 
-        $data['ip'] = $bans;
+        $query = $request->getQuery();
+        $data['ip'] = !empty($query['bans']) ? $query['bans'] : '';
         $data['bans'] = $this->ban_repository->allBans();
         return Response::ok($this->renderer->render('manage_bans.twig', $data));
     }
@@ -135,7 +137,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function addBan($bans, $ip, $expire = 0, $reason = '')
+    public function addBan(Request $request) : Response
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -150,13 +152,16 @@ class ManageController implements ManageControllerInterface
         }
 
         $this->ban_repository->clearExpiredBans();
+        $ip = $request_data['ip'];
         $ban_exists = $this->ban_repository->banByIP($ip);
-
         if (!empty($ban_exists)) {
             $message = 'Sorry, there is already a ban on record for that IP address.';
             return Response::badRequest($message);
         }
 
+        $request_data = $request->getData();
+        $expire = isset($request_data['expire']) ? $request_data['expire'] : null;
+        $reason = isset($request_data['reason']) ? $request_data['reason'] : null;
         $ban = [
             'ip' => $ip,
             'expire' => ($expire > 0) ? (time() + $expire) : 0,
@@ -165,7 +170,8 @@ class ManageController implements ManageControllerInterface
 
         $this->ban_repository->insertBan($ban);
 
-        $data['ip'] = $bans;
+        $query = $request->getQuery();
+        $data['ip'] = !empty($query['bans']) ? $query['bans'] : '';
         $data['bans'] = $this->ban_repository->allBans();
         $data['text'] = 'Ban record added for ' . $ban['ip'];
         return Response::ok($this->renderer->render('manage_bans.twig', $data));
@@ -174,7 +180,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function liftBan($bans, $id)
+    public function liftBan(Request $request) : Response
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -188,6 +194,8 @@ class ManageController implements ManageControllerInterface
             return Response::ok($this->renderer->render('manage_login_form.twig', $data));
         }
 
+        $query = $request->getQuery();
+        $id = $query['lift'];
         $this->ban_repository->clearExpiredBans();
         $ban = $this->ban_repository->banByID($id);
 
@@ -198,7 +206,7 @@ class ManageController implements ManageControllerInterface
 
         $this->ban_repository->deleteBanByID($id);
 
-        $data['ip'] = $bans;
+        $data['ip'] = !empty($query['bans']) ? $query['bans'] : '';
         $data['bans'] = $this->ban_repository->allBans();
         $data['text'] = 'Ban record lifted for ' . $ban['ip'];
         return Response::ok($this->renderer->render('manage_bans.twig', $data));
@@ -207,7 +215,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function moderate($id = 0)
+    public function moderate(Request $request) : Response
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -221,6 +229,9 @@ class ManageController implements ManageControllerInterface
             return Response::ok($this->renderer->render('manage_login_form.twig', $data));
         }
 
+        $path = $request->getPath();
+        $path_parts = explode('/', $path);
+        $id = count($path_parts) > 2 ? (int)$path_parts[2] : 0;
         if ($id <= 0) {
             return Response::ok($this->renderer->render('manage_moderate_form.twig', $data));
         }
@@ -262,7 +273,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function delete($id)
+    public function delete(Request $request) : Response
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -276,6 +287,7 @@ class ManageController implements ManageControllerInterface
             return Response::ok($this->renderer->render('manage_login_form.twig', $data));
         }
 
+        $id = (int)explode('/', $request->getPath())[2];
         /** @var \TinyIB\Model\PostInterface $post */
         $post = $this->post_repository->getPostByID($id);
         if ($post === null) {
@@ -301,7 +313,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function approve($id)
+    public function approve(Request $request) : Response
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -314,6 +326,8 @@ class ManageController implements ManageControllerInterface
         if (!$logged_in) {
             return Response::ok($this->renderer->render('manage_login_form.twig', $data));
         }
+
+        $id = (int)explode('/', $request->getPath())[2];
 
         if ($id <= 0) {
             $message = 'Form data was lost. Please go back and try again.';
@@ -348,7 +362,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function setSticky($id, $sticky = true)
+    public function setSticky(Request $request) : Response
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -362,6 +376,7 @@ class ManageController implements ManageControllerInterface
             return Response::ok($this->renderer->render('manage_login_form.twig', $data));
         }
 
+        $id = (int)explode('/', $request->getPath())[2];
         if ($id <= 0) {
             $message = 'Form data was lost. Please go back and try again.';
             return Response::badRequest($message);
@@ -374,6 +389,8 @@ class ManageController implements ManageControllerInterface
             return Response::notFound($message);
         }
 
+        $query = $request->getQuery();
+        $sticky = !empty($query['setsticky']) ? (bool)intval($query['setsticky']) : false;
         $this->post_repository->stickyThreadByID($id, $sticky);
         $this->cache->delete(TINYIB_BOARD . ':post:' . $id);
         $this->cache->delete(TINYIB_BOARD . ':index_post:' . $id);
@@ -389,7 +406,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function rawPost()
+    public function rawPost(Request $request) : Response
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -409,7 +426,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function rebuildAll()
+    public function rebuildAll(Request $request) : Response
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -435,7 +452,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function update()
+    public function update(Request $request) : Response
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -459,7 +476,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function logout()
+    public function logout(Request $request) : Response
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 

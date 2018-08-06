@@ -2,6 +2,7 @@
 
 namespace TinyIB\Service;
 
+use TinyIB\Request;
 use TinyIB\Response;
 
 interface RoutingServiceInterface
@@ -9,9 +10,9 @@ interface RoutingServiceInterface
     /**
      * Resolves route.
      *
-     * @param string $path
+     * @param \TinyIB\Request $request
      *
      * @return \TinyIB\Response
      */
-    public function resolve(string $path) : Response;
+    public function resolve(Request $request) : Response;
 }

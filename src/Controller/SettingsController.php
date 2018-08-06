@@ -2,8 +2,9 @@
 
 namespace TinyIB\Controller;
 
-use TinyIB\Response;
 use TinyIB\Cache\CacheInterface;
+use TinyIB\Request;
+use TinyIB\Response;
 use TinyIB\Service\RendererServiceInterface;
 
 class SettingsController implements SettingsControllerInterface
@@ -29,7 +30,7 @@ class SettingsController implements SettingsControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function settings()
+    public function settings(Request $request) : Response
     {
         return Response::ok($this->renderer->render('settings.twig'));
     }

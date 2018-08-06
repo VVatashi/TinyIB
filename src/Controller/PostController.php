@@ -7,6 +7,7 @@ use TinyIB\Functions;
 use TinyIB\Model\Post;
 use TinyIB\Repository\BanRepositoryInterface;
 use TinyIB\Repository\PostRepositoryInterface;
+use TinyIB\Request;
 use TinyIB\Response;
 use TinyIB\Service\PostServiceInterface;
 use TinyIB\Service\RendererServiceInterface;
@@ -229,7 +230,7 @@ final class PostController implements PostControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function create($data)
+    public function create(Request $request) : Response
     {
         global $tinyib_embeds, $tinyib_uploads;
 
@@ -249,6 +250,16 @@ final class PostController implements PostControllerInterface
             $this->checkMessageSize($data['message']);
             $this->checkFlood();
         }
+
+        $data = array_intersect_key($request->getData(), array_flip([
+            'name',
+            'email',
+            'subject',
+            'message',
+            'password',
+            'embed',
+            'parent',
+        ]));
 
         $post = new Post((int)$data['parent']);
         $post->setIP($_SERVER['REMOTE_ADDR']);
@@ -559,8 +570,10 @@ final class PostController implements PostControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function delete($id, $password = null)
+    public function delete(Request $request) : Response
     {
+        $data = $request->getData();
+        $id = isset($data['delete']) ? $data['delete'] : null;
         if (empty($id)) {
             $message = 'Tick the box next to a post and click "Delete" to delete it.';
             return Response::badRequest($message);
@@ -578,6 +591,7 @@ final class PostController implements PostControllerInterface
             return Response::notFound($message);
         }
 
+        $password = isset($data['password']) ? $data['password'] : null;
         $password_hash = md5(md5($password));
         if ($password_hash !== $post->getPassword()) {
             return Response::forbidden('Invalid password.');

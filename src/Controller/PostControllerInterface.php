@@ -2,27 +2,26 @@
 
 namespace TinyIB\Controller;
 
+use TinyIB\Request;
+use TinyIB\Response;
+
 interface PostControllerInterface
 {
     /**
      * Create post.
      *
-     * @param array $data
-     *   Post data.
+     * @param \TinyIB\Request
      *
      * @return \TinyIB\Response
      */
-    public function create($data);
+    public function create(Request $request) : Response;
 
     /**
      * Deletes specified post.
      *
-     * @param integer $id
-     *   Post id.
-     * @param string|null $password
-     *   Post delete password.
+     * @param \TinyIB\Request
      *
      * @return \TinyIB\Response
      */
-    public function delete($id, $password = null);
+    public function delete(Request $request) : Response;
 }
