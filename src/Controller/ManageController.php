@@ -2,10 +2,11 @@
 
 namespace TinyIB\Controller;
 
-use TinyIB\Response;
 use TinyIB\Cache\CacheInterface;
+use TinyIB\Functions;
 use TinyIB\Repository\BanRepositoryInterface;
 use TinyIB\Repository\PostRepositoryInterface;
+use TinyIB\Response;
 use TinyIB\Service\RendererServiceInterface;
 
 class ManageController implements ManageControllerInterface
@@ -47,7 +48,7 @@ class ManageController implements ManageControllerInterface
      */
     public function status()
     {
-        list($logged_in, $is_admin) = manageCheckLogIn();
+        list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
         $data = [
             'is_admin' => $is_admin,
@@ -112,7 +113,7 @@ class ManageController implements ManageControllerInterface
      */
     public function listBans($bans)
     {
-        list($logged_in, $is_admin) = manageCheckLogIn();
+        list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
         $data = [
             'is_admin' => $is_admin,
@@ -136,7 +137,7 @@ class ManageController implements ManageControllerInterface
      */
     public function addBan($bans, $ip, $expire = 0, $reason = '')
     {
-        list($logged_in, $is_admin) = manageCheckLogIn();
+        list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
         $data = [
             'is_admin' => $is_admin,
@@ -175,7 +176,7 @@ class ManageController implements ManageControllerInterface
      */
     public function liftBan($bans, $id)
     {
-        list($logged_in, $is_admin) = manageCheckLogIn();
+        list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
         $data = [
             'is_admin' => $is_admin,
@@ -208,7 +209,7 @@ class ManageController implements ManageControllerInterface
      */
     public function moderate($id = 0)
     {
-        list($logged_in, $is_admin) = manageCheckLogIn();
+        list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
         $data = [
             'is_admin' => $is_admin,
@@ -263,7 +264,7 @@ class ManageController implements ManageControllerInterface
      */
     public function delete($id)
     {
-        list($logged_in, $is_admin) = manageCheckLogIn();
+        list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
         $data = [
             'is_admin' => $is_admin,
@@ -302,7 +303,7 @@ class ManageController implements ManageControllerInterface
      */
     public function approve($id)
     {
-        list($logged_in, $is_admin) = manageCheckLogIn();
+        list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
         $data = [
             'is_admin' => $is_admin,
@@ -349,7 +350,7 @@ class ManageController implements ManageControllerInterface
      */
     public function setSticky($id, $sticky = true)
     {
-        list($logged_in, $is_admin) = manageCheckLogIn();
+        list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
         $data = [
             'is_admin' => $is_admin,
@@ -390,7 +391,7 @@ class ManageController implements ManageControllerInterface
      */
     public function rawPost()
     {
-        list($logged_in, $is_admin) = manageCheckLogIn();
+        list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
         $data = [
             'is_admin' => $is_admin,
@@ -410,7 +411,7 @@ class ManageController implements ManageControllerInterface
      */
     public function rebuildAll()
     {
-        list($logged_in, $is_admin) = manageCheckLogIn();
+        list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
         $data = [
             'is_admin' => $is_admin,
@@ -436,7 +437,7 @@ class ManageController implements ManageControllerInterface
      */
     public function update()
     {
-        list($logged_in, $is_admin) = manageCheckLogIn();
+        list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
         $data = [
             'is_admin' => $is_admin,
@@ -460,7 +461,7 @@ class ManageController implements ManageControllerInterface
      */
     public function logout()
     {
-        list($logged_in, $is_admin) = manageCheckLogIn();
+        list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
         $data = [
             'is_admin' => $is_admin,

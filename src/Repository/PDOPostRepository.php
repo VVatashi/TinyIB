@@ -2,6 +2,7 @@
 
 namespace TinyIB\Repository;
 
+use TinyIB\Functions;
 use TinyIB\Model\Post;
 use TinyIB\Model\PostInterface;
 
@@ -327,7 +328,7 @@ final class PDOPostRepository extends PDORepository implements PostRepositoryInt
         $posts = $this->getPostsByThreadID($id, false);
 
         foreach ($posts as $post) {
-            deletePostImages($post);
+            Functions::deletePostImages($post);
             $this->delete(['id' => $post->getID()]);
         }
     }

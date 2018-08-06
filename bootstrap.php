@@ -16,6 +16,7 @@ use TinyIB\Controller\PostController;
 use TinyIB\Controller\PostControllerInterface;
 use TinyIB\Controller\SettingsController;
 use TinyIB\Controller\SettingsControllerInterface;
+use TinyIB\Functions;
 use TinyIB\Repository\BanRepositoryInterface;
 use TinyIB\Repository\CacheRepositoryInterface;
 use TinyIB\Repository\PDOBanRepository;
@@ -144,8 +145,6 @@ define('TINYIB_NEWTHREAD', 0);
 define('TINYIB_INDEXPAGE', false);
 define('TINYIB_RESPAGE', true);
 
-require_once __DIR__ . '/src/functions.php';
-
 if (!empty(TINYIB_TIMEZONE)) {
     date_default_timezone_set(TINYIB_TIMEZONE);
 }
@@ -187,7 +186,7 @@ $container->registerCallback(Twig_Environment::class, function ($container) use 
 
     $twig->addGlobal('embeds', $tinyib_embeds);
     $twig->addGlobal('uploads', $tinyib_uploads);
-    $twig->addGlobal('is_installed_via_git', installedViaGit());
+    $twig->addGlobal('is_installed_via_git', Functions::installedViaGit());
 
     return $twig;
 });

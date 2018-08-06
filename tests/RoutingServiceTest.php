@@ -61,8 +61,6 @@ final class RoutingServiceTest extends TestCase
 
         define('TINYIB_DBMIGRATE', false);
 
-        require_once __DIR__ . '/../src/functions.php';
-
         $router = new Router();
         $cache = new InMemoryCache();
 
