@@ -2,6 +2,9 @@
 
 namespace TinyIB\Repository;
 
+use TinyIB\Model\Ban;
+use TinyIB\Model\BanInterface;
+
 class PDOBanRepository extends PDORepository implements BanRepositoryInterface
 {
     public function __construct()
@@ -50,42 +53,77 @@ class PDOBanRepository extends PDORepository implements BanRepositoryInterface
     }
 
     /**
-     * {@inheritDoc}
+     * Creates a ban model from a data array.
+     *
+     * @param array $data
+     *
+     * @return TinyIB\Model\BanInterface
      */
-    public function banByID($id)
+    protected function createModel(array $data) : BanInterface
     {
-        return $this->getOne(['id' => $id]);
+        $ban = new Ban(
+            $data['id'],
+            $data['ip'],
+            $data['timestamp'],
+            $data['expire'],
+            $data['reason']
+        );
+
+        return $ban;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function banByIP($ip)
+    public function banByID(int $id)
     {
-        return $this->getOne(['ip' => $ip]);
+        $data = $this->getOne(['id' => $id]);
+        if ($data === false) {
+            return null;
+        }
+
+        return $this->createModel($data);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function allBans()
+    public function banByIP(string $ip)
     {
-        return $this->getAll([], 'timestamp DESC');
+        $data = $this->getOne(['ip' => $ip]);
+        if ($data === false) {
+            return null;
+        }
+
+        return $this->createModel($data);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function insertBan($ban)
+    public function allBans() : array
     {
-        $now = time();
+        $data = $this->getAll([], 'timestamp DESC');
+        return array_map([$this, 'createModel'], $data);
+    }
 
-        return $this->insert([
-            'ip' => $ban['ip'],
-            'timestamp' => $now,
-            'expire' => $ban['expire'],
-            'reason' => $ban['reason'],
+    /**
+     * {@inheritDoc}
+     */
+    public function insertBan(BanInterface $ban) : int
+    {
+        $this->insert([
+            'ip' => $ban->getIP(),
+            'timestamp' => $ban->getCreatedDate(),
+            'expire' => $ban->getExpiresDate(),
+            'reason' => $ban->getReason(),
         ]);
+
+        if (TINYIB_DBDRIVER === 'pgsql') {
+            return static::$pdo->lastInsertId(TINYIB_DBBANS . '_id_seq');
+        } else {
+            return static::$pdo->lastInsertId();
+        }
     }
 
     /**
@@ -104,7 +142,7 @@ class PDOBanRepository extends PDORepository implements BanRepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function deleteBanByID($id)
+    public function deleteBanByID(int $id)
     {
         $this->delete(['id' => $id]);
     }

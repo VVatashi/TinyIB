@@ -2,6 +2,8 @@
 
 namespace TinyIB\Tests;
 
+use TinyIB\Model\Ban;
+use TinyIB\Model\BanInterface;
 use TinyIB\Repository\BanRepositoryInterface;
 
 class BanRepositoryMock implements BanRepositoryInterface
@@ -89,33 +91,33 @@ class BanRepositoryMock implements BanRepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function banByID($id)
+    public function banByID(int $id)
     {
-        return [];
+        return new Ban(0, '', 0, 0, '');
     }
 
     /**
      * {@inheritDoc}
      */
-    public function banByIP($ip)
+    public function banByIP(string $ip)
     {
-        return [];
+        return new Ban(0, '', 0, 0, '');
     }
 
     /**
      * {@inheritDoc}
      */
-    public function allBans()
+    public function allBans() : array
     {
-        return [];
+        return new Ban(0, '', 0, 0, '');
     }
 
     /**
      * {@inheritDoc}
      */
-    public function insertBan($ban)
+    public function insertBan(BanInterface $ban) : int
     {
-        return [];
+        return 0;
     }
 
     /**
@@ -128,7 +130,7 @@ class BanRepositoryMock implements BanRepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function deleteBanByID($id)
+    public function deleteBanByID(int $id)
     {
     }
 }
