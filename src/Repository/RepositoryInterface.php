@@ -76,4 +76,12 @@ interface RepositoryInterface
      * @return bool
      */
     public function commit();
+
+    /**
+     * Returns ID of the last inserted row.
+     *
+     * @return string
+     *   ID.
+     */
+    public function getLastInsertId() : string;
 }

@@ -16,13 +16,17 @@ use TinyIB\Controller\PostController;
 use TinyIB\Controller\PostControllerInterface;
 use TinyIB\Controller\SettingsController;
 use TinyIB\Controller\SettingsControllerInterface;
+use TinyIB\Functions;
 use TinyIB\Repository\BanRepositoryInterface;
 use TinyIB\Repository\CacheRepositoryInterface;
 use TinyIB\Repository\PDOBanRepository;
 use TinyIB\Repository\PDOCacheRepository;
 use TinyIB\Repository\PDOPostRepository;
 use TinyIB\Repository\PostRepositoryInterface;
+use TinyIB\Request;
 use TinyIB\Response;
+use TinyIB\Service\BanService;
+use TinyIB\Service\BanServiceInterface;
 use TinyIB\Service\CryptographyService;
 use TinyIB\Service\CryptographyServiceInterface;
 use TinyIB\Service\PostService;
@@ -144,8 +148,6 @@ define('TINYIB_NEWTHREAD', 0);
 define('TINYIB_INDEXPAGE', false);
 define('TINYIB_RESPAGE', true);
 
-require_once __DIR__ . '/src/functions.php';
-
 if (!empty(TINYIB_TIMEZONE)) {
     date_default_timezone_set(TINYIB_TIMEZONE);
 }
@@ -187,13 +189,14 @@ $container->registerCallback(Twig_Environment::class, function ($container) use 
 
     $twig->addGlobal('embeds', $tinyib_embeds);
     $twig->addGlobal('uploads', $tinyib_uploads);
-    $twig->addGlobal('is_installed_via_git', installedViaGit());
+    $twig->addGlobal('is_installed_via_git', Functions::installedViaGit());
 
     return $twig;
 });
 
 $container->registerType(RouterInterface::class, Router::class);
 
+$container->registerType(BanServiceInterface::class, BanService::class);
 $container->registerType(CryptographyServiceInterface::class, CryptographyService::class);
 $container->registerType(PostServiceInterface::class, PostService::class);
 $container->registerType(RendererServiceInterface::class, RendererService::class);
@@ -203,23 +206,9 @@ $container->registerType(ManageControllerInterface::class, ManageController::cla
 $container->registerType(PostControllerInterface::class, PostController::class);
 $container->registerType(SettingsControllerInterface::class, SettingsController::class);
 
-// Get request path without board, query and html extension.
-$path = $_SERVER['REQUEST_URI'];
-$prefix = '/' . TINYIB_BOARD . '/';
-$prefix_length = strlen($prefix);
-
-if (strncmp($path, $prefix, $prefix_length) === 0) {
-    $path = substr($path, $prefix_length);
-}
-
-$path = strtok($path, '?#');
-
-if (substr($path, -5) === '.html') {
-    $path = substr($path, 0, -5);
-}
-
 // Resolve route.
+$request = Request::getCurrentRequest();
 /** @var \TinyIB\Service\RoutingServiceInterface $routing_service */
 $routing_service = $container->get(RoutingServiceInterface::class);
-$response = $routing_service->resolve($path);
+$response = $routing_service->resolve($request);
 $response->send();

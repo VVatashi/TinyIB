@@ -7,6 +7,8 @@ use TinyIB\Cache\InMemoryCache;
 use TinyIB\Controller\ManageController;
 use TinyIB\Controller\PostController;
 use TinyIB\Controller\SettingsController;
+use TinyIB\Request;
+use TinyIB\Service\BanService;
 use TinyIB\Service\CryptographyService;
 use TinyIB\Service\PostService;
 use TinyIB\Service\RendererService;
@@ -61,8 +63,6 @@ final class RoutingServiceTest extends TestCase
 
         define('TINYIB_DBMIGRATE', false);
 
-        require_once __DIR__ . '/../src/functions.php';
-
         $router = new Router();
         $cache = new InMemoryCache();
 
@@ -79,11 +79,12 @@ final class RoutingServiceTest extends TestCase
         $twig->addGlobal('is_installed_via_git', false);
         $renderer = new RendererService($cache, $post_repository, $twig);
 
+        $ban_service = new BanService($ban_repository);
         $cryptography_service = new CryptographyService();
         $post_service = new PostService($cryptography_service);
 
-        $manage_controller = new ManageController($cache, $ban_repository, $post_repository, $renderer);
-        $post_controller = new PostController($cache, $ban_repository, $post_repository, $post_service, $renderer);
+        $manage_controller = new ManageController($cache, $post_repository, $ban_service, $renderer);
+        $post_controller = new PostController($cache, $post_repository, $ban_service, $post_service, $renderer);
         $settings_controller = new SettingsController($cache, $renderer);
 
         $routing_service = new RoutingService(
@@ -98,79 +99,79 @@ final class RoutingServiceTest extends TestCase
         $this->assertInstanceOf(RoutingServiceInterface::class, $routing_service);
         $this->assertInstanceOf(RoutingService::class, $routing_service);
 
-        $response = $routing_service->resolve('');
+        $response = $routing_service->resolve(new Request(''));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('0');
+        $response = $routing_service->resolve(new Request('0'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('1');
+        $response = $routing_service->resolve(new Request('1'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('2');
+        $response = $routing_service->resolve(new Request('2'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('res/1');
+        $response = $routing_service->resolve(new Request('res/1'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('res/2');
+        $response = $routing_service->resolve(new Request('res/2'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('res/3');
+        $response = $routing_service->resolve(new Request('res/3'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('manage');
+        $response = $routing_service->resolve(new Request('manage'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('manage/rebuildall');
+        $response = $routing_service->resolve(new Request('manage/rebuildall'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('manage/approve/1');
+        $response = $routing_service->resolve(new Request('manage/approve/1'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('manage/approve/2');
+        $response = $routing_service->resolve(new Request('manage/approve/2'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('manage/approve/3');
+        $response = $routing_service->resolve(new Request('manage/approve/3'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('manage/bans');
+        $response = $routing_service->resolve(new Request('manage/bans'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('manage/delete/1');
+        $response = $routing_service->resolve(new Request('manage/delete/1'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('manage/delete/2');
+        $response = $routing_service->resolve(new Request('manage/delete/2'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('manage/delete/3');
+        $response = $routing_service->resolve(new Request('manage/delete/3'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('manage/logout');
+        $response = $routing_service->resolve(new Request('manage/logout'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('manage/moderate');
+        $response = $routing_service->resolve(new Request('manage/moderate'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('manage/moderate/1');
+        $response = $routing_service->resolve(new Request('manage/moderate/1'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('manage/moderate/2');
+        $response = $routing_service->resolve(new Request('manage/moderate/2'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('manage/rawpost');
+        $response = $routing_service->resolve(new Request('manage/rawpost'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('manage/sticky/1');
+        $response = $routing_service->resolve(new Request('manage/sticky/1'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('manage/sticky/2');
+        $response = $routing_service->resolve(new Request('manage/sticky/2'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('manage/sticky/3');
+        $response = $routing_service->resolve(new Request('manage/sticky/3'));
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = $routing_service->resolve('manage/update');
+        $response = $routing_service->resolve(new Request('manage/update'));
         $this->assertEquals(200, $response->getStatusCode());
 
         /*$response = $routing_service->resolve('post/create');
@@ -179,7 +180,7 @@ final class RoutingServiceTest extends TestCase
         $response = $routing_service->resolve('post/delete');
         $this->assertEquals(200, $response->getStatusCode());*/
 
-        $response = $routing_service->resolve('settings');
+        $response = $routing_service->resolve(new Request('settings'));
         $this->assertEquals(200, $response->getStatusCode());
     }
 }

@@ -2,11 +2,13 @@
 
 namespace TinyIB\Controller;
 
-use TinyIB\Response;
 use TinyIB\Cache\CacheInterface;
+use TinyIB\Functions;
 use TinyIB\Model\Post;
-use TinyIB\Repository\BanRepositoryInterface;
 use TinyIB\Repository\PostRepositoryInterface;
+use TinyIB\Request;
+use TinyIB\Response;
+use TinyIB\Service\BanServiceInterface;
 use TinyIB\Service\PostServiceInterface;
 use TinyIB\Service\RendererServiceInterface;
 
@@ -15,11 +17,11 @@ final class PostController implements PostControllerInterface
     /** @var \TinyIB\Cache\CacheInterface $cache */
     protected $cache;
 
-    /** @var \TinyIB\Repository\BanRepositoryInterface $ban_repository */
-    protected $ban_repository;
-
     /** @var \TinyIB\Repository\PostRepositoryInterface $post_repository */
     protected $post_repository;
+
+    /** @var \TinyIB\Service\BanServiceInterface $ban_service */
+    protected $ban_service;
 
     /** @var \TinyIB\Service\PostServiceInterface $post_service */
     protected $post_service;
@@ -31,20 +33,21 @@ final class PostController implements PostControllerInterface
      * Constructs new post controller.
      *
      * @param \TinyIB\Cache\CacheInterface $cache
-     * @param \TinyIB\Repository\BanRepositoryInterface $ban_repository
      * @param \TinyIB\Repository\PostRepositoryInterface $post_repository
+     * @param \TinyIB\Service\BanServiceInterface $renderer
+     * @param \TinyIB\Service\PostServiceInterface $renderer
      * @param \TinyIB\Service\RendererServiceInterface $renderer
      */
     public function __construct(
         CacheInterface $cache,
-        BanRepositoryInterface $ban_repository,
         PostRepositoryInterface $post_repository,
+        BanServiceInterface $ban_service,
         PostServiceInterface $post_service,
         RendererServiceInterface $renderer
     ) {
         $this->cache = $cache;
-        $this->ban_repository = $ban_repository;
         $this->post_repository = $post_repository;
+        $this->ban_service = $ban_service;
         $this->post_service = $post_service;
         $this->renderer = $renderer;
     }
@@ -60,7 +63,7 @@ final class PostController implements PostControllerInterface
     protected function isRawPost()
     {
         if (isset($_POST['rawpost'])) {
-            list($loggedin, $isadmin) = manageCheckLogIn();
+            list($loggedin, $isadmin) = Functions::manageCheckLogIn();
             if ($loggedin) {
                 return true;
             }
@@ -116,15 +119,16 @@ final class PostController implements PostControllerInterface
 
     protected function checkBanned()
     {
-        $ban = $this->ban_repository->banByIP($_SERVER['REMOTE_ADDR']);
-
-        if ($ban) {
-            if ($ban['expire'] == 0 || $ban['expire'] > time()) {
-                $expire = ($ban['expire'] > 0) ? ('<br>This ban will expire ' . date('y/m/d(D)H:i:s', $ban['expire'])) : '<br>This ban is permanent and will not expire.';
-                $reason = ($ban['reason'] == '') ? '' : ('<br>Reason: ' . $ban['reason']);
-                throw new \Exception('Your IP address ' . $ban['ip'] . ' has been banned from posting on this image board.  ' . $expire . $reason);
+        $ban = $this->ban_service->getByIP($_SERVER['REMOTE_ADDR']);
+        if (isset($ban)) {
+            if (!$ban->isExpired()) {
+                $expire = $ban->isPermanent()
+                    ? '<br>This ban is permanent and will not expire.'
+                    : '<br>This ban will expire ' . date('y/m/d(D)H:i:s', $ban->getExpiresDate());
+                $reason = $ban->hasReason() ? '<br>Reason: ' . $ban->getReason() : '';
+                throw new \Exception('Your IP address ' . $ban->getIP() . ' has been banned from posting on this image board.  ' . $expire . $reason);
             } else {
-                $this->ban_repository->clearExpiredBans();
+                $this->ban_service->removeExpired();
             }
         }
     }
@@ -146,7 +150,7 @@ final class PostController implements PostControllerInterface
             if ($last_post !== null) {
                 $timestamp = $last_post->getCreateTime();
                 if (time() - $timestamp < TINYIB_DELAY) {
-                    throw new \Exception("Please wait a moment before posting again.  You will be able to make another post in " . (TINYIB_DELAY - (time() - $timestamp)) . " " . plural("second", (TINYIB_DELAY - (time() - $timestamp))) . ".");
+                    throw new \Exception("Please wait a moment before posting again.  You will be able to make another post in " . (TINYIB_DELAY - (time() - $timestamp)) . " " . Functions::plural('second', (TINYIB_DELAY - (time() - $timestamp))) . '.');
                 }
             }
         }
@@ -228,7 +232,7 @@ final class PostController implements PostControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function create($data)
+    public function create(Request $request) : Response
     {
         global $tinyib_embeds, $tinyib_uploads;
 
@@ -239,8 +243,18 @@ final class PostController implements PostControllerInterface
             return Response::serviceUnavailable($message);
         }
 
-        list($logged_in, $is_admin) = manageCheckLogIn();
+        list($logged_in, $is_admin) = Functions::manageCheckLogIn();
         $rawpost = $this->isRawPost();
+
+        $data = array_intersect_key($request->getData(), array_flip([
+            'name',
+            'email',
+            'subject',
+            'message',
+            'password',
+            'embed',
+            'parent',
+        ]));
 
         if (!$logged_in) {
             $this->checkCAPTCHA();
@@ -279,7 +293,7 @@ final class PostController implements PostControllerInterface
         $post->setPassword(!empty($data['password']) ? md5(md5($data['password'])) : '');
 
         if (isset($data['embed']) && trim(!empty($data['embed']))) {
-            list($service, $embed) = getEmbed(trim($data['embed']));
+            list($service, $embed) = Functions::getEmbed(trim($data['embed']));
 
             if (empty($embed) || !isset($embed['html']) || !isset($embed['title']) || !isset($embed['thumbnail_url'])) {
                 $embeds = implode("/", array_keys($tinyib_embeds));
@@ -290,7 +304,7 @@ final class PostController implements PostControllerInterface
             $post->setFileHash($service);
             $temp_file = time() . substr(microtime(), 2, 3);
             $file_location = 'thumb/' . $temp_file;
-            file_put_contents($file_location, url_get_contents($embed['thumbnail_url']));
+            file_put_contents($file_location, Functions::url_get_contents($embed['thumbnail_url']));
 
             $file_info = getimagesize($file_location);
             $file_mime = mime_content_type($file_location);
@@ -308,14 +322,14 @@ final class PostController implements PostControllerInterface
             }
             $thumb_location = 'thumb/' . $post->getThumbnailName();
 
-            list($thumb_maxwidth, $thumb_maxheight) = thumbnailDimensions($post);
+            list($thumb_maxwidth, $thumb_maxheight) = Functions::thumbnailDimensions($post);
 
-            if (!createThumbnail($file_location, $thumb_location, $thumb_maxwidth, $thumb_maxheight)) {
+            if (!Functions::createThumbnail($file_location, $thumb_location, $thumb_maxwidth, $thumb_maxheight)) {
                 return Response::serverError("Could not create thumbnail.");
             }
 
             if ($embed['type'] !== 'photo') {
-                addVideoOverlay($thumb_location);
+                Functions::addVideoOverlay($thumb_location);
             }
 
             $thumb_info = getimagesize($thumb_location);
@@ -325,7 +339,7 @@ final class PostController implements PostControllerInterface
             $post->setOriginalFileName($this->cleanString($embed['title']));
             $post->setFileName($embed['html']);
         } elseif (isset($_FILES['file']) && !empty($_FILES['file']['name'])) {
-            validateFileUpload();
+            Functions::validateFileUpload();
 
             if (!is_file($_FILES['file']['tmp_name']) || !is_readable($_FILES['file']['tmp_name'])) {
                 return Response::serverError('File transfer failure. Please retry the submission.');
@@ -404,7 +418,7 @@ final class PostController implements PostControllerInterface
                 $post->setImageHeight(max(0, $height));
 
                 if ($post->getImageWidth() > 0 && $post->getImageHeight() > 0) {
-                    list($thumb_maxwidth, $thumb_maxheight) = thumbnailDimensions($post);
+                    list($thumb_maxwidth, $thumb_maxheight) = Functions::thumbnailDimensions($post);
                     $post->setThumbnailName("${file_name}s.jpg");
                     $size = max($thumb_maxwidth, $thumb_maxheight);
                     $thumb = $post->getThumbnailName();
@@ -420,7 +434,7 @@ final class PostController implements PostControllerInterface
                         return Response::badRequest('Sorry, your video appears to be corrupt.');
                     }
 
-                    addVideoOverlay("thumb/$thumb");
+                    Functions::addVideoOverlay("thumb/$thumb");
                 }
             } elseif (in_array($file_mime, [
                 'image/jpeg',
@@ -459,7 +473,7 @@ final class PostController implements PostControllerInterface
                 }
 
                 if ($file_mime === 'application/x-shockwave-flash') {
-                    addVideoOverlay("thumb/$thumb");
+                    Functions::addVideoOverlay("thumb/$thumb");
                 }
             } elseif (in_array($file_mime, [
                 'image/jpeg',
@@ -468,10 +482,10 @@ final class PostController implements PostControllerInterface
                 'image/gif',
             ])) {
                 $post->setThumbnailName($file_name . 's.' . $tinyib_uploads[$file_mime][0]);
-                list($thumb_maxwidth, $thumb_maxheight) = thumbnailDimensions($post);
+                list($thumb_maxwidth, $thumb_maxheight) = Functions::thumbnailDimensions($post);
 
                 $thumb = $post->getThumbnailName();
-                if (!createThumbnail($file_location, "thumb/$thumb", $thumb_maxwidth, $thumb_maxheight)) {
+                if (!Functions::createThumbnail($file_location, "thumb/$thumb", $thumb_maxwidth, $thumb_maxheight)) {
                     unlink($file_location);
                     return Response::serverError('Could not create thumbnail.');
                 }
@@ -558,8 +572,10 @@ final class PostController implements PostControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function delete($id, $password = null)
+    public function delete(Request $request) : Response
     {
+        $data = $request->getData();
+        $id = isset($data['delete']) ? $data['delete'] : null;
         if (empty($id)) {
             $message = 'Tick the box next to a post and click "Delete" to delete it.';
             return Response::badRequest($message);
@@ -577,6 +593,7 @@ final class PostController implements PostControllerInterface
             return Response::notFound($message);
         }
 
+        $password = isset($data['password']) ? $data['password'] : null;
         $password_hash = md5(md5($password));
         if ($password_hash !== $post->getPassword()) {
             return Response::forbidden('Invalid password.');

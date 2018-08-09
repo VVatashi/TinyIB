@@ -6,6 +6,7 @@ use TinyIB\Cache\CacheInterface;
 use TinyIB\Controller\ManageControllerInterface;
 use TinyIB\Controller\PostControllerInterface;
 use TinyIB\Controller\SettingsControllerInterface;
+use TinyIB\Request;
 use TinyIB\Response;
 use TinyIB\Service\RendererServiceInterface;
 use VVatashi\Router\RouterInterface;
@@ -24,10 +25,10 @@ class RoutingService implements RoutingServiceInterface
     /** @var \TinyIB\Controller\ManageControllerInterface $manage_controller */
     protected $manage_controller;
 
-    /** @var \TinyIB\Controller\ManageControllerInterface $post_controller */
+    /** @var \TinyIB\Controller\PostControllerInterface $post_controller */
     protected $post_controller;
 
-    /** @var \TinyIB\Controller\ManageControllerInterface $settings_controller */
+    /** @var \TinyIB\Controller\SettingsControllerInterface $settings_controller */
     protected $settings_controller;
 
     /**
@@ -48,93 +49,37 @@ class RoutingService implements RoutingServiceInterface
         $this->post_controller = $post_controller;
         $this->settings_controller = $settings_controller;
 
-        $this->router->add('manage', function ($path) {
-            return $this->manage_controller->status();
-        });
+        $this->router->add('manage', [$this->manage_controller, 'status']);
+        $this->router->add('manage/rebuildall', [$this->manage_controller, 'rebuildAll']);
+        $this->router->add('manage/approve/:id', [$this->manage_controller, 'approve']);
 
-        $this->router->add('manage/rebuildall', function ($path) {
-            return $this->manage_controller->rebuildAll();
-        });
-
-        $this->router->add('manage/approve/:id', function ($path) {
-            $id = (int)explode('/', $path)[2];
-            return $this->manage_controller->approve($id);
-        });
-
-        $this->router->add('manage/bans', function ($path) {
-            $bans = !empty($_GET['bans']) ? $_GET['bans'] : '';
-            if (!empty($_POST['ip'])) {
-                $ip = $_POST['ip'];
-                $expire = isset($_POST['expire']) ? $_POST['expire'] : null;
-                $reason = isset($_POST['reason']) ? $_POST['reason'] : null;
-
-                return $this->manage_controller->addBan($bans, $ip, $expire, $reason);
-            } elseif (!empty($_GET['lift'])) {
-                $lift = $_GET['lift'];
-
-                return $this->manage_controller->liftBan($bans, $lift);
+        $this->router->add('manage/bans', function (Request $request) {
+            $data = $request->getData();
+            $query = $request->getQuery();
+            if (!empty($data['ip'])) {
+                return $this->manage_controller->addBan($request);
+            } elseif (!empty($query['lift'])) {
+                return $this->manage_controller->liftBan($request);
             } else {
-                return $this->manage_controller->listBans($bans);
+                return $this->manage_controller->listBans($request);
             }
         });
 
-        $this->router->add('manage/delete/:id', function ($path) {
-            $id = (int)explode('/', $path)[2];
-            return $this->manage_controller->delete($id);
-        });
+        $this->router->add('manage/delete/:id', [$this->manage_controller, 'delete']);
+        $this->router->add('manage/logout', [$this->manage_controller, 'logout']);
+        $this->router->add('manage/moderate', [$this->manage_controller, 'moderate']);
+        $this->router->add('manage/moderate/:id', [$this->manage_controller, 'moderate']);
+        $this->router->add('manage/rawpost', [$this->manage_controller, 'rawPost']);
+        $this->router->add('manage/sticky/:id', [$this->manage_controller, 'setSticky']);
+        $this->router->add('manage/update', [$this->manage_controller, 'update']);
 
-        $this->router->add('manage/logout', function ($path) {
-            return $this->manage_controller->logout();
-        });
+        $this->router->add('post/create', [$this->post_controller, 'create']);
+        $this->router->add('post/delete', [$this->post_controller, 'delete']);
 
-        $this->router->add('manage/moderate', function ($path) {
-            return $this->manage_controller->moderate();
-        });
+        $this->router->add('settings', [$this->settings_controller, 'settings']);
 
-        $this->router->add('manage/moderate/:id', function ($path) {
-            $id = (int)explode('/', $path)[2];
-            return $this->manage_controller->moderate($id);
-        });
-
-        $this->router->add('manage/rawpost', function ($path) {
-            return $this->manage_controller->rawPost();
-        });
-
-        $this->router->add('manage/sticky/:id', function ($path) {
-            $id = (int)explode('/', $path)[2];
-            $sticky = !empty($_GET['setsticky']) ? (bool)intval($_GET['setsticky']) : false;
-            return $this->manage_controller->setSticky($id, $sticky);
-        });
-
-        $this->router->add('manage/update', function ($path) {
-            return $this->manage_controller->update();
-        });
-
-        $this->router->add('post/create', function ($path) {
-            $data = array_intersect_key($_POST, array_flip([
-                'name',
-                'email',
-                'subject',
-                'message',
-                'password',
-                'embed',
-                'parent',
-            ]));
-            return $this->post_controller->create($data);
-        });
-
-        $this->router->add('post/delete', function ($path) {
-            $id = isset($_POST['delete']) ? $_POST['delete'] : null;
-            $password = isset($_POST['password']) ? $_POST['password'] : null;
-            return $this->post_controller->delete($id, $password);
-        });
-
-        $this->router->add('settings', function ($path) {
-            return $this->settings_controller->settings();
-        });
-
-        $this->router->add('res/:id', function ($path) {
-            $id = (int)explode('/', $path)[1];
+        $this->router->add('res/:id', function (Request $request) {
+            $id = (int)explode('/', $request->getPath())[1];
             $key = TINYIB_BOARD . ':thread:' . $id;
             $data = $this->cache->get($key);
             if (!isset($data)) {
@@ -145,8 +90,8 @@ class RoutingService implements RoutingServiceInterface
             return Response::ok($data);
         });
 
-        $this->router->add(':page', function ($path) {
-            $page = (int)explode('/', $path)[0];
+        $this->router->add(':page', function (Request $request) {
+            $page = (int)explode('/', $request->getPath())[0];
             $key = TINYIB_BOARD . ':page:' . $page;
             $data = $this->cache->get($key);
             if (!isset($data)) {
@@ -157,7 +102,7 @@ class RoutingService implements RoutingServiceInterface
             return Response::ok($data);
         });
 
-        $this->router->add('', function ($path) {
+        $this->router->add('', function (Request $request) {
             $key = TINYIB_BOARD . ':page:0';
             $data = $this->cache->get($key);
             if (!isset($data)) {
@@ -172,9 +117,14 @@ class RoutingService implements RoutingServiceInterface
     /**
      * {@inheritDoc}
      */
-    public function resolve(string $path) : Response
+    public function resolve(Request $request) : Response
     {
+        $path = $request->getPath();
         $handler = $this->router->resolve($path);
-        return isset($handler) ? $handler($path) : Response::notFound('The requested page is not found.');
+        if (!isset($handler)) {
+            return Response::notFound('The requested page is not found.');
+        }
+
+        return $handler($request);
     }
 }

@@ -210,4 +210,12 @@ class PostRepositoryMock implements PostRepositoryInterface
     {
         return null;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getLastInsertId() : string
+    {
+        return '0';
+    }
 }

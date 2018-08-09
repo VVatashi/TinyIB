@@ -2,6 +2,8 @@
 
 namespace TinyIB\Tests;
 
+use TinyIB\Model\Ban;
+use TinyIB\Model\BanInterface;
 use TinyIB\Repository\BanRepositoryInterface;
 
 class BanRepositoryMock implements BanRepositoryInterface
@@ -89,46 +91,8 @@ class BanRepositoryMock implements BanRepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function banByID($id)
+    public function getLastInsertId() : string
     {
-        return [];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function banByIP($ip)
-    {
-        return [];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function allBans()
-    {
-        return [];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function insertBan($ban)
-    {
-        return [];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function clearExpiredBans()
-    {
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function deleteBanByID($id)
-    {
+        return '0';
     }
 }

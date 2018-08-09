@@ -2,6 +2,7 @@
 
 namespace TinyIB\Model;
 
+use TinyIB\Functions;
 use VVatashi\BBCode\BBCodeDefinition;
 use VVatashi\BBCode\HtmlGenerator;
 use VVatashi\BBCode\Parser;
@@ -678,7 +679,7 @@ final class Post implements PostInterface
         // Truncate messages on board index pages for readability
         if (TINYIB_TRUNCATE > 0 && !$res
             && substr_count($post['message'], '<br>') > TINYIB_TRUNCATE) {
-            $br_offsets = strallpos($post['message'], '<br>');
+            $br_offsets = Functions::strallpos($post['message'], '<br>');
             $post['message'] = substr($post['message'], 0, $br_offsets[TINYIB_TRUNCATE - 1]);
             $post['is_truncated'] = true;
         }
@@ -691,7 +692,7 @@ final class Post implements PostInterface
             $file_parts = explode('.', $post['file']);
             $post['file_extension'] = end($file_parts);
 
-            if (isEmbed($post["file_hex"])) {
+            if (Functions::isEmbed($post["file_hex"])) {
                 $post['file_type'] = 'embed';
             } elseif (in_array($post['file_extension'], ['jpg', 'png', 'gif'])) {
                 $post['file_type'] = 'image';

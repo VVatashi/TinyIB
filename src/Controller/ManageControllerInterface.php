@@ -2,116 +2,117 @@
 
 namespace TinyIB\Controller;
 
+use TinyIB\Request;
+use TinyIB\Response;
+
 interface ManageControllerInterface
 {
 
     /**
      * Show status page.
      *
+     * @param \TinyIB\Request
+     *
      * @return \TinyIB\Response
      */
-    public function status();
+    public function status(Request $request) : Response;
 
     /**
      * List bans.
      *
-     * @param string $bans
-     *   IP placeholder.
+     * @param \TinyIB\Request
      *
      * @return \TinyIB\Response
      */
-    public function listBans($bans);
+    public function listBans(Request $request) : Response;
 
     /**
      * Add ban by IP.
      *
-     * @param string $bans
-     *   IP placeholder.
-     * @param string ip
-     *   Ban IP.
-     * @param integer $expire
-     *   Ban expiration time.
-     * @param string $reason
-     *   Ban reason phrase.
+     * @param \TinyIB\Request
      *
      * @return \TinyIB\Response
      */
-    public function addBan($bans, $ip, $expire = 0, $reason = '');
+    public function addBan(Request $request) : Response;
 
     /**
      * Lift ban by ID.
      *
-     * @param string $bans
-     *   IP placeholder.
-     * @param string $id
-     *   Ban ID to lift.
+     * @param \TinyIB\Request
      *
      * @return \TinyIB\Response
      */
-    public function liftBan($bans, $id);
+    public function liftBan(Request $request) : Response;
 
     /**
      * Moderate post by ID.
      *
-     * @param integer $id
+     * @param \TinyIB\Request
      *
      * @return \TinyIB\Response
      */
-    public function moderate($id = 0);
+    public function moderate(Request $request) : Response;
 
     /**
      * Delete post by ID.
      *
-     * @param integer $id
+     * @param \TinyIB\Request
      *
      * @return \TinyIB\Response
      */
-    public function delete($id);
+    public function delete(Request $request) : Response;
 
     /**
      * Approve post by ID.
      *
-     * @param integer $id
+     * @param \TinyIB\Request
      *
      * @return \TinyIB\Response
      */
-    public function approve($id);
+    public function approve(Request $request) : Response;
 
     /**
      * Set post stacky status by ID.
      *
-     * @param integer $id
-     * @param boolean $sticky
+     * @param \TinyIB\Request
      *
      * @return \TinyIB\Response
      */
-    public function setSticky($id, $sticky = true);
+    public function setSticky(Request $request) : Response;
 
     /**
      * Show raw post form.
      *
+     * @param \TinyIB\Request
+     *
      * @return \TinyIB\Response
      */
-    public function rawPost();
+    public function rawPost(Request $request) : Response;
 
     /**
      * Rebuild all pages.
      *
+     * @param \TinyIB\Request
+     *
      * @return \TinyIB\Response
      */
-    public function rebuildAll();
+    public function rebuildAll(Request $request) : Response;
 
     /**
      * Update TinyIB.
      *
+     * @param \TinyIB\Request
+     *
      * @return \TinyIB\Response
      */
-    public function update();
+    public function update(Request $request) : Response;
 
     /**
      * Logout.
      *
+     * @param \TinyIB\Request
+     *
      * @return \TinyIB\Response
      */
-    public function logout();
+    public function logout(Request $request) : Response;
 }
