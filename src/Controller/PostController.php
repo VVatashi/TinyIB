@@ -422,7 +422,7 @@ final class PostController implements PostControllerInterface
                     $post->setThumbnailName("${file_name}s.jpg");
                     $size = max($thumb_maxwidth, $thumb_maxheight);
                     $thumb = $post->getThumbnailName();
-                    shell_exec("ffmpegthumbnailer -s $size -i $file_location -o thumb/$thumb");
+                    shell_exec("ffmpegthumbnailer -s $size -t 00:00:00 -i $file_location -o thumb/$thumb");
 
                     $thumb_info = getimagesize("thumb/$thumb");
                     $post->setThumbnailWidth($thumb_info[0]);
