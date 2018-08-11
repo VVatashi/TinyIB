@@ -8,51 +8,58 @@ use TinyIB\Service\CryptographyServiceInterface;
 
 final class CryptographyServiceTest extends TestCase
 {
+    /** @var \TinyIB\Service\CryptographyServiceInterface $service */
+    protected $service;
+
+    public function setUp() : void
+    {
+        $this->service = new CryptographyService();
+    }
+
     public function testCreateCryptographyService() : void
     {
-        $service = new CryptographyService();
-        $this->assertNotNull($service);
-        $this->assertInstanceOf(CryptographyServiceInterface::class, $service);
-        $this->assertInstanceOf(CryptographyService::class, $service);
+        $this->assertNotNull($this->service);
+        $this->assertInstanceOf(CryptographyServiceInterface::class, $this->service);
+        $this->assertInstanceOf(CryptographyService::class, $this->service);
     }
 
-    public function testGenerateTripcode() : void
+    public function tripcodeProvider() : array
     {
-        $service = new CryptographyService();
-
-        // Test against some known values.
-        // Input => expected result.
-        $tests = [
-            '' => '8NBuQ4l6uQ',
-            'mdUF' => 'WatacYfoiE',
-            'ContagiousDildo' => 'JemGwef5bo',
-            'KQc/IH~a' => 'x/IrohaN9I',
-            'p,A|\\mJS' => 'DesuIR/aK.',
-            '\'IR;(6\\*' => '6xAkarinDE',
-            '\'黽剱鷽ム' => 'WaTASHIjBE',
+        return [
+            ['', '8NBuQ4l6uQ'],
+            ['mdUF', 'WatacYfoiE'],
+            ['ContagiousDildo', 'JemGwef5bo'],
+            ['KQc/IH~a', 'x/IrohaN9I'],
+            ['p,A|\\mJS', 'DesuIR/aK.'],
+            ['\'IR;(6\\*', '6xAkarinDE'],
+            ['\'黽剱鷽ム', 'WaTASHIjBE'],
         ];
-
-        foreach ($tests as $input => $expected) {
-            $result = $service->generateTripcode($input);
-            $this->assertEquals($expected, $result);
-        }
     }
 
-    public function testGenerateSecureTripcode() : void
+    /**
+     * @dataProvider tripcodeProvider
+     */
+    public function testGenerateTripcode(string $capcode, string $tripcode) : void
     {
-        $service = new CryptographyService();
+        $result = $this->service->generateTripcode($capcode);
+        $this->assertEquals($tripcode, $result);
+    }
 
-        // Test against pre-calculated values.
-        // Input => expected result.
-        $tests = [
-            '' => '2M2Y8AsgTp',
-            'qwerty' => 'eO34RYzgb7',
-            '12345678' => 'Va0oOqQAr0',
+    public function secureTripcodeProvider() : array
+    {
+        return [
+            ['', '2M2Y8AsgTp'],
+            ['qwerty', 'eO34RYzgb7'],
+            ['12345678', 'Va0oOqQAr0'],
         ];
+    }
 
-        foreach ($tests as $input => $expected) {
-            $result = $service->generateSecureTripcode($input, '');
-            $this->assertEquals($expected, $result);
-        }
+    /**
+     * @dataProvider secureTripcodeProvider
+     */
+    public function testGenerateSecureTripcode(string $capcode, string $tripcode) : void
+    {
+        $result = $this->service->generateSecureTripcode($capcode, '');
+        $this->assertEquals($tripcode, $result);
     }
 }
