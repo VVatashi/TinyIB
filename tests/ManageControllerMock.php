@@ -2,105 +2,106 @@
 
 namespace TinyIB\Tests;
 
+use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use TinyIB\Controller\ManageControllerInterface;
-use TinyIB\Request;
-use TinyIB\Response;
 
 class ManageControllerMock implements ManageControllerInterface
 {
     /**
      * {@inheritDoc}
      */
-    public function status(Request $request) : Response
+    public function status(ServerRequestInterface $request) : ResponseInterface
     {
-        return Response::ok();
+        return new Response(200);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function listBans(Request $request) : Response
+    public function listBans(ServerRequestInterface $request) : ResponseInterface
     {
-        return Response::ok();
+        return new Response(200);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function addBan(Request $request) : Response
+    public function addBan(ServerRequestInterface $request) : ResponseInterface
     {
-        return Response::ok();
+        return new Response(200);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function liftBan(Request $request) : Response
+    public function liftBan(ServerRequestInterface $request) : ResponseInterface
     {
-        return Response::ok();
+        return new Response(200);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function moderate(Request $request) : Response
+    public function moderate(ServerRequestInterface $request) : ResponseInterface
     {
-        return Response::ok();
+        return new Response(200);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function delete(Request $request) : Response
+    public function delete(ServerRequestInterface $request) : ResponseInterface
     {
-        return Response::ok();
+        return new Response(200);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function approve(Request $request) : Response
+    public function approve(ServerRequestInterface $request) : ResponseInterface
     {
-        return Response::ok();
+        return new Response(200);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function setSticky(Request $request) : Response
+    public function setSticky(ServerRequestInterface $request) : ResponseInterface
     {
-        return Response::ok();
+        return new Response(200);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function rawPost(Request $request) : Response
+    public function rawPost(ServerRequestInterface $request) : ResponseInterface
     {
-        return Response::ok();
+        return new Response(200);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function rebuildAll(Request $request) : Response
+    public function rebuildAll(ServerRequestInterface $request) : ResponseInterface
     {
-        return Response::ok();
+        return new Response(200);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function update(Request $request) : Response
+    public function update(ServerRequestInterface $request) : ResponseInterface
     {
-        return Response::ok();
+        return new Response(200);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function logout(Request $request) : Response
+    public function logout(ServerRequestInterface $request) : ResponseInterface
     {
-        return Response::ok();
+        return new Response(200);
     }
 }

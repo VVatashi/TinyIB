@@ -2,9 +2,9 @@
 
 namespace TinyIB\Tests;
 
+use GuzzleHttp\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
 use TinyIB\Cache\InMemoryCache;
-use TinyIB\Request;
 use TinyIB\Service\RendererService;
 use TinyIB\Service\RoutingService;
 use TinyIB\Service\RoutingServiceInterface;
@@ -100,7 +100,8 @@ final class RoutingServiceTest extends TestCase
         $this->assertInstanceOf(RoutingServiceInterface::class, $routing_service);
         $this->assertInstanceOf(RoutingService::class, $routing_service);
 
-        $response = $routing_service->resolve(new Request($path));
+        $request = new ServerRequest('GET', $path);
+        $response = $routing_service->resolve($request);
         if ($exists) {
             $this->assertNotEquals(404, $response->getStatusCode());
         } else {

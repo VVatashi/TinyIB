@@ -2,25 +2,26 @@
 
 namespace TinyIB\Tests;
 
+use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use TinyIB\Controller\PostControllerInterface;
-use TinyIB\Request;
-use TinyIB\Response;
 
 class PostControllerMock implements PostControllerInterface
 {
     /**
      * {@inheritDoc}
      */
-    public function create(Request $request) : Response
+    public function create(ServerRequestInterface $request) : ResponseInterface
     {
-        return Response::ok();
+        return new Response(200);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function delete(Request $request) : Response
+    public function delete(ServerRequestInterface $request) : ResponseInterface
     {
-        return Response::ok();
+        return new Response(200);
     }
 }

@@ -2,17 +2,17 @@
 
 namespace TinyIB\Service;
 
-use TinyIB\Request;
-use TinyIB\Response;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 interface RoutingServiceInterface
 {
     /**
      * Resolves route.
      *
-     * @param \TinyIB\Request $request
+     * @param \Psr\Http\Message\ResponseInterface $request
      *
-     * @return \TinyIB\Response
+     * @return \Psr\Http\Message\ServerRequestInterface
      */
-    public function resolve(Request $request) : Response;
+    public function resolve(ServerRequestInterface $request) : ResponseInterface;
 }

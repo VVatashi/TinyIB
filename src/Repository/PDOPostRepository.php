@@ -217,7 +217,7 @@ final class PDOPostRepository extends PDORepository implements PostRepositoryInt
      */
     public function stickyThreadByID(int $id, bool $sticky)
     {
-        $this->update(['id' => $id], ['stickied' => (int)$setsticky]);
+        $this->update(['id' => $id], ['stickied' => (int)$sticky]);
     }
 
     /**

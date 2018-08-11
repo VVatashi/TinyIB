@@ -2,17 +2,18 @@
 
 namespace TinyIB\Tests;
 
+use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use TinyIB\Controller\SettingsControllerInterface;
-use TinyIB\Request;
-use TinyIB\Response;
 
 class SettingsControllerMock implements SettingsControllerInterface
 {
     /**
      * {@inheritDoc}
      */
-    public function settings(Request $request) : Response
+    public function settings(ServerRequestInterface $request) : ResponseInterface
     {
-        return Response::ok();
+        return new Response(200);
     }
 }

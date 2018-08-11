@@ -2,26 +2,26 @@
 
 namespace TinyIB\Controller;
 
-use TinyIB\Request;
-use TinyIB\Response;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 interface PostControllerInterface
 {
     /**
      * Create post.
      *
-     * @param \TinyIB\Request
+     * @param \Psr\Http\Message\ServerRequestInterface
      *
-     * @return \TinyIB\Response
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function create(Request $request) : Response;
+    public function create(ServerRequestInterface $request) : ResponseInterface;
 
     /**
      * Deletes specified post.
      *
-     * @param \TinyIB\Request
+     * @param \Psr\Http\Message\ServerRequestInterface
      *
-     * @return \TinyIB\Response
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function delete(Request $request) : Response;
+    public function delete(ServerRequestInterface $request) : ResponseInterface;
 }

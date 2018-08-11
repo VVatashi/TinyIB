@@ -2,17 +2,17 @@
 
 namespace TinyIB\Controller;
 
-use TinyIB\Request;
-use TinyIB\Response;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 interface SettingsControllerInterface
 {
     /**
      * Shows settings form.
      *
-     * @param \TinyIB\Request
+     * @param \Psr\Http\Message\ServerRequestInterface
      *
-     * @return \TinyIB\Response
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function settings(Request $request) : Response;
+    public function settings(ServerRequestInterface $request) : ResponseInterface;
 }
