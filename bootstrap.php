@@ -1,5 +1,7 @@
 <?php
 
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\ServerRequest;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -23,8 +25,6 @@ use TinyIB\Repository\PDOBanRepository;
 use TinyIB\Repository\PDOCacheRepository;
 use TinyIB\Repository\PDOPostRepository;
 use TinyIB\Repository\PostRepositoryInterface;
-use TinyIB\Request;
-use TinyIB\Response;
 use TinyIB\Service\BanService;
 use TinyIB\Service\BanServiceInterface;
 use TinyIB\Service\CryptographyService;
@@ -87,7 +87,18 @@ set_exception_handler(function (Throwable $exception) use ($container) {
 </html>
 EOF;
 
-    Response::serverError($html)->send();
+    $response = new Response(500, [], $html);
+    $version = $response->getProtocolVersion();
+    $status = $response->getStatusCode();
+    $status_phrase = $response->getReasonPhrase();
+    header("HTTP/$version $status $status_phrase", TRUE);
+
+    foreach ($response->getHeaders() as $name => $values) {
+        $header_line = $response->getHeaderLine($name);
+        header("$name: $header_line", FALSE);
+    }
+
+    echo $response->getBody();
 });
 
 session_start();
@@ -206,9 +217,23 @@ $container->registerType(ManageControllerInterface::class, ManageController::cla
 $container->registerType(PostControllerInterface::class, PostController::class);
 $container->registerType(SettingsControllerInterface::class, SettingsController::class);
 
-// Resolve route.
-$request = Request::getCurrentRequest();
+// Get request object.
+$request = ServerRequest::fromGlobals();
+
+// Resolve and handle route.
 /** @var \TinyIB\Service\RoutingServiceInterface $routing_service */
 $routing_service = $container->get(RoutingServiceInterface::class);
 $response = $routing_service->resolve($request);
-$response->send();
+
+// Send response.
+$version = $response->getProtocolVersion();
+$status = $response->getStatusCode();
+$status_phrase = $response->getReasonPhrase();
+header("HTTP/$version $status $status_phrase", TRUE);
+
+foreach ($response->getHeaders() as $name => $values) {
+    $header_line = $response->getHeaderLine($name);
+    header("$name: $header_line", FALSE);
+}
+
+echo $response->getBody();

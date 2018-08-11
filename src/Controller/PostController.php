@@ -2,12 +2,13 @@
 
 namespace TinyIB\Controller;
 
+use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use TinyIB\Cache\CacheInterface;
 use TinyIB\Functions;
 use TinyIB\Model\Post;
 use TinyIB\Repository\PostRepositoryInterface;
-use TinyIB\Request;
-use TinyIB\Response;
 use TinyIB\Service\BanServiceInterface;
 use TinyIB\Service\PostServiceInterface;
 use TinyIB\Service\RendererServiceInterface;
@@ -232,7 +233,7 @@ final class PostController implements PostControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function create(Request $request) : Response
+    public function create(ServerRequestInterface $request) : ResponseInterface
     {
         global $tinyib_embeds, $tinyib_uploads;
 
@@ -240,13 +241,13 @@ final class PostController implements PostControllerInterface
 
         if (TINYIB_DBMIGRATE) {
             $message = "Posting is currently disabled.\nPlease try again in a few moments.";
-            return Response::serviceUnavailable($message);
+            return new Response(503, [], $message);
         }
 
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
         $rawpost = $this->isRawPost();
 
-        $data = array_intersect_key($request->getData(), array_flip([
+        $data = array_intersect_key($request->getParsedBody(), array_flip([
             'name',
             'email',
             'subject',
@@ -298,7 +299,7 @@ final class PostController implements PostControllerInterface
             if (empty($embed) || !isset($embed['html']) || !isset($embed['title']) || !isset($embed['thumbnail_url'])) {
                 $embeds = implode("/", array_keys($tinyib_embeds));
                 $message = "Invalid embed URL. Only $embeds URLs are supported.";
-                return Response::badRequest($message);
+                return new Response(400, [], $message);
             }
 
             $post->setFileHash($service);
@@ -318,14 +319,14 @@ final class PostController implements PostControllerInterface
             } elseif ($file_mime === 'image/png') {
                 $post->setThumbnailName($temp_file . '.png');
             } else {
-                return Response::serverError('Error while processing audio/video.');
+                return new Response(500, [], 'Error while processing audio/video.');
             }
             $thumb_location = 'thumb/' . $post->getThumbnailName();
 
             list($thumb_maxwidth, $thumb_maxheight) = Functions::thumbnailDimensions($post);
 
             if (!Functions::createThumbnail($file_location, $thumb_location, $thumb_maxwidth, $thumb_maxheight)) {
-                return Response::serverError("Could not create thumbnail.");
+                return new Response(500, [], 'Could not create thumbnail.');
             }
 
             if ($embed['type'] !== 'photo') {
@@ -342,11 +343,11 @@ final class PostController implements PostControllerInterface
             Functions::validateFileUpload();
 
             if (!is_file($_FILES['file']['tmp_name']) || !is_readable($_FILES['file']['tmp_name'])) {
-                return Response::serverError('File transfer failure. Please retry the submission.');
+                return new Response(500, [], 'File transfer failure. Please retry the submission.');
             }
 
             if (TINYIB_MAXKB > 0 && filesize($_FILES['file']['tmp_name']) > TINYIB_MAXKB * 1024) {
-                return Response::badRequest('That file is larger than ' . TINYIB_MAXKBDESC . '.');
+                return new Response(400, [], 'That file is larger than ' . TINYIB_MAXKBDESC . '.');
             }
 
             $post->setOriginalFileName(trim(htmlentities(substr($_FILES['file']['name'], 0, 50), ENT_QUOTES)));
@@ -364,7 +365,7 @@ final class PostController implements PostControllerInterface
                 if (!@getimagesize($_FILES['file']['tmp_name'])) {
                     $message = 'Failed to read the MIME type and size of the uploaded file.'
                         . ' Please retry the submission.';
-                    return Response::serverError($message);
+                    return new Response(500, [], $message);
                 }
 
                 $file_info = getimagesize($_FILES['file']['tmp_name']);
@@ -392,7 +393,7 @@ final class PostController implements PostControllerInterface
             }
 
             if (empty($file_mime) || !isset($tinyib_uploads[$file_mime])) {
-                return Response::badRequest($this->renderer->supportedFileTypes());
+                return new Response(500, [], $this->renderer->supportedFileTypes());
             }
 
             $file_name = time() . substr(microtime(), 2, 3);
@@ -400,12 +401,12 @@ final class PostController implements PostControllerInterface
 
             $file_location = 'src/' . $post->getFileName();
             if (!move_uploaded_file($_FILES['file']['tmp_name'], $file_location)) {
-                return Response::serverError("Could not copy uploaded file.");
+                return new Response(500, [], "Could not copy uploaded file.");
             }
 
             if ($_FILES['file']['size'] !== filesize($file_location)) {
                 unlink($file_location);
-                return Response::serverError('File transfer failure. Please go back and try again.');
+                return new Response(500, [], 'File transfer failure. Please go back and try again.');
             }
 
             if ($file_mime == "audio/webm" || $file_mime == "video/webm"
@@ -431,7 +432,7 @@ final class PostController implements PostControllerInterface
                     if ($post->getThumbnailWidth() <= 0 || $post->getThumbnailHeight() <= 0) {
                         unlink($file_location);
                         unlink("thumb/$thumb");
-                        return Response::badRequest('Sorry, your video appears to be corrupt.');
+                        return new Response(400, [], 'Sorry, your video appears to be corrupt.');
                     }
 
                     Functions::addVideoOverlay("thumb/$thumb");
@@ -454,7 +455,7 @@ final class PostController implements PostControllerInterface
                 $output = explode(' ', reset($output));
 
                 if (count($output) < 2) {
-                    return Response::badRequest('Image appears to be corrupt.');
+                    return new Response(400, [], 'Image appears to be corrupt.');
                 }
 
                 list($width, $height) = $output;
@@ -469,7 +470,7 @@ final class PostController implements PostControllerInterface
                 $thumb = $post->getThumbnailName();
                 if (!copy($tinyib_uploads[$file_mime][1], "thumb/$thumb")) {
                     unlink($file_location);
-                    return Response::serverError('Could not create thumbnail.');
+                    return new Response(500, [], 'Could not create thumbnail.');
                 }
 
                 if ($file_mime === 'application/x-shockwave-flash') {
@@ -487,7 +488,7 @@ final class PostController implements PostControllerInterface
                 $thumb = $post->getThumbnailName();
                 if (!Functions::createThumbnail($file_location, "thumb/$thumb", $thumb_maxwidth, $thumb_maxheight)) {
                     unlink($file_location);
-                    return Response::serverError('Could not create thumbnail.');
+                    return new Response(500, [], 'Could not create thumbnail.');
                 }
             }
 
@@ -514,12 +515,12 @@ final class PostController implements PostControllerInterface
             }
 
             if ($post->isThread() && !empty($allowed) && !TINYIB_NOFILEOK) {
-                return Response::badRequest("A $allowed is required to start a thread.");
+                return new Response(400, [], "A $allowed is required to start a thread.");
             }
 
             if (empty(str_replace('<br>', '', $post->getMessage()))) {
                 $allowed = $allowed != '' ? " and/or upload a $allowed" : '';
-                return Response::badRequest('Please enter a message' . $allowed . '.');
+                return new Response(400, [], 'Please enter a message' . $allowed . '.');
             }
         }
 
@@ -566,37 +567,37 @@ final class PostController implements PostControllerInterface
             $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
         }
 
-        return Response::redirect($redirect_url);
+        return new Response(302, ['Location' => $redirect_url]);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function delete(Request $request) : Response
+    public function delete(ServerRequestInterface $request) : ResponseInterface
     {
-        $data = $request->getData();
+        $data = $request->getParsedBody();
         $id = isset($data['delete']) ? $data['delete'] : null;
         if (empty($id)) {
             $message = 'Tick the box next to a post and click "Delete" to delete it.';
-            return Response::badRequest($message);
+            return new Response(400, [], $message);
         }
 
         if (TINYIB_DBMIGRATE) {
             $message = "Post deletion is currently disabled.\nPlease try again in a few moments.";
-            return Response::serviceUnavailable($message);
+            return new Response(503, [], $message);
         }
 
         /** @var \TinyIB\Model\PostInterface $post */
         $post = $this->post_repository->getPostByID($id);
         if ($post === null) {
             $message = "Sorry, an invalid post identifier was sent.\nPlease go back, refresh the page, and try again.";
-            return Response::notFound($message);
+            return new Response(404, [], $message);
         }
 
         $password = isset($data['password']) ? $data['password'] : null;
         $password_hash = md5(md5($password));
         if ($password_hash !== $post->getPassword()) {
-            return Response::forbidden('Invalid password.');
+            return new Response(403, [], 'Invalid password.');
         }
 
         $this->post_repository->deletePostByID($post->getID());
@@ -607,6 +608,6 @@ final class PostController implements PostControllerInterface
         $this->cache->delete(TINYIB_BOARD . ':thread:' . $thread_id);
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 
-        return Response::ok('Post deleted.');
+        return new Response(200, [], 'Post deleted.');
     }
 }

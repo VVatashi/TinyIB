@@ -6,8 +6,9 @@ use TinyIB\Cache\CacheInterface;
 use TinyIB\Controller\ManageControllerInterface;
 use TinyIB\Controller\PostControllerInterface;
 use TinyIB\Controller\SettingsControllerInterface;
-use TinyIB\Request;
-use TinyIB\Response;
+use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use TinyIB\Service\RendererServiceInterface;
 use VVatashi\Router\RouterInterface;
 
@@ -53,9 +54,9 @@ class RoutingService implements RoutingServiceInterface
         $this->router->add('manage/rebuildall', [$this->manage_controller, 'rebuildAll']);
         $this->router->add('manage/approve/:id', [$this->manage_controller, 'approve']);
 
-        $this->router->add('manage/bans', function (Request $request) {
-            $data = $request->getData();
-            $query = $request->getQuery();
+        $this->router->add('manage/bans', function (ServerRequestInterface $request) {
+            $data = $request->getParsedBody();
+            $query = $request->getQueryParams();
             if (!empty($data['ip'])) {
                 return $this->manage_controller->addBan($request);
             } elseif (!empty($query['lift'])) {
@@ -78,8 +79,8 @@ class RoutingService implements RoutingServiceInterface
 
         $this->router->add('settings', [$this->settings_controller, 'settings']);
 
-        $this->router->add('res/:id', function (Request $request) {
-            $id = (int)explode('/', $request->getPath())[1];
+        $this->router->add('res/:id', function (ServerRequestInterface $request) {
+            $id = (int)explode('/', $request->getUri()->getPath())[2];
             $key = TINYIB_BOARD . ':thread:' . $id;
             $data = $this->cache->get($key);
             if (!isset($data)) {
@@ -87,11 +88,11 @@ class RoutingService implements RoutingServiceInterface
                 $this->cache->set($key, $data, 4 * 60 * 60);
             }
 
-            return Response::ok($data);
+            return new Response(200, [], $data);
         });
 
-        $this->router->add(':page', function (Request $request) {
-            $page = (int)explode('/', $request->getPath())[0];
+        $this->router->add(':page', function (ServerRequestInterface $request) {
+            $page = (int)explode('/', $request->getUri()->getPath())[1];
             $key = TINYIB_BOARD . ':page:' . $page;
             $data = $this->cache->get($key);
             if (!isset($data)) {
@@ -99,10 +100,10 @@ class RoutingService implements RoutingServiceInterface
                 $this->cache->set($key, $data, 4 * 60 * 60);
             }
 
-            return Response::ok($data);
+            return new Response(200, [], $data);
         });
 
-        $this->router->add('', function (Request $request) {
+        $this->router->add('', function (ServerRequestInterface $request) {
             $key = TINYIB_BOARD . ':page:0';
             $data = $this->cache->get($key);
             if (!isset($data)) {
@@ -110,19 +111,39 @@ class RoutingService implements RoutingServiceInterface
                 $this->cache->set($key, $data, 4 * 60 * 60);
             }
 
-            return Response::ok($data);
+            return new Response(200, [], $data);
         });
     }
 
     /**
      * {@inheritDoc}
      */
-    public function resolve(Request $request) : Response
+    public function resolve(ServerRequestInterface $request) : ResponseInterface
     {
-        $path = $request->getPath();
+        $uri = $request->getUri();
+        $path = $uri->getPath();
+
+        // Remove board params.
+        $prefix = '/' . TINYIB_BOARD . '/';
+        $prefix_length = strlen($prefix);
+        if (strncmp($path, $prefix, $prefix_length) === 0) {
+            $path = substr($path, $prefix_length);
+        }
+
+        // Remove query params.
+        $path = strtok($path, '?#');
+
+        // Remove html extension.
+        if (substr($path, -5) === '.html') {
+            $path = substr($path, 0, -5);
+        }
+
+        $uri = $uri->withPath('/' . $path);
+        $request = $request->withUri($uri);
+
         $handler = $this->router->resolve($path);
         if (!isset($handler)) {
-            return Response::notFound('The requested page is not found.');
+            return new Response(404);
         }
 
         return $handler($request);

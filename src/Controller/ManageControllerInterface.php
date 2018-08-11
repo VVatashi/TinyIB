@@ -2,117 +2,116 @@
 
 namespace TinyIB\Controller;
 
-use TinyIB\Request;
-use TinyIB\Response;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 interface ManageControllerInterface
 {
-
     /**
      * Show status page.
      *
-     * @param \TinyIB\Request
+     * @param \Psr\Http\Message\ServerRequestInterface
      *
-     * @return \TinyIB\Response
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function status(Request $request) : Response;
+    public function status(ServerRequestInterface $request) : ResponseInterface;
 
     /**
      * List bans.
      *
-     * @param \TinyIB\Request
+     * @param \Psr\Http\Message\ServerRequestInterface
      *
-     * @return \TinyIB\Response
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function listBans(Request $request) : Response;
+    public function listBans(ServerRequestInterface $request) : ResponseInterface;
 
     /**
      * Add ban by IP.
      *
-     * @param \TinyIB\Request
+     * @param \Psr\Http\Message\ServerRequestInterface
      *
-     * @return \TinyIB\Response
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function addBan(Request $request) : Response;
+    public function addBan(ServerRequestInterface $request) : ResponseInterface;
 
     /**
      * Lift ban by ID.
      *
-     * @param \TinyIB\Request
+     * @param \Psr\Http\Message\ServerRequestInterface
      *
-     * @return \TinyIB\Response
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function liftBan(Request $request) : Response;
+    public function liftBan(ServerRequestInterface $request) : ResponseInterface;
 
     /**
      * Moderate post by ID.
      *
-     * @param \TinyIB\Request
+     * @param \Psr\Http\Message\ServerRequestInterface
      *
-     * @return \TinyIB\Response
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function moderate(Request $request) : Response;
+    public function moderate(ServerRequestInterface $request) : ResponseInterface;
 
     /**
      * Delete post by ID.
      *
-     * @param \TinyIB\Request
+     * @param \Psr\Http\Message\ServerRequestInterface
      *
-     * @return \TinyIB\Response
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function delete(Request $request) : Response;
+    public function delete(ServerRequestInterface $request) : ResponseInterface;
 
     /**
      * Approve post by ID.
      *
-     * @param \TinyIB\Request
+     * @param \Psr\Http\Message\ServerRequestInterface
      *
-     * @return \TinyIB\Response
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function approve(Request $request) : Response;
+    public function approve(ServerRequestInterface $request) : ResponseInterface;
 
     /**
      * Set post stacky status by ID.
      *
-     * @param \TinyIB\Request
+     * @param \Psr\Http\Message\ServerRequestInterface
      *
-     * @return \TinyIB\Response
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function setSticky(Request $request) : Response;
+    public function setSticky(ServerRequestInterface $request) : ResponseInterface;
 
     /**
      * Show raw post form.
      *
-     * @param \TinyIB\Request
+     * @param \Psr\Http\Message\ServerRequestInterface
      *
-     * @return \TinyIB\Response
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function rawPost(Request $request) : Response;
+    public function rawPost(ServerRequestInterface $request) : ResponseInterface;
 
     /**
      * Rebuild all pages.
      *
-     * @param \TinyIB\Request
+     * @param \Psr\Http\Message\ServerRequestInterface
      *
-     * @return \TinyIB\Response
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function rebuildAll(Request $request) : Response;
+    public function rebuildAll(ServerRequestInterface $request) : ResponseInterface;
 
     /**
      * Update TinyIB.
      *
-     * @param \TinyIB\Request
+     * @param \Psr\Http\Message\ServerRequestInterface
      *
-     * @return \TinyIB\Response
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function update(Request $request) : Response;
+    public function update(ServerRequestInterface $request) : ResponseInterface;
 
     /**
      * Logout.
      *
-     * @param \TinyIB\Request
+     * @param \Psr\Http\Message\ServerRequestInterface
      *
-     * @return \TinyIB\Response
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function logout(Request $request) : Response;
+    public function logout(ServerRequestInterface $request) : ResponseInterface;
 }

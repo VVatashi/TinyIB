@@ -227,28 +227,31 @@ final class PostTest extends TestCase
         $this->assertEquals(1000, $file_size);
     }
 
-    public function testPostFileSizeFormatted() : void
+    public function fileSizeProvider() : array
+    {
+        return [
+            [0, '0&nbsp;B'],
+            [100, '100&nbsp;B'],
+            [500, '500&nbsp;B'],
+            [1000, '1&nbsp;KB'],
+            [1234, '1.23&nbsp;KB'],
+            [12345, '12.34&nbsp;KB'],
+            [123456, '123.46&nbsp;KB'],
+            [1234567, '1.23&nbsp;MB'],
+        ];
+    }
+
+    /**
+     * @dataProvider fileSizeProvider
+     */
+    public function testPostFileSizeFormatted(int $input, string $expected) : void
     {
         $post = new Post();
 
         // Try set & get the size of the file attached to the post.
-        // Input => expected.
-        $tests = [
-            0 => '0&nbsp;B',
-            100 => '100&nbsp;B',
-            500 => '500&nbsp;B',
-            1000 => '1&nbsp;KB',
-            1234 => '1.23&nbsp;KB',
-            12345 => '12.34&nbsp;KB',
-            123456 => '123.46&nbsp;KB',
-            1234567 => '1.23&nbsp;MB',
-        ];
-
-        foreach ($tests as $input => $expected) {
-            $post->setFileSize($input);
-            $file_size = $post->getFileSizeFormatted();
-            $this->assertEquals($expected, $file_size);
-        }
+        $post->setFileSize($input);
+        $file_size = $post->getFileSizeFormatted();
+        $this->assertEquals($expected, $file_size);
     }
 
     public function testPostImageWidth() : void

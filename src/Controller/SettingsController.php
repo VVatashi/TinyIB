@@ -2,9 +2,10 @@
 
 namespace TinyIB\Controller;
 
+use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use TinyIB\Cache\CacheInterface;
-use TinyIB\Request;
-use TinyIB\Response;
 use TinyIB\Service\RendererServiceInterface;
 
 class SettingsController implements SettingsControllerInterface
@@ -30,8 +31,8 @@ class SettingsController implements SettingsControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function settings(Request $request) : Response
+    public function settings(ServerRequestInterface $request) : ResponseInterface
     {
-        return Response::ok($this->renderer->render('settings.twig'));
+        return new Response(200, [], $this->renderer->render('settings.twig'));
     }
 }
