@@ -7,7 +7,6 @@ use TinyIB\Response;
 
 interface ManageControllerInterface
 {
-
     /**
      * Show status page.
      *
