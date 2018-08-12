@@ -1,10 +1,11 @@
 <?php
 
-namespace TinyIB\Tests;
+namespace TinyIB\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use TinyIB\Service\PostService;
 use TinyIB\Service\PostServiceInterface;
+use TinyIB\Tests\Mock\CryptographyServiceMock;
 
 final class PostServiceTest extends TestCase
 {

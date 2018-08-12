@@ -1,6 +1,6 @@
 <?php
 
-namespace TinyIB\Tests;
+namespace TinyIB\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use TinyIB\Model\Post;

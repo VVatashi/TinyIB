@@ -1,6 +1,6 @@
 <?php
 
-namespace TinyIB\Tests;
+namespace TinyIB\Tests\Mock;
 
 use TinyIB\Service\CryptographyServiceInterface;
 

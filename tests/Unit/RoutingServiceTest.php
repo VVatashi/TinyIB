@@ -1,6 +1,6 @@
 <?php
 
-namespace TinyIB\Tests;
+namespace TinyIB\Tests\Unit;
 
 use GuzzleHttp\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
@@ -8,6 +8,10 @@ use TinyIB\Cache\InMemoryCache;
 use TinyIB\Service\RendererService;
 use TinyIB\Service\RoutingService;
 use TinyIB\Service\RoutingServiceInterface;
+use TinyIB\Tests\Mock\ManageControllerMock;
+use TinyIB\Tests\Mock\PostControllerMock;
+use TinyIB\Tests\Mock\PostRepositoryMock;
+use TinyIB\Tests\Mock\SettingsControllerMock;
 use VVatashi\Router\Router;
 
 final class RoutingServiceTest extends TestCase
@@ -71,10 +75,9 @@ final class RoutingServiceTest extends TestCase
         $router = new Router();
         $cache = new InMemoryCache();
 
-        $ban_repository = new BanRepositoryMock();
         $post_repository = new PostRepositoryMock();
 
-        $twig_loader = new \Twig_Loader_Filesystem(__DIR__ . '/../templates');
+        $twig_loader = new \Twig_Loader_Filesystem(__DIR__ . '/../../templates');
         $twig = new \Twig_Environment($twig_loader, [
             'autoescape' => false,
             'debug' => true,
