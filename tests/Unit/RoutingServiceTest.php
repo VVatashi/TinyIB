@@ -4,13 +4,10 @@ namespace TinyIB\Tests\Unit;
 
 use GuzzleHttp\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
-use TinyIB\Cache\InMemoryCache;
-use TinyIB\Service\RendererService;
 use TinyIB\Service\RoutingService;
 use TinyIB\Service\RoutingServiceInterface;
 use TinyIB\Tests\Mock\ManageControllerMock;
 use TinyIB\Tests\Mock\PostControllerMock;
-use TinyIB\Tests\Mock\PostRepositoryMock;
 use TinyIB\Tests\Mock\SettingsControllerMock;
 use VVatashi\Router\Router;
 
@@ -73,19 +70,6 @@ final class RoutingServiceTest extends TestCase
     public function testResolve($path, $exists) : void
     {
         $router = new Router();
-        $cache = new InMemoryCache();
-
-        $post_repository = new PostRepositoryMock();
-
-        $twig_loader = new \Twig_Loader_Filesystem(__DIR__ . '/../../templates');
-        $twig = new \Twig_Environment($twig_loader, [
-            'autoescape' => false,
-            'debug' => true,
-        ]);
-        $twig->addGlobal('embeds', []);
-        $twig->addGlobal('uploads', []);
-        $twig->addGlobal('is_installed_via_git', false);
-        $renderer = new RendererService($cache, $post_repository, $twig);
 
         $manage_controller = new ManageControllerMock();
         $post_controller = new PostControllerMock();
@@ -93,8 +77,6 @@ final class RoutingServiceTest extends TestCase
 
         $routing_service = new RoutingService(
             $router,
-            $cache,
-            $renderer,
             $manage_controller,
             $post_controller,
             $settings_controller

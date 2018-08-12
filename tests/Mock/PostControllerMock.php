@@ -24,4 +24,20 @@ class PostControllerMock implements PostControllerInterface
     {
         return new Response(200);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function board(ServerRequestInterface $request) : ResponseInterface
+    {
+        return new Response(200);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function thread(ServerRequestInterface $request) : ResponseInterface
+    {
+        return new Response(200);
+    }
 }
