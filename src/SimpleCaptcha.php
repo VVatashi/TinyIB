@@ -1,5 +1,7 @@
 <?php
 
+namespace TinyIB;
+
 /**
  * Script for generation of CAPTCHAs
  *
@@ -10,10 +12,10 @@
  *
  */
 
-session_start();
-putenv('GDFONTPATH=' . realpath(dirname(__FILE__)) . '/fonts/');
-$captcha = new SimpleCaptcha();
-$captcha->CreateImage();
+//session_start();
+//putenv('GDFONTPATH=' . realpath(dirname(__FILE__)) . '/fonts/');
+//$captcha = new SimpleCaptcha();
+//$captcha->CreateImage();
 
 /**
  * SimpleCaptcha class
@@ -114,6 +116,7 @@ class SimpleCaptcha
 
     public function __construct($config = array())
     {
+        putenv('GDFONTPATH=' . realpath(__DIR__ . '/../webroot') . '/fonts/');
     }
 
     public function CreateImage()

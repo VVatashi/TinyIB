@@ -6,6 +6,7 @@ use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TinyIB\Cache\CacheInterface;
+use TinyIB\Controller\CaptchaControllerInterface;
 use TinyIB\Controller\ManageControllerInterface;
 use TinyIB\Controller\PostControllerInterface;
 use TinyIB\Controller\SettingsControllerInterface;
@@ -25,6 +26,9 @@ class RoutingService implements RoutingServiceInterface
     /** @var \TinyIB\Controller\SettingsControllerInterface $settings_controller */
     protected $settings_controller;
 
+    /** @var \TinyIB\Controller\CaptchaControllerInterface $captcha_controller */
+    protected $captcha_controller;
+
     /**
      * Creates a new RoutingService instance.
      */
@@ -32,12 +36,14 @@ class RoutingService implements RoutingServiceInterface
         RouterInterface $router,
         ManageControllerInterface $manage_controller,
         PostControllerInterface $post_controller,
-        SettingsControllerInterface $settings_controller
+        SettingsControllerInterface $settings_controller,
+        CaptchaControllerInterface $captcha_controller
     ) {
         $this->router = $router;
         $this->manage_controller = $manage_controller;
         $this->post_controller = $post_controller;
         $this->settings_controller = $settings_controller;
+        $this->captcha_controller = $captcha_controller;
 
         $this->router->add('manage', [$this->manage_controller, 'status']);
         $this->router->add('manage/rebuildall', [$this->manage_controller, 'rebuildAll']);
@@ -67,6 +73,8 @@ class RoutingService implements RoutingServiceInterface
         $this->router->add('post/delete', [$this->post_controller, 'delete']);
 
         $this->router->add('settings', [$this->settings_controller, 'settings']);
+
+        $this->router->add('captcha', [$this->captcha_controller, 'captcha']);
 
         $this->router->add('res/:id', [$this->post_controller, 'thread']);
         $this->router->add(':page', [$this->post_controller, 'board']);
