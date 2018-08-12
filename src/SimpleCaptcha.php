@@ -116,7 +116,6 @@ class SimpleCaptcha
 
     public function __construct($config = array())
     {
-        putenv('GDFONTPATH=' . realpath(__DIR__ . '/../webroot') . '/fonts/');
     }
 
     public function CreateImage()
@@ -312,7 +311,7 @@ class SimpleCaptcha
             $fontcfg = $this->fonts[array_rand($this->fonts)];
         }
 
-        $fontfile = $fontcfg['font'];
+        $fontfile = realpath(__DIR__ . '/../webroot') . '/fonts/' . $fontcfg['font'];
 
         /** Increase font-size for shortest words: 9% for each glyph missing */
         $lettersMissing = $this->maxWordLength - strlen($text);
