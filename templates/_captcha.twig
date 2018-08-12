@@ -1,7 +1,7 @@
 {% if constant('TINYIB_CAPTCHA') %}
   <tr class="{{ class ? class ~ ' ' }}field field_captcha">
     <td class="field__label-wrapper">
-      <label class="field__label" for="captcha">CAPTCHA</label>
+      <label class="field__label field__label_hidden" for="captcha">CAPTCHA</label>
     </td>
 
     <td class="field__input-wrapper">
@@ -24,8 +24,8 @@
           </noscript>
         </div>
       {% else %} <!-- Simple CAPTCHA -->
-        <input type="text" class="field__input" name="captcha" id="captcha" autocomplete="off" />&nbsp;&nbsp;(enter the text below)<br />
-        <img id="captchaimage" src="/{{ constant('TINYIB_BOARD') }}/captcha.php" width="175" height="55" alt="CAPTCHA" style="margin-top: 5px;cursor: pointer;">
+        <input type="text" class="field__input" name="captcha" id="captcha" placeholder="CAPTCHA" /><br />
+        <img id="captchaimage" src="/{{ constant('TINYIB_BOARD') }}/captcha" width="175" height="55" alt="CAPTCHA" style="margin-top: 5px;cursor: pointer;">
       {% endif %}
     </td>
   </tr>

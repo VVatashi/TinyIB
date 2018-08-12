@@ -1,5 +1,7 @@
 <?php
 
+namespace TinyIB;
+
 /**
  * Script for generation of CAPTCHAs
  *
@@ -10,10 +12,10 @@
  *
  */
 
-session_start();
-putenv('GDFONTPATH=' . realpath(dirname(__FILE__)) . '/fonts/');
-$captcha = new SimpleCaptcha();
-$captcha->CreateImage();
+//session_start();
+//putenv('GDFONTPATH=' . realpath(dirname(__FILE__)) . '/fonts/');
+//$captcha = new SimpleCaptcha();
+//$captcha->CreateImage();
 
 /**
  * SimpleCaptcha class
@@ -309,7 +311,7 @@ class SimpleCaptcha
             $fontcfg = $this->fonts[array_rand($this->fonts)];
         }
 
-        $fontfile = $fontcfg['font'];
+        $fontfile = realpath(__DIR__ . '/../webroot') . '/fonts/' . $fontcfg['font'];
 
         /** Increase font-size for shortest words: 9% for each glyph missing */
         $lettersMissing = $this->maxWordLength - strlen($text);

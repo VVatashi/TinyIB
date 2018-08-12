@@ -12,6 +12,8 @@ use TinyIB\Cache\CacheInterface;
 use TinyIB\Cache\DatabaseCache;
 use TinyIB\Cache\InMemoryCache;
 use TinyIB\Cache\RedisCache;
+use TinyIB\Controller\CaptchaController;
+use TinyIB\Controller\CaptchaControllerInterface;
 use TinyIB\Controller\ManageController;
 use TinyIB\Controller\ManageControllerInterface;
 use TinyIB\Controller\PostController;
@@ -27,6 +29,8 @@ use TinyIB\Repository\PDOPostRepository;
 use TinyIB\Repository\PostRepositoryInterface;
 use TinyIB\Service\BanService;
 use TinyIB\Service\BanServiceInterface;
+use TinyIB\Service\CaptchaService;
+use TinyIB\Service\CaptchaServiceInterface;
 use TinyIB\Service\CryptographyService;
 use TinyIB\Service\CryptographyServiceInterface;
 use TinyIB\Service\PostService;
@@ -208,11 +212,13 @@ $container->registerCallback(Twig_Environment::class, function ($container) use 
 $container->registerType(RouterInterface::class, Router::class);
 
 $container->registerType(BanServiceInterface::class, BanService::class);
+$container->registerType(CaptchaServiceInterface::class, CaptchaService::class);
 $container->registerType(CryptographyServiceInterface::class, CryptographyService::class);
 $container->registerType(PostServiceInterface::class, PostService::class);
 $container->registerType(RendererServiceInterface::class, RendererService::class);
 $container->registerType(RoutingServiceInterface::class, RoutingService::class);
 
+$container->registerType(CaptchaControllerInterface::class, CaptchaController::class);
 $container->registerType(ManageControllerInterface::class, ManageController::class);
 $container->registerType(PostControllerInterface::class, PostController::class);
 $container->registerType(SettingsControllerInterface::class, SettingsController::class);
