@@ -146,7 +146,7 @@ if (TINYIB_CAPTCHA === 'recaptcha'
 }
 
 // Check directories are writable by the script.
-$writedirs = ['logs', 'templates/cache', 'webroot/src', 'webroot/thumb'];
+$writedirs = ['storage', 'webroot/src', 'webroot/thumb'];
 
 foreach ($writedirs as $dir) {
     if (!is_writable(__DIR__ . '/' . $dir)) {
@@ -167,7 +167,7 @@ if (!empty(TINYIB_TIMEZONE)) {
 $container->registerInstance(ContainerInterface::class, $container);
 $container->registerCallback(LoggerInterface::class, function ($container) {
     $logger = new Logger('app');
-    $log_handler = new StreamHandler(__DIR__ . '/logs/app.log');
+    $log_handler = new StreamHandler(__DIR__ . '/storage/logs/app.log');
     $log_formatter = new LineFormatter(null, null, true, true);
     $log_handler->setFormatter($log_formatter);
     $logger->pushHandler($log_handler);
@@ -194,7 +194,7 @@ $container->registerCallback(Twig_Environment::class, function ($container) use 
 
     $twig = new Twig_Environment($loader, [
         'autoescape' => false,
-        'cache' => __DIR__ . '/templates/cache',
+        'cache' => __DIR__ . '/storage/twig-cache',
         'debug' => true,
     ]);
 
