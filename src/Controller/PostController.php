@@ -231,6 +231,21 @@ final class PostController implements PostControllerInterface
     }
 
     /**
+     * @param string $text
+     *
+     * @return string
+     */
+    protected function makeLinksClickable(string $text)
+    {
+        $text = preg_replace('!(((f|ht)tp(s)?://)[-a-zA-Zа-яА-Я()0-9@:%\!_+.,~#?&;//=]+)!i', '<a href="$1" target="_blank">$1</a>', $text);
+        $text = preg_replace('/\(\<a href\=\"(.*)\)"\ target\=\"\_blank\">(.*)\)\<\/a>/i', '(<a href="$1" target="_blank">$2</a>)', $text);
+        $text = preg_replace('/\<a href\=\"(.*)\."\ target\=\"\_blank\">(.*)\.\<\/a>/i', '<a href="$1" target="_blank">$2</a>.', $text);
+        $text = preg_replace('/\<a href\=\"(.*)\,"\ target\=\"\_blank\">(.*)\,\<\/a>/i', '<a href="$1" target="_blank">$2</a>,', $text);
+
+        return $text;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function create(ServerRequestInterface $request) : ResponseInterface
@@ -281,7 +296,7 @@ final class PostController implements PostControllerInterface
         } else {
             $rawposttext = '';
             $message = $this->colorQuote($this->postLink($this->cleanString(rtrim($data['message']))));
-            $message = $this->renderer->makeLinksClickable($message);
+            $message = $this->makeLinksClickable($message);
             $message = str_replace("\n", '<br>', $message);
 
             if (TINYIB_DICE_ENABLED) {
@@ -609,5 +624,179 @@ final class PostController implements PostControllerInterface
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 
         return new Response(200, [], 'Post deleted.');
+    }
+
+    /**
+     * Renders a post view model.
+     *
+     * @param array $viewModel
+     *
+     * @return string
+     */
+    protected function renderPostViewModel(array $view_model, bool $res) : string
+    {
+        return $this->renderer->render('_post.twig', [
+            'post' => $view_model,
+            'res' => $res,
+        ]);
+    }
+
+    /**
+     * @param \TinyIB\Model\PostInterface $post
+     * @param bool $res
+     *
+     * @return string
+     */
+    protected function renderPost(PostInterface $post, bool $res) : string
+    {
+        $view_model = $post->createViewModel($res);
+        return $this->renderPostViewModel($view_model, $res);
+    }
+
+    /**
+     * @return string
+     */
+    protected function supportedFileTypes() : string
+    {
+        global $tinyib_uploads;
+        if (empty($tinyib_uploads)) {
+            return '';
+        }
+
+        $types_allowed = array_map('strtoupper', array_unique(array_column($tinyib_uploads, 0)));
+        $types_last = array_pop($types_allowed);
+        $types_formatted = $types_allowed
+            ? implode(', ', $types_allowed) . ' and ' . $types_last
+            : $types_last;
+
+        return 'Supported file type' . (count($tinyib_uploads) != 1 ? 's are ' : ' is ') . $types_formatted . '.';
+    }
+
+    /**
+     * @param int $id
+     *
+     * @return string
+     */
+    protected function renderThreadPage(int $id) : string
+    {
+        /** @var \TinyIB\Models\PostInterface[] $posts */
+        $posts = $this->post_repository->getPostsByThreadID($id);
+        $post_vms = array_map(function ($post) {
+            /** @var \TinyIB\Models\PostInterface $post */
+            $view_model = $post->createViewModel(TINYIB_RESPAGE);
+            if (TINYIB_CACHE === 'database') {
+                // Do not cache individual posts in database mode.
+                $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_RESPAGE);
+                return $view_model;
+            }
+
+            $key = TINYIB_BOARD . ':post:' . $post->getID();
+            $view_model['rendered'] = $this->cache->get($key);
+            if ($view_model['rendered'] === null) {
+                $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_RESPAGE);
+                $this->cache->set($key, $view_model['rendered'], 4 * 60 * 60);
+            }
+
+            return $view_model;
+        }, $posts);
+
+        return $this->renderer->render('thread.twig', [
+            'filetypes' => $this->supportedFileTypes(),
+            'posts' => $post_vms,
+            'parent' => $id,
+            'res' => TINYIB_RESPAGE,
+            'thumbnails' => true,
+        ]);
+    }
+
+    /**
+     * @param int $page
+     *
+     * @return string
+     */
+    protected function renderBoardPage(int $page) : string
+    {
+        /** @var \TinyIB\Model\PostInterface[] $threads */
+        $threads = $this->post_repository->getThreadsByPage($page);
+        $pages = ceil($this->post_repository->getThreadCount() / TINYIB_THREADSPERPAGE) - 1;
+        $post_vms = [];
+
+        foreach ($threads as $thread) {
+            $replies = $this->post_repository->getPostsByThreadID($thread->getID());
+            $omitted_count = max(0, count($replies) - TINYIB_PREVIEWREPLIES - 1);
+            $replies = array_slice($replies, -TINYIB_PREVIEWREPLIES);
+            if (empty($replies) || $replies[0]->getID() !== $thread->getID()) {
+                array_unshift($replies, $thread);
+            }
+
+            $thread_reply_vms = array_map(function ($post) use ($omitted_count) {
+                /** @var \TinyIB\Models\PostInterface $post */
+                $view_model = $post->createViewModel(TINYIB_INDEXPAGE);
+                if ($post->isThread() && $omitted_count > 0) {
+                    $view_model['omitted'] = $omitted_count;
+                }
+
+                if (TINYIB_CACHE === 'database') {
+                    // Do not cache individual posts in database mode.
+                    $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
+                    return $view_model;
+                }
+
+                $key = TINYIB_BOARD . ':index_post:' . $post->getID();
+                $view_model['rendered'] = $this->cache->get($key);
+                if ($view_model['rendered'] === null) {
+                    $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
+                    $this->cache->set($key, $view_model['rendered'], 4 * 60 * 60);
+                }
+
+                return $view_model;
+            }, $replies);
+
+            $post_vms = array_merge($post_vms, $thread_reply_vms);
+        }
+
+        return $this->renderer->render('board.twig', [
+            'filetypes' => $this->supportedFileTypes(),
+            'posts' => $post_vms,
+            'pages' => max($pages, 0),
+            'this_page' => $page,
+            'parent' => 0,
+            'res' => TINYIB_INDEXPAGE,
+            'thumbnails' => true,
+        ]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function board(ServerRequestInterface $request) : ResponseInterface
+    {
+        $args = explode('/', $request->getUri()->getPath());
+        $page = count($args) > 1 ? (int)$args[1] : 0;
+        $key = TINYIB_BOARD . ':page:' . $page;
+        $data = $this->cache->get($key);
+        if (!isset($data)) {
+            $data = $this->renderBoardPage($page);
+            $this->cache->set($key, $data, 4 * 60 * 60);
+        }
+
+        return new Response(200, [], $data);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function thread(ServerRequestInterface $request) : ResponseInterface
+    {
+        $args = explode('/', $request->getUri()->getPath());
+        $id = (int)$args[2];
+        $key = TINYIB_BOARD . ':thread:' . $id;
+        $data = $this->cache->get($key);
+        if (!isset($data)) {
+            $data = $this->renderThreadPage($id);
+            $this->cache->set($key, $data, 4 * 60 * 60);
+        }
+
+        return new Response(200, [], $data);
     }
 }

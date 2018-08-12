@@ -24,4 +24,22 @@ interface PostControllerInterface
      * @return \Psr\Http\Message\ResponseInterface
      */
     public function delete(ServerRequestInterface $request) : ResponseInterface;
+
+    /**
+     * Returns page for a board.
+     *
+     * @param \Psr\Http\Message\ServerRequestInterface
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function board(ServerRequestInterface $request) : ResponseInterface;
+
+    /**
+     * Returns page for a thread.
+     *
+     * @param \Psr\Http\Message\ServerRequestInterface
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function thread(ServerRequestInterface $request) : ResponseInterface;
 }

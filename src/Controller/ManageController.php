@@ -52,6 +52,21 @@ class ManageController implements ManageControllerInterface
     }
 
     /**
+     * Renders a post view model.
+     *
+     * @param array $viewModel
+     *
+     * @return string
+     */
+    protected function renderPostViewModel(array $view_model, bool $res) : string
+    {
+        return $this->renderer->render('_post.twig', [
+            'post' => $view_model,
+            'res' => $res,
+        ]);
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function status(ServerRequestInterface $request) : ResponseInterface
@@ -79,14 +94,14 @@ class ManageController implements ManageControllerInterface
                 $view_model = $post->createViewModel(TINYIB_INDEXPAGE);
                 if (TINYIB_CACHE === 'database') {
                     // Do not cache individual posts in database mode.
-                    $view_model['rendered'] = $this->renderer->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
+                    $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
                     return $view_model;
                 }
 
                 $key = TINYIB_BOARD . ':index_post:' . $post->getID();
                 $view_model['rendered'] = $this->cache->get($key);
                 if ($view_model['rendered'] === null) {
-                    $view_model['rendered'] = $this->renderer->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
+                    $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
                     $this->cache->set($key, $view_model['rendered'], 4 * 60 * 60);
                 }
 
@@ -99,14 +114,14 @@ class ManageController implements ManageControllerInterface
             $view_model = $post->createViewModel(TINYIB_INDEXPAGE);
             if (TINYIB_CACHE === 'database') {
                 // Do not cache individual posts in database mode.
-                $view_model['rendered'] = $this->renderer->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
+                $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
                 return $view_model;
             }
 
             $key = TINYIB_BOARD . ':index_post:' . $post->getID();
             $view_model['rendered'] = $this->cache->get($key);
             if ($view_model['rendered'] === null) {
-                $view_model['rendered'] = $this->renderer->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
+                $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
                 $this->cache->set($key, $view_model['rendered'], 4 * 60 * 60);
             }
 
@@ -276,14 +291,14 @@ class ManageController implements ManageControllerInterface
             $view_model = $post->createViewModel(TINYIB_INDEXPAGE);
             if (TINYIB_CACHE === 'database') {
                 // Do not cache individual posts in database mode.
-                $view_model['rendered'] = $this->renderer->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
+                $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
                 return $view_model;
             }
 
             $key = TINYIB_BOARD . ':index_post:' . $post->getID();
             $view_model['rendered'] = $this->cache->get($key);
             if ($view_model['rendered'] === null) {
-                $view_model['rendered'] = $this->renderer->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
+                $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
                 $this->cache->set($key, $view_model['rendered'], 4 * 60 * 60);
             }
 

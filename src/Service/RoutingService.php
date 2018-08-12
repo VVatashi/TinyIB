@@ -2,26 +2,19 @@
 
 namespace TinyIB\Service;
 
+use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use TinyIB\Cache\CacheInterface;
 use TinyIB\Controller\ManageControllerInterface;
 use TinyIB\Controller\PostControllerInterface;
 use TinyIB\Controller\SettingsControllerInterface;
-use GuzzleHttp\Psr7\Response;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use TinyIB\Service\RendererServiceInterface;
 use VVatashi\Router\RouterInterface;
 
 class RoutingService implements RoutingServiceInterface
 {
     /** @var \VVatashi\Router\RouterInterface $router */
     protected $router;
-
-    /** @var \TinyIB\Cache\CacheInterface $cache */
-    protected $cache;
-
-    /** @var \TinyIB\Service\RendererServiceInterface $renderer */
-    protected $renderer;
 
     /** @var \TinyIB\Controller\ManageControllerInterface $manage_controller */
     protected $manage_controller;
@@ -37,15 +30,11 @@ class RoutingService implements RoutingServiceInterface
      */
     public function __construct(
         RouterInterface $router,
-        CacheInterface $cache,
-        RendererServiceInterface $renderer,
         ManageControllerInterface $manage_controller,
         PostControllerInterface $post_controller,
         SettingsControllerInterface $settings_controller
     ) {
         $this->router = $router;
-        $this->cache = $cache;
-        $this->renderer = $renderer;
         $this->manage_controller = $manage_controller;
         $this->post_controller = $post_controller;
         $this->settings_controller = $settings_controller;
@@ -79,40 +68,9 @@ class RoutingService implements RoutingServiceInterface
 
         $this->router->add('settings', [$this->settings_controller, 'settings']);
 
-        $this->router->add('res/:id', function (ServerRequestInterface $request) {
-            $id = (int)explode('/', $request->getUri()->getPath())[2];
-            $key = TINYIB_BOARD . ':thread:' . $id;
-            $data = $this->cache->get($key);
-            if (!isset($data)) {
-                $data = $this->renderer->renderThreadPage($id);
-                $this->cache->set($key, $data, 4 * 60 * 60);
-            }
-
-            return new Response(200, [], $data);
-        });
-
-        $this->router->add(':page', function (ServerRequestInterface $request) {
-            $page = (int)explode('/', $request->getUri()->getPath())[1];
-            $key = TINYIB_BOARD . ':page:' . $page;
-            $data = $this->cache->get($key);
-            if (!isset($data)) {
-                $data = $this->renderer->renderBoardPage($page);
-                $this->cache->set($key, $data, 4 * 60 * 60);
-            }
-
-            return new Response(200, [], $data);
-        });
-
-        $this->router->add('', function (ServerRequestInterface $request) {
-            $key = TINYIB_BOARD . ':page:0';
-            $data = $this->cache->get($key);
-            if (!isset($data)) {
-                $data = $this->renderer->renderBoardPage(0);
-                $this->cache->set($key, $data, 4 * 60 * 60);
-            }
-
-            return new Response(200, [], $data);
-        });
+        $this->router->add('res/:id', [$this->post_controller, 'thread']);
+        $this->router->add(':page', [$this->post_controller, 'board']);
+        $this->router->add('', [$this->post_controller, 'board']);
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace TinyIB\Tests;
+namespace TinyIB\Tests\Mock;
 
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
@@ -21,6 +21,22 @@ class PostControllerMock implements PostControllerInterface
      * {@inheritDoc}
      */
     public function delete(ServerRequestInterface $request) : ResponseInterface
+    {
+        return new Response(200);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function board(ServerRequestInterface $request) : ResponseInterface
+    {
+        return new Response(200);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function thread(ServerRequestInterface $request) : ResponseInterface
     {
         return new Response(200);
     }

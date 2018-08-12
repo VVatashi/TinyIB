@@ -1,6 +1,6 @@
 <?php
 
-namespace TinyIB\Tests;
+namespace TinyIB\Tests\Mock;
 
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
