@@ -3,7 +3,7 @@
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
 use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
+use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
 use Monolog\Processor\PsrLogMessageProcessor;
 use Psr\Container\ContainerInterface;
@@ -167,7 +167,7 @@ if (!empty(TINYIB_TIMEZONE)) {
 $container->registerInstance(ContainerInterface::class, $container);
 $container->registerCallback(LoggerInterface::class, function ($container) {
     $logger = new Logger('app');
-    $log_handler = new StreamHandler(__DIR__ . '/storage/logs/app.log');
+    $log_handler = new RotatingFileHandler(__DIR__ . '/storage/logs/error');
     $log_formatter = new LineFormatter(null, null, true, true);
     $log_handler->setFormatter($log_formatter);
     $logger->pushHandler($log_handler);
