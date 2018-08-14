@@ -8,7 +8,8 @@
         "vvatashi/bbcode": "dev-master",
         "vvatashi/di": "dev-master",
         "vvatashi/router": "dev-master",
-        "guzzlehttp/psr7": "^1.4"
+        "guzzlehttp/psr7": "^1.4",
+        "psr/http-server-middleware": "^1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^7.2"

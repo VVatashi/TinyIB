@@ -20,6 +20,8 @@ use TinyIB\Controller\PostController;
 use TinyIB\Controller\PostControllerInterface;
 use TinyIB\Controller\SettingsController;
 use TinyIB\Controller\SettingsControllerInterface;
+use TinyIB\Middleware\CorsMiddleware;
+use TinyIB\Middleware\RequestHandler;
 use TinyIB\Functions;
 use TinyIB\Repository\BanRepositoryInterface;
 use TinyIB\Repository\CacheRepositoryInterface;
@@ -223,13 +225,31 @@ $container->registerType(ManageControllerInterface::class, ManageController::cla
 $container->registerType(PostControllerInterface::class, PostController::class);
 $container->registerType(SettingsControllerInterface::class, SettingsController::class);
 
+// Setup request handling.
+
+// Use routing handler.
+/** @var \TinyIB\Service\RoutingServiceInterface $routing_service */
+$handler = $container->get(RoutingServiceInterface::class);
+
+// Add CORS handler.
+$handler = new RequestHandler(new CorsMiddleware(), $handler);
+
 // Get request object.
 $request = ServerRequest::fromGlobals();
 
-// Resolve and handle route.
-/** @var \TinyIB\Service\RoutingServiceInterface $routing_service */
-$routing_service = $container->get(RoutingServiceInterface::class);
-$response = $routing_service->resolve($request);
+// If getallheaders() is not supported.
+if (!function_exists('getallheaders')) {
+    foreach ($_SERVER as $name => $value) {
+        if (substr($name, 0, 5) == 'HTTP_') {
+            $name = substr($name, 5);
+            $name = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', $name))));
+            $request = $request->withHeader($name, $value);
+        }
+    }
+}
+
+// Handle request.
+$response = $handler->handle($request);
 
 // Send response.
 $version = $response->getProtocolVersion();

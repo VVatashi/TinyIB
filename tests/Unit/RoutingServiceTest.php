@@ -90,7 +90,7 @@ final class RoutingServiceTest extends TestCase
         $this->assertInstanceOf(RoutingService::class, $routing_service);
 
         $request = new ServerRequest('GET', $path);
-        $response = $routing_service->resolve($request);
+        $response = $routing_service->handle($request);
         if ($exists) {
             $this->assertNotEquals(404, $response->getStatusCode());
         } else {

@@ -5,6 +5,7 @@ namespace TinyIB\Service;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use TinyIB\Cache\CacheInterface;
 use TinyIB\Controller\CaptchaControllerInterface;
 use TinyIB\Controller\ManageControllerInterface;
@@ -12,7 +13,7 @@ use TinyIB\Controller\PostControllerInterface;
 use TinyIB\Controller\SettingsControllerInterface;
 use VVatashi\Router\RouterInterface;
 
-class RoutingService implements RoutingServiceInterface
+class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
 {
     /** @var \VVatashi\Router\RouterInterface $router */
     protected $router;
@@ -84,7 +85,7 @@ class RoutingService implements RoutingServiceInterface
     /**
      * {@inheritDoc}
      */
-    public function resolve(ServerRequestInterface $request) : ResponseInterface
+    public function handle(ServerRequestInterface $request) : ResponseInterface
     {
         $uri = $request->getUri();
         $path = $uri->getPath();
