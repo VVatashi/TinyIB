@@ -14,5 +14,5 @@ interface RoutingServiceInterface
      *
      * @return \Psr\Http\Message\ServerRequestInterface
      */
-    public function resolve(ServerRequestInterface $request) : ResponseInterface;
+    public function handle(ServerRequestInterface $request) : ResponseInterface;
 }
