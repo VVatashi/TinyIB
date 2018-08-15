@@ -63,21 +63,6 @@ interface RepositoryInterface
     public function delete($conditions);
 
     /**
-     * @return bool
-     */
-    public function inTransaction();
-
-    /**
-     * @return bool
-     */
-    public function beginTransaction();
-
-    /**
-     * @return bool
-     */
-    public function commit();
-
-    /**
      * Returns ID of the last inserted row.
      *
      * @return string

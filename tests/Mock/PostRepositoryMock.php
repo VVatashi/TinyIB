@@ -66,30 +66,6 @@ class PostRepositoryMock implements PostRepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function inTransaction()
-    {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function beginTransaction()
-    {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function commit()
-    {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function getPostByID(int $id)
     {
         return null;

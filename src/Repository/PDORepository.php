@@ -28,14 +28,6 @@ abstract class PDORepository implements RepositoryInterface
                 throw new \Exception("Failed to connect to the database: $msg");
             }
         }
-
-        if (!$this->inTransaction()) {
-            $this->beginTransaction();
-            static::$pdo->query('SET TRANSACTION ISOLATION LEVEL SERIALIZABLE');
-            register_shutdown_function(function () {
-                $this->commit();
-            });
-        }
     }
 
     /**
@@ -156,7 +148,7 @@ abstract class PDORepository implements RepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function inTransaction()
+    protected function inTransaction()
     {
         return static::$pdo->inTransaction();
     }
@@ -164,7 +156,7 @@ abstract class PDORepository implements RepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function beginTransaction()
+    protected function beginTransaction()
     {
         return static::$pdo->beginTransaction();
     }
@@ -172,7 +164,7 @@ abstract class PDORepository implements RepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function commit()
+    protected function commit()
     {
         return static::$pdo->commit();
     }
