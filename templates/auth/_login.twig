@@ -1,0 +1,51 @@
+{% extends '_html.twig' %}
+
+{% block content %}
+    <form class="content__auth-form auth-form" method="post" action="{{ base_url }}/auth/login/submit">
+        <ul class="auth-form__links">
+            <li><a href="{{ base_url }}/auth/register">Register</a></li>
+        </ul>
+
+        <h1 class="auth-form__header">Login</h1>
+
+        {% if error %}
+            <p class="auth-form__error">{{ error }}</p>
+        {% endif %}
+
+        <div class="auth-form__field">
+            <div class="auth-form__label-wrapper">
+                <label class="auth-form__label" for="email">Email</label>
+            </div>
+
+            <div class="auth-form__input-wrapper">
+                <input type="email" class="auth-form__input" id="email" name="email" value="{{ email }}" />
+            </div>
+        </div>
+
+        <div class="auth-form__field">
+            <div class="auth-form__label-wrapper">
+                <label class="auth-form__label" for="password">Password</label>
+            </div>
+
+            <div class="auth-form__input-wrapper">
+                <input type="password" class="auth-form__input" id="password" name="password" placeholder="password" value="" />
+            </div>
+        </div>
+
+        <div class="auth-form__field">
+            <div class="auth-form__label-wrapper">
+                <label class="auth-form__label" for="captcha">CAPTCHA</label>
+            </div>
+
+            <img class="auth-form__captcha" src="{{ base_url }}/captcha" alt="CAPTCHA">
+
+            <div class="auth-form__input-wrapper">
+                <input type="text" class="auth-form__input" id="captcha" name="captcha" placeholder="CAPTCHA" value="" />
+            </div>
+        </div>
+
+        <div class="auth-form__buttons">
+            <button class="auth-form__button" type="submit">Login</button>
+        </div>
+    </form>
+{% endblock %}

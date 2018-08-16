@@ -7,6 +7,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use TinyIB\Cache\CacheInterface;
+use TinyIB\Controller\AuthControllerInterface;
 use TinyIB\Controller\CaptchaControllerInterface;
 use TinyIB\Controller\ManageControllerInterface;
 use TinyIB\Controller\PostControllerInterface;
@@ -17,6 +18,9 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
 {
     /** @var \VVatashi\Router\RouterInterface $router */
     protected $router;
+
+    /** @var \TinyIB\Controller\AuthControllerInterface $auth_controller */
+    protected $auth_controller;
 
     /** @var \TinyIB\Controller\ManageControllerInterface $manage_controller */
     protected $manage_controller;
@@ -35,16 +39,26 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
      */
     public function __construct(
         RouterInterface $router,
+        AuthControllerInterface $auth_controller,
+        CaptchaControllerInterface $captcha_controller,
         ManageControllerInterface $manage_controller,
         PostControllerInterface $post_controller,
-        SettingsControllerInterface $settings_controller,
-        CaptchaControllerInterface $captcha_controller
+        SettingsControllerInterface $settings_controller
     ) {
         $this->router = $router;
+        $this->auth_controller = $auth_controller;
+        $this->captcha_controller = $captcha_controller;
         $this->manage_controller = $manage_controller;
         $this->post_controller = $post_controller;
         $this->settings_controller = $settings_controller;
-        $this->captcha_controller = $captcha_controller;
+
+        $this->router->add('auth/register', [$this->auth_controller, 'registerForm']);
+        $this->router->add('auth/register/submit', [$this->auth_controller, 'register']);
+        $this->router->add('auth/login', [$this->auth_controller, 'loginForm']);
+        $this->router->add('auth/login/submit', [$this->auth_controller, 'login']);
+        $this->router->add('auth/logout', [$this->auth_controller, 'logout']);
+
+        $this->router->add('captcha', [$this->captcha_controller, 'captcha']);
 
         $this->router->add('manage', [$this->manage_controller, 'status']);
         $this->router->add('manage/rebuildall', [$this->manage_controller, 'rebuildAll']);
@@ -70,16 +84,13 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
         $this->router->add('manage/sticky/:id', [$this->manage_controller, 'setSticky']);
         $this->router->add('manage/update', [$this->manage_controller, 'update']);
 
+        $this->router->add('', [$this->post_controller, 'board']);
+        $this->router->add(':page', [$this->post_controller, 'board']);
+        $this->router->add('res/:id', [$this->post_controller, 'thread']);
         $this->router->add('post/create', [$this->post_controller, 'create']);
         $this->router->add('post/delete', [$this->post_controller, 'delete']);
 
         $this->router->add('settings', [$this->settings_controller, 'settings']);
-
-        $this->router->add('captcha', [$this->captcha_controller, 'captcha']);
-
-        $this->router->add('res/:id', [$this->post_controller, 'thread']);
-        $this->router->add(':page', [$this->post_controller, 'board']);
-        $this->router->add('', [$this->post_controller, 'board']);
     }
 
     /**

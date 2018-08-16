@@ -6,6 +6,7 @@ use GuzzleHttp\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
 use TinyIB\Service\RoutingService;
 use TinyIB\Service\RoutingServiceInterface;
+use TinyIB\Tests\Mock\AuthControllerMock;
 use TinyIB\Tests\Mock\CaptchaControllerMock;
 use TinyIB\Tests\Mock\ManageControllerMock;
 use TinyIB\Tests\Mock\PostControllerMock;
@@ -72,6 +73,7 @@ final class RoutingServiceTest extends TestCase
     {
         $router = new Router();
 
+        $auth_controller = new AuthControllerMock();
         $captcha_controller = new CaptchaControllerMock();
         $manage_controller = new ManageControllerMock();
         $post_controller = new PostControllerMock();
@@ -79,10 +81,11 @@ final class RoutingServiceTest extends TestCase
 
         $routing_service = new RoutingService(
             $router,
+            $auth_controller,
+            $captcha_controller,
             $manage_controller,
             $post_controller,
-            $settings_controller,
-            $captcha_controller
+            $settings_controller
         );
 
         $this->assertNotNull($routing_service);
