@@ -16,7 +16,7 @@ abstract class PDORepository implements RepositoryInterface
     /**
      * @param string $table_name
      */
-    public function __construct($table_name)
+    public function __construct(string $table_name)
     {
         $this->table_name = $table_name;
 
@@ -30,60 +30,107 @@ abstract class PDORepository implements RepositoryInterface
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getAll($conditions = [], $order = null, $columns = '*')
+    static protected function isTableExists(string $table)
     {
-        $table_name = $this->table_name;
-        $query = "SELECT $columns FROM $table_name"
-            . SQLHelper::createWhereClause($conditions)
-            . SQLHelper::createOrderByClause($order);
-        $params = SQLHelper::createWhereParams($conditions);
-        $statement = static::$pdo->prepare($query);
-        $statement->execute($params);
-        return PDOHelper::rowsToArray($statement);
+        if (TINYIB_DBDRIVER === 'pgsql') {
+            $query = "SELECT count(*)
+FROM pg_catalog.pg_tables
+WHERE tablename LIKE ?";
+            $statement = static::$pdo->prepare($query);
+            $statement->execute([$table]);
+        } else {
+            $statement = static::$pdo->prepare('SHOW TABLES LIKE ?');
+            $statement->execute([$table]);
+            $statement = static::$pdo->query('SELECT FOUND_ROWS()');
+        }
+
+        return (int) $statement->fetchColumn() !== 0;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getDataSource() : string
+    {
+        $table = $this->table_name;
+        return "\"$table\"";
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return mixed
+     */
+    protected function dataToModel(array $data)
+    {
+        return $data;
+    }
+
+    /**
+     * @param mixed $model
+     *
+     * @return array
+     */
+    protected function modelToData($model) : array
+    {
+        if (isset($model['id']) && (int)$model['id'] === 0) {
+            unset($model['id']);
+        }
+
+        return $model;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getRange($conditions, $order, $take, $skip = 0, $columns = '*')
+    public function getAll(array $conditions = [], $order = null, $columns = '*')
     {
-        $table_name = $this->table_name;
-        $query = "SELECT $columns FROM $table_name"
+        $query = "SELECT $columns FROM " . $this->getDataSource()
+            . SQLHelper::createWhereClause($conditions)
+            . SQLHelper::createOrderByClause($order);
+        $params = SQLHelper::createWhereParams($conditions);
+        $statement = static::$pdo->prepare($query);
+        $statement->execute($params);
+        return array_map([$this, 'dataToModel'], PDOHelper::rowsToArray($statement));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getRange(array $conditions = [], $order, $take, $skip = 0, $columns = '*')
+    {
+        $query = "SELECT $columns FROM " . $this->getDataSource()
             . SQLHelper::createWhereClause($conditions)
             . SQLHelper::createOrderByClause($order)
             . " LIMIT $take OFFSET $skip";
         $params = SQLHelper::createWhereParams($conditions);
         $statement = static::$pdo->prepare($query);
         $statement->execute($params);
-        return PDOHelper::rowsToArray($statement);
+        return array_map([$this, 'dataToModel'], PDOHelper::rowsToArray($statement));
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getOne($conditions, $order = null, $columns = '*')
+    public function getOne(array $conditions = [], $order = null, $columns = '*')
     {
-        $table_name = $this->table_name;
-        $query = "SELECT $columns FROM $table_name"
+        $query = "SELECT $columns FROM " . $this->getDataSource()
             . SQLHelper::createWhereClause($conditions)
             . SQLHelper::createOrderByClause($order)
             . ' LIMIT 1';
         $params = SQLHelper::createWhereParams($conditions);
         $statement = static::$pdo->prepare($query);
         $statement->execute($params);
-        return $statement->fetch();
+        $data = $statement->fetch();
+        return $data !== false ? $this->dataToModel($data) : null;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getCount($conditions, $columns = '*')
+    public function getCount(array $conditions = [], $columns = '*')
     {
-        $table_name = $this->table_name;
-        $query = "SELECT count($columns) FROM $table_name"
+        $query = "SELECT count($columns) FROM " . $this->getDataSource()
             . SQLHelper::createWhereClause($conditions);
         $params = SQLHelper::createWhereParams($conditions);
         $statement = static::$pdo->prepare($query);
@@ -94,8 +141,9 @@ abstract class PDORepository implements RepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function insert($data)
+    public function insert($model)
     {
+        $data = $this->modelToData($model);
         $table_name = $this->table_name;
         $columns = implode(', ', array_keys($data));
         $values = implode(', ', array_fill(0, count($data), '?'));
@@ -117,8 +165,9 @@ abstract class PDORepository implements RepositoryInterface
      * @param array $conditions
      * @param array $data
      */
-    public function update($conditions, $data)
+    public function update($conditions, $model)
     {
+        $data = $this->modelToData($model);
         $table_name = $this->table_name;
         $keys = array_map(function ($key) {
             return "$key = ?";
