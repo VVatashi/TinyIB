@@ -165,7 +165,7 @@ WHERE tablename LIKE ?";
      * @param array $conditions
      * @param array $data
      */
-    public function update($conditions, $model)
+    public function update(array $conditions, $model)
     {
         $data = $this->modelToData($model);
         $table_name = $this->table_name;
@@ -183,7 +183,7 @@ WHERE tablename LIKE ?";
     /**
      * {@inheritDoc}
      */
-    public function delete($conditions)
+    public function delete(array $conditions)
     {
         $table_name = $this->table_name;
         $query = "DELETE FROM $table_name"

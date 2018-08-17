@@ -147,7 +147,7 @@ final class PDOPostRepository extends PDORepository implements PostRepositoryInt
     public function getPostByID(int $id)
     {
         $data = $this->getOne(['id' => $id]);
-        if ($data === false) {
+        if (!isset($data)) {
             return null;
         }
 
@@ -362,9 +362,10 @@ final class PDOPostRepository extends PDORepository implements PostRepositoryInt
     public function getLastPostByIP(string $ip)
     {
         $data = $this->getOne(['ip' => $ip], 'id DESC');
-        if ($data === false) {
+        if (!isset($data)) {
             return null;
         }
+
         return $this->createModel($data);
     }
 }

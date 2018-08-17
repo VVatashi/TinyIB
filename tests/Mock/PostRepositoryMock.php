@@ -28,7 +28,7 @@ class PostRepositoryMock implements PostRepositoryInterface
      */
     public function getOne($conditions, $order = null, $columns = '*')
     {
-        return [];
+        return null;
     }
 
     /**

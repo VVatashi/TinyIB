@@ -29,7 +29,7 @@ class BanRepositoryMock implements BanRepositoryInterface
      */
     public function getOne($conditions, $order = null, $columns = '*')
     {
-        return [];
+        return null;
     }
 
     /**

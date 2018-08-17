@@ -66,7 +66,7 @@ class BanService implements BanServiceInterface
     protected function getOneByProperty($name, $value)
     {
         $data = $this->ban_repository->getOne([$name => $value]);
-        if ($data === null || $data === false) {
+        if (!isset($data)) {
             return null;
         }
 
