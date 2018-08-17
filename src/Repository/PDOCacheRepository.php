@@ -59,7 +59,7 @@ class PDOCacheRepository extends PDORepository implements CacheRepositoryInterfa
                 ['timestamp' => ['#op' => '>', $now]],
             ],
         ]);
-        return $result !== false ? $result['value'] : null;
+        return isset($result) ? $result['value'] : null;
     }
 
     /**
@@ -70,7 +70,8 @@ class PDOCacheRepository extends PDORepository implements CacheRepositoryInterfa
         $now = time();
         $timestamp = isset($expire) ? $now + $expire : 0;
 
-        if ($this->getOne(['key' => $key]) !== false) {
+        $result = $this->getOne(['key' => $key]);
+        if (isset($result)) {
             $this->update(['key' => $key], [
                 'value' => $value,
                 'timestamp' => $timestamp,

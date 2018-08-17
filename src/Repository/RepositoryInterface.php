@@ -10,7 +10,7 @@ interface RepositoryInterface
      *
      * @return array
      */
-    public function getAll($conditions = [], $order = null, $columns = '*');
+    public function getAll(array $conditions = [], $order = null, $columns = '*');
 
     /**
      * @param array $conditions
@@ -21,16 +21,16 @@ interface RepositoryInterface
      *
      * @return array
      */
-    public function getRange($conditions, $order, $take, $skip = 0, $columns = '*');
+    public function getRange(array $conditions, $order, $take, $skip = 0, $columns = '*');
 
     /**
      * @param array $conditions
      * @param string|null $order
      * @param string $columns
      *
-     * @return array
+     * @return mixed
      */
-    public function getOne($conditions, $order = null, $columns = '*');
+    public function getOne(array $conditions, $order = null, $columns = '*');
 
     /**
      * @param array $conditions
@@ -38,44 +38,29 @@ interface RepositoryInterface
      *
      * @return int
      */
-    public function getCount($conditions, $columns = '*');
+    public function getCount(array $conditions, $columns = '*');
 
     /**
-     * @param array $data
+     * @param mixed $model
      *
      * @return int Row affected count.
      */
-    public function insert($data);
+    public function insert($model);
 
     /**
      * @param array $conditions
-     * @param array $data
+     * @param mixed $model
      *
      * @return int Row affected count.
      */
-    public function update($conditions, $data);
+    public function update(array $conditions, $data);
 
     /**
      * @param array $conditions
      *
      * @return int Row affected count.
      */
-    public function delete($conditions);
-
-    /**
-     * @return bool
-     */
-    public function inTransaction();
-
-    /**
-     * @return bool
-     */
-    public function beginTransaction();
-
-    /**
-     * @return bool
-     */
-    public function commit();
+    public function delete(array $conditions);
 
     /**
      * Returns ID of the last inserted row.

@@ -6,6 +6,7 @@ use GuzzleHttp\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
 use TinyIB\Service\RoutingService;
 use TinyIB\Service\RoutingServiceInterface;
+use TinyIB\Tests\Mock\AuthControllerMock;
 use TinyIB\Tests\Mock\CaptchaControllerMock;
 use TinyIB\Tests\Mock\ManageControllerMock;
 use TinyIB\Tests\Mock\PostControllerMock;
@@ -16,18 +17,18 @@ final class RoutingServiceTest extends TestCase
 {
     public static function setUpBeforeClass()
     {
-        define('TINYIB_BOARD', 'b');
-        define('TINYIB_THREADSPERPAGE', 5);
-        define('TINYIB_INDEXPAGE', false);
-        define('TINYIB_RESPAGE', true);
-        define('TINYIB_LOGO', '');
-        define('TINYIB_BOARDDESC', '');
-        define('TINYIB_REQMOD', false);
-        define('TINYIB_MAXWOP', 250);
-        define('TINYIB_MAXHOP', 250);
-        define('TINYIB_MAXW', 250);
-        define('TINYIB_MAXH', 250);
-        define('TINYIB_CAPTCHA', '');
+        defined('TINYIB_BOARD') || define('TINYIB_BOARD', 'b');
+        defined('TINYIB_THREADSPERPAGE') || define('TINYIB_THREADSPERPAGE', 5);
+        defined('TINYIB_INDEXPAGE') || define('TINYIB_INDEXPAGE', false);
+        defined('TINYIB_RESPAGE') || define('TINYIB_RESPAGE', true);
+        defined('TINYIB_LOGO') || define('TINYIB_LOGO', '');
+        defined('TINYIB_BOARDDESC') || define('TINYIB_BOARDDESC', '');
+        defined('TINYIB_REQMOD') || define('TINYIB_REQMOD', false);
+        defined('TINYIB_MAXWOP') || define('TINYIB_MAXWOP', 250);
+        defined('TINYIB_MAXHOP') || define('TINYIB_MAXHOP', 250);
+        defined('TINYIB_MAXW') || define('TINYIB_MAXW', 250);
+        defined('TINYIB_MAXH') || define('TINYIB_MAXH', 250);
+        defined('TINYIB_CAPTCHA') || define('TINYIB_CAPTCHA', '');
     }
 
     public function resolveProvider() : array
@@ -72,6 +73,7 @@ final class RoutingServiceTest extends TestCase
     {
         $router = new Router();
 
+        $auth_controller = new AuthControllerMock();
         $captcha_controller = new CaptchaControllerMock();
         $manage_controller = new ManageControllerMock();
         $post_controller = new PostControllerMock();
@@ -79,10 +81,11 @@ final class RoutingServiceTest extends TestCase
 
         $routing_service = new RoutingService(
             $router,
+            $auth_controller,
+            $captcha_controller,
             $manage_controller,
             $post_controller,
-            $settings_controller,
-            $captcha_controller
+            $settings_controller
         );
 
         $this->assertNotNull($routing_service);

@@ -37,7 +37,7 @@ a {
   }
 }
 
-input[name='password'] {
+input[name='password']:not([type='password']) {
   color: transparent;
 
   &::placeholder {

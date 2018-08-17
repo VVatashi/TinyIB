@@ -12,6 +12,8 @@ use TinyIB\Cache\CacheInterface;
 use TinyIB\Cache\DatabaseCache;
 use TinyIB\Cache\InMemoryCache;
 use TinyIB\Cache\RedisCache;
+use TinyIB\Controller\AuthController;
+use TinyIB\Controller\AuthControllerInterface;
 use TinyIB\Controller\CaptchaController;
 use TinyIB\Controller\CaptchaControllerInterface;
 use TinyIB\Controller\ManageController;
@@ -20,6 +22,7 @@ use TinyIB\Controller\PostController;
 use TinyIB\Controller\PostControllerInterface;
 use TinyIB\Controller\SettingsController;
 use TinyIB\Controller\SettingsControllerInterface;
+use TinyIB\Middleware\AuthMiddleware;
 use TinyIB\Middleware\CorsMiddleware;
 use TinyIB\Middleware\RequestHandler;
 use TinyIB\Functions;
@@ -28,7 +31,9 @@ use TinyIB\Repository\CacheRepositoryInterface;
 use TinyIB\Repository\PDOBanRepository;
 use TinyIB\Repository\PDOCacheRepository;
 use TinyIB\Repository\PDOPostRepository;
+use TinyIB\Repository\PDOUserRepository;
 use TinyIB\Repository\PostRepositoryInterface;
+use TinyIB\Repository\UserRepositoryInterface;
 use TinyIB\Service\BanService;
 use TinyIB\Service\BanServiceInterface;
 use TinyIB\Service\CaptchaService;
@@ -41,6 +46,8 @@ use TinyIB\Service\RendererService;
 use TinyIB\Service\RendererServiceInterface;
 use TinyIB\Service\RoutingService;
 use TinyIB\Service\RoutingServiceInterface;
+use TinyIB\Service\UserService;
+use TinyIB\Service\UserServiceInterface;
 use VVatashi\DI\Container;
 use VVatashi\Router\Router;
 use VVatashi\Router\RouterInterface;
@@ -184,6 +191,7 @@ $container->registerCallback(LoggerInterface::class, function ($container) {
 $container->registerType(BanRepositoryInterface::class, PDOBanRepository::class);
 $container->registerType(CacheRepositoryInterface::class, PDOCacheRepository::class);
 $container->registerType(PostRepositoryInterface::class, PDOPostRepository::class);
+$container->registerType(UserRepositoryInterface::class, PDOUserRepository::class);
 
 if (TINYIB_CACHE === 'memory') {
     $container->registerType(CacheInterface::class, InMemoryCache::class);
@@ -219,7 +227,9 @@ $container->registerType(CryptographyServiceInterface::class, CryptographyServic
 $container->registerType(PostServiceInterface::class, PostService::class);
 $container->registerType(RendererServiceInterface::class, RendererService::class);
 $container->registerType(RoutingServiceInterface::class, RoutingService::class);
+$container->registerType(UserServiceInterface::class, UserService::class);
 
+$container->registerType(AuthControllerInterface::class, AuthController::class);
 $container->registerType(CaptchaControllerInterface::class, CaptchaController::class);
 $container->registerType(ManageControllerInterface::class, ManageController::class);
 $container->registerType(PostControllerInterface::class, PostController::class);
@@ -230,6 +240,9 @@ $container->registerType(SettingsControllerInterface::class, SettingsController:
 // Use routing handler.
 /** @var \TinyIB\Service\RoutingServiceInterface $routing_service */
 $handler = $container->get(RoutingServiceInterface::class);
+
+// Add authentification handler.
+$handler = new RequestHandler(new AuthMiddleware(), $handler);
 
 // Add CORS handler.
 $handler = new RequestHandler(new CorsMiddleware(), $handler);
