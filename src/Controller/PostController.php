@@ -281,6 +281,7 @@ final class PostController implements PostControllerInterface
 
         $post = new Post((int)$data['parent']);
         $post->setIP($_SERVER['REMOTE_ADDR']);
+        $post->setUserID($request->getAttribute('user')->getID());
 
         $nameAndTripcode = $this->post_service->processName($data['name']);
         $post->setName($this->cleanString(substr($nameAndTripcode['name'], 0, 75)));

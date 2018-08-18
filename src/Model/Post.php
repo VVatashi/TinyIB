@@ -26,6 +26,9 @@ final class Post implements PostInterface
     /** @var string $ip */
     protected $ip;
 
+    /** @var null|int $user_id */
+    protected $user_id;
+
     /** @var string $name */
     protected $name;
 
@@ -183,6 +186,23 @@ final class Post implements PostInterface
     public function setIP(string $ip) : PostInterface
     {
         $this->ip = $ip;
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getUserID()
+    {
+        return $this->user_id;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setUserID($user_id) : PostInterface
+    {
+        $this->user_id = $user_id;
         return $this;
     }
 
@@ -503,6 +523,7 @@ final class Post implements PostInterface
         $this->bumped = 0;
 
         $this->ip = '';
+        $this->user_id = null;
 
         $this->name = '';
         $this->tripcode = '';
@@ -656,6 +677,7 @@ final class Post implements PostInterface
             'timestamp' => $this->getCreateTime(),
             'bumped' => $this->getBumpTime(),
             'ip' => $this->getIP(),
+            'user_id' => $this->getUserID(),
             'name' => $this->getName(),
             'tripcode' => $this->getTripcode(),
             'email' => $this->getEmail(),
