@@ -50,8 +50,7 @@ class AuthController implements AuthControllerInterface
         unset($_SESSION['error']);
         unset($_SESSION['email']);
 
-        $content = $this->renderer->render('auth/_register.twig', [
-            'base_url' => '/' . TINYIB_BOARD,
+        $content = $this->renderer->render('auth/register.twig', [
             'error' => $error,
             'email' => $email,
         ]);
@@ -123,8 +122,7 @@ class AuthController implements AuthControllerInterface
         unset($_SESSION['error']);
         unset($_SESSION['email']);
 
-        $content = $this->renderer->render('auth/_login.twig', [
-            'base_url' => '/' . TINYIB_BOARD,
+        $content = $this->renderer->render('auth/login.twig', [
             'error' => $error,
             'email' => $email,
         ]);

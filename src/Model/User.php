@@ -105,4 +105,22 @@ class User implements UserInterface
     {
         return $this->id === 0;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function isMod() : bool
+    {
+        // @todo Role system.
+        return $this->role > 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function isAdmin() : bool
+    {
+        // @todo Role system.
+        return $this->role > 2;
+    }
 }

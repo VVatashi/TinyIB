@@ -1,0 +1,33 @@
+{% extends '_html.twig' %}
+
+{% block content %}
+  <div class="content__entity entity-form">
+    <h1 class="entity-form__header">Edit user <em><a href="mailto:{{ user.email }}">{{ user.email }}</a></em></h1>
+
+    {% if error %}
+      <p class="entity-form__error">{{ error }}</p>
+    {% endif %}
+
+    <form class="entity-form__properties" method="post" action="{{ base_url }}/admin/user/{{ user.id }}/edit/submit">
+      <div class="entity-form__property">
+        <label class="entity-form__property-label">Email</label>
+        <input class="entity-form__property-value" type="email" name="email" value="{{ user.email }}" required />
+      </div>
+
+      <div class="entity-form__property">
+        <label class="entity-form__property-label">New password <small>(leave empty to not change)</small></label>
+        <input class="entity-form__property-value" type="text" name="password" value="" />
+      </div>
+
+      <div class="entity-form__property">
+        <label class="entity-form__property-label">Role</label>
+        <input class="entity-form__property-value" type="number" name="role" value="{{ user.role }}" required />
+      </div>
+
+      <ul class="entity-form__actions actions">
+        <li class="actions__action"><button class="actions__button button" type="Submit">Save</button></li>
+        <li class="actions__action"><a class="actions__button button" href="{{ base_url }}/admin/user">Cancel</a></li>
+      </ul>
+    </form>
+  </div>
+{% endblock %}

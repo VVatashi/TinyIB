@@ -1,0 +1,37 @@
+{% extends '_html.twig' %}
+
+{% block content %}
+  <div class="content__entity-list entity-list">
+    <h1 class="entity-list__header">User list</h1>
+
+    <table class="entity-list__entities">
+      <thead>
+        <tr>
+          <th class="entity-list__property-label">Email</th>
+          <th class="entity-list__property-label">Status</th>
+          <th class="entity-list__property-label">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for user in users %}
+          <tr class="entity-list__entity">
+            <th class="entity-list__property-value" scope="row"><a href="mailto:{{ user.email }}">{{ user.email }}</a></th>
+            <td class="entity-list__property-value">{{ user.role }}</td>
+            <td class="entity-list__property-value">
+              <ul class="entity-list__entity-actions actions">
+                <li class="actions__action"><a class="actions__button button" href="{{ base_url }}/admin/user/{{ user.id }}">Show</a></li>
+                <li class="actions__action"><a class="actions__button button" href="{{ base_url }}/admin/user/{{ user.id }}/edit">Edit</a></li>
+                <li class="actions__action"><a class="actions__button button" href="{{ base_url }}/admin/user/{{ user.id }}/delete">Delete</a></li>
+              </ul>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <ul class="entity-list__actions actions">
+      <li class="actions__action"><a class="actions__button button" href="{{ base_url }}/admin/user/create">Create a new user</a></li>
+    </ul>
+  </div>
+{% endblock %}
