@@ -12,6 +12,8 @@ use TinyIB\Cache\CacheInterface;
 use TinyIB\Cache\DatabaseCache;
 use TinyIB\Cache\InMemoryCache;
 use TinyIB\Cache\RedisCache;
+use TinyIB\Controller\Admin\UserCrudController;
+use TinyIB\Controller\Admin\UserCrudControllerInterface;
 use TinyIB\Controller\AuthController;
 use TinyIB\Controller\AuthControllerInterface;
 use TinyIB\Controller\CaptchaController;
@@ -212,6 +214,7 @@ $container->registerCallback(Twig_Environment::class, function ($container) use 
         'debug' => true,
     ]);
 
+    $twig->addGlobal('base_url', '/' . TINYIB_BOARD);
     $twig->addGlobal('embeds', $tinyib_embeds);
     $twig->addGlobal('uploads', $tinyib_uploads);
     $twig->addGlobal('is_installed_via_git', Functions::installedViaGit());
@@ -234,6 +237,7 @@ $container->registerType(CaptchaControllerInterface::class, CaptchaController::c
 $container->registerType(ManageControllerInterface::class, ManageController::class);
 $container->registerType(PostControllerInterface::class, PostController::class);
 $container->registerType(SettingsControllerInterface::class, SettingsController::class);
+$container->registerType(UserCrudControllerInterface::class, UserCrudController::class);
 
 // Setup request handling.
 

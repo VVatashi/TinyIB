@@ -58,4 +58,18 @@ interface UserInterface
      * @return bool
      */
     public function isAnonymous() : bool;
+
+    /**
+     * Checks if this user is a moderator.
+     *
+     * @return bool
+     */
+    public function isMod() : bool;
+
+    /**
+     * Checks if this user is an admin.
+     *
+     * @return bool
+     */
+    public function isAdmin() : bool;
 }

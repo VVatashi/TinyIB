@@ -1,0 +1,67 @@
+.entity {
+  &__property-label,
+  &__property-value {
+    padding: .5em 1em;
+  }
+}
+
+.entity-list {
+  &__property-label,
+  &__property-value {
+    padding: .5em 1em;
+  }
+
+  &__entities {
+    margin-bottom: 1em;
+  }
+}
+
+.entity-form {
+  &__error {
+      border: 1px solid #933;
+      color: #933;
+      margin-bottom: 1em;
+      padding: 1em;
+      background: #f99;
+  }
+
+  &__property-label,
+  &__property-value {
+    padding: .5em 1em;
+    vertical-align: middle;
+  }
+
+  &__property-label {
+    display: inline-block;
+    width: 120px;
+
+    small {
+      display: block;
+    }
+  }
+
+  &__property-value {
+    box-sizing: border-box;
+    display: inline-block;
+    width: 200px;
+  }
+
+  &__property {
+    margin-bottom: 1em;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-flow: row wrap;
+
+  &__action {
+    margin-right: 1em;
+  }
+}
+
+.confirm {
+  &__text {
+    margin-bottom: 1em;
+  }
+}

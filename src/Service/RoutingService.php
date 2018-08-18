@@ -7,6 +7,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use TinyIB\Cache\CacheInterface;
+use TinyIB\Controller\Admin\UserCrudControllerInterface;
 use TinyIB\Controller\AuthControllerInterface;
 use TinyIB\Controller\CaptchaControllerInterface;
 use TinyIB\Controller\ManageControllerInterface;
@@ -21,6 +22,9 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
 
     /** @var \TinyIB\Controller\AuthControllerInterface $auth_controller */
     protected $auth_controller;
+
+    /** @var \TinyIB\Controller\UserCrudControllerInterface $user_crud_controller */
+    protected $user_crud_controller;
 
     /** @var \TinyIB\Controller\ManageControllerInterface $manage_controller */
     protected $manage_controller;
@@ -40,6 +44,7 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
     public function __construct(
         RouterInterface $router,
         AuthControllerInterface $auth_controller,
+        UserCrudControllerInterface $user_crud_controller,
         CaptchaControllerInterface $captcha_controller,
         ManageControllerInterface $manage_controller,
         PostControllerInterface $post_controller,
@@ -47,6 +52,7 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
     ) {
         $this->router = $router;
         $this->auth_controller = $auth_controller;
+        $this->user_crud_controller = $user_crud_controller;
         $this->captcha_controller = $captcha_controller;
         $this->manage_controller = $manage_controller;
         $this->post_controller = $post_controller;
@@ -57,6 +63,15 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
         $this->router->add('auth/login', [$this->auth_controller, 'loginForm']);
         $this->router->add('auth/login/submit', [$this->auth_controller, 'login']);
         $this->router->add('auth/logout', [$this->auth_controller, 'logout']);
+
+        $this->router->add('admin/user', [$this->user_crud_controller, 'list']);
+        $this->router->add('admin/user/create', [$this->user_crud_controller, 'createForm']);
+        $this->router->add('admin/user/create/submit', [$this->user_crud_controller, 'create']);
+        $this->router->add('admin/user/:id', [$this->user_crud_controller, 'show']);
+        $this->router->add('admin/user/:id/edit', [$this->user_crud_controller, 'editForm']);
+        $this->router->add('admin/user/:id/edit/submit', [$this->user_crud_controller, 'edit']);
+        $this->router->add('admin/user/:id/delete', [$this->user_crud_controller, 'deleteConfirm']);
+        $this->router->add('admin/user/:id/delete/submit', [$this->user_crud_controller, 'delete']);
 
         $this->router->add('captcha', [$this->captcha_controller, 'captcha']);
 
