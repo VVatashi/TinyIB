@@ -124,6 +124,25 @@ interface PostInterface
     public function setIP(string $ip) : PostInterface;
 
     /**
+     * Returns post author ID.
+     *
+     * @return null|int
+     *   The post author ID.
+     */
+    public function getUserID();
+
+    /**
+     * Changes post author ID.
+     *
+     * @param null|int $user_id
+     *   The post author ID.
+     *
+     * @return PostInterface
+     *   Post itself.
+     */
+    public function setUserID($user_id) : PostInterface;
+
+    /**
      * Returns the poster name.
      *
      * @return string
