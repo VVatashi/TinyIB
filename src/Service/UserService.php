@@ -67,6 +67,10 @@ class UserService implements UserServiceInterface
             throw new \Exception('Incorrect password');
         }
 
+        if ($user->getRole() === 0) {
+            throw new \Exception('User is not activated');
+        }
+
         $_SESSION['user'] = $user;
         return $user;
     }
