@@ -12,42 +12,11 @@ use TinyIB\Cache\CacheInterface;
 use TinyIB\Cache\DatabaseCache;
 use TinyIB\Cache\InMemoryCache;
 use TinyIB\Cache\RedisCache;
-use TinyIB\Controller\AuthController;
-use TinyIB\Controller\AuthControllerInterface;
-use TinyIB\Controller\CaptchaController;
-use TinyIB\Controller\CaptchaControllerInterface;
-use TinyIB\Controller\ManageController;
-use TinyIB\Controller\ManageControllerInterface;
-use TinyIB\Controller\PostController;
-use TinyIB\Controller\PostControllerInterface;
-use TinyIB\Controller\SettingsController;
-use TinyIB\Controller\SettingsControllerInterface;
 use TinyIB\Middleware\AuthMiddleware;
 use TinyIB\Middleware\CorsMiddleware;
 use TinyIB\Middleware\RequestHandler;
 use TinyIB\Functions;
-use TinyIB\Repository\BanRepositoryInterface;
-use TinyIB\Repository\CacheRepositoryInterface;
-use TinyIB\Repository\PDOBanRepository;
-use TinyIB\Repository\PDOCacheRepository;
-use TinyIB\Repository\PDOPostRepository;
-use TinyIB\Repository\PDOUserRepository;
-use TinyIB\Repository\PostRepositoryInterface;
-use TinyIB\Repository\UserRepositoryInterface;
-use TinyIB\Service\BanService;
-use TinyIB\Service\BanServiceInterface;
-use TinyIB\Service\CaptchaService;
-use TinyIB\Service\CaptchaServiceInterface;
-use TinyIB\Service\CryptographyService;
-use TinyIB\Service\CryptographyServiceInterface;
-use TinyIB\Service\PostService;
-use TinyIB\Service\PostServiceInterface;
-use TinyIB\Service\RendererService;
-use TinyIB\Service\RendererServiceInterface;
-use TinyIB\Service\RoutingService;
 use TinyIB\Service\RoutingServiceInterface;
-use TinyIB\Service\UserService;
-use TinyIB\Service\UserServiceInterface;
 use VVatashi\DI\Container;
 use VVatashi\Router\Router;
 use VVatashi\Router\RouterInterface;
@@ -188,11 +157,6 @@ $container->registerCallback(LoggerInterface::class, function ($container) {
     return $logger;
 });
 
-$container->registerType(BanRepositoryInterface::class, PDOBanRepository::class);
-$container->registerType(CacheRepositoryInterface::class, PDOCacheRepository::class);
-$container->registerType(PostRepositoryInterface::class, PDOPostRepository::class);
-$container->registerType(UserRepositoryInterface::class, PDOUserRepository::class);
-
 if (TINYIB_CACHE === 'memory') {
     $container->registerType(CacheInterface::class, InMemoryCache::class);
 } elseif (TINYIB_CACHE === 'redis') {
@@ -221,19 +185,33 @@ $container->registerCallback(Twig_Environment::class, function ($container) use 
 
 $container->registerType(RouterInterface::class, Router::class);
 
-$container->registerType(BanServiceInterface::class, BanService::class);
-$container->registerType(CaptchaServiceInterface::class, CaptchaService::class);
-$container->registerType(CryptographyServiceInterface::class, CryptographyService::class);
-$container->registerType(PostServiceInterface::class, PostService::class);
-$container->registerType(RendererServiceInterface::class, RendererService::class);
-$container->registerType(RoutingServiceInterface::class, RoutingService::class);
-$container->registerType(UserServiceInterface::class, UserService::class);
+// Discovery classes to register in the DIC.
+$directories = [
+    'Controller' => ['#Interface$#', ''],
+    'Model' => ['#Interface$#', ''],
+    'Repository' => ['#([^\\\\]+Repository)Interface$#', 'PDO$1'],
+    'Service' => ['#Interface$#', ''],
+];
+foreach ($directories as $directory => $regex) {
+    $files = glob(__DIR__ . "/src/$directory/*.php");
+    $files = array_map(function ($file) {
+        $file = str_replace(__DIR__, '', $file);
+        $file = preg_replace('#^/src(.+)\\.php$#', 'TinyIB$1', $file);
+        $file = str_replace('/', '\\', $file);
+        return $file;
+    }, $files);
 
-$container->registerType(AuthControllerInterface::class, AuthController::class);
-$container->registerType(CaptchaControllerInterface::class, CaptchaController::class);
-$container->registerType(ManageControllerInterface::class, ManageController::class);
-$container->registerType(PostControllerInterface::class, PostController::class);
-$container->registerType(SettingsControllerInterface::class, SettingsController::class);
+    $interfaces = array_filter($files, function ($file) {
+        return preg_match('#Interface$#', $file);
+    });
+
+    foreach ($interfaces as $interface) {
+        $class = preg_replace($regex[0], $regex[1], $interface);
+        if (in_array($class, $files)) {
+            $container->registerType($interface, $class);
+        }
+    }
+}
 
 // Setup request handling.
 
@@ -241,11 +219,11 @@ $container->registerType(SettingsControllerInterface::class, SettingsController:
 /** @var \TinyIB\Service\RoutingServiceInterface $routing_service */
 $handler = $container->get(RoutingServiceInterface::class);
 
-// Add authentification handler.
-$handler = new RequestHandler(new AuthMiddleware(), $handler);
-
-// Add CORS handler.
-$handler = new RequestHandler(new CorsMiddleware(), $handler);
+// Setup middleware.
+$middlewares = [AuthMiddleware::class, CorsMiddleware::class];
+foreach ($middlewares as $middleware) {
+    $handler = new RequestHandler(new $middleware(), $handler);
+}
 
 // Get request object.
 $request = ServerRequest::fromGlobals();
