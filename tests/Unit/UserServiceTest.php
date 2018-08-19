@@ -8,6 +8,7 @@ use TinyIB\Model\UserInterface;
 use TinyIB\Service\UserService;
 use TinyIB\Service\UserServiceInterface;
 use TinyIB\Tests\Mock\UserRepositoryMock;
+use TinyIB\ValidationException;
 
 final class UserServiceTest extends TestCase
 {
@@ -48,19 +49,19 @@ final class UserServiceTest extends TestCase
 
     public function testLoginWithEmptyEmailShouldThrow() : void
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(ValidationException::class);
         $this->service->login('', 'test');
     }
 
     public function testLoginWithEmptyPasswordShouldThrow() : void
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(ValidationException::class);
         $this->service->login('another@example.com', '');
     }
 
     public function testLoginWithIncorrectPasswordShouldThrow() : void
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(ValidationException::class);
         $this->service->login('test@example.com', 'another');
     }
 
@@ -84,19 +85,19 @@ final class UserServiceTest extends TestCase
 
     public function testRegisterWithEmptyEmailShouldThrow() : void
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(ValidationException::class);
         $this->service->register('', 'test');
     }
 
     public function testRegisterWithExistingEmailShouldThrow() : void
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(ValidationException::class);
         $this->service->register('test@example.com', 'test');
     }
 
     public function testRegisterWithEmptyPasswordShouldThrow() : void
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(ValidationException::class);
         $this->service->register('another@example.com', '');
     }
 }
