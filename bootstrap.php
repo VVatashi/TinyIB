@@ -26,6 +26,7 @@ use TinyIB\Controller\SettingsController;
 use TinyIB\Controller\SettingsControllerInterface;
 use TinyIB\Middleware\AuthMiddleware;
 use TinyIB\Middleware\CorsMiddleware;
+use TinyIB\Middleware\ExceptionMiddleware;
 use TinyIB\Middleware\RequestHandler;
 use TinyIB\Functions;
 use TinyIB\Repository\BanRepositoryInterface;
@@ -250,6 +251,11 @@ $handler = new RequestHandler(new AuthMiddleware(), $handler);
 
 // Add CORS handler.
 $handler = new RequestHandler(new CorsMiddleware(), $handler);
+
+// Add exception handler.
+$handler = new RequestHandler(new ExceptionMiddleware(
+    $container->get(RendererServiceInterface::class)
+), $handler);
 
 // Get request object.
 $request = ServerRequest::fromGlobals();

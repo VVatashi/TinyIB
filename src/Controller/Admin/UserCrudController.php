@@ -5,7 +5,9 @@ namespace TinyIB\Controller\Admin;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TinyIB\AccessDeniedException;
 use TinyIB\Model\User;
+use TinyIB\NotFoundException;
 use TinyIB\Repository\UserRepositoryInterface;
 use TinyIB\Service\RendererServiceInterface;
 use TinyIB\Service\UserServiceInterface;
@@ -46,15 +48,10 @@ class UserCrudController implements UserCrudControllerInterface
         /** @var \TinyIB\Model\UserInterface $user */
         $current_user = $request->getAttribute('user');
         if (!$current_user->isMod()) {
-            $content = $this->renderer->render('error.twig', [
-                'message' => 'You are not allowed to access this page',
-            ]);
-
-            return new Response(403, [], $content);
+            throw new AccessDeniedException('You are not allowed to access this page');
         }
 
         $users = $this->user_repository->getAll([], 'id DESC');
-
         $content = $this->renderer->render('admin/user/list.twig', [
             'users' => $users,
         ]);
@@ -70,22 +67,13 @@ class UserCrudController implements UserCrudControllerInterface
         /** @var \TinyIB\Model\UserInterface $user */
         $current_user = $request->getAttribute('user');
         if (!$current_user->isMod()) {
-            $content = $this->renderer->render('error.twig', [
-                'message' => 'You are not allowed to access this page',
-            ]);
-
-            return new Response(403, [], $content);
+            throw new AccessDeniedException('You are not allowed to access this page');
         }
 
         $id = (int)explode('/', $request->getUri()->getPath())[3];
-
         $user = $this->user_repository->getOne(['id' => $id]);
         if (!isset($user)) {
-            $content = $this->renderer->render('error.twig', [
-                'message' => "User #$id not found.",
-            ]);
-
-            return new Response(404, [], $content);
+            throw new NotFoundException("User #$id not found.");
         }
 
         $content = $this->renderer->render('admin/user/show.twig', [
@@ -103,11 +91,7 @@ class UserCrudController implements UserCrudControllerInterface
         /** @var \TinyIB\Model\UserInterface $user */
         $current_user = $request->getAttribute('user');
         if (!$current_user->isMod()) {
-            $content = $this->renderer->render('error.twig', [
-                'message' => 'You are not allowed to access this page',
-            ]);
-
-            return new Response(403, [], $content);
+            throw new AccessDeniedException('You are not allowed to access this page');
         }
 
         // Restore form input from the session.
@@ -139,11 +123,7 @@ class UserCrudController implements UserCrudControllerInterface
         /** @var \TinyIB\Model\UserInterface $user */
         $current_user = $request->getAttribute('user');
         if (!$current_user->isMod()) {
-            $content = $this->renderer->render('error.twig', [
-                'message' => 'You are not allowed to access this page',
-            ]);
-
-            return new Response(403, [], $content);
+            throw new AccessDeniedException('You are not allowed to access this page');
         }
 
         $data = $request->getParsedBody();
@@ -168,7 +148,7 @@ class UserCrudController implements UserCrudControllerInterface
         }
 
         try {
-            $user = (new User(0, '', ''))->withEmail($email)->withPassword($password)->withRole($role);
+            $user = (new User(0, $email, '', $role))->withPassword($password);
             $this->user_repository->insert($user);
         }
         catch(\Exception $e) {
@@ -190,22 +170,13 @@ class UserCrudController implements UserCrudControllerInterface
         /** @var \TinyIB\Model\UserInterface $user */
         $current_user = $request->getAttribute('user');
         if (!$current_user->isMod()) {
-            $content = $this->renderer->render('error.twig', [
-                'message' => 'You are not allowed to access this page',
-            ]);
-
-            return new Response(403, [], $content);
+            throw new AccessDeniedException('You are not allowed to access this page');
         }
 
         $id = (int)explode('/', $request->getUri()->getPath())[3];
-
         $user = $this->user_repository->getOne(['id' => $id]);
         if (!isset($user)) {
-            $content = $this->renderer->render('error.twig', [
-                'message' => "User #$id not found.",
-            ]);
-
-            return new Response(404, [], $content);
+            throw new NotFoundException("User #$id not found.");
         }
 
         // Restore form input from the session.
@@ -229,22 +200,13 @@ class UserCrudController implements UserCrudControllerInterface
         /** @var \TinyIB\Model\UserInterface $user */
         $current_user = $request->getAttribute('user');
         if (!$current_user->isMod()) {
-            $content = $this->renderer->render('error.twig', [
-                'message' => 'You are not allowed to access this page',
-            ]);
-
-            return new Response(403, [], $content);
+            throw new AccessDeniedException('You are not allowed to access this page');
         }
 
         $id = (int)explode('/', $request->getUri()->getPath())[3];
-
         $user = $this->user_repository->getOne(['id' => $id]);
         if (!isset($user)) {
-            $content = $this->renderer->render('error.twig', [
-                'message' => "User #$id not found.",
-            ]);
-
-            return new Response(404, [], $content);
+            throw new NotFoundException("User #$id not found.");
         }
 
         $data = $request->getParsedBody();
@@ -281,22 +243,14 @@ class UserCrudController implements UserCrudControllerInterface
         /** @var \TinyIB\Model\UserInterface $user */
         $current_user = $request->getAttribute('user');
         if (!$current_user->isMod()) {
-            $content = $this->renderer->render('error.twig', [
-                'message' => 'You are not allowed to access this page',
-            ]);
-
-            return new Response(403, [], $content);
+            throw new AccessDeniedException('You are not allowed to access this page');
         }
 
         $id = (int)explode('/', $request->getUri()->getPath())[3];
 
         $user = $this->user_repository->getOne(['id' => $id]);
         if (!isset($user)) {
-            $content = $this->renderer->render('error.twig', [
-                'message' => "User #$id not found.",
-            ]);
-
-            return new Response(404, [], $content);
+            throw new NotFoundException("User #$id not found.");
         }
 
         $content = $this->renderer->render('confirm.twig', [
@@ -319,22 +273,14 @@ class UserCrudController implements UserCrudControllerInterface
         /** @var \TinyIB\Model\UserInterface $user */
         $current_user = $request->getAttribute('user');
         if (!$current_user->isMod()) {
-            $content = $this->renderer->render('error.twig', [
-                'message' => 'You are not allowed to access this page',
-            ]);
-
-            return new Response(403, [], $content);
+            throw new AccessDeniedException('You are not allowed to access this page');
         }
 
         $id = (int)explode('/', $request->getUri()->getPath())[3];
 
         $user = $this->user_repository->getOne(['id' => $id]);
         if (!isset($user)) {
-            $content = $this->renderer->render('error.twig', [
-                'message' => "User #$id not found.",
-            ]);
-
-            return new Response(404, [], $content);
+            throw new NotFoundException("User #$id not found.");
         }
 
         $this->user_repository->delete(['id' => $id]);

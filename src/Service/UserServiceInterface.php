@@ -18,7 +18,7 @@ interface UserServiceInterface
      * @return \TinyIB\Model\UserInterface
      *   User object instance.
      *
-     * @throws \Exception
+     * @throws \TinyIB\ValidationException
      *   On validation errors.
      */
     public function register(string $email, string $password) : UserInterface;
@@ -35,7 +35,7 @@ interface UserServiceInterface
      * @return \TinyIB\Model\UserInterface
      *   User object instance.
      *
-     * @throws \Exception
+     * @throws \TinyIB\ValidationException
      *   On validation errors.
      */
     public function login(string $email, string $password) : UserInterface;
