@@ -20,6 +20,7 @@ final class PDOPostRepository extends PDORepository implements PostRepositoryInt
                 "timestamp" integer NOT NULL,
                 "bumped" integer NOT NULL,
                 "ip" varchar(39) NOT NULL,
+                "user_id" integer,
                 "name" varchar(75) NOT NULL,
                 "tripcode" varchar(22) NOT NULL,
                 "email" varchar(75) NOT NULL,
@@ -43,6 +44,7 @@ final class PDOPostRepository extends PDORepository implements PostRepositoryInt
             );
             CREATE INDEX ON "' . TINYIB_DBPOSTS . '"("parent");
             CREATE INDEX ON "' . TINYIB_DBPOSTS . '"("bumped");
+            CREATE INDEX ON "' . TINYIB_DBPOSTS . '"("user_id");
             CREATE INDEX ON "' . TINYIB_DBPOSTS . '"("stickied");
             CREATE INDEX ON "' . TINYIB_DBPOSTS . '"("moderated");';
         } else {
@@ -52,6 +54,7 @@ final class PDOPostRepository extends PDORepository implements PostRepositoryInt
                 `timestamp` int(20) NOT NULL,
                 `bumped` int(20) NOT NULL,
                 `ip` varchar(39) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+                `user_id` INT UNSIGNED,
                 `name` varchar(75) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
                 `tripcode` varchar(22) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
                 `email` varchar(75) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
@@ -74,6 +77,7 @@ final class PDOPostRepository extends PDORepository implements PostRepositoryInt
                 PRIMARY KEY	(`id`),
                 KEY `parent` (`parent`),
                 KEY `bumped` (`bumped`),
+                KEY `user_id` (`user_id`),
                 KEY `stickied` (`stickied`),
                 KEY `moderated` (`moderated`)
             )";
@@ -120,6 +124,7 @@ final class PDOPostRepository extends PDORepository implements PostRepositoryInt
         $post->setCreateTime((int)$data['timestamp']);
         $post->setBumpTime((int)$data['bumped']);
         $post->setIP($data['ip']);
+        $post->setUserID($data['user_id']);
         $post->setName($data['name']);
         $post->setTripcode($data['tripcode']);
         $post->setEmail($data['email']);
@@ -176,6 +181,7 @@ final class PDOPostRepository extends PDORepository implements PostRepositoryInt
             'timestamp' => $post->getCreateTime(),
             'bumped' => $post->getBumpTime(),
             'ip' => $post->getIP(),
+            'user_id' => $post->getUserID(),
             'name' => $post->getName(),
             'tripcode' => $post->getTripcode(),
             'email' => $post->getEmail(),

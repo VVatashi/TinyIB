@@ -4,7 +4,9 @@ namespace TinyIB\Service;
 
 use TinyIB\Model\User;
 use TinyIB\Model\UserInterface;
+use TinyIB\NotFoundException;
 use TinyIB\Repository\UserRepositoryInterface;
+use TinyIB\ValidationException;
 
 class UserService implements UserServiceInterface
 {
@@ -26,16 +28,16 @@ class UserService implements UserServiceInterface
     public function register(string $email, string $password) : UserInterface
     {
         if (empty($email)) {
-            throw new \Exception('Email should not be empty');
+            throw new ValidationException('Email should not be empty');
         }
 
         if (empty($password)) {
-            throw new \Exception('Password should not be empty');
+            throw new ValidationException('Password should not be empty');
         }
 
         $user = $this->repository->getOne(['email' => $email]);
         if (isset($user)) {
-            throw new \Exception('User with this email address is already exists');
+            throw new ValidationException('User with this email address is already exists');
         }
 
         $user = new User(0, $email, '', 0);
@@ -50,21 +52,21 @@ class UserService implements UserServiceInterface
     public function login(string $email, string $password) : UserInterface
     {
         if (empty($email)) {
-            throw new \Exception('Email should not be empty');
+            throw new ValidationException('Email should not be empty');
         }
 
         if (empty($password)) {
-            throw new \Exception('Password should not be empty');
+            throw new ValidationException('Password should not be empty');
         }
 
         $user = $this->repository->getOne(['email' => $email]);
         if (!isset($user)) {
-            throw new \Exception('User with this email address is not exists');
+            throw new ValidationException('User with this email address is not exists');
         }
 
         /** @var \TinyIB\Model\UserInterface $user */
         if (!$user->checkPassword($password)) {
-            throw new \Exception('Incorrect password');
+            throw new ValidationException('Incorrect password');
         }
 
         $_SESSION['user'] = $user;

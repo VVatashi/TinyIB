@@ -9,7 +9,7 @@ body {
   margin: 0 0 auto;
   min-width: 240px;
   overflow-x: hidden;
-  padding: 8px;
+  padding: 0;
 }
 
 form {
@@ -78,4 +78,27 @@ sub {
 
 .managebutton {
   margin: .2em;
+}
+
+.button {
+  background: #6f6f6f;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#777), to(#6f6f6f));
+  background-image: linear-gradient(#777, #6f6f6f);
+  border: 1px solid #6f6f6f;
+  box-sizing: border-box;
+  color: #dedede;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 1em;
+  line-height: 1.15;
+  padding: .5em 1em;
+  position: relative;
+  text-decoration: none;
+  text-shadow: unset;
+
+  &:hover {
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#6f6f6f), to(#888));
+    background-image: linear-gradient(#6f6f6f, #888);
+    color: #dedede;
+  }
 }

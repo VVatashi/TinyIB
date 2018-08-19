@@ -7,6 +7,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TinyIB\Service\RendererServiceInterface;
 use TinyIB\Service\UserServiceInterface;
+use TinyIB\ValidationException;
 
 class AuthController implements AuthControllerInterface
 {
@@ -50,8 +51,7 @@ class AuthController implements AuthControllerInterface
         unset($_SESSION['error']);
         unset($_SESSION['email']);
 
-        $content = $this->renderer->render('auth/_register.twig', [
-            'base_url' => '/' . TINYIB_BOARD,
+        $content = $this->renderer->render('auth/register.twig', [
             'error' => $error,
             'email' => $email,
         ]);
@@ -93,7 +93,7 @@ class AuthController implements AuthControllerInterface
             $this->user_service->register($email, $password);
             $this->user_service->login($email, $password);
         }
-        catch(\Exception $e) {
+        catch(ValidationException $e) {
             $_SESSION['error'] = $e->getMessage();
             return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/auth/register']);
         }
@@ -123,8 +123,7 @@ class AuthController implements AuthControllerInterface
         unset($_SESSION['error']);
         unset($_SESSION['email']);
 
-        $content = $this->renderer->render('auth/_login.twig', [
-            'base_url' => '/' . TINYIB_BOARD,
+        $content = $this->renderer->render('auth/login.twig', [
             'error' => $error,
             'email' => $email,
         ]);
@@ -165,7 +164,7 @@ class AuthController implements AuthControllerInterface
         try {
             $this->user_service->login($email, $password);
         }
-        catch(\Exception $e) {
+        catch(ValidationException $e) {
             $_SESSION['error'] = $e->getMessage();
             return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/auth/login']);
         }

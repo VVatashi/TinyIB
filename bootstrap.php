@@ -14,6 +14,7 @@ use TinyIB\Cache\InMemoryCache;
 use TinyIB\Cache\RedisCache;
 use TinyIB\Middleware\AuthMiddleware;
 use TinyIB\Middleware\CorsMiddleware;
+use TinyIB\Middleware\ExceptionMiddleware;
 use TinyIB\Middleware\RequestHandler;
 use TinyIB\Functions;
 use TinyIB\Service\RoutingServiceInterface;
@@ -176,6 +177,7 @@ $container->registerCallback(Twig_Environment::class, function ($container) use 
         'debug' => true,
     ]);
 
+    $twig->addGlobal('base_url', '/' . TINYIB_BOARD);
     $twig->addGlobal('embeds', $tinyib_embeds);
     $twig->addGlobal('uploads', $tinyib_uploads);
     $twig->addGlobal('is_installed_via_git', Functions::installedViaGit());
@@ -224,6 +226,11 @@ $middlewares = [AuthMiddleware::class, CorsMiddleware::class];
 foreach ($middlewares as $middleware) {
     $handler = new RequestHandler(new $middleware(), $handler);
 }
+
+// Add exception handler.
+$handler = new RequestHandler(new ExceptionMiddleware(
+    $container->get(RendererServiceInterface::class)
+), $handler);
 
 // Get request object.
 $request = ServerRequest::fromGlobals();
