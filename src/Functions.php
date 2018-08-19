@@ -421,7 +421,7 @@ class Functions
         function getOEmbed($service_url, $url)
         {
             $service_url = str_ireplace("TINYIBEMBED", urlencode($url), $service_url);
-            return json_decode(static::url_get_contents($service_url), true);
+            return json_decode(Functions::url_get_contents($service_url), true);
         }
 
         foreach ($tinyib_embeds as $name => $service) {

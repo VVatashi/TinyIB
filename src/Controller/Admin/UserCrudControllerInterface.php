@@ -13,6 +13,9 @@ interface UserCrudControllerInterface
      * @param \Psr\Http\Message\ResponseInterface $request
      *
      * @return \Psr\Http\Message\ServerRequestInterface $response
+     *
+     * @throws \TinyIB\AccessDeniedException
+     *   If current user is not an admin.
      */
     public function list(ServerRequestInterface $request) : ResponseInterface;
 
@@ -22,6 +25,11 @@ interface UserCrudControllerInterface
      * @param \Psr\Http\Message\ResponseInterface $request
      *
      * @return \Psr\Http\Message\ServerRequestInterface $response
+     *
+     * @throws \TinyIB\AccessDeniedException
+     *   If current user is not an admin.
+     * @throws \TinyIB\NotFoundException
+     *   If user with the specified ID is not found.
      */
     public function show(ServerRequestInterface $request) : ResponseInterface;
 
@@ -31,6 +39,9 @@ interface UserCrudControllerInterface
      * @param \Psr\Http\Message\ResponseInterface $request
      *
      * @return \Psr\Http\Message\ServerRequestInterface $response
+     *
+     * @throws \TinyIB\AccessDeniedException
+     *   If current user is not an admin.
      */
     public function createForm(ServerRequestInterface $request) : ResponseInterface;
 
@@ -40,6 +51,9 @@ interface UserCrudControllerInterface
      * @param \Psr\Http\Message\ResponseInterface $request
      *
      * @return \Psr\Http\Message\ServerRequestInterface $response
+     *
+     * @throws \TinyIB\AccessDeniedException
+     *   If current user is not an admin.
      */
     public function create(ServerRequestInterface $request) : ResponseInterface;
 
@@ -49,6 +63,11 @@ interface UserCrudControllerInterface
      * @param \Psr\Http\Message\ResponseInterface $request
      *
      * @return \Psr\Http\Message\ServerRequestInterface $response
+     *
+     * @throws \TinyIB\AccessDeniedException
+     *   If current user is not an admin.
+     * @throws \TinyIB\NotFoundException
+     *   If user with the specified ID is not found.
      */
     public function editForm(ServerRequestInterface $request) : ResponseInterface;
 
@@ -58,6 +77,11 @@ interface UserCrudControllerInterface
      * @param \Psr\Http\Message\ResponseInterface $request
      *
      * @return \Psr\Http\Message\ServerRequestInterface $response
+     *
+     * @throws \TinyIB\AccessDeniedException
+     *   If current user is not an admin.
+     * @throws \TinyIB\NotFoundException
+     *   If user with the specified ID is not found.
      */
     public function edit(ServerRequestInterface $request) : ResponseInterface;
 
@@ -67,6 +91,11 @@ interface UserCrudControllerInterface
      * @param \Psr\Http\Message\ResponseInterface $request
      *
      * @return \Psr\Http\Message\ServerRequestInterface $response
+     *
+     * @throws \TinyIB\AccessDeniedException
+     *   If current user is not an admin.
+     * @throws \TinyIB\NotFoundException
+     *   If user with the specified ID is not found.
      */
     public function deleteConfirm(ServerRequestInterface $request) : ResponseInterface;
 
@@ -76,6 +105,11 @@ interface UserCrudControllerInterface
      * @param \Psr\Http\Message\ResponseInterface $request
      *
      * @return \Psr\Http\Message\ServerRequestInterface $response
+     *
+     * @throws \TinyIB\AccessDeniedException
+     *   If current user is not an admin.
+     * @throws \TinyIB\NotFoundException
+     *   If user with the specified ID is not found.
      */
     public function delete(ServerRequestInterface $request) : ResponseInterface;
 }
