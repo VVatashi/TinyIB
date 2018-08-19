@@ -17,6 +17,7 @@ use TinyIB\Middleware\CorsMiddleware;
 use TinyIB\Middleware\ExceptionMiddleware;
 use TinyIB\Middleware\RequestHandler;
 use TinyIB\Functions;
+use TinyIB\Service\RendererServiceInterface;
 use TinyIB\Service\RoutingServiceInterface;
 use VVatashi\DI\Container;
 use VVatashi\Router\Router;
@@ -187,6 +188,16 @@ $container->registerCallback(Twig_Environment::class, function ($container) use 
 
 $container->registerType(RouterInterface::class, Router::class);
 
+function glob_recursive($pattern, $flags = 0)
+{
+    $files = glob($pattern, $flags);
+    foreach (glob(dirname($pattern) . '/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir) {
+        $files = array_merge($files, glob_recursive($dir . '/' . basename($pattern), $flags));
+    }
+
+    return $files;
+}
+
 // Discovery classes to register in the DIC.
 $directories = [
     'Controller' => ['#Interface$#', ''],
@@ -195,7 +206,7 @@ $directories = [
     'Service' => ['#Interface$#', ''],
 ];
 foreach ($directories as $directory => $regex) {
-    $files = glob(__DIR__ . "/src/$directory/*.php");
+    $files = glob_recursive(__DIR__ . "/src/$directory/*.php");
     $files = array_map(function ($file) {
         $file = str_replace(__DIR__, '', $file);
         $file = preg_replace('#^/src(.+)\\.php$#', 'TinyIB$1', $file);
