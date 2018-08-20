@@ -24,7 +24,7 @@ export default class StyleSwitcher extends BaseModule {
     }
 
     // Get selected style
-    const selected_style = Cookie.get('tinyib_style', 'Futaba');
+    const selected_style = Cookie.get('tinyib_style', 'Synthwave');
     this.setStyle(selected_style);
   }
 
@@ -37,7 +37,6 @@ export default class StyleSwitcher extends BaseModule {
 
       for (let i = 0; i < styles.length; ++i) {
         const title = styles[i];
-        const url = this.styles[title];
 
         style_switcher.innerHTML += `<option class="style-switcher__option" value="${title}">${title}</option>`;
       }
