@@ -1,0 +1,9 @@
+@mixin brackets {
+  &::before {
+    content: '[';
+  }
+
+  &::after {
+    content: ']';
+  }
+}
