@@ -1,0 +1,29 @@
+{#
+  Blocks:
+    - label
+    - input
+
+  Variables:
+    - class
+    - label_class
+    - input_class
+    - id
+    - name
+    - label
+    - placeholder
+    - type
+    - value
+    - required
+#}
+
+{% extends 'components/form/_textfield.twig' %}
+
+{% block label %}
+  {% spaceless %}
+    <label class="{{ label_class }}"
+      {% if id is defined %} for="{{ id }}" {% endif %}
+    >
+      <img src="{{ base_url }}/captcha" alt="CAPTCHA" />
+    </label>
+  {% endspaceless %}
+{% endblock %}

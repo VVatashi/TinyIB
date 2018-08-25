@@ -1,27 +1,29 @@
-{% extends '_html.twig' %}
+{% extends 'layout/_html.twig' %}
 
 {% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
 
 {% block content %}
-  <ul class="content__links links">
-    <li class="links__item"><a class="links__link" href="{{ url_prefix }}settings">Settings</a></li>
-  </ul>
+  <main class="{{class is defined ? class ~ ' '}}">
+    <ul class="content__links links">
+      <li class="links__item"><a class="links__link" href="{{ url_prefix }}settings">Settings</a></li>
+    </ul>
 
-  <div class="content__replymode replymode">Posting mode: Reply</div>
+    <div class="content__replymode replymode">Posting mode: Reply</div>
 
-  <form id="delform" action="{{ url_prefix }}post/delete" method="post">
-    <input type="hidden" name="board" value="{{ constant('TINYIB_BOARD') }}" />
+    <form id="delform" action="{{ url_prefix }}post/delete" method="post">
+      <input type="hidden" name="board" value="{{ constant('TINYIB_BOARD') }}" />
 
-    {% for post in posts %}
-      {% include '_post.twig' %}
-    {% endfor %}
+      {% for post in posts %}
+        {% include 'components/_post.twig' %}
+      {% endfor %}
 
-    <hr />
+      <hr />
 
-    {% include '_userdelete.twig' with {'class': 'content__userdelete'} %}
+      {% include 'components/_userdelete.twig' with {'class': 'content__userdelete'} %}
 
-    <hr />
-  </form>
+      <hr />
+    </form>
 
-  {% include '_post_form.twig' with {'class': 'content__postarea'} %}
+    {% include 'components/_post_form.twig' with {'class': 'content__postarea'} %}
+  </main>
 {% endblock %}

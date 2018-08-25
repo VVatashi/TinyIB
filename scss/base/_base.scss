@@ -37,19 +37,6 @@ a {
   }
 }
 
-input[name='password']:not([type='password']) {
-  color: transparent;
-
-  &::placeholder {
-    color: unset;
-  }
-
-  &:hover,
-  &:focus {
-    color: unset;
-  }
-}
-
 ul {
   list-style: none;
   margin: 0;

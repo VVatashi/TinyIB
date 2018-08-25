@@ -25,10 +25,8 @@
 
 {% import _self as self %}
 
-{% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
-
 <div class="{{ class is defined ? class }}">
-  <form class="content__postform form form_resizable form_postform" id="postform" name="postform" action="{{ url_prefix }}post/create" method="post" enctype="multipart/form-data">
+  <form class="content__postform form form_resizable form_postform" id="postform" name="postform" action="{{ base_url }}post/create" method="post" enctype="multipart/form-data">
     {% if uploads and constant('TINYIB_MAXKB') > 0 %}
       <input type="hidden" name="MAX_FILE_SIZE" value="{{ constant('TINYIB_MAXKB') * 1024 }}" />
     {% endif %}
@@ -78,7 +76,7 @@
         </tbody>
 
         <tbody class="form__group form__group_inline form__group_attachment">
-          {% include '_captcha.twig' with { 'class': 'form__field form__field_captcha' } %}
+          {% include 'components/_captcha.twig' with { 'class': 'form__field form__field_captcha' } %}
 
           {% if uploads %}
             <tr class="form__field form__field_attachment field field_attachment">

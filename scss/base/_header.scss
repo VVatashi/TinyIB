@@ -1,17 +1,18 @@
 .header {
+  &__style-switcher {
+    float: left;
+  }
+
   &__admin-bar {
-    clear: both;
     float: right;
   }
 
   &__logo {
     clear: both;
-    text-align: center;
   }
 
   &__title {
-    display: inline-block;
+    margin: 0;
     font-size: 2em;
-    margin: 0 auto;
   }
 }

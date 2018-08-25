@@ -1,5 +1,5 @@
 {% if constant('TINYIB_CAPTCHA') %}
-  <tr class="{{ class ? class ~ ' ' }}field field_captcha">
+  <tr class="{{ class is defined ? class ~ ' ' }}field field_captcha">
     <td class="field__label-wrapper">
       <label class="field__label field__label_hidden" for="captcha">CAPTCHA</label>
     </td>

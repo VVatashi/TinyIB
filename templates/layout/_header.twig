@@ -1,6 +1,6 @@
 <header class="{{ class is defined ? class ~ ' ' }}header">
-  {% include '_admin_bar.twig' with {'class': 'header__admin-bar'} %}
-  {% include '_style_switcher.twig' with {'class': 'header__style-switcher'} %}
+  {% include 'components/_style_switcher.twig' with {'class': 'header__style-switcher'} %}
+  {% include 'components/_admin_bar.twig' with {'class': 'header__admin-bar'} %}
 
   <div class="header__logo">
     {{ constant('TINYIB_LOGO') }}

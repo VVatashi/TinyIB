@@ -636,7 +636,7 @@ final class PostController implements PostControllerInterface
      */
     protected function renderPostViewModel(array $view_model, bool $res) : string
     {
-        return $this->renderer->render('_post.twig', [
+        return $this->renderer->render('components/_post.twig', [
             'post' => $view_model,
             'res' => $res,
         ]);

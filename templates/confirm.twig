@@ -1,21 +1,23 @@
-{% extends '_html.twig' %}
+{% extends 'layout/_html.twig' %}
 
 {% block content %}
-  <div class="confirm">
-    <p class="confirm__text">{{ message }}</p>
+    <main class="{{class is defined ? class ~ ' '}}">
+    <div class="confirm">
+      <p class="confirm__text">{{ message }}</p>
 
-    <ul class="confirm__actions actions">
-      <li class="actions__action">
-        {% if method == 'POST' %}
-          <form method="post" action="{{ base_url }}{{ submit_url }}">
-            <button class="actions__button button" type="button">{{ submit }}</button>
-          </form>
-        {% else %}
-          <a class="actions__button button" href="{{ base_url }}{{ submit_url }}">{{ submit }}</a>
-        {% endif %}
-      </li>
+      <ul class="confirm__actions actions">
+        <li class="actions__action">
+          {% if method == 'POST' %}
+            <form method="post" action="{{ base_url }}{{ submit_url }}">
+              <button class="actions__button button" type="submit">{{ submit }}</button>
+            </form>
+          {% else %}
+            <a class="actions__button button" href="{{ base_url }}{{ submit_url }}">{{ submit }}</a>
+          {% endif %}
+        </li>
 
-      <li class="actions__action"><a class="actions__button button" href="{{ base_url }}{{ cancel_url }}">{{ cancel }}</a></li>
-    </ul>
-  </div>
+        <li class="actions__action"><a class="actions__button button" href="{{ base_url }}{{ cancel_url }}">{{ cancel }}</a></li>
+      </ul>
+    </div>
+  </main>
 {% endblock %}

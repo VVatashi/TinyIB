@@ -1,4 +1,4 @@
-{% extends '_manage.twig' %}
+{% extends 'layout/_manage.twig' %}
 
 {% set is_thread = post['parent'] == constant('TINYIB_NEWTHREAD') %}
 {% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
@@ -83,7 +83,7 @@
       <legend>{{ is_thread ? 'Thread' : 'Post' }}</legend>
 
       {% for post in posts %}
-        {% include '_post.twig' %}
+        {% include 'components/_post.twig' %}
       {% endfor %}
     </fieldset>
   </fieldset>

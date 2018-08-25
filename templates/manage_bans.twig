@@ -1,4 +1,4 @@
-{% extends '_manage.twig' %}
+{% extends 'layout/_manage.twig' %}
 
 {% macro expire(title, value) %}
   <a href="#" onclick="document.tinyib.expire.value='{{ value }}';return false;">{{ title }}</a>

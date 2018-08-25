@@ -1,4 +1,4 @@
-{% extends '_manage.twig' %}
+{% extends 'layout/_manage.twig' %}
 
 {% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
 
@@ -26,7 +26,7 @@
 
             <tr>
               <td>
-                {% include '_post.twig' %}
+                {% include 'components/_post.twig' %}
               </td>
               <td valign="top" align="right">
                 <table border="0">
@@ -70,7 +70,7 @@
 
           <tr>
             <td>
-              {% include '_post.twig' %}
+              {% include 'components/_post.twig' %}
             </td>
             <td valign="top" align="right">
               <form method="get" action="{{ url_prefix }}manage/moderate/{{ post['id'] }}">

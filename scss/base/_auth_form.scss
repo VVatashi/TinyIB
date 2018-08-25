@@ -1,66 +1,56 @@
 .auth-form {
-    &__links {
-        display: flex;
-        flex-flow: row nowrap;
-        justify-content: space-around;
-        margin-bottom: 1em;
-    }
+  &__links {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-around;
+    margin-bottom: 1em;
+  }
 
-    &__header {
-        text-align: center;
-    }
+  &__header {
+    text-align: center;
+  }
 
-    &__error {
-        border: 1px solid #933;
-        color: #933;
-        margin-bottom: 1em;
-        padding: 1em;
-        background: #f99;
-    }
+  &__error {
+    border: 1px solid #933;
+    color: #933;
+    margin-bottom: 1em;
+    padding: 1em;
+    background: #f99;
+  }
 
-    &__field {
-        display: flex;
-        flex-flow: row nowrap;
-        align-items: center;
-        margin-bottom: 1em;
-    }
+  &__field {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    margin-bottom: 1em;
+  }
 
-    &__label-wrapper,
-    &__input-wrapper {
-        vertical-align: middle;
-        width: 100%;
-    }
+  &__label {
+    flex: 1;
+    width: 100%;
+    vertical-align: middle;
 
-    &__label-wrapper {
-        display: none;
-        flex: 1;
-        text-align: center;
+    &_hidden {
+      display: none;
     }
+  }
 
-    &__input-wrapper {
-        flex: 2;
-    }
+  &__input {
+    flex: 2;
+    box-sizing: border-box;
+    vertical-align: middle;
+    width: 100%;
+  }
 
-    &__label {
-        vertical-align: middle;
-    }
+  &__captcha {
+    display: block;
+    margin-right: 1em;
+  }
 
-    &__input {
-        box-sizing: border-box;
-        vertical-align: middle;
-        width: 100%;
-    }
-
-    &__captcha {
-        display: block;
-        margin-right: 1em;
-        vertical-align: middle;
-    }
-
-    &__buttons {
-        display: flex;
-        flex-flow: row nowrap;
-        justify-content: space-around;
-        margin-bottom: 1em;
-    }
+  &__buttons {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-around;
+    margin-bottom: 1em;
+  }
 }
