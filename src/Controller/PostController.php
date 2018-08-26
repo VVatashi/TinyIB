@@ -250,7 +250,7 @@ final class PostController implements PostControllerInterface
      */
     public function create(ServerRequestInterface $request) : ResponseInterface
     {
-        global $tinyib_embeds, $tinyib_uploads;
+        global $tinyib_uploads;
 
         $redirect_url = '/' . TINYIB_BOARD . '/';
 
@@ -268,7 +268,6 @@ final class PostController implements PostControllerInterface
             'subject',
             'message',
             'password',
-            'embed',
             'parent',
         ]));
 
@@ -309,53 +308,7 @@ final class PostController implements PostControllerInterface
 
         $post->setPassword(!empty($data['password']) ? md5(md5($data['password'])) : '');
 
-        if (isset($data['embed']) && trim(!empty($data['embed']))) {
-            list($service, $embed) = Functions::getEmbed(trim($data['embed']));
-
-            if (empty($embed) || !isset($embed['html']) || !isset($embed['title']) || !isset($embed['thumbnail_url'])) {
-                $embeds = implode("/", array_keys($tinyib_embeds));
-                $message = "Invalid embed URL. Only $embeds URLs are supported.";
-                return new Response(400, [], $message);
-            }
-
-            $post->setFileHash($service);
-            $temp_file = time() . substr(microtime(), 2, 3);
-            $file_location = 'thumb/' . $temp_file;
-            file_put_contents($file_location, Functions::url_get_contents($embed['thumbnail_url']));
-
-            $file_info = getimagesize($file_location);
-            $file_mime = mime_content_type($file_location);
-            $post->setImageWidth($file_info[0]);
-            $post->setImageHeight($file_info[1]);
-
-            if ($file_mime === 'image/jpeg') {
-                $post->setThumbnailName($temp_file . '.jpg');
-            } elseif ($file_mime === 'image/gif') {
-                $post->setThumbnailName($temp_file . '.gif');
-            } elseif ($file_mime === 'image/png') {
-                $post->setThumbnailName($temp_file . '.png');
-            } else {
-                return new Response(500, [], 'Error while processing audio/video.');
-            }
-            $thumb_location = 'thumb/' . $post->getThumbnailName();
-
-            list($thumb_maxwidth, $thumb_maxheight) = Functions::thumbnailDimensions($post);
-
-            if (!Functions::createThumbnail($file_location, $thumb_location, $thumb_maxwidth, $thumb_maxheight)) {
-                return new Response(500, [], 'Could not create thumbnail.');
-            }
-
-            if ($embed['type'] !== 'photo') {
-                Functions::addVideoOverlay($thumb_location);
-            }
-
-            $thumb_info = getimagesize($thumb_location);
-            $post->setThumbnailWidth($thumb_info[0]);
-            $post->setThumbnailHeight($thumb_info[1]);
-
-            $post->setOriginalFileName($this->cleanString($embed['title']));
-            $post->setFileName($embed['html']);
-        } elseif (isset($_FILES['file']) && !empty($_FILES['file']['name'])) {
+        if (isset($_FILES['file']) && !empty($_FILES['file']['name'])) {
             Functions::validateFileUpload();
 
             if (!is_file($_FILES['file']['tmp_name']) || !is_readable($_FILES['file']['tmp_name'])) {
@@ -517,25 +470,12 @@ final class PostController implements PostControllerInterface
         }
 
         if (empty($post->getFileName())) { // No file uploaded
-            $allowed = '';
-            if (!empty($tinyib_uploads)) {
-                $allowed = 'file';
-            }
-
-            if (!empty($tinyib_embeds)) {
-                if ($allowed != '') {
-                    $allowed .= ' or ';
-                }
-
-                $allowed .= 'embed URL';
-            }
-
-            if ($post->isThread() && !empty($allowed) && !TINYIB_NOFILEOK) {
-                return new Response(400, [], "A $allowed is required to start a thread.");
+            if ($post->isThread() && !empty($tinyib_uploads) && !TINYIB_NOFILEOK) {
+                return new Response(400, [], "A file is required to start a thread.");
             }
 
             if (empty(str_replace('<br>', '', $post->getMessage()))) {
-                $allowed = $allowed != '' ? " and/or upload a $allowed" : '';
+                $allowed = !empty($tinyib_uploads) ? ' and/or upload a file' : '';
                 return new Response(400, [], 'Please enter a message' . $allowed . '.');
             }
         }

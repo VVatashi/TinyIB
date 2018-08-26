@@ -1,9 +1,6 @@
-{% set is_embed = post['file_type'] == 'embed' %}
 {% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
 
-{% if is_embed %}
-  {% set direct_link = '#' %}
-{% elseif post['file_type'] %}
+{% if post['file_type'] %}
   {% set direct_link = url_prefix ~ 'src/' ~ post['file'] %}
 {% endif %}
 
@@ -31,9 +28,7 @@
 
   {# Stores the encoded original file markup, so the browser doesn't load it until it's needed #}
   <div id="expand_{{ post['id'] }}" style="display: none;">
-    {% if is_embed %}
-      {{ post['file']|url_encode }}
-    {% elseif post['file_type'] == 'image' %}
+    {% if post['file_type'] == 'image' %}
       {{ ('<img class="original__content original__content_image"'
   ~ ' src="' ~ direct_link ~ '" width="' ~ post['image_width'] ~ '"/>')|url_encode }}
     {% elseif post['file_type'] == 'audio' %}
