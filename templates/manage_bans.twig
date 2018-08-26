@@ -7,12 +7,11 @@
 {% import _self as self %}
 
 {% set body_attribs = 'onload="document.tinyib.ip.focus();"' %}
-{% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
 
 {% block manage %}
   {{ text}}
 
-  <form id="tinyib" name="tinyib" method="post" action="{{ url_prefix }}manage/bans">
+  <form id="tinyib" name="tinyib" method="post" action="{{ base_url }}/manage/bans">
     <fieldset>
       <legend>Ban an IP address</legend>
 
@@ -60,7 +59,7 @@
           <td>{{ ban['timestamp']|date }}</td>
           <td>{{ ban['expire'] > 0 ? ban['expire']|date : 'Does not expire' }}</td>
           <td>{{ ban['reason'] ? ban['reason']|e : '&nbsp;' }}</td>
-          <td><a href="{{ url_prefix }}manage/bans?lift={{ ban['id'] }}">lift</a></td>
+          <td><a href="{{ base_url }}/manage/bans?lift={{ ban['id'] }}">lift</a></td>
         </tr>
       {% endfor %}
     </table>

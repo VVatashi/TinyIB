@@ -1,10 +1,9 @@
 {% extends 'layout/_manage.twig' %}
 
 {% set body_attribs = 'onload="document.tinyib.moderate.focus();"' %}
-{% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
 
 {% block manage %}
-  <form id="tinyib" name="tinyib" method="get" action="{{ url_prefix }}manage/moderate"
+  <form id="tinyib" name="tinyib" method="get" action="{{ base_url }}/manage/moderate"
     onsubmit="event.preventDefault(); window.location += '/' + document.getElementById('moderate').value;">
     <input type="hidden" name="manage" value="" />
     <fieldset>

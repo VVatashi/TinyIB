@@ -1,6 +1,6 @@
 {% macro link(title, url) %}
   <li class="admin-bar__list-item">
-    {% set url = '/' ~ constant('TINYIB_BOARD') ~ '/' ~ url %}
+    {% set url = base_url ~ '/' ~ url %}
     <a class="admin-bar__link" href="{{ url }}">{{ title }}</a>
   </li>
 {% endmacro %}

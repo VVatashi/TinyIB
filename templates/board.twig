@@ -1,16 +1,14 @@
 {% extends 'layout/_html.twig' %}
 
-{% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
-
 {% block content %}
   <main class="{{class is defined ? class ~ ' '}}">
     <ul class="content__links links">
-      <li class="links__item"><a class="links__link" href="{{ url_prefix }}settings">Settings</a></li>
+      <li class="links__item"><a class="links__link" href="{{ base_url }}/settings">Settings</a></li>
     </ul>
 
     {% include 'components/_post_form.twig' with {'class': 'content__postarea'} %}
 
-    <form id="delform" action="{{ url_prefix }}post/delete" method="post">
+    <form id="delform" action="{{ base_url }}/post/delete" method="post">
       <input type="hidden" name="board" value="{{ constant('TINYIB_BOARD') }}" />
 
       {% for post in posts %}

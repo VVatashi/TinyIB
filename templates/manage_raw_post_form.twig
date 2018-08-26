@@ -1,11 +1,10 @@
 {% extends 'layout/_manage.twig' %}
 
 {% set body_attribs = 'onload="document.tinyib.message.focus();"' %}
-{% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
 
 {% block manage %}
   <div class="content__postarea">
-    <form id="tinyib" name="tinyib" method="post" action="{{ url_prefix }}post/create" enctype="multipart/form-data">
+    <form id="tinyib" name="tinyib" method="post" action="{{ base_url }}/post/create" enctype="multipart/form-data">
       <input name="rawpost" value="1" type="hidden" />
 
       {% if constant('TINYIB_MAXKB') > 0 %}

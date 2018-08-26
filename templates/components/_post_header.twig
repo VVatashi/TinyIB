@@ -44,20 +44,18 @@
     {{ date }}
   </time>
 
-  {% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
-
   <span class="post-header__reflink-wrapper">
-    №<a class="post-header__reflink reflink" href="{{ url_prefix }}res/{{ thread_id }}#q{{ post['id'] }}" data-id="{{ post['id'] }}">
+    №<a class="post-header__reflink reflink" href="{{ base_url }}/res/{{ thread_id }}#q{{ post['id'] }}" data-id="{{ post['id'] }}">
       {{- post['id'] -}}
     </a>
 
     {% if post[stickied] %}
-      <img src="{{url_prefix}}images/sticky.png" alt="Stickied" title="Stickied" width="16" height="16" />
+      <img src="{{ base_url }}/images/sticky.png" alt="Stickied" title="Stickied" width="16" height="16" />
     {% endif %}
 
     {% if res == constant('TINYIB_INDEXPAGE') and post['parent'] == constant('TINYIB_NEWTHREAD') %}
       <span class="post-header__reply-wrapper">
-        <a class="post-header__reply-link" href="{{ url_prefix }}res/{{ post['id'] }}">Reply</a>
+        <a class="post-header__reply-link" href="{{ base_url }}/res/{{ post['id'] }}">Reply</a>
       </span>
     {% endif %}
   </span>

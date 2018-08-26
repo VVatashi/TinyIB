@@ -1,7 +1,5 @@
 {% extends 'layout/_manage.twig' %}
 
-{% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
-
 {% block manage %}
   <fieldset>
     <legend>Status</legend>
@@ -32,13 +30,13 @@
                 <table border="0">
                   <tr>
                     <td>
-                      <form method="get" action="{{ url_prefix }}manage/approve/{{ post['id'] }}">
+                      <form method="get" action="{{ base_url }}/manage/approve/{{ post['id'] }}">
                         <input type="submit" value="Approve" class="managebutton" />
                       </form>
                     </td>
 
                     <td>
-                      <form method="get" action="{{ url_prefix }}manage/moderate/{{ post['id'] }}">
+                      <form method="get" action="{{ base_url }}/manage/moderate/{{ post['id'] }}">
                         <input type="submit" value="More Info" class="managebutton" />
                       </form>
                     </td>
@@ -46,7 +44,7 @@
 
                   <tr>
                     <td align="right" colspan="2">
-                      <form method="get" action="{{ url_prefix }}manage/delete/{{ post['id'] }}">
+                      <form method="get" action="{{ base_url }}/manage/delete/{{ post['id'] }}">
                         <input type="submit" value="Delete" class="managebutton" />
                       </form>
                     </td>
@@ -73,7 +71,7 @@
               {% include 'components/_post.twig' %}
             </td>
             <td valign="top" align="right">
-              <form method="get" action="{{ url_prefix }}manage/moderate/{{ post['id'] }}">
+              <form method="get" action="{{ base_url }}/manage/moderate/{{ post['id'] }}">
                 <input type="submit" value="Moderate" class="managebutton" />
               </form>
             </td>
