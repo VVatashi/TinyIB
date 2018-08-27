@@ -10,6 +10,7 @@ use TinyIB\Functions;
 use TinyIB\Model\Post;
 use TinyIB\Repository\PostRepositoryInterface;
 use TinyIB\Service\BanServiceInterface;
+use TinyIB\Service\CaptchaServiceInterface;
 use TinyIB\Service\PostServiceInterface;
 use TinyIB\Service\RendererServiceInterface;
 
@@ -24,6 +25,9 @@ final class PostController implements PostControllerInterface
     /** @var \TinyIB\Service\BanServiceInterface $ban_service */
     protected $ban_service;
 
+    /** @var \TinyIB\Service\CaptchaServiceInterface $captcha_service */
+    protected $captcha_service;
+
     /** @var \TinyIB\Service\PostServiceInterface $post_service */
     protected $post_service;
 
@@ -35,20 +39,23 @@ final class PostController implements PostControllerInterface
      *
      * @param \TinyIB\Cache\CacheInterface $cache
      * @param \TinyIB\Repository\PostRepositoryInterface $post_repository
-     * @param \TinyIB\Service\BanServiceInterface $renderer
-     * @param \TinyIB\Service\PostServiceInterface $renderer
+     * @param \TinyIB\Service\BanServiceInterface $ban_service
+     * @param \TinyIB\Service\CaptchaServiceInterface $captcha_service
+     * @param \TinyIB\Service\PostServiceInterface $post_service
      * @param \TinyIB\Service\RendererServiceInterface $renderer
      */
     public function __construct(
         CacheInterface $cache,
         PostRepositoryInterface $post_repository,
         BanServiceInterface $ban_service,
+        CaptchaServiceInterface $captcha_service,
         PostServiceInterface $post_service,
         RendererServiceInterface $renderer
     ) {
         $this->cache = $cache;
         $this->post_repository = $post_repository;
         $this->ban_service = $ban_service;
+        $this->captcha_service = $captcha_service;
         $this->post_service = $post_service;
         $this->renderer = $renderer;
     }
@@ -75,45 +82,13 @@ final class PostController implements PostControllerInterface
 
     protected function checkCAPTCHA()
     {
-        if (TINYIB_CAPTCHA === 'recaptcha') {
-            require_once 'src/recaptcha/autoload.php';
-
-            $captcha = isset($_POST['g-recaptcha-response']) ? $_POST['g-recaptcha-response'] : '';
-            $failed_captcha = true;
-
-            $recaptcha = new \ReCaptcha\ReCaptcha(TINYIB_RECAPTCHA_SECRET);
-            $resp = $recaptcha->verify($captcha, $_SERVER['REMOTE_ADDR']);
-            if ($resp->isSuccess()) {
-                $failed_captcha = false;
+        if (defined('TINYIB_CAPTCHA') && !empty(TINYIB_CAPTCHA)) {
+            if (!isset($_POST['cap_response'])) {
+                throw new \Exception('CAPTCHA required.');
             }
 
-            if ($failed_captcha) {
-                $captcha_error = 'Failed CAPTCHA.';
-                $error_reason = '';
-
-                if (count($resp->getErrorCodes()) == 1) {
-                    $error_codes = $resp->getErrorCodes();
-                    $error_reason = $error_codes[0];
-                }
-
-                if ($error_reason == 'missing-input-response') {
-                    $captcha_error .= ' Please click the checkbox labeled "I\'m not a robot".';
-                } else {
-                    $captcha_error .= ' Reason:';
-                    foreach ($resp->getErrorCodes() as $error) {
-                        $captcha_error .= '<br>' . $error;
-                    }
-                }
-                throw new \Exception($captcha_error);
-            }
-        } elseif (TINYIB_CAPTCHA) { // Simple CAPTCHA
-            $captcha = isset($_POST['captcha']) ? strtolower(trim($_POST['captcha'])) : '';
-            $captcha_solution = isset($_SESSION['tinyibcaptcha']) ? strtolower(trim($_SESSION['tinyibcaptcha'])) : '';
-
-            if ($captcha == '') {
-                throw new \Exception('Please enter the CAPTCHA text.');
-            } elseif ($captcha != $captcha_solution) {
-                throw new \Exception('Incorrect CAPTCHA text entered.  Please try again.<br>Click the image to retrieve a new CAPTCHA.');
+            if (!$this->captcha_service->checkCaptcha($_POST['cap_response'])) {
+                throw new \Exception('Incorrect CAPTCHA.');
             }
         }
     }
@@ -250,7 +225,7 @@ final class PostController implements PostControllerInterface
      */
     public function create(ServerRequestInterface $request) : ResponseInterface
     {
-        global $tinyib_embeds, $tinyib_uploads;
+        global $tinyib_uploads;
 
         $redirect_url = '/' . TINYIB_BOARD . '/';
 
@@ -268,7 +243,6 @@ final class PostController implements PostControllerInterface
             'subject',
             'message',
             'password',
-            'embed',
             'parent',
         ]));
 
@@ -309,53 +283,7 @@ final class PostController implements PostControllerInterface
 
         $post->setPassword(!empty($data['password']) ? md5(md5($data['password'])) : '');
 
-        if (isset($data['embed']) && trim(!empty($data['embed']))) {
-            list($service, $embed) = Functions::getEmbed(trim($data['embed']));
-
-            if (empty($embed) || !isset($embed['html']) || !isset($embed['title']) || !isset($embed['thumbnail_url'])) {
-                $embeds = implode("/", array_keys($tinyib_embeds));
-                $message = "Invalid embed URL. Only $embeds URLs are supported.";
-                return new Response(400, [], $message);
-            }
-
-            $post->setFileHash($service);
-            $temp_file = time() . substr(microtime(), 2, 3);
-            $file_location = 'thumb/' . $temp_file;
-            file_put_contents($file_location, Functions::url_get_contents($embed['thumbnail_url']));
-
-            $file_info = getimagesize($file_location);
-            $file_mime = mime_content_type($file_location);
-            $post->setImageWidth($file_info[0]);
-            $post->setImageHeight($file_info[1]);
-
-            if ($file_mime === 'image/jpeg') {
-                $post->setThumbnailName($temp_file . '.jpg');
-            } elseif ($file_mime === 'image/gif') {
-                $post->setThumbnailName($temp_file . '.gif');
-            } elseif ($file_mime === 'image/png') {
-                $post->setThumbnailName($temp_file . '.png');
-            } else {
-                return new Response(500, [], 'Error while processing audio/video.');
-            }
-            $thumb_location = 'thumb/' . $post->getThumbnailName();
-
-            list($thumb_maxwidth, $thumb_maxheight) = Functions::thumbnailDimensions($post);
-
-            if (!Functions::createThumbnail($file_location, $thumb_location, $thumb_maxwidth, $thumb_maxheight)) {
-                return new Response(500, [], 'Could not create thumbnail.');
-            }
-
-            if ($embed['type'] !== 'photo') {
-                Functions::addVideoOverlay($thumb_location);
-            }
-
-            $thumb_info = getimagesize($thumb_location);
-            $post->setThumbnailWidth($thumb_info[0]);
-            $post->setThumbnailHeight($thumb_info[1]);
-
-            $post->setOriginalFileName($this->cleanString($embed['title']));
-            $post->setFileName($embed['html']);
-        } elseif (isset($_FILES['file']) && !empty($_FILES['file']['name'])) {
+        if (isset($_FILES['file']) && !empty($_FILES['file']['name'])) {
             Functions::validateFileUpload();
 
             if (!is_file($_FILES['file']['tmp_name']) || !is_readable($_FILES['file']['tmp_name'])) {
@@ -517,25 +445,12 @@ final class PostController implements PostControllerInterface
         }
 
         if (empty($post->getFileName())) { // No file uploaded
-            $allowed = '';
-            if (!empty($tinyib_uploads)) {
-                $allowed = 'file';
-            }
-
-            if (!empty($tinyib_embeds)) {
-                if ($allowed != '') {
-                    $allowed .= ' or ';
-                }
-
-                $allowed .= 'embed URL';
-            }
-
-            if ($post->isThread() && !empty($allowed) && !TINYIB_NOFILEOK) {
-                return new Response(400, [], "A $allowed is required to start a thread.");
+            if ($post->isThread() && !empty($tinyib_uploads) && !TINYIB_NOFILEOK) {
+                return new Response(400, [], "A file is required to start a thread.");
             }
 
             if (empty(str_replace('<br>', '', $post->getMessage()))) {
-                $allowed = $allowed != '' ? " and/or upload a $allowed" : '';
+                $allowed = !empty($tinyib_uploads) ? ' and/or upload a file' : '';
                 return new Response(400, [], 'Please enter a message' . $allowed . '.');
             }
         }
@@ -636,7 +551,7 @@ final class PostController implements PostControllerInterface
      */
     protected function renderPostViewModel(array $view_model, bool $res) : string
     {
-        return $this->renderer->render('_post.twig', [
+        return $this->renderer->render('components/_post.twig', [
             'post' => $view_model,
             'res' => $res,
         ]);

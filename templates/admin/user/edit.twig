@@ -1,33 +1,42 @@
-{% extends '_html.twig' %}
+{% extends 'layout/_html.twig' %}
 
 {% block content %}
-  <div class="content__entity entity-form">
-    <h1 class="entity-form__header">Edit user <em><a href="mailto:{{ user.email }}">{{ user.email }}</a></em></h1>
+  <main class="{{class is defined ? class ~ ' '}}">
+    <div class="content__entity entity-form">
+      <h1 class="entity-form__header">Edit user <em><a href="mailto:{{ user.email }}">{{ user.email }}</a></em></h1>
 
-    {% if error %}
-      <p class="entity-form__error">{{ error }}</p>
-    {% endif %}
+      {% if error %}
+        <p class="entity-form__error">{{ error }}</p>
+      {% endif %}
 
-    <form class="entity-form__properties" method="post" action="{{ base_url }}/admin/user/{{ user.id }}/edit/submit">
-      <div class="entity-form__property">
-        <label class="entity-form__property-label">Email</label>
-        <input class="entity-form__property-value" type="email" name="email" value="{{ user.email }}" required />
-      </div>
+      <form class="entity-form__properties" method="post" action="{{ base_url }}/admin/user/{{ user.id }}/edit/submit">
+        {% include 'components/form/_textfield.twig' with {
+          'class': ['entity-form__property'],
+          'label_class': ['entity-form__property-label'],
+          'input_class': ['entity-form__property-value'],
+          'label': 'Email', 'type': 'email', 'name': 'email', 'value': user.email, 'required': true,
+        } %}
 
-      <div class="entity-form__property">
-        <label class="entity-form__property-label">New password <small>(leave empty to not change)</small></label>
-        <input class="entity-form__property-value" type="text" name="password" value="" />
-      </div>
+        {% include 'components/form/_textfield.twig' with {
+          'class': ['entity-form__property'],
+          'label_class': ['entity-form__property-label'],
+          'input_class': ['entity-form__property-value'],
+          'label': 'New password <small>(leave empty to not change)</small>',
+          'placeholder': 'New password', 'type': 'text', 'name': 'password',
+        } %}
 
-      <div class="entity-form__property">
-        <label class="entity-form__property-label">Role</label>
-        <input class="entity-form__property-value" type="number" name="role" value="{{ user.role }}" required />
-      </div>
+        {% include 'components/form/_textfield.twig' with {
+          'class': ['entity-form__property'],
+          'label_class': ['entity-form__property-label'],
+          'input_class': ['entity-form__property-value'],
+          'label': 'Role', 'type': 'number', 'name': 'role', 'value': user.role, 'required': true,
+        } %}
 
-      <ul class="entity-form__actions actions">
-        <li class="actions__action"><button class="actions__button button" type="Submit">Save</button></li>
-        <li class="actions__action"><a class="actions__button button" href="{{ base_url }}/admin/user">Cancel</a></li>
-      </ul>
-    </form>
-  </div>
+        <ul class="entity-form__actions actions">
+          <li class="actions__action"><button class="actions__button button" type="Submit">Save</button></li>
+          <li class="actions__action"><a class="actions__button button" href="{{ base_url }}/admin/user">Cancel</a></li>
+        </ul>
+      </form>
+    </div>
+  </main>
 {% endblock %}

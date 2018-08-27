@@ -1,0 +1,11 @@
+@import '../utils/index';
+
+.links {
+  text-align: center;
+
+  &__item {
+    @include brackets;
+
+    display: block;
+  }
+}

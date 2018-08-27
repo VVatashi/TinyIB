@@ -36,7 +36,7 @@ class Functions
     {
         // TODO: Exception handling & logging.
 
-        if (!static::isEmbed($post->getFileHash()) && !empty($post->getFileName())) {
+        if (!empty($post->getFileName())) {
             $path = 'src/' . $post->getFileName();
             if (file_exists($path)) {
                 unlink($path);
@@ -369,79 +369,6 @@ class Functions
             }
         }
         return $result;
-    }
-
-    /**
-     * Retrives contents from url.
-     *
-     * @param string $url
-     *
-     * @return string
-     */
-    public static function url_get_contents($url)
-    {
-        if (!function_exists('curl_init')) {
-            return file_get_contents($url);
-        }
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $output = curl_exec($ch);
-        curl_close($ch);
-
-        return $output;
-    }
-
-    /**
-     * Determines if file is embed.
-     *
-     * @param string $file_hex
-     *
-     * @return bool
-     */
-    public static function isEmbed($file_hex)
-    {
-        global $tinyib_embeds;
-        return in_array($file_hex, array_keys($tinyib_embeds));
-    }
-
-    /**
-     * Returns embed data.
-     *
-     * @param string $url
-     *
-     * @return array
-     */
-    public static function getEmbed($url)
-    {
-        global $tinyib_embeds;
-
-        function getOEmbed($service_url, $url)
-        {
-            $service_url = str_ireplace("TINYIBEMBED", urlencode($url), $service_url);
-            return json_decode(Functions::url_get_contents($service_url), true);
-        }
-
-        foreach ($tinyib_embeds as $name => $service) {
-            if (is_string($service)) {
-                // oEmbed by default
-                $result = getOEmbed($service, $url);
-            } elseif (is_array($service)) {
-                if ($service['type'] === 'oembed') {
-                    $result = getOEmbed($service['url'], $url);
-                } elseif ($service['type'] === 'custom') {
-                    $result = $service['callback']($url);
-                }
-            }
-
-            if (!empty($result)) {
-                return array($name, $result);
-            }
-        }
-
-        return array('', array());
     }
 
     /**

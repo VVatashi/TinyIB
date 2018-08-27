@@ -714,9 +714,7 @@ final class Post implements PostInterface
             $file_parts = explode('.', $post['file']);
             $post['file_extension'] = end($file_parts);
 
-            if (Functions::isEmbed($post["file_hex"])) {
-                $post['file_type'] = 'embed';
-            } elseif (in_array($post['file_extension'], ['jpg', 'png', 'gif'])) {
+            if (in_array($post['file_extension'], ['jpg', 'png', 'gif'])) {
                 $post['file_type'] = 'image';
             } elseif (in_array($post['file_extension'], ['mp3'])) {
                 $post['file_type'] = 'audio';

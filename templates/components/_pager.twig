@@ -1,0 +1,37 @@
+{% macro item(content) %}
+  <li class="pager__item">{{ content }}</li>
+{% endmacro %}
+
+{% macro link(url, title) %}
+  {% import _self as self %}
+
+  {{ self.item("<a href=\"#{url}\">#{title}</a>") }}
+{% endmacro %}
+
+{% import _self as self %}
+
+<ul class="{{ class is defined ? class ~ ' ' }}pager">
+  {% if this_page > 0 %}
+    {{ self.link(base_url ~ '/', 'First') }}
+    {{ self.link(base_url ~ '/' ~ (this_page != 1 ? this_page - 1), 'Previous') }}
+  {% else %}
+    {{ self.item('First') }}
+    {{ self.item('Previous') }}
+  {% endif %}
+
+  {% for i in 0..pages %}
+    {% if this_page != i %}
+      {{ self.link(base_url ~ '/' ~ (i != 0 ? i), i) }}
+    {% else %}
+      {{ self.item(i) }}
+    {% endif %}
+  {% endfor %}
+
+  {% if this_page < pages %}
+    {{ self.link(base_url ~ '/' ~ (this_page + 1), 'Next') }}
+    {{ self.link(base_url ~ '/' ~ pages, 'Last') }}
+  {% else %}
+    {{ self.item('Next') }}
+    {{ self.item('Last') }}
+  {% endif %}
+</ul>

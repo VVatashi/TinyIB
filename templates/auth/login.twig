@@ -1,54 +1,45 @@
-{% extends '_html.twig' %}
+{% extends 'layout/_html.twig' %}
 
 {% block content %}
+  <main class="{{class is defined ? class ~ ' '}}">
     <form class="content__auth-form auth-form" method="post" action="{{ base_url }}/auth/login/submit">
-        <ul class="auth-form__links">
-            <li><a href="{{ base_url }}/auth/register">Register</a></li>
-        </ul>
+      <ul class="auth-form__links">
+        <li><a href="{{ base_url }}/auth/register">Register</a></li>
+      </ul>
 
-        <h1 class="auth-form__header">Login</h1>
+      <h1 class="auth-form__header">Login</h1>
 
 	<p style="margin-bottom: 1em;"><span title="&lt; 15.08.2018" style="text-decoration: underline; text-decoration-style: dotted;">Старая система инвайтов</span> отключена. Для доступа к доске необходимо пройти <a href="{{ base_url }}/auth/register">регистрацию</a> и дождаться подтверждения учётной записи модератором.</p>
 	<p style="margin-bottom: 1em;">По любым вопросам можно писать <a href="mailto:vvatashi4259@gmail.com">vvatashi4259@gmail.com</a>, <a href="mailto:suigintoufagothread@gmail.com">suigintoufagothread@gmail.com</a>, <a href="mailto:megpoid@waifu.club">megpoid@waifu.club</a>.</p>
 
-        {% if error %}
-            <p class="auth-form__error">{{ error }}</p>
-        {% endif %}
+      {% if error %}
+        <p class="auth-form__error">{{ error }}</p>
+      {% endif %}
 
-        <div class="auth-form__field">
-            <div class="auth-form__label-wrapper">
-                <label class="auth-form__label" for="email">Email</label>
-            </div>
+      {% include 'components/form/_textfield.twig' with {
+        'class': ['auth-form__field'],
+        'label_class': ['auth-form__label', 'auth-form__label_hidden'],
+        'input_class': ['auth-form__input'],
+        'label': 'Email', 'type': 'email', 'name': 'email', 'value': email, 'required': true,
+      } %}
 
-            <div class="auth-form__input-wrapper">
-                <input type="email" class="auth-form__input" id="email" name="email" placeholder="Email" value="{{ email }}" />
-            </div>
-        </div>
+      {% include 'components/form/_textfield.twig' with {
+        'class': ['auth-form__field'],
+        'label_class': ['auth-form__label', 'auth-form__label_hidden'],
+        'input_class': ['auth-form__input'],
+        'label': 'Password', 'type': 'password', 'name': 'password', 'value': '', 'required': true,
+      } %}
 
-        <div class="auth-form__field">
-            <div class="auth-form__label-wrapper">
-                <label class="auth-form__label" for="password">Password</label>
-            </div>
+      {% include 'components/form/_captcha.twig' with {
+        'class': ['auth-form__field'],
+        'label_class': ['auth-form__label'],
+        'input_class': ['auth-form__input'],
+        'label': 'CAPTCHA', 'name': 'cap_response', 'value': '', 'required': true, 'action': 'login',
+      } %}
 
-            <div class="auth-form__input-wrapper">
-                <input type="password" class="auth-form__input" id="password" name="password" placeholder="Password" value="" />
-            </div>
-        </div>
-
-        <div class="auth-form__field">
-            <div class="auth-form__label-wrapper">
-                <label class="auth-form__label" for="captcha">CAPTCHA</label>
-            </div>
-
-            <img class="auth-form__captcha" src="{{ base_url }}/captcha" alt="CAPTCHA">
-
-            <div class="auth-form__input-wrapper">
-                <input type="text" class="auth-form__input" id="captcha" name="captcha" placeholder="CAPTCHA" value="" />
-            </div>
-        </div>
-
-        <div class="auth-form__buttons">
-            <button class="auth-form__button" type="submit">Login</button>
-        </div>
+      <div class="auth-form__buttons">
+        <button class="auth-form__button" type="submit">Login</button>
+      </div>
     </form>
+  </main>
 {% endblock %}

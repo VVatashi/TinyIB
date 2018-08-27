@@ -1,7 +1,6 @@
-{% extends '_manage.twig' %}
+{% extends 'layout/_manage.twig' %}
 
 {% set is_thread = post['parent'] == constant('TINYIB_NEWTHREAD') %}
-{% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
 
 {% block manage %}
   <fieldset>
@@ -13,7 +12,7 @@
       <table border="0" cellspacing="0" cellpadding="0" width="100%">
         <tr>
           <td align="right" width="50%;">
-            <form method="get" action="{{ url_prefix }}manage/delete/{{ post['id'] }}">
+            <form method="get" action="{{ base_url }}/manage/delete/{{ post['id'] }}">
               <input type="submit" value="Delete {{ is_thread ? 'Thread' : 'Post' }}"
                 class="managebutton" style="width: 50%;" />
             </form>
@@ -32,7 +31,7 @@
 
         <tr>
           <td align="right" width="50%;">
-            <form method="get" action="{{ url_prefix }}manage/bans">
+            <form method="get" action="{{ base_url }}/manage/bans">
               <input type="hidden" name="bans" value="{{ post['ip'] }}" />
               <input type="submit" value="Ban Poster"
                 class="managebutton" style="width: 50%;"
@@ -58,7 +57,7 @@
         {% if is_thread %}
           <tr>
             <td align="right" width="50%;">
-              <form method="get" action="{{ url_prefix }}manage/sticky/{{ post['id'] }}">
+              <form method="get" action="{{ base_url }}/manage/sticky/{{ post['id'] }}">
                 <input type="hidden" name="setsticky" value="{{ post['stickied'] ? '0' : '1' }}" />
                 <input type="submit" value="{{ post['stickied'] ? 'Un-sticky' : 'Sticky' }} Thread"
                   class="managebutton" style="width: 50%;" />
@@ -83,7 +82,7 @@
       <legend>{{ is_thread ? 'Thread' : 'Post' }}</legend>
 
       {% for post in posts %}
-        {% include '_post.twig' %}
+        {% include 'components/_post.twig' %}
       {% endfor %}
     </fieldset>
   </fieldset>

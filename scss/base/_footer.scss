@@ -1,0 +1,19 @@
+.footer {
+  position: relative;
+  text-align: center;
+
+  &__list {
+    &::before,
+    &::after {
+      content: '-';
+    }
+  }
+
+  &__list-item {
+    display: inline;
+
+    & + &::before {
+      content: '+';
+    }
+  }
+}

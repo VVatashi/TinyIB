@@ -1,7 +1,9 @@
-{% extends '_html.twig' %}
+{% extends 'layout/_html.twig' %}
 
 {% block content %}
+  <main class="{{class is defined ? class ~ ' '}}">
     <form class="content__auth-form auth-form" method="post" action="{{ base_url }}/auth/register/submit">
+<<<<<<< HEAD
         <ul class="auth-form__links">
             <li><a href="{{ base_url }}/auth/login">Login</a></li>
         </ul>
@@ -50,5 +52,42 @@
         <div class="auth-form__buttons">
             <button class="auth-form__button" type="submit">Register</button>
         </div>
+=======
+      <ul class="auth-form__links">
+        <li><a href="{{ base_url }}/auth/login">Login</a></li>
+      </ul>
+
+      <h1 class="auth-form__header">Register</h1>
+
+      {% if error %}
+        <p class="auth-form__error">{{ error }}</p>
+      {% endif %}
+
+      {% include 'components/form/_textfield.twig' with {
+        'class': ['auth-form__field'],
+        'label_class': ['auth-form__label', 'auth-form__label_hidden'],
+        'input_class': ['auth-form__input'],
+        'label': 'Email', 'type': 'email', 'name': 'email', 'value': email, 'required': true,
+      } %}
+
+      {% include 'components/form/_textfield.twig' with {
+        'class': ['auth-form__field'],
+        'label_class': ['auth-form__label', 'auth-form__label_hidden'],
+        'input_class': ['auth-form__input'],
+        'label': 'Password', 'type': 'password', 'name': 'password', 'value': '', 'required': true,
+      } %}
+
+      {% include 'components/form/_captcha.twig' with {
+        'class': ['auth-form__field'],
+        'label_class': ['auth-form__label'],
+        'input_class': ['auth-form__input'],
+        'label': 'CAPTCHA', 'name': 'cap_response', 'value': '', 'required': true, 'action': 'register',
+      } %}
+
+      <div class="auth-form__buttons">
+        <button class="auth-form__button" type="submit">Register</button>
+      </div>
+>>>>>>> origin/master
     </form>
+  </main>
 {% endblock %}

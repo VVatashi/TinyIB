@@ -1,0 +1,13 @@
+{% extends 'layout/_html.twig' %}
+
+{% block content %}
+  <main class="{{class is defined ? class ~ ' '}}">
+    <div class="content__replymode">
+      Manage mode
+    </div>
+
+    {% block manage %}
+      {{ text }}
+    {% endblock %}
+  </main>
+{% endblock %}

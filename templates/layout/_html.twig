@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+
+<html>
+  {% include 'layout/_head.twig' %}
+
+  <body {{ body_attribs }}>
+    <div class="layout">
+      {% include 'layout/_header.twig' with {'class': 'layout__header'} %}
+
+      {% with %}
+        {% set class = 'layout__content' %}
+        {% block content %}{% endblock %}
+      {% endwith %}
+
+      {% include 'layout/_footer.twig' with {'class': 'layout__footer'} %}
+    </div>
+  </body>
+</html>

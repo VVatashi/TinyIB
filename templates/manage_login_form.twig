@@ -1,10 +1,9 @@
-{% extends '_manage.twig' %}
+{% extends 'layout/_manage.twig' %}
 
 {% set body_attribs = 'onload="document.tinyib.managepassword.focus();"' %}
-{% set url_prefix = '/' ~ constant('TINYIB_BOARD') ~ '/' %}
 
 {% block manage %}
-  <form id="tinyib" name="tinyib" method="post" action="{{ url_prefix }}manage">
+  <form id="tinyib" name="tinyib" method="post" action="{{ base_url }}/manage">
     <fieldset>
       <legend align="center">Enter an administrator or moderator password</legend>
 

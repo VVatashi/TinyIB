@@ -257,8 +257,8 @@ class UserCrudController implements UserCrudControllerInterface
             'message' => 'Are you sure you want to delete the user <em><a href="mailto:' . $user->getEmail() . '">' . $user->getEmail() . '</a></em>?',
             'submit' => 'Yes',
             'cancel' => 'No',
-            'submit_url' => "/admin/user/$id/delete/submit",
-            'cancel_url' => '/admin/user',
+            'submit_url' => "admin/user/$id/delete/submit",
+            'cancel_url' => 'admin/user',
             'method' => 'POST',
         ]);
 

@@ -17,4 +17,9 @@ interface CaptchaServiceInterface
      * @return resource
      */
     public function getImage(string $text);
+
+    /**
+     * Checks a CAPTCHA response.
+     */
+    public function checkCaptcha(string $captcha_response);
 }

@@ -1,0 +1,41 @@
+{% macro link(title, url) %}
+  <li class="admin-bar__list-item">
+    {% set url = base_url ~ '/' ~ url %}
+    <a class="admin-bar__link" href="{{ url }}">{{ title }}</a>
+  </li>
+{% endmacro %}
+
+{% import _self as self %}
+
+<div class="{{ class is defined ? class ~ ' ' }}admin-bar adminbar">
+  <ul class="admin-bar__list">
+    {% if is_manage_page %}
+      {% if is_logged_in %}
+        {{ self.link('Status', 'manage') }}
+
+        {% if is_admin %}
+          {{ self.link('Bans', 'manage/bans') }}
+        {% endif %}
+
+        {{ self.link('Moderate Post', 'manage/moderate') }}
+        {{ self.link('Raw Post', 'manage/rawpost') }}
+
+        {% if is_admin %}
+          {{ self.link('Rebuild All', 'manage/rebuildall') }}
+        {% endif %}
+
+        {% if is_admin and is_installed_via_git %}
+          {{ self.link('Update', 'manage/update') }}
+        {% endif %}
+
+        {{ self.link('Log Out', 'manage/logout') }}
+
+        &middot;
+      {% endif %}
+
+      {{ self.link('Return', '') }}
+    {% else %}
+      {{ self.link('Manage', 'manage') }}
+    {% endif %}
+  </ul>
+</div>

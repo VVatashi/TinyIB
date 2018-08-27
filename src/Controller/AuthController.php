@@ -5,12 +5,16 @@ namespace TinyIB\Controller;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TinyIB\Service\CaptchaServiceInterface;
 use TinyIB\Service\RendererServiceInterface;
 use TinyIB\Service\UserServiceInterface;
 use TinyIB\ValidationException;
 
 class AuthController implements AuthControllerInterface
 {
+    /** @var \TinyIB\Service\CaptchaService $captcha_service */
+    protected $captcha_service;
+
     /** @var \TinyIB\Service\RendererServiceInterface $renderer */
     protected $renderer;
 
@@ -23,9 +27,11 @@ class AuthController implements AuthControllerInterface
      * @param UserServiceInterface $service
      */
     public function __construct(
+        CaptchaServiceInterface $captcha_service,
         RendererServiceInterface $renderer,
         UserServiceInterface $user_service
     ) {
+        $this->captcha_service = $captcha_service;
         $this->renderer = $renderer;
         $this->user_service = $user_service;
     }
@@ -81,12 +87,10 @@ class AuthController implements AuthControllerInterface
         $_SESSION['email'] = $email;
 
         // Check captcha.
-        if (isset($_SESSION['tinyibcaptcha'])) {
-            $captcha = isset($data['captcha']) ? $data['captcha'] : '';
-            if ($captcha !== $_SESSION['tinyibcaptcha']) {
-                $_SESSION['error'] = 'Incorrect CAPTCHA';
-                return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/auth/register']);
-            }
+        $captcha = isset($data['cap_response']) ? $data['cap_response'] : '';
+        if (!$this->captcha_service->checkCaptcha($captcha)) {
+            $_SESSION['error'] = 'Incorrect CAPTCHA';
+            return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/auth/register']);
         }
 
         try {
@@ -153,12 +157,10 @@ class AuthController implements AuthControllerInterface
         $_SESSION['email'] = $email;
 
         // Check captcha.
-        if (isset($_SESSION['tinyibcaptcha'])) {
-            $captcha = isset($data['captcha']) ? $data['captcha'] : '';
-            if ($captcha !== $_SESSION['tinyibcaptcha']) {
-                $_SESSION['error'] = 'Incorrect CAPTCHA';
-                return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/auth/login']);
-            }
+        $captcha = isset($data['cap_response']) ? $data['cap_response'] : '';
+        if (!$this->captcha_service->checkCaptcha($captcha)) {
+            $_SESSION['error'] = 'Incorrect CAPTCHA';
+            return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/auth/login']);
         }
 
         try {

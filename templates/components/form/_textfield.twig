@@ -1,0 +1,52 @@
+{#
+  Blocks:
+    - label
+    - input
+
+  Variables:
+    - class
+    - label_class
+    - input_class
+    - id
+    - name
+    - label
+    - placeholder
+    - type
+    - value
+    - required
+#}
+
+{% set class = class|default([])|merge(['field'])|join(' ') %}
+{% set label_class = label_class|default([])|merge(['field__label'])|join(' ') %}
+{% set input_class = input_class|default([])|merge(['field__input'])|join(' ') %}
+
+{% if name is defined %}
+  {# If id is not defined, use the name. #}
+  {% set id = id|default(name) %}
+{% endif %}
+
+{% set label = label|default('') %}
+{% set placeholder = placeholder|default(label) %}
+{% set type = type|default('text') %}
+{% set value = value|default('') %}
+
+{% spaceless %}
+  <div class="{{ class }}">
+      {% block label %}
+        <label class="{{ label_class }}"
+          {% if id is defined %} for="{{ id }}" {% endif %}
+        >{{ label }}</label>
+      {% endblock %}
+
+      {% block input %}
+        <input type="{{ type }}"
+          class="{{ input_class }}"
+          {% if id is defined %} id="{{ id }}" {% endif %}
+          {% if name is defined %} name="{{ name }}" {% endif %}
+          {% if required %} required {% endif %}
+          value="{{ value }}"
+          placeholder="{{ placeholder }}"
+        />
+      {% endblock %}
+  </div>
+{% endspaceless %}

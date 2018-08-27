@@ -1,0 +1,23 @@
+@import '../utils/index';
+
+.post-header {
+  background: inherit;
+  display: block;
+
+  &__delete-label {
+    display: none;
+  }
+
+  &__delete,
+  &__name-wrapper,
+  &__datetime,
+  &__reflink-wrapper {
+    display: inline-block;
+    margin: 0 2px;
+    vertical-align: middle;
+  }
+
+  &__reply-wrapper {
+    @include brackets;
+  }
+}

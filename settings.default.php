@@ -32,78 +32,25 @@ define('TINYIB_MAXREPLIES', 0);       // Maximum replies before a thread stops b
 // Upload types
 //   Empty array to disable
 //   Format: MIME type => (extension, optional thumbnail)
-$tinyib_uploads = array(
-    'image/jpeg' => array('jpg'),
-    'image/pjpeg' => array('jpg'),
-    'image/png' => array('png'),
-    'image/gif' => array('gif'),
+$tinyib_uploads = [
+    'image/jpeg' => ['jpg'],
+    'image/pjpeg' => ['jpg'],
+    'image/png' => ['png'],
+    'image/gif' => ['gif'],
 
-    'audio/mpeg' => array('mp3', 'images/audio_thumbnail.png'),
-    'audio/mp3' => array('mp3', 'images/audio_thumbnail.png'),
-    'audio/x-mpeg' => array('mp3', 'images/audio_thumbnail.png'),
-    'audio/x-mpeg-3' => array('mp3', 'images/audio_thumbnail.png'),
-    'audio/mp4' => array('mp4', 'images/audio_thumbnail.png'),
-    //'audio/webm' => array('webm', 'audio_thumbnail.png'),
+    'audio/mpeg' => ['mp3', 'images/audio_thumbnail.png'],
+    'audio/mp3' => ['mp3', 'images/audio_thumbnail.png'],
+    'audio/x-mpeg' => ['mp3', 'images/audio_thumbnail.png'],
+    'audio/x-mpeg-3' => ['mp3', 'images/audio_thumbnail.png'],
+    'audio/mp4' => ['mp4', 'images/audio_thumbnail.png'],
+    //'audio/webm' => ['webm', 'images/audio_thumbnail.png'],
 
     // Video upload requires mediainfo and ffmpegthumbnailer  (see README for instructions)
-    'video/mp4' => array('mp4'),
-    //'video/webm' => array('webm'),
+    'video/mp4' => ['mp4'],
+    //'video/webm' => ['webm'],
 
-    //'application/x-shockwave-flash' => array('swf', 'images/swf_thumbnail.png'));
-);
-
-function buildEmbedHtml($url, $extension)
-{
-    if ($extension === 'mp4') {
-        return '<video controls autoplay><source src="' . $url . '" type="video/mp4" /></video>';
-    } elseif ($extension === 'webm') {
-        return '<video controls autoplay><source src="' . $url . '" type="video/webm" /></video>';
-    } else {
-        return '<img src="' . $url . '" alt="" />';
-    }
-}
-
-// Embeds
-//   Empty array to disable
-$tinyib_embeds = array(
-    // oEmbed APIs
-    'SoundCloud' => array(
-        'type' => 'oembed',
-        'url' => 'http://soundcloud.com/oembed?format=json&url=TINYIBEMBED',
-    ),
-    'Vimeo' => array(
-        'type' => 'oembed',
-        'url' => 'http://vimeo.com/api/oembed.json?url=TINYIBEMBED',
-    ),
-    'YouTube' => array(
-        'type' => 'oembed',
-        'url' => 'http://www.youtube.com/oembed?url=TINYIBEMBED&format=json',
-    ),
-    // Custom embeds
-    'Imgur' => array(
-        'type' => 'custom',
-        'callback' => function ($url) {
-            $matches = array();
-
-            if (preg_match('/(?:https?:\/\/)i\.imgur\.com\/(\w{1,8})\.(\w{3,4})/i', $url, $matches)) {
-                $hash = $matches[1];
-                $extension = $matches[2];
-                $url = "https://i.imgur.com/$hash.$extension";
-                $is_video = in_array($extension, array('mp4', 'webm'));
-
-                return array(
-                    'type' => $is_video ? 'video' : 'photo',
-                    'title' => "$hash.$extension",
-                    'url' => $url,
-                    'thumbnail_url' => "https://i.imgur.com/${hash}m.jpg",
-                    'html' => buildEmbedHtml($url, $extension),
-                );
-            }
-
-            return null;
-        },
-    ),
-);
+    //'application/x-shockwave-flash' => ['swf', 'images/swf_thumbnail.png'];
+];
 
 // Dice roll
 define('TINYIB_DICE_ENABLED', true);
@@ -138,6 +85,7 @@ define('TINYIB_TRIPSEED', '');        // Enter some random text  (used when gene
 //   For API keys visit https://www.google.com/recaptcha
 define('TINYIB_RECAPTCHA_SITE', '');  // Site key
 define('TINYIB_RECAPTCHA_SECRET', '');// Secret key
+define('TINYIB_RECAPTCHA_THRESHOLD', 0.5);
 
 // Database
 define('TINYIB_DBMIGRATE', false);    // Enable database migration tool  (see README for instructions)

@@ -1,7 +1,9 @@
-{% extends '_html.twig' %}
+{% extends 'layout/_html.twig' %}
 
 {% block content %}
-  <div class="status-message status-message_error">
-    <p class="status-message__text">{{ message }}</p>
-  </div>
+  <main class="{{class is defined ? class ~ ' '}}">
+    <div class="status-message status-message_error">
+      <p class="status-message__text">{{ message }}</p>
+    </div>
+  </main>
 {% endblock %}

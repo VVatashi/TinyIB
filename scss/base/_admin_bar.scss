@@ -1,0 +1,11 @@
+@import '../utils/index';
+
+.admin-bar {
+  text-align: right;
+
+  &__list-item {
+    @include brackets;
+
+    display: inline;
+  }
+}
