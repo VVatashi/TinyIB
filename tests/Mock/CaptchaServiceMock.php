@@ -22,4 +22,12 @@ class CaptchaServiceMock implements CaptchaServiceInterface
         $image = imagecreatetruecolor(175, 55);
         return $image;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function checkCaptcha(string $captcha_response): bool
+    {
+        return true;
+    }
 }

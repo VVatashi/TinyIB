@@ -9,6 +9,7 @@ use TinyIB\Controller\AuthController;
 use TinyIB\Controller\AuthControllerInterface;
 use TinyIB\Model\User;
 use TinyIB\Service\UserService;
+use TinyIB\Tests\Mock\CaptchaServiceMock;
 use TinyIB\Tests\Mock\RendererServiceMock;
 use TinyIB\Tests\Mock\UserRepositoryMock;
 
@@ -32,6 +33,7 @@ final class AuthControllerTest extends TestCase
     {
         //session_start();
 
+        $captcha_service = new CaptchaServiceMock();
         $renderer = new RendererServiceMock();
         $repository = new UserRepositoryMock();
 
@@ -41,7 +43,7 @@ final class AuthControllerTest extends TestCase
         $repository->insert($user);
 
         $service = new UserService($repository);
-        $this->controller = new AuthController($renderer, $service);
+        $this->controller = new AuthController($captcha_service, $renderer, $service);
     }
 
     public function testCreateController() : void

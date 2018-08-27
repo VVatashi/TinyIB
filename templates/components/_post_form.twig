@@ -33,6 +33,16 @@
 
     <input type="hidden" name="parent" value="{{ parent }}" />
 
+    {% if constant('TINYIB_CAPTCHA') == 'recaptcha' %}
+      {% include 'components/form/_captcha.twig' with {
+        'class': [],
+        'action': 'create_post',
+        'id': 'cap_response',
+        'name': 'cap_response',
+        'label': '',
+      } %}
+    {% endif %}
+
     {% spaceless %}
       <table class="form__inner">
         <tbody class="form__group form__group_inline form__group_name">
@@ -76,7 +86,25 @@
         </tbody>
 
         <tbody class="form__group form__group_inline form__group_attachment">
-          {% include 'components/_captcha.twig' with { 'class': 'form__field form__field_captcha' } %}
+          {% if constant('TINYIB_CAPTCHA') == 'simple' %}
+            <tr class="form__field form__field_attachment field field_captcha">
+              <td class="field__label-wrapper">
+                <label class="field__label field__label_hidden" for="file">CAPTCHA</label>
+              </td>
+
+              <td class="field__input-wrapper">
+                {% include 'components/form/_captcha.twig' with {
+                  'class': ['form__field form__field_captcha'],
+                  'label_class': ['field__label'],
+                  'input_class': ['field__input'],
+                  'action': 'create_post',
+                  'id': 'cap_response',
+                  'name': 'cap_response',
+                  'label': 'CAPTCHA',
+                } %}
+              </td>
+            </tr>
+          {% endif %}
 
           {% if uploads %}
             <tr class="form__field form__field_attachment field field_attachment">

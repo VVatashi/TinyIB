@@ -45,5 +45,23 @@
     &_fixed-width {
       flex-grow: 0;
     }
+
+    &_captcha {
+      display: flex;
+      margin-right: 0;
+
+      .field__label {
+        flex: 0;
+      }
+
+      .field__input {
+        flex: 1;
+      }
+
+      img {
+        height: 40px;
+        margin-right: 0.5em;
+      }
+    }
   }
 }
