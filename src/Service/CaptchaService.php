@@ -47,47 +47,47 @@ class CaptchaService extends SimpleCaptcha implements CaptchaServiceInterface
     /**
      * {@inheritDoc}
      */
-    public function checkCaptcha(string $captcha_response): bool
+    public function checkCaptcha(string $captcha_response) : bool
     {
-        if (TINYIB_CAPTCHA === 'recaptcha') {
-            $data = [
-                'secret' => TINYIB_RECAPTCHA_SECRET,
-                'response' => $captcha_response,
-            ];
-
-            $options = [
-                'http' => [
-                    'method' => 'POST',
-                    'header'  => [
-                        'Content-type: application/x-www-form-urlencoded',
-                    ],
-                    'content' => http_build_query($data),
-                ],
-                'ssl' => [
-                    'allow_self_signed' => true,
-                    'verify_peer' => false,
-                    'verify_peer_name' => false,
-                ],
-            ];
-
-            $context = stream_context_create($options);
-            $response = file_get_contents('https://www.google.com/recaptcha/api/siteverify', false, $context);
-            $data = json_decode($response, true);
-            if (!isset($data['success']) || $data['success'] !== true) {
-                return false;
-            }
-
-            return isset($data['score']) && $data['score'] > TINYIB_RECAPTCHA_THRESHOLD;
-        }
-        elseif (TINYIB_CAPTCHA === 'simple') {
-            if (!isset($_SESSION[$this->session_var])) {
-                return true;
-            }
-
-            return $captcha_response === $_SESSION[$this->session_var];
-        }
-        else {
+        if (!isset($_SESSION[$this->session_var])) {
             return true;
         }
+
+        return $captcha_response === $_SESSION[$this->session_var];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function checkRecaptcha(string $captcha_response) : bool
+    {
+        $data = [
+            'secret' => TINYIB_RECAPTCHA_SECRET,
+            'response' => $captcha_response,
+        ];
+
+        $options = [
+            'http' => [
+                'method' => 'POST',
+                'header' => [
+                    'Content-type: application/x-www-form-urlencoded',
+                ],
+                'content' => http_build_query($data),
+            ],
+            'ssl' => [
+                'allow_self_signed' => true,
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+            ],
+        ];
+
+        $context = stream_context_create($options);
+        $response = file_get_contents('https://www.google.com/recaptcha/api/siteverify', false, $context);
+        $data = json_decode($response, true);
+        if (!isset($data['success']) || $data['success'] !== true) {
+            return false;
+        }
+
+        return isset($data['score']) && $data['score'] > TINYIB_RECAPTCHA_THRESHOLD;
     }
 }

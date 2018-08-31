@@ -87,7 +87,7 @@ class AuthController implements AuthControllerInterface
         $_SESSION['email'] = $email;
 
         // Check captcha.
-        $captcha = isset($data['cap_response']) ? $data['cap_response'] : '';
+        $captcha = isset($data['captcha']) ? $data['captcha'] : '';
         if (!$this->captcha_service->checkCaptcha($captcha)) {
             $_SESSION['error'] = 'Incorrect CAPTCHA';
             return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/auth/register']);
@@ -157,7 +157,7 @@ class AuthController implements AuthControllerInterface
         $_SESSION['email'] = $email;
 
         // Check captcha.
-        $captcha = isset($data['cap_response']) ? $data['cap_response'] : '';
+        $captcha = isset($data['captcha']) ? $data['captcha'] : '';
         if (!$this->captcha_service->checkCaptcha($captcha)) {
             $_SESSION['error'] = 'Incorrect CAPTCHA';
             return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/auth/login']);

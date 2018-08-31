@@ -90,11 +90,14 @@ final class PostController implements PostControllerInterface
     protected function checkCAPTCHA()
     {
         if (defined('TINYIB_CAPTCHA') && !empty(TINYIB_CAPTCHA)) {
-            if (!isset($_POST['cap_response'])) {
+            if (!isset($_POST['captcha'])) {
                 throw new \Exception('CAPTCHA required.');
             }
 
-            if (!$this->captcha_service->checkCaptcha($_POST['cap_response'])) {
+            $response = $_POST['captcha'];
+            if (TINYIB_CAPTCHA === 'simple' && !$this->captcha_service->checkCaptcha($response)) {
+                throw new \Exception('Incorrect CAPTCHA.');
+            } elseif (TINYIB_CAPTCHA === 'recaptcha' && !$this->captcha_service->checkRecaptcha($response)) {
                 throw new \Exception('Incorrect CAPTCHA.');
             }
         }
