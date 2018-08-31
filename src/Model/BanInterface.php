@@ -20,7 +20,7 @@ interface BanInterface
      *
      * @return self
      */
-    public function setID(int $id) : BanInterface;
+    public function withID(int $id) : BanInterface;
 
     /**
      * Returns IP of the ban.
@@ -38,7 +38,7 @@ interface BanInterface
      *
      * @return self
      */
-    public function setIP(string $ip) : BanInterface;
+    public function withIP(string $ip) : BanInterface;
 
     /**
      * Returns created timestamp of the ban.
@@ -56,7 +56,7 @@ interface BanInterface
      *
      * @return self
      */
-    public function setCreatedDate(int $created_at) : BanInterface;
+    public function withCreatedDate(int $created_at) : BanInterface;
 
     /**
      * Returns expires timestamp of the ban.
@@ -74,7 +74,7 @@ interface BanInterface
      *
      * @return self
      */
-    public function setExpiresDate(int $expires_at) : BanInterface;
+    public function withExpiresDate(int $expires_at) : BanInterface;
 
     /**
      * Checks if ban is a permanent.
@@ -111,5 +111,5 @@ interface BanInterface
      *
      * @return self
      */
-    public function setReason(string $reason) : BanInterface;
+    public function withReason(string $reason) : BanInterface;
 }

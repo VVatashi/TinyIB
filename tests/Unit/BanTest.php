@@ -31,7 +31,7 @@ final class BanTest extends TestCase
     public function testBanId(int $id) : void
     {
         $ban = new Ban(1, '127.0.0.1', time(), time());
-        $new_ban = $ban->setID($id);
+        $new_ban = $ban->withID($id);
         $this->assertNotNull($new_ban);
         $this->assertInstanceOf(BanInterface::class, $new_ban);
         $this->assertInstanceOf(Ban::class, $new_ban);
@@ -65,7 +65,7 @@ final class BanTest extends TestCase
     public function testBanCreatedDate(int $timestamp) : void
     {
         $ban = new Ban(1, '127.0.0.1', time(), time());
-        $new_ban = $ban->setCreatedDate($timestamp);
+        $new_ban = $ban->withCreatedDate($timestamp);
         $this->assertNotNull($new_ban);
         $this->assertInstanceOf(BanInterface::class, $new_ban);
         $this->assertInstanceOf(Ban::class, $new_ban);
@@ -82,7 +82,7 @@ final class BanTest extends TestCase
     public function testBanExpiresDate(int $timestamp) : void
     {
         $ban = new Ban(1, '127.0.0.1', time(), time());
-        $new_ban = $ban->setExpiresDate($timestamp);
+        $new_ban = $ban->withExpiresDate($timestamp);
         $this->assertNotNull($new_ban);
         $this->assertInstanceOf(BanInterface::class, $new_ban);
         $this->assertInstanceOf(Ban::class, $new_ban);
@@ -99,7 +99,7 @@ final class BanTest extends TestCase
     public function testBanIp(string $ip) : void
     {
         $ban = new Ban(1, '127.0.0.1', time(), time());
-        $new_ban = $ban->setIP($ip);
+        $new_ban = $ban->withIP($ip);
         $this->assertNotNull($new_ban);
         $this->assertInstanceOf(BanInterface::class, $new_ban);
         $this->assertInstanceOf(Ban::class, $new_ban);
@@ -125,7 +125,7 @@ final class BanTest extends TestCase
     public function testBanReason(string $reason) : void
     {
         $ban = new Ban(1, '127.0.0.1', time(), time());
-        $new_ban = $ban->setReason($reason);
+        $new_ban = $ban->withReason($reason);
         $this->assertNotNull($new_ban);
         $this->assertInstanceOf(BanInterface::class, $new_ban);
         $this->assertInstanceOf(Ban::class, $new_ban);
