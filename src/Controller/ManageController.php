@@ -35,17 +35,20 @@ class ManageController implements ManageControllerInterface
      * Constructs new manage controller.
      *
      * @param \TinyIB\Cache\CacheInterface $cache
+     * @param \TinyIB\Repository\BanRepositoryInterface $ban_repository
      * @param \TinyIB\Repository\PostRepositoryInterface $post_repository
      * @param \TinyIB\Service\BanServiceInterface $ban_service
      * @param \TinyIB\Service\RendererServiceInterface $renderer
      */
     public function __construct(
         CacheInterface $cache,
+        BanRepositoryInterface $ban_repository,
         PostRepositoryInterface $post_repository,
         BanServiceInterface $ban_service,
         RendererServiceInterface $renderer
     ) {
         $this->cache = $cache;
+        $this->ban_repository = $ban_repository;
         $this->post_repository = $post_repository;
         $this->ban_service = $ban_service;
         $this->renderer = $renderer;
@@ -84,7 +87,7 @@ class ManageController implements ManageControllerInterface
         }
 
         $threads_count = $this->post_repository->getThreadCount();
-        $bans_count = $this->ban_service->getCount();
+        $bans_count = $this->ban_repository->getCount([]);
         $data['info'] = $threads_count . ' ' . Functions::plural('thread', $threads_count) . ', '
             . $bans_count . ' ' . Functions::plural('ban', $bans_count);
 
@@ -132,25 +135,6 @@ class ManageController implements ManageControllerInterface
     }
 
     /**
-     * Returns view model for a ban.
-     *
-     * @param \TinyIB\Model\BanInterface
-     *
-     * @return array
-     */
-    protected function banViewModel(BanInterface $ban) : array
-    {
-        return [
-            'id' => $ban->getID(),
-            'ip' => $ban->getIP(),
-            'id' => $ban->getID(),
-            'timestamp' => $ban->getCreatedDate(),
-            'expire' => $ban->getExpiresDate(),
-            'reason' => $ban->getReason(),
-        ];
-    }
-
-    /**
      * {@inheritDoc}
      */
     public function listBans(ServerRequestInterface $request) : ResponseInterface
@@ -171,7 +155,7 @@ class ManageController implements ManageControllerInterface
 
         $query = $request->getQueryParams();
         $data['ip'] = !empty($query['bans']) ? $query['bans'] : '';
-        $data['bans'] = array_map([$this, 'banViewModel'], $this->ban_service->getAll());
+        $data['bans'] = $this->ban_repository->getAll([], 'timestamp DESC');
         return new Response(200, [], $this->renderer->render('manage_bans.twig', $data));
     }
 
@@ -196,20 +180,20 @@ class ManageController implements ManageControllerInterface
 
         $request_data = $request->getParsedBody();
         $ip = $request_data['ip'];
-        $is_ban_exists = $this->ban_service->getByIP($ip) !== null;
+        $is_ban_exists = $this->ban_repository->getOne(['ip' => $ip]) !== null;
         if ($is_ban_exists) {
             $message = 'Sorry, there is already a ban on record for that IP address.';
             return new Response(400, [], $message);
         }
 
-        $duration = isset($request_data['expire']) ? $request_data['expire'] : 0;
+        $duration = isset($request_data['expire']) ? (int)$request_data['expire'] : 0;
         $expires_at = $duration !== 0 ? $duration + time() : 0;
         $reason = isset($request_data['reason']) ? $request_data['reason'] : '';
         $ban = $this->ban_service->create($ip, $expires_at, $reason);
 
         $query = $request->getQueryParams();
         $data['ip'] = !empty($query['bans']) ? $query['bans'] : '';
-        $data['bans'] = array_map([$this, 'banViewModel'], $this->ban_service->getAll());
+        $data['bans'] = $this->ban_repository->getAll([], 'timestamp DESC');
         $data['text'] = 'Ban record added for ' . $ban->getIP();
         return new Response(200, [], $this->renderer->render('manage_bans.twig', $data));
     }
@@ -235,7 +219,7 @@ class ManageController implements ManageControllerInterface
 
         $query = $request->getQueryParams();
         $id = (int)$query['lift'];
-        $ban = $this->ban_service->getByID($id);
+        $ban = $this->ban_repository->getOne(['id' => $id]);
         if (!isset($ban)) {
             $message = "Ban No.$id not found.";
             return new Response(404, [], $message);
@@ -244,7 +228,7 @@ class ManageController implements ManageControllerInterface
         $this->ban_service->liftByID($id);
 
         $data['ip'] = !empty($query['bans']) ? $query['bans'] : '';
-        $data['bans'] = array_map([$this, 'banViewModel'], $this->ban_service->getAll());
+        $data['bans'] = $this->ban_repository->getAll([], 'timestamp DESC');
         $data['text'] = 'Ban record lifted for ' . $ban->getIP();
         return new Response(200, [], $this->renderer->render('manage_bans.twig', $data));
     }
@@ -281,7 +265,7 @@ class ManageController implements ManageControllerInterface
         }
 
         $post_ip = $post->getIP();
-        $data['has_ban'] = $this->ban_service->getByIP($post_ip) !== null;
+        $data['has_ban'] = $this->ban_repository->getOne(['ip' => $post_ip]) !== null;
         $data['post'] = $post->createViewModel(TINYIB_INDEXPAGE);
 
         $posts = $post->isThread() ? $this->post_repository->getPostsByThreadID($post->getID()) : [$post];

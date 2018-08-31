@@ -24,93 +24,14 @@ class BanService implements BanServiceInterface
     }
 
     /**
-     * Creates a ban model from a data array.
-     *
-     * @param array $data
-     *
-     * @return TinyIB\Model\BanInterface
-     */
-    protected function createModel(array $data) : BanInterface
-    {
-        $ban = new Ban(
-            $data['id'],
-            $data['ip'],
-            $data['timestamp'],
-            $data['expire'],
-            $data['reason']
-        );
-
-        return $ban;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getAll() : array
-    {
-        $data = $this->ban_repository->getAll([], 'timestamp DESC');
-        return array_map([$this, 'createModel'], $data);
-    }
-
-    /**
-     * Loads a single ban model by a property.
-     *
-     * @param $name
-     *   Property name.
-     * @param $value
-     *   Property value.
-     *
-     * @return \TinyIB\Model\BanInterface|null
-     *   Loaded ban model or null.
-     */
-    protected function getOneByProperty($name, $value)
-    {
-        $data = $this->ban_repository->getOne([$name => $value]);
-        if (!isset($data)) {
-            return null;
-        }
-
-        return $this->createModel($data);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getByID(int $id)
-    {
-        return $this->getOneByProperty('id', $id);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getByIP(string $ip)
-    {
-        return $this->getOneByProperty('ip', $ip);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getCount() : int
-    {
-        return $this->ban_repository->getCount([]);
-    }
-
-    /**
      * {@inheritDoc}
      */
     public function create(string $ip, int $expires_at = 0, string $reason = '') : BanInterface
     {
-        $this->ban_repository->insert([
-            'ip' => $ip,
-            'timestamp' => time(),
-            'expire' => $expires_at,
-            'reason' => $reason,
-        ]);
-
+        $model = new Ban(0, $ip, time(), $expires_at, $reason);
+        $this->ban_repository->insert($model);
         $id = $this->ban_repository->getLastInsertId();
-        return $this->getByID($id);
+        return $this->ban_repository->getOne(['id' => $id]);
     }
 
     /**

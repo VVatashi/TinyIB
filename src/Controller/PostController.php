@@ -8,6 +8,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use TinyIB\Cache\CacheInterface;
 use TinyIB\Functions;
 use TinyIB\Model\Post;
+use TinyIB\Repository\BanRepositoryInterface;
 use TinyIB\Repository\PostRepositoryInterface;
 use TinyIB\Service\BanServiceInterface;
 use TinyIB\Service\CaptchaServiceInterface;
@@ -18,6 +19,9 @@ final class PostController implements PostControllerInterface
 {
     /** @var \TinyIB\Cache\CacheInterface $cache */
     protected $cache;
+
+    /** @var \TinyIB\Repository\BanRepositoryInterface $ban_repository */
+    protected $ban_repository;
 
     /** @var \TinyIB\Repository\PostRepositoryInterface $post_repository */
     protected $post_repository;
@@ -38,6 +42,7 @@ final class PostController implements PostControllerInterface
      * Constructs new post controller.
      *
      * @param \TinyIB\Cache\CacheInterface $cache
+     * @param \TinyIB\Repository\BanRepositoryInterface $ban_repository
      * @param \TinyIB\Repository\PostRepositoryInterface $post_repository
      * @param \TinyIB\Service\BanServiceInterface $ban_service
      * @param \TinyIB\Service\CaptchaServiceInterface $captcha_service
@@ -46,6 +51,7 @@ final class PostController implements PostControllerInterface
      */
     public function __construct(
         CacheInterface $cache,
+        BanRepositoryInterface $ban_repository,
         PostRepositoryInterface $post_repository,
         BanServiceInterface $ban_service,
         CaptchaServiceInterface $captcha_service,
@@ -53,6 +59,7 @@ final class PostController implements PostControllerInterface
         RendererServiceInterface $renderer
     ) {
         $this->cache = $cache;
+        $this->ban_repository = $ban_repository;
         $this->post_repository = $post_repository;
         $this->ban_service = $ban_service;
         $this->captcha_service = $captcha_service;
@@ -95,7 +102,7 @@ final class PostController implements PostControllerInterface
 
     protected function checkBanned()
     {
-        $ban = $this->ban_service->getByIP($_SERVER['REMOTE_ADDR']);
+        $ban = $this->ban_repository->getOne(['ip' => $_SERVER['REMOTE_ADDR']]);
         if (isset($ban)) {
             if (!$ban->isExpired()) {
                 $expire = $ban->isPermanent()
