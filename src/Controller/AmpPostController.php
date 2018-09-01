@@ -97,13 +97,32 @@ class AmpPostController implements AmpPostControllerInterface
         $query = $request->getQueryParams();
         $page = isset($query['page']) ? (int)$query['page'] : 0;
 
+        $refmap = [];
+
         $posts = array_reverse($this->post_repository->getPostsByThreadID($thread_id, true, $limit, $page * $limit));
-        $posts = array_map(function ($post) use ($thread_id) {
+        $posts = array_map(function ($post) use ($thread_id, &$refmap) {
             $message = $post->getMessage();
             $message = $post->markup($message);
-            // Fix links in thread.
-            $message = preg_replace('#href="/' . TINYIB_BOARD . '/res/' . $thread_id . '\#(\d+)"#', 'href="#post_$1"', $message);
+            $post_id = $post->getID();
+
+            // Fix links in thread and populate the reference map.
+            $link_pattern = '#href="/' . TINYIB_BOARD . '/res/' . $thread_id . '\#(\d+)"#';
+            $message = preg_replace_callback($link_pattern, function ($matches) use ($post_id, &$refmap) {
+                $target_id = (int)$matches[1];
+                $refmap[$target_id][] = $post_id;
+                return "href=\"#post_$target_id\"";
+            }, $message);
+
             $post->setMessage($message);
+            return $post;
+        }, $posts);
+
+        $posts = array_map(function ($post) use ($refmap) {
+            $post_id = $post->getID();
+            if (isset($refmap[$post_id])) {
+                $post->references = $refmap[$post_id];
+            }
+
             return $post;
         }, $posts);
 

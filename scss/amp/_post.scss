@@ -61,6 +61,14 @@
     float: right;
   }
 
+  &__references {
+    display: flex;
+  }
+
+  &__reference {
+    margin-right: 0.5em;
+  }
+
   @include breakpoint($phone-up) {
     &__subject,
     &__author,

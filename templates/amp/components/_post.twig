@@ -62,5 +62,18 @@
   {% endblock %}
 
   {% block footer %}
+    {% if post.references %}
+      <div class="post__footer">
+        <ul class="post__references">
+          {% for reference in post.references %}
+            <li class="post__reference">
+              <a class="post_reference-link" href="#post_{{ reference }}">
+                &gt;&gt;{{ reference }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
   {% endblock %}
 </div>
