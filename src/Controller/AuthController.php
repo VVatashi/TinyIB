@@ -95,7 +95,7 @@ class AuthController implements AuthControllerInterface
 
         try {
             $this->user_service->register($email, $password);
-            $this->user_service->login($email, $password);
+            //$this->user_service->login($email, $password);
         }
         catch(ValidationException $e) {
             $_SESSION['error'] = $e->getMessage();
