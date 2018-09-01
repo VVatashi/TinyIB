@@ -1,0 +1,8 @@
+{% extends 'amp/components/_post.twig' %}
+
+{% block footer %}
+  <div class="post__footer">
+    <span>Replies: {{ post.replyCount }}</span>
+    <a class="post__reply-link" href="{{ base_url }}/amp/thread/{{ post.id }}">Reply</a>
+  </div>
+{% endblock %}

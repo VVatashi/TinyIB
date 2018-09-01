@@ -27,7 +27,7 @@
       {% if constant('TINYIB_CAPTCHA') == 'recaptcha' %}
         <script>
           grecaptcha.ready(() => {
-            const captcha_input = document.getElementById('cap_response');
+            const captcha_input = document.getElementById('captcha');
             if (captcha_input !== null) {
               grecaptcha.execute('{{ constant('TINYIB_RECAPTCHA_SITE') }}', {
                 action: '{{ action }}',
@@ -45,7 +45,7 @@
 {% block input %}
   {% spaceless %}
     {% if constant('TINYIB_CAPTCHA') == 'recaptcha' %}
-      <input type="hidden" id="cap_response" name="cap_response" value="" readonly />
+      <input type="hidden" id="captcha" name="captcha" value="" readonly />
     {% else %}
       <input type="{{ type }}"
         class="{{ input_class }}"

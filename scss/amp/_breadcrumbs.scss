@@ -1,0 +1,18 @@
+@import '../utils/index';
+
+.breadcrumbs {
+  display: flex;
+  flex-flow: column;
+  font-size: 2em;
+
+  @include breakpoint($phone-up) {
+    flex-flow: row;
+
+    &__item {
+      & + &::before {
+        content: '/';
+        margin: 0 0.1em;
+      }
+    }
+  }
+}

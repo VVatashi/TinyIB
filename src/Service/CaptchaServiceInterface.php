@@ -21,5 +21,10 @@ interface CaptchaServiceInterface
     /**
      * Checks a CAPTCHA response.
      */
-    public function checkCaptcha(string $captcha_response);
+    public function checkCaptcha(string $captcha_response) : bool;
+
+    /**
+     * Checks a reCAPTCHA response.
+     */
+    public function checkRecaptcha(string $captcha_response) : bool;
 }

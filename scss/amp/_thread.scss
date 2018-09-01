@@ -1,0 +1,15 @@
+.thread {
+  &__pagination {
+    padding: 0 0.5em;
+    margin: 0 0 1em;
+  }
+
+  &__post {
+    width: 100%;
+    margin-bottom: 1em;
+
+    &--hidden {
+      display: none;
+    }
+  }
+}

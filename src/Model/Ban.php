@@ -2,8 +2,10 @@
 
 namespace TinyIB\Model;
 
-final class Ban implements BanInterface
+class Ban implements BanInterface
 {
+    use ImmutableTrait;
+
     /** @var int $id */
     protected $id;
 
@@ -30,15 +32,9 @@ final class Ban implements BanInterface
     /**
      * {@inheritDoc}
      */
-    public function setID(int $id) : BanInterface
+    public function withID(int $id) : BanInterface
     {
-        return new Ban(
-            $id,
-            $this->ip,
-            $this->created_at,
-            $this->expires_at,
-            $this->reason
-        );
+        return $this->with('id', $id);
     }
 
     /**
@@ -52,15 +48,9 @@ final class Ban implements BanInterface
     /**
      * {@inheritDoc}
      */
-    public function setIP(string $ip) : BanInterface
+    public function withIP(string $ip) : BanInterface
     {
-        return new Ban(
-            $this->id,
-            $ip,
-            $this->created_at,
-            $this->expires_at,
-            $this->reason
-        );
+        return $this->with('ip', $ip);
     }
 
     /**
@@ -74,15 +64,9 @@ final class Ban implements BanInterface
     /**
      * {@inheritDoc}
      */
-    public function setCreatedDate(int $created_at) : BanInterface
+    public function withCreatedDate(int $created_at) : BanInterface
     {
-        return new Ban(
-            $this->id,
-            $this->ip,
-            $created_at,
-            $this->expires_at,
-            $this->reason
-        );
+        return $this->with('created_at', $created_at);
     }
 
     /**
@@ -112,15 +96,9 @@ final class Ban implements BanInterface
     /**
      * {@inheritDoc}
      */
-    public function setExpiresDate(int $expires_at) : BanInterface
+    public function withExpiresDate(int $expires_at) : BanInterface
     {
-        return new Ban(
-            $this->id,
-            $this->ip,
-            $this->created_at,
-            $expires_at,
-            $this->reason
-        );
+        return $this->with('expires_at', $expires_at);
     }
 
     /**
@@ -142,15 +120,9 @@ final class Ban implements BanInterface
     /**
      * {@inheritDoc}
      */
-    public function setReason(string $reason) : BanInterface
+    public function withReason(string $reason) : BanInterface
     {
-        return new Ban(
-            $this->id,
-            $this->ip,
-            $this->created_at,
-            $this->expires_at,
-            $reason
-        );
+        return $this->with('reason', $reason);
     }
 
     /**

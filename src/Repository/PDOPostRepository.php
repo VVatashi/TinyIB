@@ -285,7 +285,7 @@ final class PDOPostRepository extends PDORepository implements PostRepositoryInt
     /**
      * {@inheritDoc}
      */
-    public function getPostsByThreadID(int $id, bool $moderated_only = true) : array
+    public function getPostsByThreadID(int $id, bool $moderated_only = true, $take = null, $skip = 0) : array
     {
         $conditions = [
             [
@@ -299,8 +299,13 @@ final class PDOPostRepository extends PDORepository implements PostRepositoryInt
             $conditions['moderated'] = 1;
         }
 
-        $data = $this->getAll($conditions, 'id ASC');
-        return array_map([$this, 'createModel'], $data);
+        if (isset($take)) {
+            $data = $this->getRange($conditions, 'id DESC', $take, $skip);
+        } else {
+            $data = $this->getAll($conditions, 'id DESC');
+        }
+
+        return array_map([$this, 'createModel'], array_reverse($data));
     }
 
     /**

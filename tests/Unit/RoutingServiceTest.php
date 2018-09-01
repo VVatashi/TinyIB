@@ -11,6 +11,7 @@ use TinyIB\Tests\Mock\UserCrudControllerMock;
 use TinyIB\Tests\Mock\CaptchaControllerMock;
 use TinyIB\Tests\Mock\ManageControllerMock;
 use TinyIB\Tests\Mock\PostControllerMock;
+use TinyIB\Tests\Mock\AmpPostControllerMock;
 use TinyIB\Tests\Mock\SettingsControllerMock;
 use VVatashi\Router\Router;
 
@@ -79,6 +80,7 @@ final class RoutingServiceTest extends TestCase
         $captcha_controller = new CaptchaControllerMock();
         $manage_controller = new ManageControllerMock();
         $post_controller = new PostControllerMock();
+        $amp_post_controller = new AmpPostControllerMock();
         $settings_controller = new SettingsControllerMock();
 
         $routing_service = new RoutingService(
@@ -88,6 +90,7 @@ final class RoutingServiceTest extends TestCase
             $captcha_controller,
             $manage_controller,
             $post_controller,
+            $amp_post_controller,
             $settings_controller
         );
 
