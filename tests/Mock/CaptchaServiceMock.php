@@ -26,7 +26,15 @@ class CaptchaServiceMock implements CaptchaServiceInterface
     /**
      * {@inheritDoc}
      */
-    public function checkCaptcha(string $captcha_response): bool
+    public function checkCaptcha(string $captcha_response) : bool
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function checkRecaptcha(string $captcha_response) : bool
     {
         return true;
     }

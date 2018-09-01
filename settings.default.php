@@ -11,6 +11,7 @@ define('TINYIB_ADMINPASS', '');       // Administrators have full access to the 
 define('TINYIB_MODPASS', '');         // Moderators only have access to delete (and moderate if TINYIB_REQMOD is set) posts  ['' to disable]
 
 // Board description and behavior
+define('TINYIB_BASE_URL', 'https://localhost/');
 define('TINYIB_BOARD', 'b');          // Unique identifier for this board using only letters and numbers
 define('TINYIB_BOARDDESC', 'TinyIB'); // Displayed at the top of every page
 define('TINYIB_ALWAYSNOKO', false);   // Redirect to thread after posting

@@ -8,6 +8,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use TinyIB\Cache\CacheInterface;
 use TinyIB\Controller\Admin\UserCrudControllerInterface;
+use TinyIB\Controller\AmpPostControllerInterface;
 use TinyIB\Controller\AuthControllerInterface;
 use TinyIB\Controller\CaptchaControllerInterface;
 use TinyIB\Controller\ManageControllerInterface;
@@ -32,6 +33,9 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
     /** @var \TinyIB\Controller\PostControllerInterface $post_controller */
     protected $post_controller;
 
+    /** @var \TinyIB\Controller\AmpPostControllerInterface $amp_post_controller */
+    protected $amp_post_controller;
+
     /** @var \TinyIB\Controller\SettingsControllerInterface $settings_controller */
     protected $settings_controller;
 
@@ -48,6 +52,7 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
         CaptchaControllerInterface $captcha_controller,
         ManageControllerInterface $manage_controller,
         PostControllerInterface $post_controller,
+        AmpPostControllerInterface $amp_post_controller,
         SettingsControllerInterface $settings_controller
     ) {
         $this->router = $router;
@@ -56,6 +61,7 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
         $this->captcha_controller = $captcha_controller;
         $this->manage_controller = $manage_controller;
         $this->post_controller = $post_controller;
+        $this->amp_post_controller = $amp_post_controller;
         $this->settings_controller = $settings_controller;
 
         $this->router->add('auth/register', [$this->auth_controller, 'registerForm']);
@@ -104,6 +110,9 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
         $this->router->add('res/:id', [$this->post_controller, 'thread']);
         $this->router->add('post/create', [$this->post_controller, 'create']);
         $this->router->add('post/delete', [$this->post_controller, 'delete']);
+
+        $this->router->add('amp', [$this->amp_post_controller, 'index']);
+        $this->router->add('amp/thread/:id', [$this->amp_post_controller, 'thread']);
 
         $this->router->add('settings', [$this->settings_controller, 'settings']);
     }

@@ -178,7 +178,7 @@ $container->registerCallback(Twig_Environment::class, function ($container) use 
         'debug' => true,
     ]);
 
-    $twig->addGlobal('base_url', '/' . TINYIB_BOARD);
+    $twig->addGlobal('base_url', TINYIB_BASE_URL . TINYIB_BOARD);
     $twig->addGlobal('uploads', $tinyib_uploads);
     $twig->addGlobal('is_installed_via_git', Functions::installedViaGit());
 
