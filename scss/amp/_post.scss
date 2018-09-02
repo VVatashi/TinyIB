@@ -94,4 +94,12 @@
       margin: 0 0.5em 0 0;
     }
   }
+
+  &--own {
+    box-shadow: 0em 0em 0.25em #004282;
+  }
+
+  &--own-reply {
+    box-shadow: 0em 0em 0.25em #008242;
+  }
 }
