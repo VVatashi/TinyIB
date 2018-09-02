@@ -171,9 +171,9 @@ class AmpPostController implements AmpPostControllerInterface
         $query = $request->getQueryParams();
         $amp_source_origin = isset($query['__amp_source_origin']) ? $query['__amp_source_origin'] : '';
 
-        $subject = isset($_SESSION['subject']) ? $_SESSION['subject'] : '';
-        $name = isset($_SESSION['name']) ? $_SESSION['name'] : '';
-        $email = isset($_SESSION['email']) ? $_SESSION['email'] : '';
+        $subject = isset($_SESSION['amp']['subject']) ? $_SESSION['amp']['subject'] : '';
+        $name = isset($_SESSION['amp']['name']) ? $_SESSION['amp']['name'] : '';
+        $email = isset($_SESSION['amp']['email']) ? $_SESSION['amp']['email'] : '';
 
         $data = json_encode([
             'subject' => $subject,
@@ -194,6 +194,7 @@ class AmpPostController implements AmpPostControllerInterface
     {
         $query = $request->getQueryParams();
         $amp_source_origin = isset($query['__amp_source_origin']) ? $query['__amp_source_origin'] : '';
+        $poster_name = isset($query['name']) ? $query['name'] : null;
 
         $data = $request->getParsedBody();
         $name = isset($data['name']) ? $data['name'] : '';
@@ -206,9 +207,9 @@ class AmpPostController implements AmpPostControllerInterface
         $parent = isset($data['parent']) ? (int)$data['parent'] : 0;
 
         // Store form state to the session.
-        $_SESSION['subject'] = $subject;
-        $_SESSION['name'] = $name;
-        $_SESSION['email'] = $email;
+        $_SESSION['amp']['subject'] = $subject;
+        $_SESSION['amp']['name'] = $name;
+        $_SESSION['amp']['email'] = $email;
 
         try {
             $post = $this->post_service->create(
@@ -237,10 +238,14 @@ class AmpPostController implements AmpPostControllerInterface
         ]);
 
         $thread_id = $post->isThread() ? $post->getID() : $post->getParentID();
+        $destination = TINYIB_BASE_URL . TINYIB_BOARD . '/amp/thread/' . $thread_id;
+        if (!empty($poster_name)) {
+            $destination .= "?name=$poster_name";
+        }
 
         return new Response(201, [
             'AMP-Access-Control-Allow-Source-Origin' => $amp_source_origin,
-            'AMP-Redirect-To' => TINYIB_BASE_URL . TINYIB_BOARD . '/amp/thread/' . $thread_id,
+            'AMP-Redirect-To' => $destination,
             'Content-Type' => 'application/json',
         ], $data);
     }
