@@ -11,8 +11,11 @@
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>
     <noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 
+    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
     <script async custom-element="amp-image-lightbox" src="https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js"></script>
     <script async custom-element="amp-live-list" src="https://cdn.ampproject.org/v0/amp-live-list-0.1.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans" />
 
@@ -22,7 +25,7 @@
   <body>
     <div class="layout">
       <header id="header" class="layout__header">
-        <div class="layout__page-nav">
+        <div class="layout__page-nav layout__page-nav--top">
           <a class="layout__page-nav-link" href="#footer" title="Go to the page bottom">▼</a>
         </div>
 
@@ -36,8 +39,8 @@
       </main>
 
       <footer id="footer" class="layout__footer">
-        <div class="layout__page-nav">
-          <a class="layout__page-nav-link" href="#top" title="Go to the page top">▲</a>
+        <div class="layout__page-nav layout__page-nav--bottom">
+          <a class="layout__page-nav-link" href="#header" title="Go to the page top">▲</a>
         </div>
 
         <ul class="links">

@@ -24,4 +24,12 @@ class AmpPostControllerMock implements AmpPostControllerInterface
     {
         return new Response(200);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function createPost(ServerRequestInterface $request) : ResponseInterface
+    {
+        return new Response(201);
+    }
 }

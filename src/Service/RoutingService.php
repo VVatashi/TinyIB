@@ -112,6 +112,8 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
         $this->router->add('post/delete', [$this->post_controller, 'delete']);
 
         $this->router->add('amp', [$this->amp_post_controller, 'index']);
+        $this->router->add('amp/post', [$this->amp_post_controller, 'createPost']);
+        $this->router->add('amp/form-state', [$this->amp_post_controller, 'formState']);
         $this->router->add('amp/thread/:id', [$this->amp_post_controller, 'thread']);
 
         $this->router->add('settings', [$this->settings_controller, 'settings']);

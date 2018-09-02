@@ -1,0 +1,70 @@
+@import '../utils/index';
+
+.form {
+  &__row {
+    box-sizing: border-box;
+    display: block;
+
+    @include breakpoint($phone-up) {
+      display: flex;
+      flex-flow: row;
+      margin-right: -0.5em;
+    }
+
+    &--markup {
+      display: flex;
+      flex-flow: row wrap;
+      margin-right: -0.5em;
+      font-size: 0.8em;
+    }
+  }
+
+  &__field {
+    display: block;
+    flex: 1;
+    width: 100%;
+    margin: 0 0.5em 0.5em 0;
+  }
+
+  &__button,
+  &__input,
+  &__textarea {
+    box-sizing: border-box;
+    background-color: #6f6f6f;
+    color: #dedede;
+
+    transition: background-color ease 0.333s;
+
+    display: block;
+
+    width: 100%;
+    min-width: 0;
+
+    margin: 0;
+    padding: 0.5em;
+
+    border: 0;
+    border-radius: 0.25em;
+
+    overflow: hidden;
+
+    &:hover {
+      background-color: mix(#000, #6f6f6f, 10%);
+    }
+
+    &:focus,
+    &:active {
+      background-color: mix(#000, #6f6f6f, 25%);
+    }
+  }
+
+  &__file {
+    display: none;
+  }
+
+  &__textarea {
+    min-height: 8em;
+    resize: vertical;
+    overflow-y: auto;
+  }
+}

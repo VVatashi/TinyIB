@@ -61,6 +61,10 @@
     float: right;
   }
 
+  &__id {
+    cursor: pointer;
+  }
+
   &__references {
     display: flex;
   }

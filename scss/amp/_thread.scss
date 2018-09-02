@@ -1,7 +1,15 @@
+@import '../utils/index';
+
 .thread {
   &__pagination {
     padding: 0 0.5em;
     margin: 0 0 1em;
+  }
+
+  &__form {
+    padding: 0 0.5em;
+    margin: 0 auto 1em;
+    max-width: calc(#{$tablet-portrait-up} - 5em);
   }
 
   &__post {

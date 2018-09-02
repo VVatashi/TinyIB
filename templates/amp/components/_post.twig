@@ -1,7 +1,10 @@
 <div id="post_{{ post.id }}" class="post">
   {% block header %}
     <div class="post__header">
-      <span class="post__id">№{{ post.id }}</span>
+      <span class="post__id"
+        on="tap:AMP.setState({formState: {message: formState.message + (formState.message.length > 0 ? formState.newLine : '') + '>>{{ post.id }}' + formState.newLine} }),message.focus">
+        №{{ post.id }}
+      </span>
 
       {% if post.subject %}
         <span class="post__subject">{{ post.subject }}</span>
@@ -10,12 +13,26 @@
       <span class="post__author">
         {% if post.email %}
           <a class="post__email" href="mailto:{{ post.email }}">
-            <span class="post__name">{{ post.name }}</span>
-            <span class="post__tripcode">{{ post.tripcode }}</span>
+            {% if post.name %}
+              <span class="post__name">{{ post.name }}</span>
+            {% elseif not post.tripcode %}
+              <span class="post__name">Anonymous</span>
+            {% endif %}
+
+            {% if post.tripcode %}
+              <span class="post__tripcode">!{{ post.tripcode }}</span>
+            {% endif %}
           </a>
         {% else %}
-          <span class="post__name">{{ post.name }}</span>
-          <span class="post__tripcode">{{ post.tripcode }}</span>
+          {% if post.name %}
+            <span class="post__name">{{ post.name }}</span>
+          {% elseif not post.tripcode %}
+            <span class="post__name">Anonymous</span>
+          {% endif %}
+
+          {% if post.tripcode %}
+            <span class="post__tripcode">!{{ post.tripcode }}</span>
+          {% endif %}
         {% endif %}
       </span>
 

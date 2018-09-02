@@ -24,4 +24,13 @@ interface AmpPostControllerInterface
      * @return \Psr\Http\Message\ResponseInterface
      */
     public function thread(ServerRequestInterface $request) : ResponseInterface;
+
+    /**
+     * Creates a post.
+     *
+     * @param \Psr\Http\Message\ServerRequestInterface
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function createPost(ServerRequestInterface $request) : ResponseInterface;
 }

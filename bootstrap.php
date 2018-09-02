@@ -232,10 +232,21 @@ foreach ($directories as $directory => $regex) {
 $handler = $container->get(RoutingServiceInterface::class);
 
 // Setup middleware.
-$middlewares = [AuthMiddleware::class, CorsMiddleware::class];
+$middlewares = [AuthMiddleware::class];
 foreach ($middlewares as $middleware) {
     $handler = new RequestHandler(new $middleware(), $handler);
 }
+
+// Add CORS handler.
+$handler = new RequestHandler(new CorsMiddleware('*', [
+    'OPTIONS',
+    'GET',
+    'POST',
+], [
+], [
+    'AMP-Access-Control-Allow-Source-Origin',
+    'AMP-Redirect-To',
+]), $handler);
 
 // Add exception handler.
 $handler = new RequestHandler(new ExceptionMiddleware(

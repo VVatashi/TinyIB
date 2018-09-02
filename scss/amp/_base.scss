@@ -13,6 +13,19 @@ a {
   text-decoration: none;
 }
 
+a,
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+  &,
+  &:-moz-focusring,
+  &::-moz-focus-inner {
+    outline: none;
+  }
+}
+
+
 ul {
   display: block;
   padding: 0;
