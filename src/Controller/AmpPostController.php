@@ -96,18 +96,28 @@ class AmpPostController implements AmpPostControllerInterface
 
         $query = $request->getQueryParams();
         $page = isset($query['page']) ? (int)$query['page'] : 0;
+        $poster_name = isset($query['name']) ? $query['name'] : null;
 
         $refmap = [];
+        $inv_refmap = [];
+        $own_posts = [];
 
         $posts = array_reverse($this->post_repository->getPostsByThreadID($thread_id, true, $limit, $page * $limit));
-        $posts = array_map(function ($post) use ($thread_id, &$refmap) {
+        $posts = array_map(function ($post) use ($thread_id, $poster_name, &$refmap, &$inv_refmap, &$own_posts) {
             $message = $post->getMessage();
             $message = $post->markup($message);
             $post_id = $post->getID();
 
+            if (!empty($poster_name)
+                && (stripos($post->getName(), $poster_name) !== false
+                || stripos($post->getTripcode(), $poster_name) !== false)) {
+                $own_posts[] = $post_id;
+                $post->own = true;
+            }
+
             // Fix links in thread and populate the reference map.
             $link_pattern = '#href="/' . TINYIB_BOARD . '/res/(\d+)\#(\d+)"#';
-            $message = preg_replace_callback($link_pattern, function ($matches) use ($thread_id, $post_id, &$refmap) {
+            $message = preg_replace_callback($link_pattern, function ($matches) use ($thread_id, $post_id, &$refmap, &$inv_refmap, &$own_posts) {
                 $link_thread_id = (int)$matches[1];
                 $target_id = (int)$matches[2];
 
@@ -116,6 +126,7 @@ class AmpPostController implements AmpPostControllerInterface
                 }
 
                 $refmap[$target_id][] = $post_id;
+                $inv_refmap[$post_id][] = $target_id;
                 return "href=\"#post_$target_id\"";
             }, $message);
 
@@ -123,10 +134,14 @@ class AmpPostController implements AmpPostControllerInterface
             return $post;
         }, $posts);
 
-        $posts = array_map(function ($post) use ($refmap) {
+        $posts = array_map(function ($post) use ($refmap, $inv_refmap, $own_posts) {
             $post_id = $post->getID();
             if (isset($refmap[$post_id])) {
                 $post->references = $refmap[$post_id];
+            }
+
+            if (isset($inv_refmap[$post_id]) && !empty(array_intersect($inv_refmap[$post_id], $own_posts))) {
+                $post->ownReply = $inv_refmap[$post_id];
             }
 
             return $post;
@@ -144,6 +159,7 @@ class AmpPostController implements AmpPostControllerInterface
             'last_updated' => $last_updated,
             'limit' => $limit,
             'page' => $page,
+            'name' => $poster_name,
         ]));
     }
 

@@ -33,45 +33,45 @@
     </label>
 
     <div class="form__field phone-hidden">
-      <button type="submit" class="form__button">Submit</button>
+      <button type="submit" class="form__button button">Submit</button>
     </div>
   </div>
 
   <div class="form__row form__row--markup">
     <div class="form__field">
-      <button type="button" class="form__button" on="tap:AMP.setState({formState: {message: formState.message + (formState.message.lastIndexOf('[b]') > formState.message.lastIndexOf('[/b]') ? '[/b]' : '[b]')} }),message.focus">Bold</button>
+      <button type="button" class="form__button button" on="tap:AMP.setState({formState: {message: formState.message + (formState.message.lastIndexOf('[b]') > formState.message.lastIndexOf('[/b]') ? '[/b]' : '[b]')} }),message.focus">Bold</button>
     </div>
 
     <div class="form__field">
-      <button type="button" class="form__button" on="tap:AMP.setState({formState: {message: formState.message + (formState.message.lastIndexOf('[i]') > formState.message.lastIndexOf('[/i]') ? '[/i]' : '[i]')} }),message.focus">Italic</button>
+      <button type="button" class="form__button button" on="tap:AMP.setState({formState: {message: formState.message + (formState.message.lastIndexOf('[i]') > formState.message.lastIndexOf('[/i]') ? '[/i]' : '[i]')} }),message.focus">Italic</button>
     </div>
 
     <div class="form__field">
-      <button type="button" class="form__button" on="tap:AMP.setState({formState: {message: formState.message + (formState.message.lastIndexOf('[u]') > formState.message.lastIndexOf('[/u]') ? '[/u]' : '[u]')} }),message.focus">Underline</button>
+      <button type="button" class="form__button button" on="tap:AMP.setState({formState: {message: formState.message + (formState.message.lastIndexOf('[u]') > formState.message.lastIndexOf('[/u]') ? '[/u]' : '[u]')} }),message.focus">Underline</button>
     </div>
 
     <div class="form__field">
-      <button type="button" class="form__button" on="tap:AMP.setState({formState: {message: formState.message + (formState.message.lastIndexOf('[s]') > formState.message.lastIndexOf('[/s]') ? '[/s]' : '[s]')} }),message.focus">Strike</button>
+      <button type="button" class="form__button button" on="tap:AMP.setState({formState: {message: formState.message + (formState.message.lastIndexOf('[s]') > formState.message.lastIndexOf('[/s]') ? '[/s]' : '[s]')} }),message.focus">Strike</button>
     </div>
 
     <div class="form__field">
-      <button type="button" class="form__button" on="tap:AMP.setState({formState: {message: formState.message + (formState.message.lastIndexOf('[sup]') > formState.message.lastIndexOf('[/sup]') ? '[/sup]' : '[sup]')} }),message.focus">Sup</button>
+      <button type="button" class="form__button button" on="tap:AMP.setState({formState: {message: formState.message + (formState.message.lastIndexOf('[sup]') > formState.message.lastIndexOf('[/sup]') ? '[/sup]' : '[sup]')} }),message.focus">Sup</button>
     </div>
 
     <div class="form__field">
-      <button type="button" class="form__button" on="tap:AMP.setState({formState: {message: formState.message + (formState.message.lastIndexOf('[sub]') > formState.message.lastIndexOf('[/sub]') ? '[/sub]' : '[sub]')} }),message.focus">Sub</button>
+      <button type="button" class="form__button button" on="tap:AMP.setState({formState: {message: formState.message + (formState.message.lastIndexOf('[sub]') > formState.message.lastIndexOf('[/sub]') ? '[/sub]' : '[sub]')} }),message.focus">Sub</button>
     </div>
 
     <div class="form__field">
-      <button type="button" class="form__button" on="tap:AMP.setState({formState: {message: formState.message + (formState.message.lastIndexOf('[spoiler]') > formState.message.lastIndexOf('[/spoiler]') ? '[/spoiler]' : '[spoiler]')} }),message.focus">Spoiler</button>
+      <button type="button" class="form__button button" on="tap:AMP.setState({formState: {message: formState.message + (formState.message.lastIndexOf('[spoiler]') > formState.message.lastIndexOf('[/spoiler]') ? '[/spoiler]' : '[spoiler]')} }),message.focus">Spoiler</button>
     </div>
 
     <div class="form__field">
-      <button type="button" class="form__button" on="tap:AMP.setState({formState: {message: formState.message + (formState.message.lastIndexOf('[rp]') > formState.message.lastIndexOf('[/rp]') ? '[/rp]' : '[rp]')} }),message.focus">RP</button>
+      <button type="button" class="form__button button" on="tap:AMP.setState({formState: {message: formState.message + (formState.message.lastIndexOf('[rp]') > formState.message.lastIndexOf('[/rp]') ? '[/rp]' : '[rp]')} }),message.focus">RP</button>
     </div>
 
     <div class="form__field">
-      <button type="button" class="form__button" on="tap:AMP.setState({formState: {message: formState.message + (formState.message.length > 0 ? formState.newLine : '') + '>'} }),message.focus">Quote</button>
+      <button type="button" class="form__button button" on="tap:AMP.setState({formState: {message: formState.message + (formState.message.length > 0 ? formState.newLine : '') + '>'} }),message.focus">Quote</button>
     </div>
   </div>
 
@@ -79,13 +79,13 @@
     <label class="form__field">
       <textarea id="message" class="form__textarea" placeholder="Message"
         name="message" [text]="formState.message"
-        on="change:AMP.setState({formState: {message: event.value} })">
+        on="change:AMP.setState({formState: {message: event.value} });tap:AMP.setState({formState: {message: formState.message} })">
       </textarea>
     </label>
   </div>
 
   <div class="form__row">
-    <label class="form__field">
+    <label class="form__field input">
       <input type="file" id="file" class="form__file" placeholder="File" name="file" value=""
         on="change:AMP.setState({formState: {filename: event.value.split('\').slice(-1)[0]} })" />
 
@@ -95,7 +95,7 @@
 
   <div class="form__row phone-only">
     <div class="form__field">
-      <button type="submit" class="form__button">Submit</submit>
+      <button type="submit" class="form__button button">Submit</submit>
     </div>
   </div>
 
