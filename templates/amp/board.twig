@@ -23,6 +23,10 @@
 {% block content %}
   {% spaceless %}
     <article class="board">
+      {% if page == 0 %}
+        {% include 'amp/components/_form.twig' %}
+      {% endif %}
+
       {% if page > 0 %}
         <div class="board__pagination">
           <a href="?page={{ page - 1 }}">Show newer threads</a>

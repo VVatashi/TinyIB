@@ -35,7 +35,16 @@
   }
 
   &__page-nav {
-    float: right;
-    font-size: 2em;
+    position: absolute;
+    right: 1.5rem;
+    font-size: 2rem;
+
+    &--top {
+      top: 1rem;
+    }
+
+    &--bottom {
+      bottom: 1rem;
+    }
   }
 }

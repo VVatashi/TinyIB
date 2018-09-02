@@ -2,6 +2,8 @@
 
 namespace TinyIB\Service;
 
+use TinyIB\Model\PostInterface;
+
 interface PostServiceInterface
 {
     /**
@@ -16,4 +18,43 @@ interface PostServiceInterface
      *     tripcode - processed poster tripcode.
      */
     function processName(string $name) : array;
+
+    /**
+     * Creates a post.
+     *
+     * @param string $name
+     * @param string $email
+     * @param string $subject
+     * @param string $message
+     * @param string $password
+     * @param int $parent
+     * @param bool $rawpost
+     *
+     * @return PostInterface
+     *
+     * @throws \Exception
+     * @throws ValidationException
+     */
+    function create(
+        string $name,
+        string $email,
+        string $subject,
+        string $message,
+        string $password,
+        string $ip,
+        int $user_id = 0,
+        int $parent = 0,
+        bool $rawpost = false
+    ) : PostInterface;
+
+    /**
+     * Deletes post by ID.
+     *
+     * @param int $id
+     * @param string $password
+     *
+     * @throws NotFoundException
+     * @throws AccessDeniedException
+     */
+    function delete(int $id, string $password);
 }

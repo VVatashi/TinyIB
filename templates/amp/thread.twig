@@ -29,6 +29,12 @@
 {% block content %}
   {% spaceless %}
     <article class="thread">
+      {% if page == 0 %}
+        {% include 'amp/components/_form.twig' with {
+          parent: thread.id,
+        } %}
+      {% endif %}
+
       <amp-live-list id="thread" {{ page != 0 ? 'disabled' }}
         data-poll-interval="15000" data-max-items-per-page="{{ limit }}">
         <div update class="thread__pagination">

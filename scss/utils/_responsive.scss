@@ -14,3 +14,17 @@ $desktop-up: 1800px;
     @content;
   }
 }
+
+.phone-only {
+  @include breakpoint($phone-up) {
+    display: none;
+  }
+}
+
+.phone-hidden {
+  display: none;
+
+  @include breakpoint($phone-up) {
+    display: block;
+  }
+}
