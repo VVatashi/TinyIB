@@ -1,0 +1,67 @@
+{% extends 'amp/layout/_layout.twig' %}
+
+{% block breadcrumbs %}
+  {% spaceless %}
+    <ul class="breadcrumbs">
+      <li class="breadcrumbs__item">
+        <a class="breadcrumbs__link" href="{{ base_url }}/amp{{ name ? '?name=' ~ name }}">{{ board }}</a>
+      </li>
+
+      {% set subject = thread.subject ? thread.subject : 'Thread #' ~ thread.id %}
+
+      {% if page == 0 %}
+        <li class="breadcrumbs__item">
+          <span>{{ subject }}</span>
+        </li>
+      {% else %}
+        <li class="breadcrumbs__item">
+          <a class="breadcrumbs__link" href="{{ base_url }}/amp/thread/{{ thread.id }}{{ name ? '?name=' ~ name }}">{{ subject }}</a>
+        </li>
+
+        <li class="breadcrumbs__item">
+          <span>Page {{ page + 1 }}</span>
+        </li>
+      {% endif %}
+    </ul>
+  {% endspaceless %}
+{% endblock %}
+
+{% block content %}
+  {% spaceless %}
+    <article class="thread">
+      {% if page == 0 %}
+        {% include 'amp/components/_form.twig' with {
+          parent: thread.id,
+        } %}
+      {% endif %}
+
+      <amp-live-list id="thread" {{ page != 0 ? 'disabled' }}
+        data-poll-interval="15000" data-max-items-per-page="{{ limit }}">
+        {% if page > 0 %}
+          <div class="thread__pagination">
+            <a href="?page={{ page - 1 }}{{ name ? '&name=' ~ name }}">Show newer posts</a>
+          </div>
+        {% endif %}
+
+        <div update class="thread__update">
+          <button class="button" on="tap:thread.update">New posts available. Click to load</button>
+        </div>
+
+        <div items class="thread__posts">
+          {% for post in posts %}
+            <section id="item_{{ post.id }}" class="thread__post"
+              data-sort-time="{{ post.createTime }}">
+              {% include 'amp/components/_post.twig' %}
+            </section>
+          {% endfor %}
+        </div>
+
+        {% if posts|length == limit %}
+          <div pagination class="thread__pagination">
+            <a href="?page={{ page + 1 }}{{ name ? '&name=' ~ name }}">Show older posts</a>
+          </div>
+        {% endif %}
+      </amp-live-list>
+    </article>
+  {% endspaceless %}
+{% endblock %}

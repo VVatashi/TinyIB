@@ -3,26 +3,43 @@
 namespace TinyIB\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
+use TinyIB\Cache\InMemoryCache;
 use TinyIB\Service\PostService;
 use TinyIB\Service\PostServiceInterface;
+use TinyIB\Tests\Mock\BanRepositoryMock;
 use TinyIB\Tests\Mock\CryptographyServiceMock;
+use TinyIB\Tests\Mock\PostRepositoryMock;
 
 final class PostServiceTest extends TestCase
 {
+    /** @var PostServiceInterface $service */
+    protected $service;
+
+    public function setUp() : void
+    {
+        $cache = new InMemoryCache();
+        $ban_repository = new BanRepositoryMock();
+        $post_repository = new PostRepositoryMock();
+        $cryptography_service = new CryptographyServiceMock();
+
+        $this->service = new PostService(
+            $cache,
+            $ban_repository,
+            $post_repository,
+            $cryptography_service
+        );
+    }
+
     public function testCreatePostService() : void
     {
-        $cryptography_service = new CryptographyServiceMock();
-        $post_service = new PostService($cryptography_service);
-        $this->assertNotNull($post_service);
-        $this->assertInstanceOf(PostServiceInterface::class, $post_service);
-        $this->assertInstanceOf(PostService::class, $post_service);
+        $this->assertNotNull($this->service);
+        $this->assertInstanceOf(PostServiceInterface::class, $this->service);
+        $this->assertInstanceOf(PostService::class, $this->service);
     }
 
     public function testProcessEmptyName() : void
     {
-        $cryptography_service = new CryptographyServiceMock();
-        $post_service = new PostService($cryptography_service);
-        $result = $post_service->processName('');
+        $result = $this->service->processName('');
         $expected = [
             'name' => '',
             'tripcode' => '',
@@ -32,9 +49,7 @@ final class PostServiceTest extends TestCase
 
     public function testProcessNameOnly() : void
     {
-        $cryptography_service = new CryptographyServiceMock();
-        $post_service = new PostService($cryptography_service);
-        $result = $post_service->processName('name');
+        $result = $this->service->processName('name');
         $expected = [
             'name' => 'name',
             'tripcode' => '',
@@ -44,9 +59,7 @@ final class PostServiceTest extends TestCase
 
     public function testProcessTripcodeOnly() : void
     {
-        $cryptography_service = new CryptographyServiceMock();
-        $post_service = new PostService($cryptography_service);
-        $result = $post_service->processName('#tripcode');
+        $result = $this->service->processName('#tripcode');
         $expected = [
             'name' => '',
             'tripcode' => 'tripcode',
@@ -56,9 +69,7 @@ final class PostServiceTest extends TestCase
 
     public function testProcessSecureTripcodeOnly() : void
     {
-        $cryptography_service = new CryptographyServiceMock();
-        $post_service = new PostService($cryptography_service);
-        $result = $post_service->processName('##secure_tripcode');
+        $result = $this->service->processName('##secure_tripcode');
         $expected = [
             'name' => '',
             'tripcode' => '!!secure_tripcode',
@@ -68,9 +79,7 @@ final class PostServiceTest extends TestCase
 
     public function testProcessNameWithTripcode() : void
     {
-        $cryptography_service = new CryptographyServiceMock();
-        $post_service = new PostService($cryptography_service);
-        $result = $post_service->processName('name#tripcode');
+        $result = $this->service->processName('name#tripcode');
         $expected = [
             'name' => 'name',
             'tripcode' => 'tripcode',
@@ -80,9 +89,7 @@ final class PostServiceTest extends TestCase
 
     public function testProcessNameWithSecureTripcode() : void
     {
-        $cryptography_service = new CryptographyServiceMock();
-        $post_service = new PostService($cryptography_service);
-        $result = $post_service->processName('name##secure_tripcode');
+        $result = $this->service->processName('name##secure_tripcode');
         $expected = [
             'name' => 'name',
             'tripcode' => '!!secure_tripcode',
@@ -92,9 +99,7 @@ final class PostServiceTest extends TestCase
 
     public function testProcessNameWithTripcodeAndSecureTripcode() : void
     {
-        $cryptography_service = new CryptographyServiceMock();
-        $post_service = new PostService($cryptography_service);
-        $result = $post_service->processName('name#tripcode##secure_tripcode');
+        $result = $this->service->processName('name#tripcode##secure_tripcode');
         $expected = [
             'name' => 'name',
             'tripcode' => 'tripcode!!secure_tripcode',

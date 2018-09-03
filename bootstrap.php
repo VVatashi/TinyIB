@@ -178,7 +178,7 @@ $container->registerCallback(Twig_Environment::class, function ($container) use 
         'debug' => true,
     ]);
 
-    $twig->addGlobal('base_url', '/' . TINYIB_BOARD);
+    $twig->addGlobal('base_url', TINYIB_BASE_URL . TINYIB_BOARD);
     $twig->addGlobal('uploads', $tinyib_uploads);
     $twig->addGlobal('is_installed_via_git', Functions::installedViaGit());
 
@@ -232,10 +232,21 @@ foreach ($directories as $directory => $regex) {
 $handler = $container->get(RoutingServiceInterface::class);
 
 // Setup middleware.
-$middlewares = [AuthMiddleware::class, CorsMiddleware::class];
+$middlewares = [AuthMiddleware::class];
 foreach ($middlewares as $middleware) {
     $handler = new RequestHandler(new $middleware(), $handler);
 }
+
+// Add CORS handler.
+$handler = new RequestHandler(new CorsMiddleware('*', [
+    'OPTIONS',
+    'GET',
+    'POST',
+], [
+], [
+    'AMP-Access-Control-Allow-Source-Origin',
+    'AMP-Redirect-To',
+]), $handler);
 
 // Add exception handler.
 $handler = new RequestHandler(new ExceptionMiddleware(

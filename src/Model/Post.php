@@ -661,7 +661,7 @@ final class Post implements PostInterface
      *
      * @return string
      */
-    protected function markup(string $message) : string
+    public function markup(string $message) : string
     {
         return $this->bbcode($message);
     }
