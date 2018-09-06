@@ -67,14 +67,20 @@ class CorsMiddleware implements MiddlewareInterface
         ServerRequestInterface $request,
         RequestHandlerInterface $handler
     ) : ResponseInterface {
-        if (!$request->hasHeader('Origin')) {
+        $query = $request->getQueryParams();
+        if ($request->hasHeader('Origin')) {
+            $origin = $request->getHeaderLine('Origin');
+        } elseif (isset($query['__amp_source_origin'])) {
+            $origin = $query['__amp_source_origin'];
+        }
+
+        if (empty($origin)) {
             // If the request does not have the origin header,
             // it is not a CORS request, so not do anything.
             return $handler->handle($request);
         }
 
         $allow_any_origin = in_array('*', $this->allow_origins);
-        $origin = $request->getHeaderLine('Origin');
         if (!$allow_any_origin && !in_array($origin, $this->allow_origins)) {
             // If the request have an invalid origin, return 403.
             return new Response(403);

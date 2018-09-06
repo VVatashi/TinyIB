@@ -20,9 +20,18 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans" />
 
     <style amp-custom>{{ amp_style }}</style>
+
+    {% if constant('TINYIB_GTM_AMP') %}
+      <!-- AMP Analytics --><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+    {% endif %}
   </head>
 
   <body>
+    {% if constant('TINYIB_GTM_AMP') %}
+      <!-- Google Tag Manager -->
+      <amp-analytics config="https://www.googletagmanager.com/amp.json?id={{ constant('TINYIB_GTM_AMP') }}&gtm.url=SOURCE_URL" data-credentials="include"></amp-analytics>
+    {% endif %}
+
     <div class="layout">
       <header id="header" class="layout__header">
         <div class="layout__page-nav layout__page-nav--top">

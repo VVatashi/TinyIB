@@ -17,6 +17,16 @@
   <link rel="alternate stylesheet" type="text/css" href="{{ base_url }}/css/nocturnal.css" title="Nocturnal" />
   <link rel="stylesheet" type="text/css" href="{{ base_url }}/css/synthwave.css" title="Synthwave" />
 
+  {% if constant('TINYIB_GTM') %}
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','{{ constant('TINYIB_GTM') }}');</script>
+    <!-- End Google Tag Manager -->
+  {% endif %}
+
   <script src="https://cdn.rawgit.com/VVatashi/Dollchan-Extension-Tools/master/Dollchan_Extension_Tools.user.js"></script>
   <script src="{{ base_url }}/js/vendor/luxon.min.js"></script>
   <script src="{{ base_url }}/js/index.js"></script>
