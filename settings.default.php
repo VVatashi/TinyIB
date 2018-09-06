@@ -114,3 +114,6 @@ define('TINYIB_DBDSN', '');           // Enter a custom DSN to override all of t
 //   redis - Preferred if possible.
 define('TINYIB_CACHE', 'database');
 define('TINYIB_CACHE_REDIS_HOST', 'unix:/var/run/redis/redis.sock'); // Redis host.
+
+define('TINYIB_GTM', '');
+define('TINYIB_GTM_AMP', '');

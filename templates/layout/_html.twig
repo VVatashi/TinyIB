@@ -4,6 +4,13 @@
   {% include 'layout/_head.twig' %}
 
   <body {{ body_attribs }}>
+    {% if constant('TINYIB_GTM') %}
+      <!-- Google Tag Manager (noscript) -->
+      <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ constant('TINYIB_GTM') }}"
+      height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+      <!-- End Google Tag Manager (noscript) -->
+    {% endif %}
+
     <div class="layout">
       {% include 'layout/_header.twig' with {'class': 'layout__header'} %}
 
