@@ -1,5 +1,17 @@
 {% extends 'layout/_html.twig' %}
 
+{% block head %}
+  {{ parent() }}
+
+  {% if this_page == 0 %}
+    <link rel="canonical" href="{{ base_url }}" />
+    <link rel="amphtml" href="{{ base_url }}/amp" />
+  {% else %}
+    <link rel="canonical" href="{{ base_url }}/{{ this_page }}" />
+    <link rel="amphtml" href="{{ base_url }}/amp?page={{ this_page }}" />
+  {% endif %}
+{% endblock %}
+
 {% block content %}
   <main class="{{class is defined ? class ~ ' '}}">
     <ul class="content__links links">

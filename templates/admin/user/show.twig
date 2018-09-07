@@ -1,5 +1,11 @@
 {% extends 'layout/_html.twig' %}
 
+{% block head %}
+  {{ parent() }}
+
+  <link rel="canonical" href="{{ base_url }}/admin/user/{{ user.id }}" />
+{% endblock %}
+
 {% block content %}
   <main class="{{class is defined ? class ~ ' '}}">
     <div class="content__entity entity">

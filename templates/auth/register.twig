@@ -1,5 +1,11 @@
 {% extends 'layout/_html.twig' %}
 
+{% block head %}
+  {{ parent() }}
+
+  <link rel="canonical" href="{{ base_url }}/auth/register" />
+{% endblock %}
+
 {% block content %}
   <main class="{{class is defined ? class ~ ' '}}">
     <form class="content__auth-form auth-form" method="post" action="{{ base_url }}/auth/register/submit">
