@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 
 <html>
-  {% include 'layout/_head.twig' %}
+  <head>
+    {% block head %}
+      {% include 'layout/_head.twig' %}
+    {% endblock %}
+  </head>
 
   <body {{ body_attribs }}>
     {% if constant('TINYIB_GTM') %}

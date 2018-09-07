@@ -169,22 +169,6 @@ if (TINYIB_CACHE === 'memory') {
     $container->registerType(CacheInterface::class, DatabaseCache::class);
 }
 
-$container->registerCallback(Twig_Environment::class, function ($container) use ($tinyib_uploads) {
-    $loader = new Twig_Loader_Filesystem(__DIR__ . '/templates');
-
-    $twig = new Twig_Environment($loader, [
-        'autoescape' => false,
-        'cache' => __DIR__ . '/storage/twig-cache',
-        'debug' => true,
-    ]);
-
-    $twig->addGlobal('base_url', TINYIB_BASE_URL . TINYIB_BOARD);
-    $twig->addGlobal('uploads', $tinyib_uploads);
-    $twig->addGlobal('is_installed_via_git', Functions::installedViaGit());
-
-    return $twig;
-});
-
 $container->registerType(RouterInterface::class, Router::class);
 
 function glob_recursive($pattern, $flags = 0)
