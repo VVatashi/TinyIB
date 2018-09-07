@@ -7,11 +7,9 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use TinyIB\AccessDeniedException;
+use TinyIB\HttpException;
 use TinyIB\Model\User;
-use TinyIB\NotFoundException;
 use TinyIB\Service\RendererServiceInterface;
-use TinyIB\ValidationException;
 
 /**
  * Converts exceptions to responses.
@@ -36,24 +34,15 @@ class ExceptionMiddleware implements MiddlewareInterface
         try {
             return $handler->handle($request);
         }
-        catch (ValidationException $exception) {
+        catch (HttpException $exception) {
+            $code = $exception->getHTTPStatusCode();
             $message = $exception->getMessage();
-            $content = $this->renderer->render('error.twig', ['message' => $message]);
-            return new Response(400, [], $content);
-        }
-        catch (AccessDeniedException $exception) {
-            $message = $exception->getMessage();
-            $content = $this->renderer->render('error.twig', ['message' => $message]);
-            return new Response(403, [], $content);
-        }
-        catch (NotFoundException $exception) {
-            $message = $exception->getMessage();
-            $content = $this->renderer->render('error.twig', ['message' => $message]);
-            return new Response(404, [], $content);
+            $content = $this->renderer->render('error.twig', ['message' => "$code: $message"]);
+            return new Response($code, [], $content);
         }
         catch (\Exception $exception) {
             $message = $exception->getMessage();
-            $content = $this->renderer->render('error.twig', ['message' => $message]);
+            $content = $this->renderer->render('error.twig', ['message' => "500: $message"]);
             return new Response(500, [], $content);
         }
     }

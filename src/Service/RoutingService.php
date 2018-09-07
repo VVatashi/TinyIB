@@ -14,6 +14,7 @@ use TinyIB\Controller\CaptchaControllerInterface;
 use TinyIB\Controller\ManageControllerInterface;
 use TinyIB\Controller\PostControllerInterface;
 use TinyIB\Controller\SettingsControllerInterface;
+use TinyIB\NotFoundException;
 use VVatashi\Router\RouterInterface;
 
 class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
@@ -142,12 +143,17 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
             $path = substr($path, 0, -5);
         }
 
+        // Remove trailing slash.
+        if (substr($path, -1) === '/') {
+            $path = substr($path, 0, -1);
+        }
+
         $uri = $uri->withPath('/' . $path);
         $request = $request->withUri($uri);
 
         $handler = $this->router->resolve($path);
         if (!isset($handler)) {
-            return new Response(404);
+            throw new NotFoundException();
         }
 
         return $handler($request);
