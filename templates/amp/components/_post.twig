@@ -1,8 +1,7 @@
-<div id="post_{{ post.id }}" class="post{{ post.own ? ' post--own' }}{{ post.ownReply ? ' post--own-reply' }}">
+<div id="post_{{ post.id }}" class="post">
   {% block header %}
     <div class="post__header">
-      <span class="post__id"
-        on="tap:AMP.setState({formState: {message: formState.message + (formState.message.length > 0 ? formState.newLine : '') + '>>{{ post.id }}' + formState.newLine} }),message.focus">
+      <span class="post__id">
         №{{ post.id }}
       </span>
 
