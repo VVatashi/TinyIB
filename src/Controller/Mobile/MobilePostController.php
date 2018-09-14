@@ -62,24 +62,36 @@ class MobilePostController implements MobilePostControllerInterface
         $query = $request->getQueryParams();
         $page = isset($query['page']) ? (int)$query['page'] : 0;
 
-        $threads = $this->post_repository->getThreadsByPage($page);
-        $threads = array_map(function ($thread) {
-            $message = $thread->getMessage();
-            $message = $thread->markup($message);
-            $thread->setMessage($message);
+        $cache_key = TINYIB_BOARD . ':mobile:page:' . $page;
+        $headers = [];
+        $content = $this->cache->get($cache_key);
+        if (!isset($content)) {
+            $threads = $this->post_repository->getThreadsByPage($page);
+            $threads = array_map(function ($thread) {
+                $message = $thread->getMessage();
+                $message = $thread->markup($message);
+                $thread->setMessage($message);
 
-            $id = $thread->getID();
-            $thread->replyCount = $this->post_repository->getReplyCountByThreadID($id);
-            return $thread;
-        }, $threads);
+                $id = $thread->getID();
+                $thread->replyCount = $this->post_repository->getReplyCountByThreadID($id);
+                return $thread;
+            }, $threads);
 
-        return new Response(200, [], $this->renderer->render('mobile/board.twig', [
-            'title' => '/' . TINYIB_BOARD,
-            'board' => TINYIB_BOARDDESC,
-            'threads' => $threads,
-            'limit' => TINYIB_THREADSPERPAGE,
-            'page' => $page,
-        ]));
+            $content = $this->renderer->render('mobile/board.twig', [
+                'title' => '/' . TINYIB_BOARD,
+                'board' => TINYIB_BOARDDESC,
+                'threads' => $threads,
+                'limit' => TINYIB_THREADSPERPAGE,
+                'page' => $page,
+            ]);
+
+            $this->cache->set($cache_key, $content);
+            $headers['X-Cached'] = 'false';
+        } else {
+            $headers['X-Cached'] = 'true';
+        }
+
+        return new Response(200, $headers, $content);
     }
 
     /**
@@ -87,48 +99,60 @@ class MobilePostController implements MobilePostControllerInterface
      */
     public function thread(ServerRequestInterface $request) : ResponseInterface
     {
-        $limit = 50;
-
         $args = explode('/', $request->getUri()->getPath());
         $thread_id = (int)$args[3];
-        $thread = $this->post_repository->getPostByID($thread_id);
-        if (!isset($thread)) {
-            throw new NotFoundException("Thread #$thread_id not found.");
-        }
 
         $query = $request->getQueryParams();
         $page = isset($query['page']) ? (int)$query['page'] : 0;
 
-        $posts = $this->post_repository->getPostsByThreadID($thread_id, true, $limit, $page * $limit);
-        $posts = array_map(function ($post) use ($thread_id) {
-            $message = $post->getMessage();
-            $message = $post->markup($message);
-            $post_id = $post->getID();
+        $cache_key = TINYIB_BOARD . ':mobile:thread:' . $thread_id . ':page:' . $page;
+        $headers = [];
+        $content = $this->cache->get($cache_key);
+        if (!isset($content)) {
+            $limit = 50;
+            $thread = $this->post_repository->getPostByID($thread_id);
+            if (!isset($thread)) {
+                throw new NotFoundException("Thread #$thread_id not found.");
+            }
 
-            // Fix links in thread and populate the reference map.
-            $link_pattern = '#href="/' . TINYIB_BOARD . '/res/(\d+)\#(\d+)"#';
-            $message = preg_replace_callback($link_pattern, function ($matches) use ($thread_id) {
-                $link_thread_id = (int)$matches[1];
-                $target_id = (int)$matches[2];
+            $posts = $this->post_repository->getPostsByThreadID($thread_id, true, $limit, $page * $limit);
+            $posts = array_map(function ($post) use ($thread_id) {
+                $message = $post->getMessage();
+                $message = $post->markup($message);
+                $post_id = $post->getID();
 
-                if ($link_thread_id !== $thread_id) {
-                    return 'href="/' . TINYIB_BOARD . "/mobile/thread/$link_thread_id#post_$target_id\"";
-                }
+                // Fix links in thread and populate the reference map.
+                $link_pattern = '#href="/' . TINYIB_BOARD . '/res/(\d+)\#(\d+)"#';
+                $message = preg_replace_callback($link_pattern, function ($matches) use ($thread_id) {
+                    $link_thread_id = (int)$matches[1];
+                    $target_id = (int)$matches[2];
 
-                return "href=\"#post_$target_id\"";
-            }, $message);
+                    if ($link_thread_id !== $thread_id) {
+                        return 'href="/' . TINYIB_BOARD . "/mobile/thread/$link_thread_id#post_$target_id\"";
+                    }
 
-            $post->setMessage($message);
-            return $post;
-        }, $posts);
+                    return "href=\"#post_$target_id\"";
+                }, $message);
 
-        return new Response(200, [], $this->renderer->render('mobile/thread.twig', [
-            'title' => '/' . TINYIB_BOARD . ' &ndash; ' . $thread->getSubject(),
-            'board' => TINYIB_BOARDDESC,
-            'thread' => $thread,
-            'posts' => $posts,
-            'limit' => $limit,
-            'page' => $page,
-        ]));
+                $post->setMessage($message);
+                return $post;
+            }, $posts);
+
+            $content = $this->renderer->render('mobile/thread.twig', [
+                'title' => '/' . TINYIB_BOARD . ' &ndash; ' . $thread->getSubject(),
+                'board' => TINYIB_BOARDDESC,
+                'thread' => $thread,
+                'posts' => $posts,
+                'limit' => $limit,
+                'page' => $page,
+            ]);
+
+            $this->cache->set($cache_key, $content);
+            $headers['X-Cached'] = 'false';
+        } else {
+            $headers['X-Cached'] = 'true';
+        }
+
+        return new Response(200, $headers, $content);
     }
 }

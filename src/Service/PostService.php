@@ -552,6 +552,8 @@ class PostService implements PostServiceInterface
                 $this->cache->delete(TINYIB_BOARD . ":post:$parent");
                 $this->cache->delete(TINYIB_BOARD . ":index_post:$parent");
                 $this->cache->delete(TINYIB_BOARD . ":thread:$parent");
+                $this->cache->deletePattern(TINYIB_BOARD . ":mobile:thread:$parent:page:*");
+                $this->cache->deletePattern(TINYIB_BOARD . ":amp:thread:$parent:page:*");
 
                 if (strtolower($post->getEmail()) !== 'sage') {
                     if (TINYIB_MAXREPLIES == 0
@@ -564,9 +566,13 @@ class PostService implements PostServiceInterface
                 $this->cache->delete(TINYIB_BOARD . ":post:$id");
                 $this->cache->delete(TINYIB_BOARD . ":index_post:$id");
                 $this->cache->delete(TINYIB_BOARD . ":thread:$id");
+                $this->cache->deletePattern(TINYIB_BOARD . ":mobile:thread:$id:page:*");
+                $this->cache->deletePattern(TINYIB_BOARD . ":amp:thread:$id:page:*");
             }
 
             $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
+            $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
+            $this->cache->deletePattern(TINYIB_BOARD . ':amp:page:*');
         }
 
         return $post;
@@ -595,5 +601,7 @@ class PostService implements PostServiceInterface
         $this->cache->delete(TINYIB_BOARD . ':index_post:' . $thread_id);
         $this->cache->delete(TINYIB_BOARD . ':thread:' . $thread_id);
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
+        $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
+        $this->cache->deletePattern(TINYIB_BOARD . ':amp:page:*');
     }
 }
