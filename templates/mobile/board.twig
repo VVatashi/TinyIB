@@ -1,4 +1,4 @@
-{% extends 'amp/layout/_layout.twig' %}
+{% extends 'mobile/layout/_layout.twig' %}
 
 {% block breadcrumbs %}
   {% spaceless %}
@@ -9,7 +9,7 @@
         </li>
       {% else %}
         <li class="breadcrumbs__item">
-          <a class="breadcrumbs__link" href="{{ base_url }}/amp">{{ board }}</a>
+          <a class="breadcrumbs__link" href="{{ base_url }}/mobile">{{ board }}</a>
         </li>
 
         <li class="breadcrumbs__item">
@@ -32,7 +32,7 @@
       <div class="board__posts">
         {% for post in threads %}
           <section class="board__post">
-            {% include 'amp/components/_thread.twig' %}
+            {% include 'mobile/components/_thread.twig' %}
           </section>
         {% endfor %}
       </div>
@@ -47,11 +47,7 @@
 {% endblock %}
 
 {% block footer_links %}
-  {{ parent() }}
-
   <li class="links__item">
-    <a class="links__link" href="{{ base_url }}/mobile{{ page != 0 ? '?page=' ~ page }}">
-      Mobile version
-    </a>
+    <a class="links__link" href="{{ base_url }}{{ page != 0 ? '/' ~ page }}">Full version</a>
   </li>
 {% endblock %}

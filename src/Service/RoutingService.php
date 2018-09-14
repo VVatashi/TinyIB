@@ -8,7 +8,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use TinyIB\Cache\CacheInterface;
 use TinyIB\Controller\Admin\UserCrudControllerInterface;
-use TinyIB\Controller\AmpPostControllerInterface;
+use TinyIB\Controller\Amp\AmpPostControllerInterface;
+use TinyIB\Controller\Mobile\MobilePostControllerInterface;
 use TinyIB\Controller\AuthControllerInterface;
 use TinyIB\Controller\CaptchaControllerInterface;
 use TinyIB\Controller\ManageControllerInterface;
@@ -34,8 +35,11 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
     /** @var \TinyIB\Controller\PostControllerInterface $post_controller */
     protected $post_controller;
 
-    /** @var \TinyIB\Controller\AmpPostControllerInterface $amp_post_controller */
+    /** @var \TinyIB\Controller\Amp\AmpPostControllerInterface $amp_post_controller */
     protected $amp_post_controller;
+
+    /** @var \TinyIB\Controller\Mobile\MobilePostControllerInterface $mobile_post_controller */
+    protected $mobile_post_controller;
 
     /** @var \TinyIB\Controller\SettingsControllerInterface $settings_controller */
     protected $settings_controller;
@@ -54,6 +58,7 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
         ManageControllerInterface $manage_controller,
         PostControllerInterface $post_controller,
         AmpPostControllerInterface $amp_post_controller,
+        MobilePostControllerInterface $mobile_post_controller,
         SettingsControllerInterface $settings_controller
     ) {
         $this->router = $router;
@@ -63,6 +68,7 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
         $this->manage_controller = $manage_controller;
         $this->post_controller = $post_controller;
         $this->amp_post_controller = $amp_post_controller;
+        $this->mobile_post_controller = $mobile_post_controller;
         $this->settings_controller = $settings_controller;
 
         $this->router->add('auth/register', [$this->auth_controller, 'registerForm']);
@@ -113,9 +119,10 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
         $this->router->add('post/delete', [$this->post_controller, 'delete']);
 
         $this->router->add('amp', [$this->amp_post_controller, 'index']);
-        $this->router->add('amp/post', [$this->amp_post_controller, 'createPost']);
-        $this->router->add('amp/form-state', [$this->amp_post_controller, 'formState']);
         $this->router->add('amp/thread/:id', [$this->amp_post_controller, 'thread']);
+
+        $this->router->add('mobile', [$this->mobile_post_controller, 'index']);
+        $this->router->add('mobile/thread/:id', [$this->mobile_post_controller, 'thread']);
 
         $this->router->add('settings', [$this->settings_controller, 'settings']);
     }

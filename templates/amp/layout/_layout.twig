@@ -50,9 +50,11 @@
         </div>
 
         <ul class="links">
-          <li class="links__item">
-            <a class="links__link" href="{{ canonical_url }}">Full version</a>
-          </li>
+          {% block footer_links %}
+            <li class="links__item">
+              <a class="links__link" href="{{ canonical_url }}">Full version</a>
+            </li>
+          {% endblock %}
         </ul>
       </footer>
     </div>

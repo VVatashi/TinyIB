@@ -1,0 +1,8 @@
+{% extends 'mobile/components/_post.twig' %}
+
+{% block footer %}
+  <div class="post__footer">
+    <span>Replies: {{ post.replyCount }}</span>
+    <a class="post__reply-link" href="{{ base_url }}/mobile/thread/{{ post.id }}#footer">Reply</a>
+  </div>
+{% endblock %}

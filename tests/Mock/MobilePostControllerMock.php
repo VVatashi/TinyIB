@@ -5,9 +5,9 @@ namespace TinyIB\Tests\Mock;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use TinyIB\Controller\Amp\AmpPostControllerInterface;
+use TinyIB\Controller\Mobile\MobilePostControllerInterface;
 
-class AmpPostControllerMock implements AmpPostControllerInterface
+class MobilePostControllerMock implements MobilePostControllerInterface
 {
     /**
      * {@inheritDoc}

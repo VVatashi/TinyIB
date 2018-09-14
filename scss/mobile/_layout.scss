@@ -1,0 +1,50 @@
+@import '../utils/index';
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  max-width: calc(#{$phone-up} - 2rem);
+  margin: 0 auto;
+
+  @include breakpoint($tablet-portrait-up) {
+    max-width: calc(#{$tablet-portrait-up} - 2rem);
+  }
+
+  @include breakpoint($tablet-landscape-up) {
+    max-width: calc(#{$tablet-landscape-up} - 2rem);
+  }
+
+  &__header,
+  &__content,
+  &__footer {
+    position: relative;
+  }
+
+  &__header {
+    padding: 1rem 1.5rem;
+  }
+
+  &__content {
+    flex: 1;
+    padding: 0 1rem;
+  }
+
+  &__footer {
+    padding: 1rem 1.5rem;
+  }
+
+  &__page-nav {
+    position: absolute;
+    right: 1.5rem;
+    font-size: 2rem;
+
+    &--top {
+      top: 1rem;
+    }
+
+    &--bottom {
+      bottom: 1rem;
+    }
+  }
+}

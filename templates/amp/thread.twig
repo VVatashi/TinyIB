@@ -60,3 +60,13 @@
     </article>
   {% endspaceless %}
 {% endblock %}
+
+{% block footer_links %}
+  {{ parent() }}
+
+  <li class="links__item">
+    <a class="links__link" href="{{ base_url }}/mobile/thread/{{ thread.id }}{{ page != 0 ? '?page=' ~ page }}">
+      Mobile version
+    </a>
+  </li>
+{% endblock %}

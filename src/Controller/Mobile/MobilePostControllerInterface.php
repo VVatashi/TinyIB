@@ -1,11 +1,11 @@
 <?php
 
-namespace TinyIB\Controller;
+namespace TinyIB\Controller\Mobile;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-interface AmpPostControllerInterface
+interface  MobilePostControllerInterface
 {
     /**
      * Returns an index page.

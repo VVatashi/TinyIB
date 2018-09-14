@@ -1,6 +1,6 @@
 <?php
 
-namespace TinyIB\Controller;
+namespace TinyIB\Controller\Mobile;
 
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
@@ -14,7 +14,7 @@ use TinyIB\Service\PostServiceInterface;
 use TinyIB\Service\RendererServiceInterface;
 use TinyIB\NotFoundException;
 
-class AmpPostController implements AmpPostControllerInterface
+class MobilePostController implements MobilePostControllerInterface
 {
     /** @var \TinyIB\Cache\CacheInterface $cache */
     protected $cache;
@@ -32,7 +32,7 @@ class AmpPostController implements AmpPostControllerInterface
     protected $renderer;
 
     /**
-     * Constructs new AMP post controller.
+     * Constructs new Mobile post controller.
      *
      * @param \TinyIB\Cache\CacheInterface $cache
      * @param \TinyIB\Repository\PostRepositoryInterface $post_repository
@@ -73,9 +73,7 @@ class AmpPostController implements AmpPostControllerInterface
             return $thread;
         }, $threads);
 
-        return new Response(200, [], $this->renderer->render('amp/board.twig', [
-            'amp_style' => file_get_contents(__DIR__ . '/../../webroot/css/amp.css'),
-            'canonical_url' => TINYIB_BASE_URL . TINYIB_BOARD . '/' . $page,
+        return new Response(200, [], $this->renderer->render('mobile/board.twig', [
             'title' => '/' . TINYIB_BOARD,
             'board' => TINYIB_BOARDDESC,
             'threads' => $threads,
@@ -101,25 +99,22 @@ class AmpPostController implements AmpPostControllerInterface
         $query = $request->getQueryParams();
         $page = isset($query['page']) ? (int)$query['page'] : 0;
 
-        $refmap = [];
-
         $posts = $this->post_repository->getPostsByThreadID($thread_id, true, $limit, $page * $limit);
-        $posts = array_map(function ($post) use ($thread_id, &$refmap) {
+        $posts = array_map(function ($post) use ($thread_id) {
             $message = $post->getMessage();
             $message = $post->markup($message);
             $post_id = $post->getID();
 
             // Fix links in thread and populate the reference map.
             $link_pattern = '#href="/' . TINYIB_BOARD . '/res/(\d+)\#(\d+)"#';
-            $message = preg_replace_callback($link_pattern, function ($matches) use ($thread_id, $post_id, &$refmap) {
+            $message = preg_replace_callback($link_pattern, function ($matches) use ($thread_id) {
                 $link_thread_id = (int)$matches[1];
                 $target_id = (int)$matches[2];
 
                 if ($link_thread_id !== $thread_id) {
-                    return 'href="/' . TINYIB_BOARD . "/amp/thread/$link_thread_id#post_$target_id\"";
+                    return 'href="/' . TINYIB_BOARD . "/mobile/thread/$link_thread_id#post_$target_id\"";
                 }
 
-                $refmap[$target_id][] = $post_id;
                 return "href=\"#post_$target_id\"";
             }, $message);
 
@@ -127,22 +122,7 @@ class AmpPostController implements AmpPostControllerInterface
             return $post;
         }, $posts);
 
-        $posts = array_map(function ($post) use ($posts, $refmap) {
-            $post_id = $post->getID();
-            if (isset($refmap[$post_id])) {
-                $post->references = $refmap[$post_id];
-                $post->updateTime = max(array_map(function ($post_id) use ($posts) {
-                    $post = $posts[$post_id];
-                    return $post->getCreateTime();
-                }, $refmap[$post_id]));
-            }
-
-            return $post;
-        }, $posts);
-
-        return new Response(200, [], $this->renderer->render('amp/thread.twig', [
-            'amp_style' => file_get_contents(__DIR__ . '/../../webroot/css/amp.css'),
-            'canonical_url' => TINYIB_BASE_URL . TINYIB_BOARD . "/res/$thread_id",
+        return new Response(200, [], $this->renderer->render('mobile/thread.twig', [
             'title' => '/' . TINYIB_BOARD . ' &ndash; ' . $thread->getSubject(),
             'board' => TINYIB_BOARDDESC,
             'thread' => $thread,
