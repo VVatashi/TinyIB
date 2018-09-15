@@ -23,6 +23,8 @@
       })(window,document,'script','dataLayer','{{ constant('TINYIB_GTM') }}');</script>
       <!-- End Google Tag Manager -->
     {% endif %}
+
+    <script src="{{ base_url }}/js/mobile.js?mtime={{ mtime('js/mobile.js') }}"></script>
   </head>
 
   <body>

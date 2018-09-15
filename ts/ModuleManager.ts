@@ -3,28 +3,10 @@ import { throttle } from 'lodash-es';
 
 import IModule from './modules/IModule';
 
-import Captcha from './modules/Captcha';
-import CorrectTime from './modules/CorrectTime';
-import DeleteForm from './modules/DeleteForm';
-import ExpandFile from './modules/ExpandFile';
-import PostForm from './modules/PostForm';
-import QuotePost from './modules/QuotePost';
-import Settings from './modules/Settings';
-import StyleSwitcher from './modules/StyleSwitcher';
-
 export default class ModuleManager {
   protected readonly modules: { [key: string]: IModule } = {};
 
   constructor() {
-    this.modules['Captcha'] = new Captcha(this);
-    this.modules['CorrectTime'] = new CorrectTime(this);
-    this.modules['DeleteForm'] = new DeleteForm(this);
-    this.modules['ExpandFile'] = new ExpandFile(this);
-    this.modules['PostForm'] = new PostForm(this);
-    this.modules['QuotePost'] = new QuotePost(this);
-    this.modules['Settings'] = new Settings(this);
-    this.modules['StyleSwitcher'] = new StyleSwitcher(this);
-
     const observer = new MutationObserver(mutations => {
       mutations.forEach(mutation => {
         for (let i = 0; i < mutation.addedNodes.length; ++i) {
@@ -84,6 +66,10 @@ export default class ModuleManager {
     }, 50);
 
     window.addEventListener('resize', resize);
+  }
+
+  addModule(key: string, value: IModule) {
+    this.modules[key] = value;
   }
 
   emit(event: string, data?: any) {
