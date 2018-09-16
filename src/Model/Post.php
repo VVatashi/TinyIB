@@ -707,7 +707,12 @@ final class Post implements PostInterface
         }
 
         // Process post message.
-        $post['message'] = $this->markup($post['message']);
+        try {
+            $post['message'] = $this->markup($post['message']);
+        }
+        catch (\Exception $e) {
+            // TODO: log error.
+        }
 
         // Process post file.
         if (isset($post['file'])) {
