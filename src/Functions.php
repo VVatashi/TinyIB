@@ -380,4 +380,29 @@ class Functions
     {
         return is_dir('.git');
     }
+
+    /**
+     * Format exception string.
+     *
+     * @param \Throwable $exception
+     *
+     * @return string
+     */
+    public static function formatException(\Throwable $exception) : string
+    {
+        $trace = $exception->getTrace();
+        $trace_lines = array_map(function ($key, $value) {
+            $file = isset($value['file']) ? basename($value['file']) : '';
+            $line = isset($value['line']) ? $value['line'] : '';
+            $function = $value['function'];
+            $args = isset($value['args']) ? implode(', ', array_map('gettype', $value['args'])) : '';
+            return "#$key $file:$line $function($args)";
+        }, array_keys($trace), $trace);
+
+        $type = get_class($exception);
+        $exception_message = $exception->getMessage();
+        $file = basename($exception->getFile());
+        $line = $exception->getLine();
+        return "$type '$exception_message' at $file:$line. Stack trace:\n" . implode("\n", $trace_lines);
+    }
 }
