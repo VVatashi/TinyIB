@@ -37,20 +37,7 @@ $container = new Container();
 
 // Setup exception handling.
 set_exception_handler(function (Throwable $exception) use ($container) {
-    $trace = $exception->getTrace();
-    $trace_lines = array_map(function ($key, $value) {
-        $file = isset($value['file']) ? basename($value['file']) : '';
-        $line = isset($value['line']) ? $value['line'] : '';
-        $function = $value['function'];
-        $args = isset($value['args']) ? implode(', ', array_map('gettype', $value['args'])) : '';
-        return "#$key $file:$line $function($args)";
-    }, array_keys($trace), $trace);
-
-    $type = get_class($exception);
-    $exception_message = $exception->getMessage();
-    $file = basename($exception->getFile());
-    $line = $exception->getLine();
-    $message = "$type '$exception_message' at $file:$line. Stack trace:\n" . implode("\n", $trace_lines);
+    $message = Functions::formatException($exception);
 
     if ($container->has(LoggerInterface::class)) {
         /** @var LoggerInterface $logger */
@@ -234,6 +221,7 @@ $handler = new RequestHandler(new CorsMiddleware('*', [
 
 // Add exception handler.
 $handler = new RequestHandler(new ExceptionMiddleware(
+    $container->get(LoggerInterface::class),
     $container->get(RendererServiceInterface::class)
 ), $handler);
 
