@@ -23,6 +23,13 @@
 {% block content %}
   {% spaceless %}
     <article class="board">
+      {% if page == 0 %}
+        <div class="board__form">
+          <h2 class="board__form-title">Create thread</h2>
+          {% include 'mobile/components/_form.twig' %}
+        </div>
+      {% endif %}
+
       {% if page > 0 %}
         <div class="board__pagination">
           <a href="?page={{ page - 1 }}">Show newer threads</a>

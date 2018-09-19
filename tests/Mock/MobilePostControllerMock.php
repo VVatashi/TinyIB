@@ -24,4 +24,12 @@ class MobilePostControllerMock implements MobilePostControllerInterface
     {
         return new Response(200);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function createPost(ServerRequestInterface $request) : ResponseInterface
+    {
+        return new Response(200);
+    }
 }

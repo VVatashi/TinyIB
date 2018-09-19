@@ -43,13 +43,12 @@ ul {
 button,
 input,
 textarea,
-.button,
-.input {
+.input,
+.button {
   box-sizing: border-box;
-  background-color: #6f6f6f;
   color: #dedede;
 
-  transition: background-color ease 0.333s;
+  transition: background-color ease 0.333s, box-shadow ease 0.333s;
 
   padding: 0.5rem;
 
@@ -57,14 +56,65 @@ textarea,
   border-radius: 0.25rem;
 
   overflow: hidden;
+}
+
+$input-color: #6f6f6f;
+$input-top-color: mix(#000, $input-color, 20%);
+$input-bottom-color: mix(#fff, $input-color, 10%);
+
+$input-hover-color: mix(#000, $input-color, 10%);
+$input-hover-top-color: mix(#000, $input-hover-color, 20%);
+$input-hover-bottom-color: mix(#fff, $input-hover-color, 10%);
+
+$input-active-color: mix(#000, $input-color, 20%);
+$input-active-top-color: mix(#000, $input-active-color, 20%);
+$input-active-bottom-color: mix(#fff, $input-active-color, 10%);
+
+input,
+textarea,
+.input {
+  background-color: $input-color;
+  box-shadow: 1px 2px 2px $input-top-color inset, -1px -2px 2px $input-bottom-color inset;
 
   &:hover {
-    background-color: mix(#000, #6f6f6f, 10%);
+    background-color: $input-hover-color;
+    box-shadow: 1px 2px 2px $input-hover-top-color inset, -1px -2px 2px $input-hover-bottom-color inset;
   }
 
   &:focus,
   &:active {
-    background-color: mix(#000, #6f6f6f, 25%);
+    background-color: $input-active-color;
+    box-shadow: 1px 2px 2px $input-active-top-color inset, -1px -2px 2px $input-active-bottom-color inset;
+  }
+}
+
+$btn-color: #6f6f6f;
+$btn-top-color: mix(#fff, $btn-color, 10%);
+$btn-bottom-color: mix(#000, $btn-color, 20%);
+
+$btn-hover-color: mix(#000, $btn-color, 10%);
+$btn-hover-top-color: mix(#fff, $btn-hover-color, 10%);
+$btn-hover-bottom-color: mix(#000, $btn-hover-color, 20%);
+
+$btn-active-color: mix(#000, $btn-color, 20%);
+$btn-active-top-color: mix(#fff, $btn-active-color, 10%);
+$btn-active-bottom-color: mix(#000, $btn-active-color, 20%);
+
+button,
+.button {
+  background-color: $btn-color;
+  box-shadow: 1px 2px 2px $btn-top-color inset, -1px -2px 2px $btn-bottom-color inset;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $btn-hover-color;
+    box-shadow: 1px 2px 2px $btn-hover-top-color inset, -1px -2px 2px $btn-hover-bottom-color inset;
+  }
+
+  &:focus,
+  &:active {
+    background-color: $btn-active-color;
+    box-shadow: 1px 2px 2px $btn-active-top-color inset, -1px -2px 2px $btn-active-bottom-color inset;
   }
 }
 

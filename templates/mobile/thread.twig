@@ -48,6 +48,15 @@
           <a href="?page={{ page - 1 }}">Show newer posts</a>
         </div>
       {% endif %}
+
+      {% if page == 0 %}
+        <div class="thread__form">
+          <h2 class="thread__form-title">Reply to thread</h2>
+          {% include 'mobile/components/_form.twig' with {
+            parent: thread.id,
+          } %}
+        </div>
+      {% endif %}
     </article>
   {% endspaceless %}
 {% endblock %}

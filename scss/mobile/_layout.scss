@@ -4,15 +4,15 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  max-width: calc(#{$phone-up} - 2rem);
+  max-width: calc(#{$xs-up} - 2rem);
   margin: 0 auto;
 
-  @include breakpoint($tablet-portrait-up) {
-    max-width: calc(#{$tablet-portrait-up} - 2rem);
+  @include breakpoint($sm-up) {
+    max-width: calc(#{$sm-up} - 2rem);
   }
 
-  @include breakpoint($tablet-landscape-up) {
-    max-width: calc(#{$tablet-landscape-up} - 2rem);
+  @include breakpoint($md-up) {
+    max-width: calc(#{$md-up} - 2rem);
   }
 
   &__header,

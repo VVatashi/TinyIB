@@ -6,10 +6,17 @@
     margin: 0 0 1em;
   }
 
+  &__form-title {
+    text-align: center;
+    font-size: 1.5em;
+    font-weight: normal;
+    margin: 0 0 1rem;
+  }
+
   &__form {
     padding: 0 0.5em;
     margin: 0 auto 1em;
-    max-width: calc(#{$tablet-portrait-up} - 5em);
+    max-width: calc(#{$sm-up} - 5em);
   }
 
   &__post {

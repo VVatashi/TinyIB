@@ -1,8 +1,13 @@
 @import '../utils/index';
 
+$post-color: #424242;
+$post-top-color: mix(#fff, $post-color, 10%);
+$post-bottom-color: mix(#000, $post-color, 20%);
+
 .post {
-  background: #424242;
+  background: $post-color;
   border-radius: 0.25em;
+  box-shadow: 1px 2px 2px $post-top-color inset, -1px -2px 2px $post-bottom-color inset;
 
   &__header,
   &__content,

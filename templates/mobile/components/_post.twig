@@ -2,7 +2,9 @@
   {% block header %}
     <div class="post__header">
       <span class="post__id">
-        №{{ post.id }}
+        <a class="post__id-link" href="#post_{{ post.id }}" data-post-id="{{ post.id }}">
+          №{{ post.id }}
+        </a>
       </span>
 
       {% if post.subject %}

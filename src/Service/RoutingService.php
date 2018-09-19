@@ -123,6 +123,7 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
 
         $this->router->add('mobile', [$this->mobile_post_controller, 'index']);
         $this->router->add('mobile/thread/:id', [$this->mobile_post_controller, 'thread']);
+        $this->router->add('mobile/post/create', [$this->mobile_post_controller, 'createPost']);
 
         $this->router->add('settings', [$this->settings_controller, 'settings']);
     }
