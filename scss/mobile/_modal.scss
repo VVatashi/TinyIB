@@ -1,0 +1,14 @@
+.modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background-color: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+
+  &__image {
+    width: auto;
+    height: auto;
+    max-height: 100%;
+  }
+}

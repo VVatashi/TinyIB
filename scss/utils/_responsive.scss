@@ -3,6 +3,11 @@ $tablet-portrait-up: 900px;
 $tablet-landscape-up: 1200px;
 $desktop-up: 1800px;
 
+$xs-up: $phone-up;
+$sm-up: $tablet-portrait-up;
+$md-up: $tablet-landscape-up;
+$lg-up: $desktop-up;
+
 @mixin breakpoint($min-width) {
   @media screen and (min-width: $min-width) {
     @content;
@@ -22,9 +27,19 @@ $desktop-up: 1800px;
 }
 
 .phone-hidden {
-  display: none;
+  @include breakpoint-max($phone-up) {
+    display: none;
+  }
+}
 
-  @include breakpoint($phone-up) {
-    display: block;
+.xs-only {
+  @include breakpoint($xs-up) {
+    display: none;
+  }
+}
+
+.xs-hidden {
+  @include breakpoint-max($xs-up) {
+    display: none;
   }
 }

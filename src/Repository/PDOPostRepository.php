@@ -305,7 +305,7 @@ final class PDOPostRepository extends PDORepository implements PostRepositoryInt
             $data = $this->getAll($conditions, 'id DESC');
         }
 
-        return array_map([$this, 'createModel'], array_reverse($data));
+        return array_map([$this, 'createModel'], array_reverse($data, true));
     }
 
     /**

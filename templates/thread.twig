@@ -32,3 +32,9 @@
     {% include 'components/_post_form.twig' with {'class': 'content__postarea'} %}
   </main>
 {% endblock %}
+
+{% block footer_links %}
+  <li class="footer__list-item">
+    <a class="footer__link" href="{{ base_url }}/mobile/thread/{{ parent }}">Mobile version</a>
+  </li>
+{% endblock %}

@@ -4,22 +4,21 @@ const gulp = require('gulp');
 const gutil = require('gulp-util');
 
 const webpack = require('webpack');
-const webpackConfig = require('./webpack.config.js');
 
 const sass = require('gulp-sass');
 const autoprefixer = require('gulp-autoprefixer');
 
-gulp.task('ts', function (done) {
+function webpackHandler(config, callback) {
   function onError(error) {
-    done(new gutil.PluginError('webpack', error));
+    callback(new gutil.PluginError('webpack', error));
   }
 
   function onSuccess(info) {
     gutil.log('[webpack]', info);
-    done();
+    callback();
   }
 
-  webpack(webpackConfig, function (error, stats) {
+  function handler(error, stats) {
     if (error) {
       onError(error);
     } else if (stats.hasErrors()) {
@@ -33,8 +32,25 @@ gulp.task('ts', function (done) {
         reasons: true,
       }));
     }
-  });
+  }
+
+  webpack(config, handler);
+}
+
+gulp.task('ts:index', function (callback) {
+  const config = require('./webpack.config.js');
+  return webpackHandler(config, callback);
 });
+
+gulp.task('ts:mobile', function (callback) {
+  const config = require('./webpack.config.mobile.js');
+  return webpackHandler(config, callback);
+});
+
+gulp.task('ts', [
+  'ts:index',
+  'ts:mobile',
+]);
 
 gulp.task('sass', function () {
   return gulp.src('./scss/**/*.scss')

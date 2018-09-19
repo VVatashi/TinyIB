@@ -320,6 +320,8 @@ class ManageController implements ManageControllerInterface
         $this->post_repository->deletePostByID($id);
         $this->cache->delete(TINYIB_BOARD . ":post:$id");
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
+        $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
+        $this->cache->deletePattern(TINYIB_BOARD . ':amp:page:*');
 
         if ($post->isReply()) {
             $parent = $post->getParentID();
@@ -376,6 +378,8 @@ class ManageController implements ManageControllerInterface
         $this->cache->delete(TINYIB_BOARD . ":index_post:$thread_id");
         $this->cache->delete(TINYIB_BOARD . ":thread:$thread_id");
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
+        $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
+        $this->cache->deletePattern(TINYIB_BOARD . ':amp:page:*');
 
         $data['text'] = "Post No.$id approved.";
         return new Response(200, [], $this->renderer->render('manage_info.twig', $data));
@@ -418,6 +422,8 @@ class ManageController implements ManageControllerInterface
         $this->cache->delete(TINYIB_BOARD . ':index_post:' . $id);
         $this->cache->delete(TINYIB_BOARD . ':thread:' . $id);
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
+        $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
+        $this->cache->deletePattern(TINYIB_BOARD . ':amp:page:*');
 
         $id = $post->getID();
         $action = $sticky ? 'stickied' : 'un-stickied';
@@ -462,10 +468,7 @@ class ManageController implements ManageControllerInterface
             return new Response(200, [], $this->renderer->render('manage_login_form.twig', $data));
         }
 
-        $this->cache->deletePattern(TINYIB_BOARD . ':post:*');
-        $this->cache->deletePattern(TINYIB_BOARD . ':index_post:*');
-        $this->cache->deletePattern(TINYIB_BOARD . ':thread:*');
-        $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
+        $this->cache->deletePattern(TINYIB_BOARD . ':*');
 
         $data['text'] = 'Rebuilt board.';
         return new Response(200, [], $this->renderer->render('manage_info.twig', $data));

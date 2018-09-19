@@ -1,6 +1,6 @@
 <?php
 
-namespace TinyIB\Controller;
+namespace TinyIB\Controller\Amp;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -24,13 +24,4 @@ interface AmpPostControllerInterface
      * @return \Psr\Http\Message\ResponseInterface
      */
     public function thread(ServerRequestInterface $request) : ResponseInterface;
-
-    /**
-     * Creates a post.
-     *
-     * @param \Psr\Http\Message\ServerRequestInterface
-     *
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    public function createPost(ServerRequestInterface $request) : ResponseInterface;
 }

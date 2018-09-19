@@ -1,0 +1,112 @@
+@import '../utils/index';
+
+$post-color: #424242;
+$post-top-color: mix(#fff, $post-color, 10%);
+$post-bottom-color: mix(#000, $post-color, 20%);
+
+.post {
+  background: $post-color;
+  border-radius: 0.25em;
+  box-shadow: 1px 2px 2px $post-top-color inset, -1px -2px 2px $post-bottom-color inset;
+
+  &__header,
+  &__content,
+  &__footer {
+    padding: 0.5em;
+    overflow: hidden;
+  }
+
+  &__header,
+  &__footer {
+    font-size: 0.9em;
+    color: #9e9e9e;
+  }
+
+  &__content,
+  &__footer {
+    @include clearfix;
+  }
+
+  &__header {
+    border-bottom: 1px solid rgba(158, 158, 158, 0.1);
+  }
+
+  &__footer {
+    border-top: 1px solid rgba(158, 158, 158, 0.1);
+  }
+
+  &__subject,
+  &__author,
+  &__date,
+  &__id {
+    display: block;
+  }
+
+  &__subject {
+    color: #005a83;
+    font-weight: 800;
+  }
+
+  &__name {
+    color: #60debf;
+    font-weight: 800;
+  }
+
+  &__tripcode {
+    color: #1ab38d;
+    font-weight: 400;
+  }
+
+  &__id-link {
+    color: inherit;
+  }
+
+  &__thumbnail {
+    margin: 0 0 0.5em 0;
+  }
+
+  &__thumbnail-link {
+    display: block;
+    line-height: 0;
+  }
+
+  &__thumbnail-image {
+    max-width: 100%;
+    height: 100%;
+  }
+
+  &__id,
+  &__reply-link {
+    float: right;
+  }
+
+  &__references {
+    display: flex;
+  }
+
+  &__reference {
+    margin-right: 0.5em;
+  }
+
+  @include breakpoint($xs-up) {
+    &__subject,
+    &__author,
+    &__date,
+    &__id {
+      display: inline;
+    }
+
+    &__subject {
+      margin: 0 0.5em 0 0;
+    }
+
+    &__date {
+      margin: 0 0.5em;
+    }
+
+    &__thumbnail {
+      float: left;
+      margin: 0 0.5em 0 0;
+    }
+  }
+}
