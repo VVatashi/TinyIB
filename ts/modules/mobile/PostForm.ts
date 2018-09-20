@@ -45,6 +45,7 @@ export default class PostForm extends BaseModule {
   onReady() {
     const form = qid('postform');
     if (!form) {
+      console.warn('#postform is not found.');
       return;
     }
 
@@ -137,11 +138,13 @@ export default class PostForm extends BaseModule {
     if (event === 'insertMarkup') {
       const form = qid('postform');
       if (!form) {
+        console.warn('#postform is not found.');
         return;
       }
 
       const message = qs('#message', form) as HTMLTextAreaElement;
       if (!message) {
+        console.warn('#message is not found.');
         return;
       }
 

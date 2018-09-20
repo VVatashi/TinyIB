@@ -54,6 +54,21 @@ class MobilePostController implements MobilePostControllerInterface
         $this->renderer = $renderer;
     }
 
+    protected function fixLinks(string $message, int $thread_id): string {
+        $link_pattern = '#href="/' . TINYIB_BOARD . '/res/(\d+)\#(\d+)"#';
+        return preg_replace_callback($link_pattern, function ($matches) use ($thread_id) {
+            $target_thread_id = (int)$matches[1];
+            $target_post_id = (int)$matches[2];
+            if ($target_thread_id !== $thread_id) {
+                // If link to another thread.
+                return 'href="/' . TINYIB_BOARD . "/mobile/thread/$target_thread_id#post_$target_post_id\"";
+            }
+
+            // If link to the same thread.
+            return "href=\"#post_$target_post_id\"";
+        }, $message);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -119,21 +134,7 @@ class MobilePostController implements MobilePostControllerInterface
             $posts = array_map(function ($post) use ($thread_id) {
                 $message = $post->getMessage();
                 $message = $post->markup($message);
-                $post_id = $post->getID();
-
-                // Fix links in thread and populate the reference map.
-                $link_pattern = '#href="/' . TINYIB_BOARD . '/res/(\d+)\#(\d+)"#';
-                $message = preg_replace_callback($link_pattern, function ($matches) use ($thread_id) {
-                    $link_thread_id = (int)$matches[1];
-                    $target_id = (int)$matches[2];
-
-                    if ($link_thread_id !== $thread_id) {
-                        return 'href="/' . TINYIB_BOARD . "/mobile/thread/$link_thread_id#post_$target_id\"";
-                    }
-
-                    return "href=\"#post_$target_id\"";
-                }, $message);
-
+                $message = $this->fixLinks($message, $thread_id);
                 $post->setMessage($message);
                 return $post;
             }, $posts);
@@ -190,5 +191,40 @@ class MobilePostController implements MobilePostControllerInterface
             'Location' => $destination,
             'Content-Type' => 'application/json',
         ]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function ajaxThread(ServerRequestInterface $request) : ResponseInterface
+    {
+        $args = explode('/', $request->getUri()->getPath());
+        $thread_id = (int)$args[4];
+
+        $query = $request->getQueryParams();
+        $after = isset($query['after']) ? (int)$query['after'] : 0;
+
+        $limit = 50;
+        $thread = $this->post_repository->getPostByID($thread_id);
+        if (!isset($thread)) {
+            throw new NotFoundException("Thread #$thread_id not found.");
+        }
+
+        $posts = $this->post_repository->getPostsByThreadID($thread_id, true, $limit, 0, [
+            ['id' => ['#op' => '>', $after]],
+        ]);
+        $posts = array_map(function ($post) use ($thread_id) {
+            $message = $post->getMessage();
+            $message = $post->markup($message);
+            $message = $this->fixLinks($message, $thread_id);
+            $post->setMessage($message);
+            return $post;
+        }, $posts);
+
+        $content = $this->renderer->render('mobile/ajax/thread.twig', [
+            'posts' => $posts,
+        ]);
+
+        return new Response(200, [], $content);
     }
 }
