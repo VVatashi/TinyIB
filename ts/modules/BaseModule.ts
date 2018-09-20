@@ -1,7 +1,7 @@
 import IModule from './IModule';
 import ModuleManager from '../ModuleManager';
 
-export default class BaseModule implements IModule {
+export default abstract class BaseModule implements IModule {
   protected readonly manager: ModuleManager;
 
   constructor(manager: ModuleManager) {

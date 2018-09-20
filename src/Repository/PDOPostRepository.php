@@ -285,15 +285,15 @@ final class PDOPostRepository extends PDORepository implements PostRepositoryInt
     /**
      * {@inheritDoc}
      */
-    public function getPostsByThreadID(int $id, bool $moderated_only = true, $take = null, $skip = 0) : array
+    public function getPostsByThreadID(int $id, bool $moderated_only = true, $take = null, $skip = 0, array $conditions = []) : array
     {
-        $conditions = [
+        $conditions = array_merge([
             [
                 '#op' => 'OR',
                 'id' => $id,
                 'parent' => $id,
             ],
-        ];
+        ], $conditions);
 
         if ($moderated_only === true) {
             $conditions['moderated'] = 1;

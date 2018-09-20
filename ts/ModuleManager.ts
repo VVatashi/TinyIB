@@ -1,6 +1,8 @@
 import { mapValues } from 'lodash-es';
 import { throttle } from 'lodash-es';
 
+import { qsa } from './utils/DOM';
+
 import IModule from './modules/IModule';
 
 export default class ModuleManager {
@@ -17,12 +19,15 @@ export default class ModuleManager {
           }
 
           const element = node as Element;
-
-          if (element.classList.contains('post')) {
+          const posts = qsa('.post', element);
+          const count = posts.length;
+          if (count) {
             mapValues(this.modules, (module, key) => {
               return new Promise(() => {
                 try {
-                  module.onPostInsert(element);
+                  for (let i = 0; i < count; ++i) {
+                    module.onPostInsert(posts[i]);
+                  }
                 }
                 catch (error) {
                   console.error(`Error in ${key}.onPostInsert(): ${error}`);

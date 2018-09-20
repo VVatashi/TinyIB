@@ -1,8 +1,8 @@
-import BaseModule from '../BaseModule';
+import PostModule from './PostModule';
 import ModuleManager from '../../ModuleManager';
 import { qs, qsa } from '../../utils/DOM';
 
-export default class PostImagePopup extends BaseModule {
+export default class PostImagePopup extends PostModule {
   protected scale = 1.0;
 
   protected offsetX = 0;
@@ -133,17 +133,5 @@ export default class PostImagePopup extends BaseModule {
         return false;
       });
     }
-  }
-
-  onReady() {
-    const posts = qsa('.post');
-    const count = posts.length;
-    for (let i = 0; i < count; ++i) {
-      this.processPost(posts[i]);
-    }
-  }
-
-  onPostInsert(post: Element) {
-    this.processPost(post);
   }
 }

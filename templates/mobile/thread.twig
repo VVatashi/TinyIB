@@ -28,7 +28,7 @@
 
 {% block content %}
   {% spaceless %}
-    <article class="thread">
+    <article class="thread" data-thread-id="{{ thread.id }}" data-thread-page="{{ page }}">
       {% if posts|length == limit %}
         <div class="thread__pagination">
           <a href="?page={{ page + 1 }}#footer">Show older posts</a>

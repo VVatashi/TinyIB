@@ -12,6 +12,7 @@
   },
   "license": "GPL-3.0",
   "devDependencies": {
+    "@types/axios": "^0.14.0",
     "@types/lodash-es": "^4.17.0",
     "@types/luxon": "^0.5.1",
     "gulp": "^3.9.1",
@@ -24,5 +25,8 @@
     "ts-loader": "^4.4.1",
     "typescript": "^2.9.1",
     "webpack": "^4.12.0"
+  },
+  "dependencies": {
+    "axios": "^0.18.0"
   }
 }
