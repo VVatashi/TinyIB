@@ -15,5 +15,6 @@ export function qsa(selector: string, context: Element|Document = null) {
     context = document;
   }
 
-  return context.querySelectorAll(selector);
+  const elementList = context.querySelectorAll(selector);
+  return Array.prototype.slice.call(elementList) as Element[];
 }

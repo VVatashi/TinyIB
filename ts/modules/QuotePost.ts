@@ -20,11 +20,10 @@ export default class QuotePost extends BaseModule {
     }
 
     const links = qsa('.post-header__reflink');
-
-    for (let i = 0; i < links.length; ++i) {
-      const id = Number(links[i].getAttribute('data-id'));
-      links[i].addEventListener('click', () => this.quotePost(id));
-    }
+    links.forEach(link => {
+      const id = Number(link.getAttribute('data-id'));
+      link.addEventListener('click', () => this.quotePost(id));
+    });
   }
 
   protected quotePost(id: number) {

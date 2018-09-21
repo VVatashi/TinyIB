@@ -146,3 +146,11 @@ button,
   color: mix(#000, #dedede, 25%);
   opacity: 1.0;
 }
+
+.fadable {
+  transition: opacity 0.333s ease;
+}
+
+.fade {
+  opacity: 0;
+}
