@@ -109,10 +109,8 @@ export default class PostForm extends BaseModule {
       });
     }
 
-    const file_inputs = qsa('#file', form);
-    const count = file_inputs.length;
-    for (let i = 0; i < count; ++i) {
-      const file_input = file_inputs[i] as HTMLInputElement;
+    const file_inputs = qsa('#file', form) as HTMLInputElement[];
+    file_inputs.forEach(file_input => {
       file_input.addEventListener('change', e => {
         if (file_input.files && file_input.files.length) {
           const reader = new FileReader();
@@ -131,7 +129,7 @@ export default class PostForm extends BaseModule {
           reader.readAsDataURL(file_input.files[0]);
         }
       });
-    }
+    });
   }
 
   onEvent(event: string, data?: any) {

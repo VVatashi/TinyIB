@@ -1,6 +1,6 @@
 import PostModule from './PostModule';
 import ModuleManager from '../../ModuleManager';
-import { qs, qsa } from '../../utils/DOM';
+import { qs } from '../../utils/DOM';
 
 export default class PostImagePopup extends PostModule {
   protected scale = 1.0;
@@ -23,7 +23,11 @@ export default class PostImagePopup extends PostModule {
     this.offsetX = 0;
     this.offsetY = 0;
 
-    modal.remove();
+    // Fade-out the modal.
+    modal.classList.add('fade');
+    setTimeout(() => {
+      modal.remove();
+    }, 333);
   }
 
   protected transformModal(modal: HTMLElement) {
@@ -122,6 +126,12 @@ export default class PostImagePopup extends PostModule {
 
     const thumbnail = thumbnailLink.parentElement;
     thumbnail.appendChild(modal);
+
+    // Fade-in the modal.
+    modal.classList.add('fadable', 'fade');
+    setTimeout(() => {
+      modal.classList.remove('fade');
+    }, 100);
   }
 
   protected processPost(post: Element) {

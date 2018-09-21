@@ -1,6 +1,6 @@
 import PostModule from './PostModule';
 import ModuleManager from '../../ModuleManager';
-import { qs } from '../../utils/DOM';
+import { qs, qsa } from '../../utils/DOM';
 import axios from 'axios';
 
 export default class ThreadUpdater extends PostModule {
@@ -32,11 +32,26 @@ export default class ThreadUpdater extends PostModule {
 
     const threadId = +thread.getAttribute('data-thread-id');
     setInterval(() => {
-      axios.get(`${window.baseUrl}/ajax/mobile/thread/${threadId}?after=${this.latestPostId}`)
+      const latestPostId = this.latestPostId;
+      axios.get(`${window.baseUrl}/ajax/mobile/thread/${threadId}?after=${latestPostId}`)
         .then(result => {
           const postsWrapper = qs('.thread__posts', thread);
-          if (postsWrapper) {
-            postsWrapper.insertAdjacentHTML('beforeend', result.data);
+          if (postsWrapper && result.data && result.data.length) {
+            // Fade-in new posts.
+            const newPostsWrapper = document.createElement('div');
+            newPostsWrapper.classList.add('fadable', 'fade');
+            newPostsWrapper.insertAdjacentHTML('beforeend', result.data);
+            postsWrapper.appendChild(newPostsWrapper);
+
+            setTimeout(() => {
+              newPostsWrapper.classList.remove('fade');
+            }, 100);
+
+            // Remove old posts.
+            const posts = qsa('.thread__post', postsWrapper);
+            for (let i = 0; i < posts.length - 50; ++i) {
+              posts[i].remove();
+            }
           }
         });
     }, 15000);
