@@ -61,11 +61,12 @@ class MobilePostController implements MobilePostControllerInterface
             $target_post_id = (int)$matches[2];
             if ($target_thread_id !== $thread_id) {
                 // If link to another thread.
-                return 'href="/' . TINYIB_BOARD . "/mobile/thread/$target_thread_id#post_$target_post_id\"";
+                return 'href="/' . TINYIB_BOARD . "/mobile/thread/$target_thread_id#post_$target_post_id\""
+                    . " data-target-post-id=\"$target_post_id\"";
             }
 
             // If link to the same thread.
-            return "href=\"#post_$target_post_id\"";
+            return "href=\"#post_$target_post_id\" data-target-post-id=\"$target_post_id\"";
         }, $message);
     }
 
