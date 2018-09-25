@@ -33,6 +33,8 @@ $post-bottom-color: mix(#000, $post-color, 20%);
 
   &__footer {
     border-top: 1px solid rgba(158, 158, 158, 0.1);
+    display: flex;
+    flex-flow: row wrap;
   }
 
   &__subject,
@@ -84,7 +86,7 @@ $post-bottom-color: mix(#000, $post-color, 20%);
     display: flex;
   }
 
-  &__reference {
+  &__reference-link {
     margin-right: 0.5em;
   }
 
