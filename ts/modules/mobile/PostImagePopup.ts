@@ -36,25 +36,49 @@ export default class PostImagePopup extends PostModule {
   }
 
   protected openModal(thumbnailLink: HTMLAnchorElement) {
-    const image = document.createElement('img');
-    image.classList.add('modal__image');
-    image.src = thumbnailLink.href;
+    let file: HTMLElement;
+
+    const type = thumbnailLink.getAttribute('data-file-type');
+    if (type === 'video') {
+      const element = document.createElement('video') as HTMLVideoElement;
+      const width = thumbnailLink.getAttribute('data-file-width');
+      const height = thumbnailLink.getAttribute('data-file-height');
+      element.classList.add('modal__video');
+      element.setAttribute('controls', 'controls');
+      element.setAttribute('preload', 'metadata');
+      element.setAttribute('width', width);
+      element.setAttribute('height', height);
+      element.src = thumbnailLink.href;
+      file = element;
+    } else if (type === 'audio') {
+      const element = document.createElement('audio') as HTMLAudioElement;
+      element.classList.add('modal__audio');
+      element.setAttribute('controls', 'controls');
+      element.setAttribute('preload', 'metadata');
+      element.src = thumbnailLink.href;
+      file = element;
+    } else {
+      const element = document.createElement('img') as HTMLImageElement;
+      element.classList.add('modal__image');
+      element.src = thumbnailLink.href;
+      file = element;
+    }
 
     // Prevent default drag behaviour on the image.
-    image.addEventListener('dragstart', e => {
+    file.addEventListener('dragstart', e => {
       e.preventDefault();
       return false;
     });
 
     // Prevent image click event bubbling to the modal.
-    image.addEventListener('click', e => {
+    file.addEventListener('click', e => {
       e.preventDefault();
       e.stopPropagation();
       return false;
     });
 
     // Move image on mouse drag.
-    image.addEventListener('mousedown', e => {
+    file.addEventListener('mousedown', e => {
       e.preventDefault();
 
       // Save initial image position.
@@ -85,7 +109,7 @@ export default class PostImagePopup extends PostModule {
 
         // Remove drag event handlers.
         document.removeEventListener('mousemove', onMouseMove);
-        image.removeEventListener('mouseup', onMouseUp);
+        file.removeEventListener('mouseup', onMouseUp);
 
         // If image is not dragged, close the modal.
         const eps = 10e-3;
@@ -99,14 +123,14 @@ export default class PostImagePopup extends PostModule {
 
       // Setup drag event handlers.
       document.addEventListener('mousemove', onMouseMove);
-      image.addEventListener('mouseup', onMouseUp);
+      file.addEventListener('mouseup', onMouseUp);
 
       return false;
     });
 
     const modal = document.createElement('div');
     modal.classList.add('layout__modal', 'modal');
-    modal.appendChild(image);
+    modal.appendChild(file);
 
     // Close modal on mouse click.
     modal.addEventListener('click', e => {

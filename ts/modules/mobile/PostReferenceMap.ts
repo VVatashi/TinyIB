@@ -4,7 +4,6 @@ import { qs, qsa } from '../../utils/DOM';
 
 export default class PostReferenceMap extends PostModule {
   protected posts: { [id: number]: Element } = {};
-  //protected references: { [id: number]: number[] } = {};
 
   constructor(manager: ModuleManager) {
     super(manager);

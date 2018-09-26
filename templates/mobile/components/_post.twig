@@ -56,7 +56,10 @@
         {% set file_w = post.imageWidth %}
 
         <div class="post__thumbnail">
-          <a class="post__thumbnail-link" href="{{ file_url }}" target="_blank">
+          <a class="post__thumbnail-link" href="{{ file_url }}" target="_blank"
+            data-file-type="{{ post.fileType }}"
+            data-file-width="{{ post.imageWidth }}"
+            data-file-height="{{ post.imageHeight }}">
             <img class="post__thumbnail-image" src="{{ thumb_url }}"
               width="{{ thumb_w }}" height="{{ thumb_h }}" alt="{{ alt }}" />
           </a>
