@@ -667,6 +667,44 @@ final class Post implements PostInterface
     }
 
     /**
+     * @return string
+     */
+    public function getFileExtension() : string
+    {
+        if (empty($this->getFileName())) {
+            return '';
+        }
+
+        $file_parts = explode('.', $this->getFileName());
+        return end($file_parts);
+    }
+
+    /**
+     * @return string
+     */
+    public function getFileType() : string
+    {
+        $extension = $this->getFileExtension();
+
+        switch ($extension) {
+            case 'jpg':
+            case 'png':
+            case 'gif':
+                return 'image';
+
+            case 'mp3':
+                return 'audio';
+
+            case 'mp4':
+            case 'webm':
+                return 'video';
+
+            default:
+                return '';
+        }
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function createViewModel(bool $res) : array
