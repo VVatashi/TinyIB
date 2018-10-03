@@ -9,7 +9,6 @@ use TinyIB\Cache\CacheInterface;
 use TinyIB\Functions;
 use TinyIB\Model\Post;
 use TinyIB\Repository\PostRepositoryInterface;
-use TinyIB\Service\BanServiceInterface;
 use TinyIB\Service\PostServiceInterface;
 use TinyIB\Service\RendererServiceInterface;
 use TinyIB\NotFoundException;
@@ -22,9 +21,6 @@ class AmpPostController implements AmpPostControllerInterface
     /** @var \TinyIB\Repository\PostRepositoryInterface $post_repository */
     protected $post_repository;
 
-    /** @var \TinyIB\Service\BanServiceInterface $ban_service */
-    protected $ban_service;
-
     /** @var \TinyIB\Service\PostServiceInterface $post_service */
     protected $post_service;
 
@@ -36,20 +32,17 @@ class AmpPostController implements AmpPostControllerInterface
      *
      * @param \TinyIB\Cache\CacheInterface $cache
      * @param \TinyIB\Repository\PostRepositoryInterface $post_repository
-     * @param \TinyIB\Service\BanServiceInterface $renderer
-     * @param \TinyIB\Service\PostServiceInterface $renderer
+     * @param \TinyIB\Service\PostServiceInterface $post_service
      * @param \TinyIB\Service\RendererServiceInterface $renderer
      */
     public function __construct(
         CacheInterface $cache,
         PostRepositoryInterface $post_repository,
-        BanServiceInterface $ban_service,
         PostServiceInterface $post_service,
         RendererServiceInterface $renderer
     ) {
         $this->cache = $cache;
         $this->post_repository = $post_repository;
-        $this->ban_service = $ban_service;
         $this->post_service = $post_service;
         $this->renderer = $renderer;
     }

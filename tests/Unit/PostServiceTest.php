@@ -6,7 +6,6 @@ use PHPUnit\Framework\TestCase;
 use TinyIB\Cache\InMemoryCache;
 use TinyIB\Service\PostService;
 use TinyIB\Service\PostServiceInterface;
-use TinyIB\Tests\Mock\BanRepositoryMock;
 use TinyIB\Tests\Mock\CryptographyServiceMock;
 use TinyIB\Tests\Mock\PostRepositoryMock;
 
@@ -18,13 +17,11 @@ final class PostServiceTest extends TestCase
     public function setUp() : void
     {
         $cache = new InMemoryCache();
-        $ban_repository = new BanRepositoryMock();
         $post_repository = new PostRepositoryMock();
         $cryptography_service = new CryptographyServiceMock();
 
         $this->service = new PostService(
             $cache,
-            $ban_repository,
             $post_repository,
             $cryptography_service
         );

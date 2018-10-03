@@ -8,7 +8,6 @@ use TinyIB\Functions;
 use TinyIB\Model\Post;
 use TinyIB\Model\PostInterface;
 use TinyIB\NotFoundException;
-use TinyIB\Repository\BanRepositoryInterface;
 use TinyIB\Repository\PostRepositoryInterface;
 use TinyIB\ValidationException;
 
@@ -16,9 +15,6 @@ class PostService implements PostServiceInterface
 {
     /** @var CacheInterface $cache */
     protected $cache;
-
-    /** @var BanRepositoryInterface $ban_repository */
-    protected $ban_repository;
 
     /** @var PostRepositoryInterface $post_repository */
     protected $post_repository;
@@ -30,18 +26,15 @@ class PostService implements PostServiceInterface
      * Creates a new PostService instance.
      *
      * @param CacheInterface $cache
-     * @param BanRepositoryInterface $ban_repository
      * @param PostRepositoryInterface $post_repository
      * @param CryptographyServiceInterface $cryptography_service
      */
     public function __construct(
         CacheInterface $cache,
-        BanRepositoryInterface $ban_repository,
         PostRepositoryInterface $post_repository,
         CryptographyServiceInterface $cryptography_service
     ) {
         $this->cache = $cache;
-        $this->ban_repository = $ban_repository;
         $this->post_repository = $post_repository;
         $this->cryptography_service = $cryptography_service;
     }
@@ -50,14 +43,14 @@ class PostService implements PostServiceInterface
      * Checks if poster IP is not banned.
      *
      * @param string $ip
-     * @param null|BanInterface &$ban
+     * @param null|Ban &$ban
      *   (Output) Ban model.
      *
      * @return bool
      */
     protected function checkBanned(string $ip, &$ban) : bool
     {
-        $ban = $this->ban_repository->getOne(['ip' => $ip]);
+        $ban = Ban::where('ip', $ip)->first();
         if (!isset($ban)) {
             return true;
         }
@@ -276,9 +269,9 @@ class PostService implements PostServiceInterface
             if (!$this->checkBanned($ip, $ban)) {
                 $expire = $ban->isPermanent()
                     ? '<br>This ban is permanent and will not expire.'
-                    : '<br>This ban will expire ' . date('y/m/d(D)H:i:s', $ban->getExpiresDate());
-                $reason = $ban->hasReason() ? '<br>Reason: ' . $ban->getReason() : '';
-                throw new ValidationException('Your IP address ' . $ban->getIP()
+                    : '<br>This ban will expire ' . date('y/m/d(D)H:i:s', $ban->getExpiresTimestamp());
+                $reason = $ban->hasReason() ? '<br>Reason: ' . $ban->reason : '';
+                throw new ValidationException('Your IP address ' . $ban->ip
                     . ' has been banned from posting on this image board.  ' . $expire . $reason);
             }
 

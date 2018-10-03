@@ -2,6 +2,7 @@
 
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
+use Illuminate\Database\Capsule\Manager as Capsule;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
@@ -155,6 +156,21 @@ if (TINYIB_CACHE === 'memory') {
 } else {
     $container->registerType(CacheInterface::class, DatabaseCache::class);
 }
+
+$capsule = new Capsule();
+$capsule->addConnection([
+    'driver'    => TINYIB_DBDRIVER,
+    'host'      => TINYIB_DBHOST,
+    'database'  => TINYIB_DBNAME,
+    'username'  => TINYIB_DBUSERNAME,
+    'password'  => TINYIB_DBPASSWORD,
+    'charset'   => 'utf8',
+    'collation' => 'utf8_unicode_ci',
+    'prefix'    => '',
+]);
+$capsule->setAsGlobal();
+$capsule->bootEloquent();
+$container->registerInstance(Capsule::class, $capsule);
 
 $container->registerType(RouterInterface::class, Router::class);
 
