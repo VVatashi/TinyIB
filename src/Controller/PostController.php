@@ -101,7 +101,7 @@ class PostController implements PostControllerInterface
         $message = isset($data['message']) ? $data['message'] : '';
         $password = isset($data['password']) ? $data['password'] : '';
         $ip = $_SERVER['REMOTE_ADDR'];
-        $user_id = $request->getAttribute('user')->getID();
+        $user_id = $request->getAttribute('user')->id;
         $parent = isset($data['parent']) ? (int)$data['parent'] : 0;
         $rawpost = isset($data['rawpost']);
 

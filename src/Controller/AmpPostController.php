@@ -196,7 +196,7 @@ class AmpPostController implements AmpPostControllerInterface
         $message = isset($data['message']) ? $data['message'] : '';
         $password = '';
         $ip = $_SERVER['REMOTE_ADDR'];
-        $user_id = $request->getAttribute('user')->getID();
+        $user_id = $request->getAttribute('user')->id;
         $parent = isset($data['parent']) ? (int)$data['parent'] : 0;
 
         // Store form state to the session.
