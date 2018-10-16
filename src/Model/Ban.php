@@ -18,7 +18,7 @@ class Ban extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'bans';
+    protected $table = TINYIB_DBBANS;
 
     protected $fillable = [
         'ip',

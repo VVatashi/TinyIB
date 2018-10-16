@@ -7,35 +7,29 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TinyIB\Cache\CacheInterface;
 use TinyIB\Functions;
-use TinyIB\Repository\PostRepositoryInterface;
 use TinyIB\Model\Ban;
+use TinyIB\Model\Post;
 use TinyIB\Service\RendererServiceInterface;
 
 class ManageController implements ManageControllerInterface
 {
-    /** @var \TinyIB\Cache\CacheInterface $cache */
+    /** @var CacheInterface $cache */
     protected $cache;
 
-    /** @var \TinyIB\Repository\PostRepositoryInterface $post_repository */
-    protected $post_repository;
-
-    /** @var \TinyIB\Service\RendererServiceInterface $renderer */
+    /** @var RendererServiceInterface $renderer */
     protected $renderer;
 
     /**
      * Constructs new manage controller.
      *
-     * @param \TinyIB\Cache\CacheInterface $cache
-     * @param \TinyIB\Repository\PostRepositoryInterface $post_repository
-     * @param \TinyIB\Service\RendererServiceInterface $renderer
+     * @param CacheInterface $cache
+     * @param RendererServiceInterface $renderer
      */
     public function __construct(
         CacheInterface $cache,
-        PostRepositoryInterface $post_repository,
         RendererServiceInterface $renderer
     ) {
         $this->cache = $cache;
-        $this->post_repository = $post_repository;
         $this->renderer = $renderer;
     }
 
@@ -71,14 +65,14 @@ class ManageController implements ManageControllerInterface
             return new Response(200, [], $this->renderer->render('manage_login_form.twig', $data));
         }
 
-        $threads_count = $this->post_repository->getThreadCount();
+        $threads_count = Post::getThreadCount();
         $bans_count = Ban::count();
         $data['info'] = $threads_count . ' ' . Functions::plural('thread', $threads_count) . ', '
             . $bans_count . ' ' . Functions::plural('ban', $bans_count);
 
         if (TINYIB_REQMOD === 'files' || TINYIB_REQMOD === 'all') {
-            $data['reqmod_posts'] = array_map(function ($post) {
-                /** @var \TinyIB\Models\PostInterface $post */
+            $data['reqmod_posts'] = Post::getLatestPosts(false)->map(function ($post) {
+                /** @var Post $post */
                 $view_model = $post->createViewModel(TINYIB_INDEXPAGE);
                 if (TINYIB_CACHE === 'database') {
                     // Do not cache individual posts in database mode.
@@ -86,7 +80,7 @@ class ManageController implements ManageControllerInterface
                     return $view_model;
                 }
 
-                $key = TINYIB_BOARD . ':index_post:' . $post->getID();
+                $key = TINYIB_BOARD . ':index_post:' . $post->id;
                 $view_model['rendered'] = $this->cache->get($key);
                 if ($view_model['rendered'] === null) {
                     $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
@@ -94,11 +88,11 @@ class ManageController implements ManageControllerInterface
                 }
 
                 return $view_model;
-            }, $this->post_repository->getLatestPosts(false));
+            });
         }
 
-        $data['posts'] = array_map(function ($post) {
-            /** @var \TinyIB\Models\PostInterface $post */
+        $data['posts'] = Post::getLatestPosts(true)->map(function ($post) {
+            /** @var Post $post */
             $view_model = $post->createViewModel(TINYIB_INDEXPAGE);
             if (TINYIB_CACHE === 'database') {
                 // Do not cache individual posts in database mode.
@@ -106,7 +100,7 @@ class ManageController implements ManageControllerInterface
                 return $view_model;
             }
 
-            $key = TINYIB_BOARD . ':index_post:' . $post->getID();
+            $key = TINYIB_BOARD . ':index_post:' . $post->id;
             $view_model['rendered'] = $this->cache->get($key);
             if ($view_model['rendered'] === null) {
                 $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
@@ -114,7 +108,7 @@ class ManageController implements ManageControllerInterface
             }
 
             return $view_model;
-        }, $this->post_repository->getLatestPosts(true));
+        });
 
         return new Response(200, [], $this->renderer->render('manage_status.twig', $data));
     }
@@ -246,21 +240,21 @@ class ManageController implements ManageControllerInterface
             return new Response(200, [], $this->renderer->render('manage_moderate_form.twig', $data));
         }
 
-        /** @var \TinyIB\Model\PostInterface $post */
-        $post = $this->post_repository->getPostByID($id);
+        /** @var Post $post */
+        $post = Post::find($id);
         if ($post === null) {
             $message = 'Sorry, there doesn\'t appear to be a post with that ID.';
             return new Response(404, [], $message);
         }
 
-        $post_ip = $post->getIP();
+        $post_ip = $post->ip;
         $data['has_ban'] = Ban::where('ip', $post_ip)->first() !== null;
         $data['post'] = $post->createViewModel(TINYIB_INDEXPAGE);
 
-        $posts = $post->isThread() ? $this->post_repository->getPostsByThreadID($post->getID()) : [$post];
+        $posts = $post->isThread() ? Post::getPostsByThreadID($post->id) : [$post];
 
         $data['posts'] = array_map(function ($post) {
-            /** @var \TinyIB\Models\PostInterface $post */
+            /** @var Post $post */
             $view_model = $post->createViewModel(TINYIB_INDEXPAGE);
             if (TINYIB_CACHE === 'database') {
                 // Do not cache individual posts in database mode.
@@ -268,7 +262,7 @@ class ManageController implements ManageControllerInterface
                 return $view_model;
             }
 
-            $key = TINYIB_BOARD . ':index_post:' . $post->getID();
+            $key = TINYIB_BOARD . ':index_post:' . $post->id;
             $view_model['rendered'] = $this->cache->get($key);
             if ($view_model['rendered'] === null) {
                 $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
@@ -299,24 +293,24 @@ class ManageController implements ManageControllerInterface
         }
 
         $id = (int)explode('/', $request->getUri()->getPath())[3];
-        /** @var \TinyIB\Model\PostInterface $post */
-        $post = $this->post_repository->getPostByID($id);
+        /** @var Post $post */
+        $post = Post::find($id);
         if ($post === null) {
             $message = 'Sorry, there doesn\'t appear to be a post with that ID.';
             return new Response(404, [], $message);
         }
 
-        $this->post_repository->deletePostByID($id);
+        Post::deletePostByID($id);
         $this->cache->delete(TINYIB_BOARD . ":post:$id");
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 
         if ($post->isReply()) {
-            $parent = $post->getParentID();
+            $parent = $post->parent_id;
             $this->cache->delete(TINYIB_BOARD . ":index_post:$parent");
             $this->cache->delete(TINYIB_BOARD . ":thread:$parent");
         }
 
-        $id = $post->getID();
+        $id = $post->id;
         $data['text'] = "Post No.$id deleted.";
         return new Response(200, [], $this->renderer->render('manage_info.twig', $data));
     }
@@ -345,20 +339,26 @@ class ManageController implements ManageControllerInterface
             return new Response(400, [], $message);
         }
 
-        /** @var \TinyIB\Model\PostInterface $post */
-        $post = $this->post_repository->getPostByID($id);
+        /** @var Post $post */
+        $post = Post::find($id);
         if ($post === null) {
             $message = 'Sorry, there doesn\'t appear to be a post with that ID.';
             return new Response(404, [], $message);
         }
 
-        $this->post_repository->approvePostByID($id);
-        $thread_id = $post->isThread() ? $id : $post->getParentID();
+        $post->moderated = true;
+        $post->save();
 
-        if (strtolower($post->getEmail()) !== 'sage'
+        $thread_id = $post->isThread() ? $id : $post->parent_id;
+
+        if (strtolower($post->email) !== 'sage'
             && (TINYIB_MAXREPLIES === 0
-            || $this->post_repository->getReplyCountByThreadID($thread_id) <= TINYIB_MAXREPLIES)) {
-            $this->post_repository->bumpThreadByID($thread_id);
+            || Post::getReplyCountByThreadID($thread_id) <= TINYIB_MAXREPLIES)) {
+            $thread = Post::find($thread_id);
+            if (isset($thread)) {
+                $thread->bumped_at = time();
+                $thread->save();
+            }
         }
 
         $this->cache->delete(TINYIB_BOARD . ":post:$id");
@@ -393,8 +393,8 @@ class ManageController implements ManageControllerInterface
             return new Response(40, [], $message);
         }
 
-        /** @var \TinyIB\Model\PostInterface $post */
-        $post = $this->post_repository->getPostByID($id);
+        /** @var Post $post */
+        $post = Post::find($id);
         if ($post === null || !$post->isThread()) {
             $message = 'Sorry, there doesn\'t appear to be a thread with that ID.';
             return new Response(404, [], $message);
@@ -402,13 +402,15 @@ class ManageController implements ManageControllerInterface
 
         $query = $request->getQueryParams();
         $sticky = !empty($query['setsticky']) ? (bool)intval($query['setsticky']) : false;
-        $this->post_repository->stickyThreadByID($id, $sticky);
+        $post->stickied = $sticky;
+        $post->save();
+
         $this->cache->delete(TINYIB_BOARD . ':post:' . $id);
         $this->cache->delete(TINYIB_BOARD . ':index_post:' . $id);
         $this->cache->delete(TINYIB_BOARD . ':thread:' . $id);
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
 
-        $id = $post->getID();
+        $id = $post->id;
         $action = $sticky ? 'stickied' : 'un-stickied';
         $data['text'] = "Thread No.$id $action.";
         return new Response(200, [], $this->renderer->render('manage_info.twig', $data));

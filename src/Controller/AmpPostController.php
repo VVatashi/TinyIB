@@ -8,41 +8,34 @@ use Psr\Http\Message\ServerRequestInterface;
 use TinyIB\Cache\CacheInterface;
 use TinyIB\Functions;
 use TinyIB\Model\Post;
-use TinyIB\Repository\PostRepositoryInterface;
 use TinyIB\Service\PostServiceInterface;
 use TinyIB\Service\RendererServiceInterface;
 use TinyIB\NotFoundException;
 
 class AmpPostController implements AmpPostControllerInterface
 {
-    /** @var \TinyIB\Cache\CacheInterface $cache */
+    /** @var CacheInterface $cache */
     protected $cache;
 
-    /** @var \TinyIB\Repository\PostRepositoryInterface $post_repository */
-    protected $post_repository;
-
-    /** @var \TinyIB\Service\PostServiceInterface $post_service */
+    /** @var PostServiceInterface $post_service */
     protected $post_service;
 
-    /** @var \TinyIB\Service\RendererServiceInterface $renderer */
+    /** @var RendererServiceInterface $renderer */
     protected $renderer;
 
     /**
      * Constructs new AMP post controller.
      *
-     * @param \TinyIB\Cache\CacheInterface $cache
-     * @param \TinyIB\Repository\PostRepositoryInterface $post_repository
-     * @param \TinyIB\Service\PostServiceInterface $post_service
-     * @param \TinyIB\Service\RendererServiceInterface $renderer
+     * @param CacheInterface $cache
+     * @param PostServiceInterface $post_service
+     * @param RendererServiceInterface $renderer
      */
     public function __construct(
         CacheInterface $cache,
-        PostRepositoryInterface $post_repository,
         PostServiceInterface $post_service,
         RendererServiceInterface $renderer
     ) {
         $this->cache = $cache;
-        $this->post_repository = $post_repository;
         $this->post_service = $post_service;
         $this->renderer = $renderer;
     }
@@ -55,10 +48,10 @@ class AmpPostController implements AmpPostControllerInterface
         $query = $request->getQueryParams();
         $page = isset($query['page']) ? (int)$query['page'] : 0;
 
-        $threads = $this->post_repository->getThreadsByPage($page);
+        $threads = Post::getThreadsByPage($page);
         $threads = array_map(function ($thread) {
-            $id = $thread->getID();
-            $thread->replyCount = $this->post_repository->getReplyCountByThreadID($id);
+            $id = $thread->id;
+            $thread->replyCount = Post::getReplyCountByThreadID($id);
             return $thread;
         }, $threads);
 
@@ -82,7 +75,7 @@ class AmpPostController implements AmpPostControllerInterface
 
         $args = explode('/', $request->getUri()->getPath());
         $thread_id = (int)$args[3];
-        $thread = $this->post_repository->getPostByID($thread_id);
+        $thread = Post::find($thread_id);
         if (!isset($thread)) {
             throw new NotFoundException("Thread #$thread_id not found.");
         }
@@ -95,15 +88,15 @@ class AmpPostController implements AmpPostControllerInterface
         $inv_refmap = [];
         $own_posts = [];
 
-        $posts = array_reverse($this->post_repository->getPostsByThreadID($thread_id, true, $limit, $page * $limit));
+        $posts = array_reverse(Post::getPostsByThreadID($thread_id, true, $limit, $page * $limit));
         $posts = array_map(function ($post) use ($thread_id, $poster_name, &$refmap, &$inv_refmap, &$own_posts) {
-            $message = $post->getMessage();
+            $message = $post->message;
             $message = $post->markup($message);
-            $post_id = $post->getID();
+            $post_id = $post->id;
 
             if (!empty($poster_name)
-                && (stripos($post->getName(), $poster_name) !== false
-                || stripos($post->getTripcode(), $poster_name) !== false)) {
+                && (stripos($post->name, $poster_name) !== false
+                || stripos($post->tripcode, $poster_name) !== false)) {
                 $own_posts[] = $post_id;
                 $post->own = true;
             }
@@ -123,12 +116,12 @@ class AmpPostController implements AmpPostControllerInterface
                 return "href=\"#post_$target_id\"";
             }, $message);
 
-            $post->setMessage($message);
+            $post->message = $message;
             return $post;
         }, $posts);
 
         $posts = array_map(function ($post) use ($refmap, $inv_refmap, $own_posts) {
-            $post_id = $post->getID();
+            $post_id = $post->id;
             if (isset($refmap[$post_id])) {
                 $post->references = $refmap[$post_id];
             }
@@ -140,12 +133,12 @@ class AmpPostController implements AmpPostControllerInterface
             return $post;
         }, $posts);
 
-        $last_updated = $thread->getBumpTime();
+        $last_updated = $thread->getBumpedTimestamp();
 
         return new Response(200, [], $this->renderer->render('amp/thread.twig', [
             'amp_style' => file_get_contents(__DIR__ . '/../../webroot/css/amp.css'),
             'canonical_url' => TINYIB_BASE_URL . TINYIB_BOARD . "/res/$thread_id",
-            'title' => '/' . TINYIB_BOARD . ' &ndash; ' . $thread->getSubject(),
+            'title' => '/' . TINYIB_BOARD . ' &ndash; ' . $thread->subject,
             'board' => TINYIB_BOARDDESC,
             'thread' => $thread,
             'posts' => $posts,
@@ -227,10 +220,10 @@ class AmpPostController implements AmpPostControllerInterface
         }
 
         $data = json_encode([
-            'id' => $post->getID(),
+            'id' => $post->id,
         ]);
 
-        $thread_id = $post->isThread() ? $post->getID() : $post->getParentID();
+        $thread_id = $post->isThread() ? $post->id : $post->parent_id;
         $destination = TINYIB_BASE_URL . TINYIB_BOARD . '/amp/thread/' . $thread_id;
         if (!empty($poster_name)) {
             $destination .= "?name=$poster_name";

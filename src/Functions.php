@@ -2,7 +2,7 @@
 
 namespace TinyIB;
 
-use TinyIB\Model\PostInterface;
+use TinyIB\Model\Post;
 
 class Functions
 {
@@ -30,21 +30,21 @@ class Functions
     /**
      * Deletes image & thumbnail of the post.
      *
-     * @param PostInterface $post
+     * @param Post $post
      */
-    public static function deletePostImages(PostInterface $post)
+    public static function deletePostImages(Post $post)
     {
         // TODO: Exception handling & logging.
 
-        if (!empty($post->getFileName())) {
-            $path = 'src/' . $post->getFileName();
+        if (!empty($post->file)) {
+            $path = 'src/' . $post->file;
             if (file_exists($path)) {
                 unlink($path);
             }
         }
 
-        if (!empty($post->getThumbnailName())) {
-            $path = 'thumb/' . $post->getThumbnailName();
+        if (!empty($post->thumb)) {
+            $path = 'thumb/' . $post->thumb;
             if (file_exists($path)) {
                 unlink($path);
             }
@@ -113,12 +113,12 @@ class Functions
     /**
      * Checks thumbnail size.
      *
-     * @param PostInterface $post
+     * @param Post $post
      *
      * @return int[]
      *   Thumbnail size.
      */
-    public static function thumbnailDimensions(PostInterface $post)
+    public static function thumbnailDimensions(Post $post)
     {
         if ($post->isThread()) {
             $max_width = TINYIB_MAXWOP;
@@ -128,8 +128,8 @@ class Functions
             $max_height = TINYIB_MAXH;
         }
 
-        $width = $post->getImageWidth();
-        $height = $post->getImageHeight();
+        $width = $post->image_width;
+        $height = $post->image_height;
         return $width > $max_width || $height > $max_height
             ? [$max_width, $max_height]
             : [$width, $height];

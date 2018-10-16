@@ -7,7 +7,6 @@ use TinyIB\Cache\InMemoryCache;
 use TinyIB\Service\PostService;
 use TinyIB\Service\PostServiceInterface;
 use TinyIB\Tests\Mock\CryptographyServiceMock;
-use TinyIB\Tests\Mock\PostRepositoryMock;
 
 final class PostServiceTest extends TestCase
 {
@@ -17,12 +16,10 @@ final class PostServiceTest extends TestCase
     public function setUp() : void
     {
         $cache = new InMemoryCache();
-        $post_repository = new PostRepositoryMock();
         $cryptography_service = new CryptographyServiceMock();
 
         $this->service = new PostService(
             $cache,
-            $post_repository,
             $cryptography_service
         );
     }

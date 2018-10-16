@@ -2,7 +2,7 @@
 
 namespace TinyIB\Service;
 
-use TinyIB\Model\PostInterface;
+use TinyIB\Model\Post;
 
 interface PostServiceInterface
 {
@@ -30,7 +30,7 @@ interface PostServiceInterface
      * @param int $parent
      * @param bool $rawpost
      *
-     * @return PostInterface
+     * @return Post
      *
      * @throws \Exception
      * @throws ValidationException
@@ -45,7 +45,7 @@ interface PostServiceInterface
         int $user_id = 0,
         int $parent = 0,
         bool $rawpost = false
-    ) : PostInterface;
+    ) : Post;
 
     /**
      * Deletes post by ID.
