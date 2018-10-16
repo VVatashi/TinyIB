@@ -8,36 +8,22 @@ use Psr\Http\Message\ServerRequestInterface;
 use TinyIB\AccessDeniedException;
 use TinyIB\Model\User;
 use TinyIB\NotFoundException;
-use TinyIB\Repository\UserRepositoryInterface;
 use TinyIB\Service\RendererServiceInterface;
-use TinyIB\Service\UserServiceInterface;
 
 class UserCrudController implements UserCrudControllerInterface
 {
     /** @var \TinyIB\Service\RendererServiceInterface $renderer */
     protected $renderer;
 
-    /** @var \TinyIB\Repository\UserRepositoryInterface $user_repository */
-    protected $user_repository;
-
-    /** @var \TinyIB\Service\UserServiceInterface $user_service */
-    protected $user_service;
-
     /**
      * Creates a new AuthController instance.
      *
      * @param RendererServiceInterface $renderer
-     * @param UserRepositoryInterface $user_repository
-     * @param UserServiceInterface $user_service
      */
     public function __construct(
-        RendererServiceInterface $renderer,
-        UserRepositoryInterface $user_repository,
-        UserServiceInterface $user_service
+        RendererServiceInterface $renderer
     ) {
         $this->renderer = $renderer;
-        $this->user_repository = $user_repository;
-        $this->user_service = $user_service;
     }
 
     /**
@@ -45,13 +31,13 @@ class UserCrudController implements UserCrudControllerInterface
      */
     public function list(ServerRequestInterface $request) : ResponseInterface
     {
-        /** @var \TinyIB\Model\UserInterface $user */
+        /** @var \TinyIB\Model\User $current_user */
         $current_user = $request->getAttribute('user');
         if (!$current_user->isMod()) {
             throw new AccessDeniedException('You are not allowed to access this page');
         }
 
-        $users = $this->user_repository->getAll([], 'id DESC');
+        $users = User::orderBy('id', 'desc')->get();
         $content = $this->renderer->render('admin/user/list.twig', [
             'users' => $users,
         ]);
@@ -64,14 +50,14 @@ class UserCrudController implements UserCrudControllerInterface
      */
     public function show(ServerRequestInterface $request) : ResponseInterface
     {
-        /** @var \TinyIB\Model\UserInterface $user */
+        /** @var \TinyIB\Model\User $current_user */
         $current_user = $request->getAttribute('user');
         if (!$current_user->isMod()) {
             throw new AccessDeniedException('You are not allowed to access this page');
         }
 
         $id = (int)explode('/', $request->getUri()->getPath())[3];
-        $user = $this->user_repository->getOne(['id' => $id]);
+        $user = User::find($id);
         if (!isset($user)) {
             throw new NotFoundException("User #$id not found.");
         }
@@ -88,7 +74,7 @@ class UserCrudController implements UserCrudControllerInterface
      */
     public function createForm(ServerRequestInterface $request) : ResponseInterface
     {
-        /** @var \TinyIB\Model\UserInterface $user */
+        /** @var \TinyIB\Model\User $current_user */
         $current_user = $request->getAttribute('user');
         if (!$current_user->isMod()) {
             throw new AccessDeniedException('You are not allowed to access this page');
@@ -120,7 +106,7 @@ class UserCrudController implements UserCrudControllerInterface
      */
     public function create(ServerRequestInterface $request) : ResponseInterface
     {
-        /** @var \TinyIB\Model\UserInterface $user */
+        /** @var \TinyIB\Model\User $current_user */
         $current_user = $request->getAttribute('user');
         if (!$current_user->isMod()) {
             throw new AccessDeniedException('You are not allowed to access this page');
@@ -129,7 +115,7 @@ class UserCrudController implements UserCrudControllerInterface
         $data = $request->getParsedBody();
         $email = isset($data['email']) ? $data['email'] : '';
         $password = isset($data['password']) ? $data['password'] : '';
-        $role = isset($data['role']) ? (int)$data['role'] : '';
+        $role = isset($data['role']) ? (int)$data['role'] : 0;
 
         if (empty($email)) {
             $_SESSION['error'] = 'Email should not be empty';
@@ -148,8 +134,23 @@ class UserCrudController implements UserCrudControllerInterface
         }
 
         try {
-            $user = (new User(0, $email, '', $role))->withPassword($password);
-            $this->user_repository->insert($user);
+            $user = User::where('email', $email)->first();
+            if (isset($user)) {
+                $_SESSION['error'] = "User $email is already exists";
+                $_SESSION['email'] = $email;
+                $_SESSION['password'] = $password;
+                $_SESSION['role'] = $role;
+                return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/admin/user/create']);
+            }
+
+            $user = User::onlyTrashed()->where('email', $email)->forceDelete();
+
+            $user = new User([
+                'email' => $email,
+                'role' => $role,
+            ]);
+            $user->setPassword($password);
+            $user->save();
         }
         catch(\Exception $e) {
             $_SESSION['error'] = $e->getMessage();
@@ -167,14 +168,14 @@ class UserCrudController implements UserCrudControllerInterface
      */
     public function editForm(ServerRequestInterface $request) : ResponseInterface
     {
-        /** @var \TinyIB\Model\UserInterface $user */
+        /** @var \TinyIB\Model\User $current_user */
         $current_user = $request->getAttribute('user');
         if (!$current_user->isMod()) {
             throw new AccessDeniedException('You are not allowed to access this page');
         }
 
         $id = (int)explode('/', $request->getUri()->getPath())[3];
-        $user = $this->user_repository->getOne(['id' => $id]);
+        $user = User::find($id);
         if (!isset($user)) {
             throw new NotFoundException("User #$id not found.");
         }
@@ -197,14 +198,14 @@ class UserCrudController implements UserCrudControllerInterface
      */
     public function edit(ServerRequestInterface $request) : ResponseInterface
     {
-        /** @var \TinyIB\Model\UserInterface $user */
+        /** @var \TinyIB\Model\User $current_user */
         $current_user = $request->getAttribute('user');
         if (!$current_user->isMod()) {
             throw new AccessDeniedException('You are not allowed to access this page');
         }
 
         $id = (int)explode('/', $request->getUri()->getPath())[3];
-        $user = $this->user_repository->getOne(['id' => $id]);
+        $user = User::find($id);
         if (!isset($user)) {
             throw new NotFoundException("User #$id not found.");
         }
@@ -220,12 +221,14 @@ class UserCrudController implements UserCrudControllerInterface
         }
 
         try {
-            $user = $user->withEmail($email)->withRole($role);
+            $user->email = $email;
+            $user->role = $role;
+
             if (!empty($password)) {
-                $user = $user->withPassword($password);
+                $user->setPassword($password);
             }
 
-            $this->user_repository->update(['id' => $id], $user);
+            $user->save();
         }
         catch(\Exception $e) {
             $_SESSION['error'] = $e->getMessage();
@@ -240,7 +243,7 @@ class UserCrudController implements UserCrudControllerInterface
      */
     public function deleteConfirm(ServerRequestInterface $request) : ResponseInterface
     {
-        /** @var \TinyIB\Model\UserInterface $user */
+        /** @var \TinyIB\Model\User $current_user */
         $current_user = $request->getAttribute('user');
         if (!$current_user->isMod()) {
             throw new AccessDeniedException('You are not allowed to access this page');
@@ -248,13 +251,13 @@ class UserCrudController implements UserCrudControllerInterface
 
         $id = (int)explode('/', $request->getUri()->getPath())[3];
 
-        $user = $this->user_repository->getOne(['id' => $id]);
+        $user = User::find($id);
         if (!isset($user)) {
             throw new NotFoundException("User #$id not found.");
         }
 
         $content = $this->renderer->render('confirm.twig', [
-            'message' => 'Are you sure you want to delete the user <em><a href="mailto:' . $user->getEmail() . '">' . $user->getEmail() . '</a></em>?',
+            'message' => 'Are you sure you want to delete the user <em><a href="mailto:' . $user->email . '">' . $user->email . '</a></em>?',
             'submit' => 'Yes',
             'cancel' => 'No',
             'submit_url' => "admin/user/$id/delete/submit",
@@ -270,7 +273,7 @@ class UserCrudController implements UserCrudControllerInterface
      */
     public function delete(ServerRequestInterface $request) : ResponseInterface
     {
-        /** @var \TinyIB\Model\UserInterface $user */
+        /** @var \TinyIB\Model\User $current_user */
         $current_user = $request->getAttribute('user');
         if (!$current_user->isMod()) {
             throw new AccessDeniedException('You are not allowed to access this page');
@@ -278,12 +281,12 @@ class UserCrudController implements UserCrudControllerInterface
 
         $id = (int)explode('/', $request->getUri()->getPath())[3];
 
-        $user = $this->user_repository->getOne(['id' => $id]);
+        $user = User::find($id);
         if (!isset($user)) {
             throw new NotFoundException("User #$id not found.");
         }
 
-        $this->user_repository->delete(['id' => $id]);
+        $user->delete();
 
         return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/admin/user']);
     }

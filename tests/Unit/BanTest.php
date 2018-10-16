@@ -4,135 +4,54 @@ namespace TinyIB\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use TinyIB\Model\Ban;
-use TinyIB\Model\BanInterface;
 
 final class BanTest extends TestCase
 {
-    public function testCreateBan() : void
+    public function test_isPermanent_notExpires_shouldReturnTrue() : void
     {
-        $ban = new Ban(1, '127.0.0.1', time(), time());
-        $this->assertNotNull($ban);
-        $this->assertInstanceOf(BanInterface::class, $ban);
-        $this->assertInstanceOf(Ban::class, $ban);
+        $ban = new Ban(['expires_at' => 0]);
+        $this->assertEquals(true, $ban->isPermanent());
     }
 
-    public function idProvider() : array
+    public function test_isPermanent_expires_shouldReturnFalse() : void
     {
-        return [
-            [0],
-            [1],
-            [2],
-        ];
+        $ban = new Ban(['expires_at' => time() + 1000]);
+        $this->assertEquals(false, $ban->isPermanent());
     }
 
-    /**
-     * @dataProvider idProvider
-     */
-    public function testBanId(int $id) : void
+    public function test_isExpired_notExpires_shouldReturnFalse() : void
     {
-        $ban = new Ban(1, '127.0.0.1', time(), time());
-        $new_ban = $ban->withID($id);
-        $this->assertNotNull($new_ban);
-        $this->assertInstanceOf(BanInterface::class, $new_ban);
-        $this->assertInstanceOf(Ban::class, $new_ban);
-
-        $result = $new_ban->getID();
-        $this->assertNotNull($result);
-        $this->assertInternalType('int', $result);
-        $this->assertEquals($id, $result);
+        $ban = new Ban(['expires_at' => 0]);
+        $this->assertEquals(false, $ban->isExpired());
     }
 
-    public function ipProvider() : array
+    public function test_isExpired_notExpired_shouldReturnFalse() : void
     {
-        return [
-            [''],
-            ['127.0.0.1'],
-            ['192.168.1.169'],
-        ];
+        $ban = new Ban(['expires_at' => time() + 1000]);
+        $this->assertEquals(false, $ban->isExpired());
     }
 
-    public function timestampProvider() : array
+    public function test_isExpired_expired_shouldReturnTrue() : void
     {
-        return [
-            [0],
-            [1533575152],
-        ];
+        $ban = new Ban(['expires_at' => time() - 1000]);
+        $this->assertEquals(true, $ban->isExpired());
     }
 
-    /**
-     * @dataProvider timestampProvider
-     */
-    public function testBanCreatedDate(int $timestamp) : void
+    public function test_hasReason_withoutReason_shouldReturnFalse() : void
     {
-        $ban = new Ban(1, '127.0.0.1', time(), time());
-        $new_ban = $ban->withCreatedDate($timestamp);
-        $this->assertNotNull($new_ban);
-        $this->assertInstanceOf(BanInterface::class, $new_ban);
-        $this->assertInstanceOf(Ban::class, $new_ban);
-
-        $result = $new_ban->getCreatedDate();
-        $this->assertNotNull($result);
-        $this->assertInternalType('int', $result);
-        $this->assertEquals($timestamp, $result);
+        $ban = new Ban([]);
+        $this->assertEquals(false, $ban->hasReason());
     }
 
-    /**
-     * @dataProvider timestampProvider
-     */
-    public function testBanExpiresDate(int $timestamp) : void
+    public function test_hasReason_emptyReason_shouldReturnFalse() : void
     {
-        $ban = new Ban(1, '127.0.0.1', time(), time());
-        $new_ban = $ban->withExpiresDate($timestamp);
-        $this->assertNotNull($new_ban);
-        $this->assertInstanceOf(BanInterface::class, $new_ban);
-        $this->assertInstanceOf(Ban::class, $new_ban);
-
-        $result = $new_ban->getExpiresDate();
-        $this->assertNotNull($result);
-        $this->assertInternalType('int', $result);
-        $this->assertEquals($timestamp, $result);
+        $ban = new Ban(['reason' => '']);
+        $this->assertEquals(false, $ban->hasReason());
     }
 
-    /**
-     * @dataProvider ipProvider
-     */
-    public function testBanIp(string $ip) : void
+    public function test_hasReason_withReason_shouldReturnTrue() : void
     {
-        $ban = new Ban(1, '127.0.0.1', time(), time());
-        $new_ban = $ban->withIP($ip);
-        $this->assertNotNull($new_ban);
-        $this->assertInstanceOf(BanInterface::class, $new_ban);
-        $this->assertInstanceOf(Ban::class, $new_ban);
-
-        $result = $new_ban->getIP();
-        $this->assertNotNull($result);
-        $this->assertInternalType('string', $result);
-        $this->assertEquals($ip, $result);
-    }
-
-    public function reasonProvider() : array
-    {
-        return [
-            [''],
-            ['test'],
-            ['Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'],
-        ];
-    }
-
-    /**
-     * @dataProvider reasonProvider
-     */
-    public function testBanReason(string $reason) : void
-    {
-        $ban = new Ban(1, '127.0.0.1', time(), time());
-        $new_ban = $ban->withReason($reason);
-        $this->assertNotNull($new_ban);
-        $this->assertInstanceOf(BanInterface::class, $new_ban);
-        $this->assertInstanceOf(Ban::class, $new_ban);
-
-        $result = $new_ban->getReason();
-        $this->assertNotNull($result);
-        $this->assertInternalType('string', $result);
-        $this->assertEquals($reason, $result);
+        $ban = new Ban(['reason' => 'test']);
+        $this->assertEquals(true, $ban->hasReason());
     }
 }

@@ -8,184 +8,218 @@ use Psr\Http\Message\ResponseInterface;
 use TinyIB\AccessDeniedException;
 use TinyIB\Controller\Admin\UserCrudController;
 use TinyIB\Controller\Admin\UserCrudControllerInterface;
-use TinyIB\Controller\AuthController;
-use TinyIB\Controller\AuthControllerInterface;
 use TinyIB\Model\User;
 use TinyIB\NotFoundException;
-use TinyIB\Service\UserService;
 use TinyIB\Tests\Mock\RendererServiceMock;
-use TinyIB\Tests\Mock\UserRepositoryMock;
 
 final class UserCrudControllerTest extends TestCase
 {
-    /** @var \TinyIB\Controller\AuthControllerInterface $controller */
+    /** @var \TinyIB\Controller\Admin\UserCrudControllerInterface $controller */
     protected $controller;
-
-    public static function setUpBeforeClass()
-    {
-        global $_SESSION;
-
-        if (!isset($_SESSION)) {
-            $_SESSION = [];
-        }
-    }
 
     public function setUp() : void
     {
+        global $_SESSION;
+        $_SESSION = [];
+
+        User::where('email', 'admin@example.com')->forceDelete();
+        User::where('email', 'user@example.com')->forceDelete();
+        User::where('email', 'test@example.com')->forceDelete();
+        User::where('email', 'another@example.com')->forceDelete();
+
+        $admin = User::firstOrCreate([
+            'email' => 'admin@example.com',
+        ], [
+            'password_hash' => '',
+            'role' => 2,
+        ]);
+        $admin->setPassword('admin');
+        $admin->save();
+
+        $user = User::firstOrCreate([
+            'email' => 'user@example.com',
+        ], [
+            'password_hash' => '',
+        ]);
+        $user->setPassword('user');
+        $user->save();
+
+        $test = User::firstOrCreate([
+            'email' => 'test@example.com',
+        ], [
+            'password_hash' => '',
+        ]);
+        $test->setPassword('test');
+        $test->save();
+
         $renderer = new RendererServiceMock();
-        $repository = new UserRepositoryMock();
 
-        // Create users for tests.
-        $user = new User(1, 'admin@example.com', '', 2);
-        $user = $user->withPassword('admin');
-        $repository->insert($user);
-
-        $user = new User(2, 'test@example.com', '', 1);
-        $user = $user->withPassword('test');
-        $repository->insert($user);
-
-        $service = new UserService($repository);
-        $this->controller = new UserCrudController($renderer, $repository, $service);
+        $this->controller = new UserCrudController($renderer);
     }
 
-    public function testCreateController() : void
+    public function test_сreateInstance() : void
     {
         $this->assertNotNull($this->controller);
         $this->assertInstanceOf(UserCrudControllerInterface::class, $this->controller);
         $this->assertInstanceOf(UserCrudController::class, $this->controller);
     }
 
-    public function testList() : void
+    public function test_list_asAdmin_shouldReturnStatus200() : void
     {
+        $user = User::where('email', 'admin@example.com')->first();
         $request = new ServerRequest('GET', '/admin/user');
-        $request = $request->withAttribute('user', new User(1, 'admin@example.com', '', 2));
+        $request = $request->withAttribute('user', $user);
 
+        // Check response.
         $response = $this->controller->list($request);
         $this->assertNotNull($response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
+        // Check status code.
         $status = $response->getStatusCode();
         $this->assertEquals(200, $status);
     }
 
-    public function testListAsNotAdminShouldThrow() : void
+    public function test_list_asUser_shouldThrowAccessDeniedException() : void
     {
+        $user = User::where('email', 'test@example.com')->first();
         $request = new ServerRequest('GET', '/admin/user');
-        $request = $request->withAttribute('user', new User(2, 'test@example.com', '', 1));
+        $request = $request->withAttribute('user', $user);
 
         $this->expectException(AccessDeniedException::class);
         $response = $this->controller->list($request);
     }
 
-    public function testShow() : void
+    public function test_show_asAdmin_shouldReturnStatus200() : void
     {
-        $request = new ServerRequest('GET', '/admin/user/1');
-        $request = $request->withAttribute('user', new User(1, 'admin@example.com', '', 2));
+        $user = User::where('email', 'admin@example.com')->first();
+        $target_id = User::where('email', 'test@example.com')->first()->id;
+        $request = new ServerRequest('GET', "/admin/user/$target_id");
+        $request = $request->withAttribute('user', $user);
 
+        // Check response.
         $response = $this->controller->show($request);
         $this->assertNotNull($response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
+        // Check status code.
         $status = $response->getStatusCode();
         $this->assertEquals(200, $status);
     }
 
-    public function testShowAsNotAdminShouldThrow() : void
+    public function test_show_asUser_shouldThrowAccessDeniedException() : void
     {
-        $request = new ServerRequest('GET', '/admin/user/1');
-        $request = $request->withAttribute('user', new User(2, 'test@example.com', '', 1));
+        $user = User::where('email', 'user@example.com')->first();
+        $target_id = User::where('email', 'test@example.com')->first()->id;
+        $request = new ServerRequest('GET', "/admin/user/$target_id");
+        $request = $request->withAttribute('user', $user);
 
         $this->expectException(AccessDeniedException::class);
         $response = $this->controller->show($request);
     }
 
-    public function testShowNotExistsUserShouldThrow() : void
+    public function test_show_nonExistingUser_shouldThrowNotFoundException() : void
     {
-        $request = new ServerRequest('GET', '/admin/user/3');
-        $request = $request->withAttribute('user', new User(1, 'admin@example.com', '', 2));
+        $user = User::where('email', 'admin@example.com')->first();
+        $target_id = 1000;
+        $request = new ServerRequest('GET', "/admin/user/$target_id");
+        $request = $request->withAttribute('user', $user);
 
         $this->expectException(NotFoundException::class);
         $response = $this->controller->show($request);
     }
 
-    public function testGetCreateForm() : void
+    public function test_createForm_asAdmin_shouldReturnStatus200() : void
     {
+        $user = User::where('email', 'admin@example.com')->first();
         $request = new ServerRequest('GET', '/admin/user/create');
-        $request = $request->withAttribute('user', new User(1, 'admin@example.com', '', 2));
+        $request = $request->withAttribute('user', $user);
 
+        // Check response.
         $response = $this->controller->createForm($request);
         $this->assertNotNull($response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
+        // Check status code.
         $status = $response->getStatusCode();
         $this->assertEquals(200, $status);
     }
 
-    public function testGetCreateFormAsNotAdminShouldThrow() : void
+    public function test_createForm_asUser_shouldThrowAccessDeniedException() : void
     {
+        $user = User::where('email', 'user@example.com')->first();
         $request = new ServerRequest('GET', '/admin/user/create');
-        $request = $request->withAttribute('user', new User(2, 'test@example.com', '', 1));
+        $request = $request->withAttribute('user', $user);
 
         $this->expectException(AccessDeniedException::class);
         $response = $this->controller->createForm($request);
     }
 
-    public function testSubmitCreateForm() : void
+    public function test_create_asAdmin_shouldRedirect() : void
     {
+        $user = User::where('email', 'admin@example.com')->first();
         $request = new ServerRequest('GET', '/admin/user/create/submit');
-        $request = $request->withAttribute('user', new User(1, 'admin@example.com', '', 2));
+        $request = $request->withAttribute('user', $user);
         $request = $request->withParsedBody([
-            'email' => 'test@example.com',
-            'password' => 'test',
+            'email' => 'another@example.com',
+            'password' => 'another',
             'role' => 1,
         ]);
 
+        // Check response.
         $response = $this->controller->create($request);
         $this->assertNotNull($response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
+        // Shound not set error.
         $this->assertFalse(isset($_SESSION['error']));
 
-        // Should redirect to the user list.
+        // Should set redirect to the user list.
         $status = $response->getStatusCode();
         $this->assertEquals(302, $status);
     }
 
-    public function testSubmitCreateFormWithEmptyEmailShouldSetError() : void
+    public function test_create_withEmptyEmail_shouldSetErrorAndRedirect() : void
     {
+        $user = User::where('email', 'admin@example.com')->first();
         $request = new ServerRequest('GET', '/admin/user/create/submit');
-        $request = $request->withAttribute('user', new User(1, 'admin@example.com', '', 2));
+        $request = $request->withAttribute('user', $user);
         $request = $request->withParsedBody([
             'email' => '',
-            'password' => 'test',
+            'password' => 'another',
             'role' => 1,
         ]);
 
+        // Check response.
         $response = $this->controller->create($request);
         $this->assertNotNull($response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
+        // Shound set error.
         $this->assertTrue(isset($_SESSION['error']));
 
-        // Should redirect to the user list.
+        // Should set redirect to the user list.
         $status = $response->getStatusCode();
         $this->assertEquals(302, $status);
     }
 
-    public function testSubmitCreateFormWithEmptyPasswordShouldSetError() : void
+    public function test_create_withEmptyPassword_shouldSetErrorAndRedirect() : void
     {
+        $user = User::where('email', 'admin@example.com')->first();
         $request = new ServerRequest('GET', '/admin/user/create/submit');
-        $request = $request->withAttribute('user', new User(1, 'admin@example.com', '', 2));
+        $request = $request->withAttribute('user', $user);
         $request = $request->withParsedBody([
-            'email' => 'test@example.com',
+            'email' => 'another@example.com',
             'password' => '',
             'role' => 1,
         ]);
 
+        // Check response.
         $response = $this->controller->create($request);
         $this->assertNotNull($response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
+        // Shound set error.
         $this->assertTrue(isset($_SESSION['error']));
 
         // Should redirect to the user list.
@@ -193,13 +227,14 @@ final class UserCrudControllerTest extends TestCase
         $this->assertEquals(302, $status);
     }
 
-    public function testSubmitCreateFormAsNotAdminShouldThrow() : void
+    public function test_create_asUser_shouldThrowAccessDeniedException() : void
     {
+        $user = User::where('email', 'user@example.com')->first();
         $request = new ServerRequest('GET', '/admin/user/create/submit');
-        $request = $request->withAttribute('user', new User(2, 'test@example.com', '', 1));
+        $request = $request->withAttribute('user', $user);
         $request = $request->withParsedBody([
-            'email' => 'test@example.com',
-            'password' => 'test',
+            'email' => 'another@example.com',
+            'password' => 'another',
             'role' => 1,
         ]);
 
@@ -207,72 +242,88 @@ final class UserCrudControllerTest extends TestCase
         $response = $this->controller->create($request);
     }
 
-    public function testGetEditForm() : void
+    public function test_editForm_asAdmin_shouldReturnStatus200() : void
     {
-        $request = new ServerRequest('GET', '/admin/user/2/edit');
-        $request = $request->withAttribute('user', new User(1, 'admin@example.com', '', 2));
+        $user = User::where('email', 'admin@example.com')->first();
+        $target_id = User::where('email', 'test@example.com')->first()->id;
+        $request = new ServerRequest('GET', "/admin/user/$target_id/edit/submit");
+        $request = $request->withAttribute('user', $user);
 
+        // Check response.
         $response = $this->controller->editForm($request);
         $this->assertNotNull($response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
+        // Check status code.
         $status = $response->getStatusCode();
         $this->assertEquals(200, $status);
     }
 
-    public function testGetEditFormAsNotAdminShouldThrow() : void
+    public function test_editForm_asUser_shouldThrowAccessDeniedException() : void
     {
-        $request = new ServerRequest('GET', '/admin/user/2/edit');
-        $request = $request->withAttribute('user', new User(2, 'test@example.com', '', 1));
+        $user = User::where('email', 'user@example.com')->first();
+        $target_id = User::where('email', 'test@example.com')->first()->id;
+        $request = new ServerRequest('GET', "/admin/user/$target_id/edit/submit");
+        $request = $request->withAttribute('user', $user);
 
         $this->expectException(AccessDeniedException::class);
         $response = $this->controller->editForm($request);
     }
 
-    public function testGetEditFormForNotExistsUserShouldThrow() : void
+    public function test_editForm_nonExistingUser_shouldThrowNotFoundException() : void
     {
-        $request = new ServerRequest('GET', '/admin/user/3/edit');
-        $request = $request->withAttribute('user', new User(1, 'admin@example.com', '', 2));
+        $user = User::where('email', 'admin@example.com')->first();
+        $target_id = 1000;
+        $request = new ServerRequest('GET', "/admin/user/$target_id/edit/submit");
+        $request = $request->withAttribute('user', $user);
 
         $this->expectException(NotFoundException::class);
         $response = $this->controller->editForm($request);
     }
 
-    public function testSubmitEditForm() : void
+    public function test_edit_asAdmin_shouldRedirect() : void
     {
-        $request = new ServerRequest('GET', '/admin/user/2/edit/submit');
-        $request = $request->withAttribute('user', new User(1, 'admin@example.com', '', 2));
+        $user = User::where('email', 'admin@example.com')->first();
+        $target_id = User::where('email', 'test@example.com')->first()->id;
+        $request = new ServerRequest('GET', "/admin/user/$target_id/edit/submit");
+        $request = $request->withAttribute('user', $user);
         $request = $request->withParsedBody([
             'email' => 'test@example.com',
             'password' => 'test',
             'role' => 1,
         ]);
 
+        // Check response.
         $response = $this->controller->edit($request);
         $this->assertNotNull($response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
+        // Shound not set error.
         $this->assertFalse(isset($_SESSION['error']));
 
-        // Should redirect to the user list.
+        // Should set redirect to the user list.
         $status = $response->getStatusCode();
         $this->assertEquals(302, $status);
     }
 
-    public function testSubmitEditFormWithEmptyEmailShouldThrow() : void
+    public function test_edit_withEmptyEmail_shouldSetErrorAndRedirect() : void
     {
-        $request = new ServerRequest('GET', '/admin/user/2/edit/submit');
-        $request = $request->withAttribute('user', new User(1, 'admin@example.com', '', 2));
+        $user = User::where('email', 'admin@example.com')->first();
+        $target_id = User::where('email', 'test@example.com')->first()->id;
+        $request = new ServerRequest('GET', "/admin/user/$target_id/edit/submit");
+        $request = $request->withAttribute('user', $user);
         $request = $request->withParsedBody([
             'email' => '',
             'password' => 'test',
             'role' => 1,
         ]);
 
+        // Check response.
         $response = $this->controller->edit($request);
         $this->assertNotNull($response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
+        // Shound set error.
         $this->assertTrue(isset($_SESSION['error']));
 
         // Should redirect to the user list.
@@ -280,10 +331,12 @@ final class UserCrudControllerTest extends TestCase
         $this->assertEquals(302, $status);
     }
 
-    public function testSubmitEditFormAsNotAdminShouldThrow() : void
+    public function test_edit_asUser_shouldThrowAccessDeniedException() : void
     {
-        $request = new ServerRequest('GET', '/admin/user/2/edit/submit');
-        $request = $request->withAttribute('user', new User(2, 'test@example.com', '', 1));
+        $user = User::where('email', 'user@example.com')->first();
+        $target_id = User::where('email', 'test@example.com')->first()->id;
+        $request = new ServerRequest('GET', "/admin/user/$target_id/edit/submit");
+        $request = $request->withAttribute('user', $user);
         $request = $request->withParsedBody([
             'email' => 'test@example.com',
             'password' => 'test',
@@ -294,10 +347,12 @@ final class UserCrudControllerTest extends TestCase
         $response = $this->controller->edit($request);
     }
 
-    public function testSubmitEditFormForNotExistsUserShouldThrow() : void
+    public function test_edit_nonExistingUser_shouldThrowNotFoundException() : void
     {
-        $request = new ServerRequest('GET', '/admin/user/3/edit/submit');
-        $request = $request->withAttribute('user', new User(1, 'admin@example.com', '', 2));
+        $user = User::where('email', 'admin@example.com')->first();
+        $target_id = 1000;
+        $request = new ServerRequest('GET', "/admin/user/$target_id/edit/submit");
+        $request = $request->withAttribute('user', $user);
         $request = $request->withParsedBody([
             'email' => 'test@example.com',
             'password' => 'test',
@@ -308,55 +363,68 @@ final class UserCrudControllerTest extends TestCase
         $response = $this->controller->edit($request);
     }
 
-    public function testGetDeleteConfirmation() : void
+    public function test_deleteConfirm_asAdmin_shouldReturnStatus200() : void
     {
-        $request = new ServerRequest('GET', '/admin/user/2/delete');
-        $request = $request->withAttribute('user', new User(1, 'admin@example.com', '', 2));
+        $user = User::where('email', 'admin@example.com')->first();
+        $target_id = User::where('email', 'test@example.com')->first()->id;
+        $request = new ServerRequest('GET', "/admin/user/$target_id/delete");
+        $request = $request->withAttribute('user', $user);
 
+        // Check response.
         $response = $this->controller->deleteConfirm($request);
         $this->assertNotNull($response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
+        // Check status code.
         $status = $response->getStatusCode();
         $this->assertEquals(200, $status);
     }
 
-    public function testGetDeleteConfirmationAsNotAdminShouldThrow() : void
+    public function test_deleteConfirm_asUser_shouldThrowAccessDeniedException() : void
     {
-        $request = new ServerRequest('GET', '/admin/user/2/delete');
-        $request = $request->withAttribute('user', new User(2, 'test@example.com', '', 1));
+        $user = User::where('email', 'user@example.com')->first();
+        $target_id = User::where('email', 'test@example.com')->first()->id;
+        $request = new ServerRequest('GET', "/admin/user/$target_id/delete");
+        $request = $request->withAttribute('user', $user);
 
         $this->expectException(AccessDeniedException::class);
         $response = $this->controller->deleteConfirm($request);
     }
 
-    public function testGetDeleteConfirmationForNotExistsUserShouldThrow() : void
+    public function test_deleteConfirm_nonExistingUser_shouldThrowNotFoundException() : void
     {
-        $request = new ServerRequest('GET', '/admin/user/3/delete');
-        $request = $request->withAttribute('user', new User(1, 'admin@example.com', '', 2));
+        $user = User::where('email', 'admin@example.com')->first();
+        $target_id = 1000;
+        $request = new ServerRequest('GET', "/admin/user/$target_id/delete");
+        $request = $request->withAttribute('user', $user);
 
         $this->expectException(NotFoundException::class);
         $response = $this->controller->deleteConfirm($request);
     }
 
-    public function testSubmitDelete() : void
+    public function test_delete_asAdmin_shouldRedirect() : void
     {
-        $request = new ServerRequest('GET', '/admin/user/2/delete/submit');
-        $request = $request->withAttribute('user', new User(1, 'admin@example.com', '', 2));
+        $user = User::where('email', 'admin@example.com')->first();
+        $target_id = User::where('email', 'test@example.com')->first()->id;
+        $request = new ServerRequest('GET', "/admin/user/$target_id/delete/submit");
+        $request = $request->withAttribute('user', $user);
 
+        // Check response.
         $response = $this->controller->delete($request);
         $this->assertNotNull($response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
-        // Should redirect to the user list.
+        // Should set redirect to the user list.
         $status = $response->getStatusCode();
         $this->assertEquals(302, $status);
     }
 
-    public function testSubmitDeleteAsNotAdminShouldThrow() : void
+    public function test_delete_asUser_shouldThrowAccessDeniedException() : void
     {
-        $request = new ServerRequest('GET', '/admin/user/2/delete/submit');
-        $request = $request->withAttribute('user', new User(2, 'test@example.com', '', 1));
+        $user = User::where('email', 'user@example.com')->first();
+        $target_id = User::where('email', 'test@example.com')->first()->id;
+        $request = new ServerRequest('GET', "/admin/user/$target_id/delete/submit");
+        $request = $request->withAttribute('user', $user);
 
         $this->expectException(AccessDeniedException::class);
         $response = $this->controller->delete($request);
@@ -364,8 +432,10 @@ final class UserCrudControllerTest extends TestCase
 
     public function testSubmitDeleteForNotExistsUserShouldThrow() : void
     {
-        $request = new ServerRequest('GET', '/admin/user/3/delete/submit');
-        $request = $request->withAttribute('user', new User(1, 'admin@example.com', '', 2));
+        $user = User::where('email', 'admin@example.com')->first();
+        $target_id = 1000;
+        $request = new ServerRequest('GET', "/admin/user/$target_id/delete/submit");
+        $request = $request->withAttribute('user', $user);
 
         $this->expectException(NotFoundException::class);
         $response = $this->controller->delete($request);

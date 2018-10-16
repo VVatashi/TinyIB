@@ -2,6 +2,9 @@
 
 namespace TinyIB\Model;
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
 use TinyIB\Functions;
 use VVatashi\BBCode\BBCodeDefinition;
 use VVatashi\BBCode\HtmlGenerator;
@@ -9,375 +12,142 @@ use VVatashi\BBCode\Parser;
 use VVatashi\BBCode\Token;
 use VVatashi\BBCode\Tokenizer;
 
-final class Post implements PostInterface
+/**
+ * @property int $id
+ * @property int $created_at
+ * @property int $updated_at
+ * @property int $deleted_at
+ * @property int $parent_id
+ * @property int $bumped_at
+ * @property string $ip
+ * @property int $user_id
+ * @property string $name
+ * @property string $tripcode
+ * @property string $email
+ * @property string $subject
+ * @property string $message
+ * @property string $password
+ * @property string $file
+ * @property string $file_hex
+ * @property string $file_original
+ * @property int $file_size
+ * @property int $image_width
+ * @property int $image_height
+ * @property string $thumb
+ * @property int $thumb_width
+ * @property int $thumb_height
+ * @property bool $stickied
+ * @property bool $moderated
+ */
+class Post extends Model
 {
-    /** @var int $id */
-    protected $id;
+    use SoftDeletes;
 
-    /** @var int $parent */
-    protected $parent;
+    protected $table = TINYIB_DBPOSTS;
 
-    /** @var int $timestamp */
-    protected $timestamp;
+    protected $fillable = [
+        'parent_id',
+        'bumped_at',
+        'ip',
+        'user_id',
+        'name',
+        'tripcode',
+        'email',
+        'subject',
+        'message',
+        'password',
+        'file',
+        'file_hex',
+        'file_original',
+        'file_size',
+        'image_width',
+        'image_height',
+        'thumb',
+        'thumb_width',
+        'thumb_height',
+        'stickied',
+        'moderated',
+    ];
 
-    /** @var int $bumped */
-    protected $bumped;
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+        'bumped_at',
+    ];
 
-    /** @var string $ip */
-    protected $ip;
+    protected $dateFormat = 'U';
 
-    /** @var null|int $user_id */
-    protected $user_id;
-
-    /** @var string $name */
-    protected $name;
-
-    /** @var string $tripcode */
-    protected $tripcode;
-
-    /** @var string $email */
-    protected $email;
-
-    /** @var string $subject */
-    protected $subject;
-
-    /** @var string $message */
-    protected $message;
-
-    /** @var string $password */
-    protected $password;
-
-    /** @var string $file */
-    protected $file;
-
-    /** @var string $file_hex */
-    protected $file_hex;
-
-    /** @var string $file_original */
-    protected $file_original;
-
-    /** @var int $file_size */
-    protected $file_size;
-
-    /** @var int $image_width */
-    protected $image_width;
-
-    /** @var int $image_height */
-    protected $image_height;
-
-    /** @var string $thumb */
-    protected $thumb;
-
-    /** @var int $thumb_width */
-    protected $thumb_width;
-
-    /** @var int $thumb_height */
-    protected $thumb_height;
-
-    /** @var int $stickied */
-    protected $stickied;
-
-    /** @var int $moderated */
-    protected $moderated;
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getID() : int
+    public function replies()
     {
-        return $this->id;
+        return $this->hasMany(static::class, 'parent_id');
+    }
+
+    public function thread()
+    {
+        return $this->belongsTo(static::class, 'parent_id');
     }
 
     /**
-     * {@inheritDoc}
-     */
-    public function setID(int $id) : PostInterface
-    {
-        $this->id = $id;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
+     * Checks if post instance is not saved to the database.
+     *
+     * @return bool
+     *   Post atatus.
      */
     public function isNew() : bool
     {
-        return $this->getID() === 0;
+        return $this->id === 0;
     }
 
     /**
-     * {@inheritDoc}
-     */
-    public function getParentID() : int
-    {
-        return $this->parent;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setParentID(int $parent) : PostInterface
-    {
-        $this->parent = $parent;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
+     * Checks if the post is a thread.
+     *
+     * @return bool
+     *   Is post a thread.
      */
     public function isThread() : bool
     {
-        return $this->getParentID() === 0;
+        return $this->parent_id === 0;
     }
 
     /**
-     * {@inheritDoc}
+     * Checks if the post is a reply.
+     *
+     * @return bool
+     *   Is post a reply.
      */
     public function isReply() : bool
     {
-        return $this->getParentID() !== 0;
+        return $this->parent_id !== 0;
     }
 
     /**
-     * {@inheritDoc}
+     * Returns create time of the post.
+     *
+     * @return int
+     *   The create time of the post.
      */
-    public function getCreateTime() : int
+    public function getCreatedTimestamp() : int
     {
-        return $this->timestamp;
+        return $this->created_at->getTimestamp();
     }
 
     /**
-     * {@inheritDoc}
+     * Returns bump time of the post.
+     *
+     * @return int
+     *   The bump time of the post.
      */
-    public function setCreateTime(int $timestamp) : PostInterface
+    public function getBumpedTimestamp() : int
     {
-        $this->timestamp = $timestamp;
-        return $this;
+        return $this->bumped_at->getTimestamp();
     }
 
     /**
-     * {@inheritDoc}
-     */
-    public function getBumpTime() : int
-    {
-        return $this->bumped;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setBumpTime(int $bumped) : PostInterface
-    {
-        $this->bumped = $bumped;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getIP() : string
-    {
-        return $this->ip;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setIP(string $ip) : PostInterface
-    {
-        $this->ip = $ip;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getUserID()
-    {
-        return $this->user_id;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setUserID($user_id) : PostInterface
-    {
-        $this->user_id = $user_id;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getName() : string
-    {
-        return $this->name;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setName(string $name) : PostInterface
-    {
-        $this->name = $name;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getTripcode() : string
-    {
-        return $this->tripcode;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setTripcode(string $tripcode) : PostInterface
-    {
-        $this->tripcode = $tripcode;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getEmail() : string
-    {
-        return $this->email;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setEmail(string $email) : PostInterface
-    {
-        $this->email = $email;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getSubject() : string
-    {
-        return $this->subject;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setSubject(string $subject) : PostInterface
-    {
-        $this->subject = $subject;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getMessage() : string
-    {
-        return $this->message;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setMessage(string $message) : PostInterface
-    {
-        $this->message = $message;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getPassword() : string
-    {
-        return $this->password;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setPassword(string $password) : PostInterface
-    {
-        $this->password = $password;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getFileName() : string
-    {
-        return $this->file;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setFileName(string $name) : PostInterface
-    {
-        $this->file = $name;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getFileHash() : string
-    {
-        return $this->file_hex;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setFileHash(string $hash) : PostInterface
-    {
-        $this->file_hex = $hash;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getOriginalFileName() : string
-    {
-        return $this->file_original;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setOriginalFileName(string $name) : PostInterface
-    {
-        $this->file_original = $name;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getFileSize() : int
-    {
-        return $this->file_size;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setFileSize(int $size) : PostInterface
-    {
-        $this->file_size = $size;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
+     * Returns the size of the file attached to the post.
+     *
+     * @return string
+     *   The size of the file attached to the post.
      */
     public function getFileSizeFormatted() : string
     {
@@ -393,161 +163,25 @@ final class Post implements PostInterface
     }
 
     /**
-     * {@inheritDoc}
-     */
-    public function getImageWidth() : int
-    {
-        return $this->image_width;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setImageWidth(int $width) : PostInterface
-    {
-        $this->image_width = $width;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getImageHeight() : int
-    {
-        return $this->image_height;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setImageHeight(int $height) : PostInterface
-    {
-        $this->image_height = $height;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getThumbnailName() : string
-    {
-        return $this->thumb;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setThumbnailName(string $name) : PostInterface
-    {
-        $this->thumb = $name;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getThumbnailWidth() : int
-    {
-        return $this->thumb_width;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setThumbnailWidth(int $width) : PostInterface
-    {
-        $this->thumb_width = $width;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getThumbnailHeight() : int
-    {
-        return $this->thumb_height;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setThumbnailHeight(int $height) : PostInterface
-    {
-        $this->thumb_height = $height;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
+     * Checks if post is sticky.
+     *
+     * @return bool
+     *   Is post sticky.
      */
     public function isSticky() : bool
     {
-        return $this->stickied === 1;
+        return $this->stickied === true;
     }
 
     /**
-     * {@inheritDoc}
-     */
-    public function setSticky(bool $stickied) : PostInterface
-    {
-        $this->stickied = $stickied ? 1 : 0;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
+     * Returns the moderation status of the post.
+     *
+     * @return bool
+     *   Is post moderated.
      */
     public function isModerated() : bool
     {
-        return $this->moderated === 1;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setModerated(bool $moderated) : PostInterface
-    {
-        $this->moderated = $moderated ? 1 : 0;
-        return $this;
-    }
-
-    /**
-     * Creates a new instance of the post.
-     */
-    public function __construct(int $parent = 0)
-    {
-        $this->id = 0;
-        $this->parent = $parent;
-
-        $this->timestamp = 0;
-        $this->bumped = 0;
-
-        $this->ip = '';
-        $this->user_id = null;
-
-        $this->name = '';
-        $this->tripcode = '';
-        $this->email = '';
-        $this->subject = '';
-        $this->message = '';
-
-        $this->password = '';
-
-        $this->file = '';
-        $this->file_hex = '';
-        $this->file_original = '';
-        $this->file_size = 0;
-        $this->file_size_formatted = '';
-
-        $this->image_width = 0;
-        $this->image_height = 0;
-
-        $this->thumb = '';
-        $this->thumb_width = 0;
-        $this->thumb_height = 0;
-
-        $this->stickied = 0;
-        $this->moderated = 1;
+        return $this->moderated === true;
     }
 
     /**
@@ -667,33 +301,36 @@ final class Post implements PostInterface
     }
 
     /**
-     * {@inheritDoc}
+     * Creates a post view model from this post model.
+     *
+     * @param bool $res
+     *   False for index pages, true for res pages.
      */
     public function createViewModel(bool $res) : array
     {
         $post = [
-            'id' => $this->getID(),
-            'parent' => $this->getParentID(),
-            'timestamp' => $this->getCreateTime(),
-            'bumped' => $this->getBumpTime(),
-            'ip' => $this->getIP(),
-            'user_id' => $this->getUserID(),
-            'name' => $this->getName(),
-            'tripcode' => $this->getTripcode(),
-            'email' => $this->getEmail(),
-            'subject' => $this->getSubject(),
-            'message' => $this->getMessage(),
-            'password' => $this->getPassword(),
-            'file' => $this->getFileName(),
-            'file_hex' => $this->getFileHash(),
-            'file_original' => $this->getOriginalFileName(),
-            'file_size' => $this->getFileSize(),
+            'id' => $this->id,
+            'parent' => $this->parent_id,
+            'timestamp' => $this->getCreatedTimestamp(),
+            'bumped' => $this->getBumpedTimestamp(),
+            'ip' => $this->ip,
+            'user_id' => $this->user_id,
+            'name' => $this->name,
+            'tripcode' => $this->tripcode,
+            'email' => $this->email,
+            'subject' => $this->subject,
+            'message' => $this->message,
+            'password' => $this->password,
+            'file' => $this->file,
+            'file_hex' => $this->file_hex,
+            'file_original' => $this->file_original,
+            'file_size' => $this->file_size,
             'file_size_formatted' => $this->getFileSizeFormatted(),
-            'image_width' => $this->getImageWidth(),
-            'image_height' => $this->getImageHeight(),
-            'thumb' => $this->getThumbnailName(),
-            'thumb_width' => $this->getThumbnailWidth(),
-            'thumb_height' => $this->getThumbnailHeight(),
+            'image_width' => $this->image_width,
+            'image_height' => $this->image_height,
+            'thumb' => $this->thumb,
+            'thumb_width' => $this->thumb_width,
+            'thumb_height' => $this->thumb_height,
             'stickied' => $this->isSticky() ? 1 : 0,
             'moderated' => $this->isModerated() ? 1 : 0,
         ];
@@ -729,5 +366,176 @@ final class Post implements PostInterface
         }
 
         return $post;
+    }
+
+    /**
+     * Returns the thread count.
+     *
+     * @return int
+     */
+    public static function getThreadCount() : int
+    {
+        return Post::where([
+                ['parent_id', 0],
+                ['moderated', true],
+            ])
+            ->count();
+    }
+
+    /**
+     * Returns threads by a board page.
+     *
+     * @param int $page
+     *
+     * @return Collection
+     */
+    public static function getThreadsByPage(int $page) : Collection
+    {
+        $skip = $page * TINYIB_THREADSPERPAGE;
+        $take = TINYIB_THREADSPERPAGE;
+
+        return Post::where([
+                ['parent_id', 0],
+                ['moderated', true],
+            ])
+            ->orderBy('stickied', 'desc')
+            ->orderBy('bumped_at', 'desc')
+            ->skip($skip)
+            ->take($take)
+            ->get();
+    }
+
+    /**
+     * Returns the thread reply count by thread ID.
+     *
+     * @param int $id
+     *   Thread ID.
+     *
+     * @return int
+     */
+    public static function getReplyCountByThreadID(int $id) : int
+    {
+        return Post::where([
+                ['parent_id', $id],
+                ['moderated', true],
+            ])
+            ->count();
+    }
+
+    /**
+     * Returns posts by thread ID.
+     *
+     * @param int $id
+     *   Thread ID.
+     * @param bool $moderated_only
+     *
+     * @return Collection
+     */
+    public static function getPostsByThreadID(
+        int $id,
+        bool $moderated_only = true,
+        $take = null,
+        $skip = 0
+    ) : Collection {
+        $query = Post::where(function ($query) use ($id) {
+                $query->where('id', $id);
+                $query->orWhere('parent_id', $id);
+            })
+            ->orderBy('id', 'desc');
+
+        if ($moderated_only) {
+            $query = $query->where('moderated', true);
+        }
+
+        if (isset($take)) {
+            $query->skip($skip)->take($take);
+        }
+
+        return $query->get()->reverse();
+    }
+
+    /**
+     * Returns posts by the hash of the attached file.
+     *
+     * @param string $hash
+     *
+     * @return Collection
+     */
+    public static function getPostsByHex(string $hash) : Collection
+    {
+        return Post::where([
+            ['file_hex', $hash],
+            ['moderated', true],
+        ])->get();
+    }
+
+    /**
+     * Returns latest posts.
+     *
+     * @param bool $moderated
+     *
+     * @return Collection
+     */
+    public static function getLatestPosts(bool $moderated = true) : Collection
+    {
+        $count = 10;
+
+        return Post::where('moderated', $moderated)
+            ->orderBy('created_at', 'desc')
+            ->take($count)
+            ->get();
+    }
+
+    /**
+     * Deletes a post by ID.
+     *
+     * @param int $id
+     *   Post ID.
+     */
+    public static function deletePostByID(int $id)
+    {
+        $posts = static::getPostsByThreadID($id, false);
+
+        foreach ($posts as $post) {
+            Functions::deletePostImages($post);
+            $post->delete();
+        }
+    }
+
+    /**
+     * Removes old threads.
+     */
+    public static function trimThreads()
+    {
+        $limit = (int)TINYIB_MAXTHREADS;
+
+        if ($limit > 0) {
+            /** @var Post[] $results */
+            $threads = Post::where([
+                    ['parent_id', 0],
+                    ['moderated', true],
+                ])
+                ->orderBy('stickied', 'desc')
+                ->orderBy('bumped_at', 'desc')
+                ->skip($limit)
+                ->take(100)
+                ->get();
+
+            foreach ($threads as $thread) {
+                static::deletePostByID($thread->id);
+            }
+        }
+    }
+
+    /**
+     * Returns the last post by the poster IP.
+     *
+     * @return null|Post
+     */
+    public static function getLastPostByIP(string $ip)
+    {
+        return Post::where('ip', $ip)
+            ->orderBy('id', 'desc')
+            ->first();
     }
 }

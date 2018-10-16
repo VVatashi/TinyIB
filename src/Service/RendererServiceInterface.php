@@ -2,8 +2,6 @@
 
 namespace TinyIB\Service;
 
-use TinyIB\Model\PostInterface;
-
 interface RendererServiceInterface
 {
     /**
