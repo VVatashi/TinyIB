@@ -24,10 +24,12 @@ class AuthMiddleware implements MiddlewareInterface
         RequestHandlerInterface $handler
     ) : ResponseInterface {
         if (isset($_SESSION['user'])) {
-            $request = $request->withAttribute('user', $_SESSION['user']);
+            $user = User::find($_SESSION['user']);
+            $request = $request->withAttribute('user', $user);
         } else {
-            // If there is no user in the session, store anonymous user instance in the request.
-            $request = $request->withAttribute('user', new User(0, '', '', 0));
+            // If there is no user ID in the session, store anonymous user instance in the request.
+            $user = User::anonymous();
+            $request = $request->withAttribute('user', $user);
         }
 
         return $handler->handle($request);

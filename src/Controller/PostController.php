@@ -8,9 +8,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use TinyIB\Cache\CacheInterface;
 use TinyIB\Functions;
 use TinyIB\Model\Post;
-use TinyIB\Repository\BanRepositoryInterface;
-use TinyIB\Repository\PostRepositoryInterface;
-use TinyIB\Service\BanServiceInterface;
 use TinyIB\Service\CaptchaServiceInterface;
 use TinyIB\Service\PostServiceInterface;
 use TinyIB\Service\RendererServiceInterface;
@@ -18,39 +15,33 @@ use TinyIB\ValidationException;
 
 class PostController implements PostControllerInterface
 {
-    /** @var \TinyIB\Cache\CacheInterface $cache */
+    /** @var CacheInterface $cache */
     protected $cache;
-
-    /** @var \TinyIB\Repository\PostRepositoryInterface $post_repository */
-    protected $post_repository;
 
     /** @var CaptchaServiceInterface $captcha_service */
     protected $captcha_service;
 
-    /** @var \TinyIB\Service\PostServiceInterface $post_service */
+    /** @var PostServiceInterface $post_service */
     protected $post_service;
 
-    /** @var \TinyIB\Service\RendererServiceInterface $renderer */
+    /** @var RendererServiceInterface $renderer */
     protected $renderer;
 
     /**
      * Constructs new post controller.
      *
-     * @param \TinyIB\Cache\CacheInterface $cache
-     * @param \TinyIB\Repository\PostRepositoryInterface $post_repository
-     * @param \TinyIB\Service\CaptchaServiceInterface $captcha_service
-     * @param \TinyIB\Service\PostServiceInterface $post_service
-     * @param \TinyIB\Service\RendererServiceInterface $renderer
+     * @param CacheInterface $cache
+     * @param CaptchaServiceInterface $captcha_service
+     * @param PostServiceInterface $post_service
+     * @param RendererServiceInterface $renderer
      */
     public function __construct(
         CacheInterface $cache,
-        PostRepositoryInterface $post_repository,
         CaptchaServiceInterface $captcha_service,
         PostServiceInterface $post_service,
         RendererServiceInterface $renderer
     ) {
         $this->cache = $cache;
-        $this->post_repository = $post_repository;
         $this->captcha_service = $captcha_service;
         $this->post_service = $post_service;
         $this->renderer = $renderer;
@@ -103,7 +94,7 @@ class PostController implements PostControllerInterface
         $message = isset($data['message']) ? $data['message'] : '';
         $password = isset($data['password']) ? $data['password'] : '';
         $ip = $_SERVER['REMOTE_ADDR'];
-        $user_id = $request->getAttribute('user')->getID();
+        $user_id = $request->getAttribute('user')->id;
         $parent = isset($data['parent']) ? (int)$data['parent'] : 0;
         $rawpost = isset($data['rawpost']);
 
@@ -121,9 +112,9 @@ class PostController implements PostControllerInterface
 
         $redirect_url = '/' . TINYIB_BOARD . '/';
         if ($post->isModerated()) {
-            if (TINYIB_ALWAYSNOKO || strtolower($post->getEmail()) === 'noko') {
-                $id = $post->getID();
-                $thread_id = $post->isThread() ? $id : $post->getParentID();
+            if (TINYIB_ALWAYSNOKO || strtolower($post->email) === 'noko') {
+                $id = $post->id;
+                $thread_id = $post->isThread() ? $id : $post->parent_id;
                 $redirect_url = '/' . TINYIB_BOARD . "/res/$thread_id#$id";
             }
         }
@@ -164,12 +155,12 @@ class PostController implements PostControllerInterface
     }
 
     /**
-     * @param \TinyIB\Model\PostInterface $post
+     * @param Post $post
      * @param bool $res
      *
      * @return string
      */
-    protected function renderPost(PostInterface $post, bool $res) : string
+    protected function renderPost(Post $post, bool $res) : string
     {
         $view_model = $post->createViewModel($res);
         return $this->renderPostViewModel($view_model, $res);
@@ -201,10 +192,9 @@ class PostController implements PostControllerInterface
      */
     protected function renderThreadPage(int $id) : string
     {
-        /** @var \TinyIB\Models\PostInterface[] $posts */
-        $posts = $this->post_repository->getPostsByThreadID($id);
-        $post_vms = array_map(function ($post) {
-            /** @var \TinyIB\Models\PostInterface $post */
+        $posts = Post::getPostsByThreadID($id);
+        $post_vms = $posts->map(function ($post) {
+            /** @var Post $post */
             $view_model = $post->createViewModel(TINYIB_RESPAGE);
             if (TINYIB_CACHE === 'database') {
                 // Do not cache individual posts in database mode.
@@ -212,7 +202,7 @@ class PostController implements PostControllerInterface
                 return $view_model;
             }
 
-            $key = TINYIB_BOARD . ':post:' . $post->getID();
+            $key = TINYIB_BOARD . ':post:' . $post->id;
             $view_model['rendered'] = $this->cache->get($key);
             if ($view_model['rendered'] === null) {
                 $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_RESPAGE);
@@ -220,7 +210,7 @@ class PostController implements PostControllerInterface
             }
 
             return $view_model;
-        }, $posts);
+        });
 
         return $this->renderer->render('thread.twig', [
             'filetypes' => $this->supportedFileTypes(),
@@ -238,20 +228,20 @@ class PostController implements PostControllerInterface
      */
     protected function renderBoardPage(int $page) : string
     {
-        /** @var \TinyIB\Model\PostInterface[] $threads */
-        $threads = $this->post_repository->getThreadsByPage($page);
-        $pages = ceil($this->post_repository->getThreadCount() / TINYIB_THREADSPERPAGE) - 1;
+        $threads = Post::getThreadsByPage($page);
+        $threads_count = Post::getThreadCount();
+        $pages = ceil($threads_count / TINYIB_THREADSPERPAGE) - 1;
         $post_vms = [];
 
         foreach ($threads as $thread) {
-            $replies = $this->post_repository->getPostsByThreadID($thread->getID());
-            $omitted_count = max(0, count($replies) - TINYIB_PREVIEWREPLIES - 1);
-            $replies = array_slice($replies, -TINYIB_PREVIEWREPLIES);
-            if (empty($replies) || $replies[0]->getID() !== $thread->getID()) {
-                array_unshift($replies, $thread);
+            $replies = Post::getPostsByThreadID($thread->id);
+            $omitted_count = max(0, $replies->count() - TINYIB_PREVIEWREPLIES - 1);
+            $replies = $replies->take(-TINYIB_PREVIEWREPLIES);
+            if ($replies->count() === 0 || $replies->first()->id !== $thread->id) {
+                $replies->prepend($thread);
             }
 
-            $thread_reply_vms = array_map(function ($post) use ($omitted_count) {
+            $thread_reply_vms = $replies->map(function ($post) use ($omitted_count) {
                 /** @var \TinyIB\Models\PostInterface $post */
                 $view_model = $post->createViewModel(TINYIB_INDEXPAGE);
                 if ($post->isThread() && $omitted_count > 0) {
@@ -264,7 +254,7 @@ class PostController implements PostControllerInterface
                     return $view_model;
                 }
 
-                $key = TINYIB_BOARD . ':index_post:' . $post->getID();
+                $key = TINYIB_BOARD . ':index_post:' . $post->id;
                 $view_model['rendered'] = $this->cache->get($key);
                 if ($view_model['rendered'] === null) {
                     $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
@@ -272,9 +262,9 @@ class PostController implements PostControllerInterface
                 }
 
                 return $view_model;
-            }, $replies);
+            });
 
-            $post_vms = array_merge($post_vms, $thread_reply_vms);
+            $post_vms = collect([$post_vms, $thread_reply_vms])->collapse();
         }
 
         return $this->renderer->render('board.twig', [

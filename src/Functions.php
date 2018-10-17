@@ -2,7 +2,7 @@
 
 namespace TinyIB;
 
-use TinyIB\Model\PostInterface;
+use TinyIB\Model\Post;
 
 class Functions
 {
@@ -30,21 +30,21 @@ class Functions
     /**
      * Deletes image & thumbnail of the post.
      *
-     * @param PostInterface $post
+     * @param Post $post
      */
-    public static function deletePostImages(PostInterface $post)
+    public static function deletePostImages(Post $post)
     {
         // TODO: Exception handling & logging.
 
-        if (!empty($post->getFileName())) {
-            $path = 'src/' . $post->getFileName();
+        if (!empty($post->file)) {
+            $path = 'src/' . $post->file;
             if (file_exists($path)) {
                 unlink($path);
             }
         }
 
-        if (!empty($post->getThumbnailName())) {
-            $path = 'thumb/' . $post->getThumbnailName();
+        if (!empty($post->thumb)) {
+            $path = 'thumb/' . $post->thumb;
             if (file_exists($path)) {
                 unlink($path);
             }
@@ -113,12 +113,12 @@ class Functions
     /**
      * Checks thumbnail size.
      *
-     * @param PostInterface $post
+     * @param Post $post
      *
      * @return int[]
      *   Thumbnail size.
      */
-    public static function thumbnailDimensions(PostInterface $post)
+    public static function thumbnailDimensions(Post $post)
     {
         if ($post->isThread()) {
             $max_width = TINYIB_MAXWOP;
@@ -128,8 +128,8 @@ class Functions
             $max_height = TINYIB_MAXH;
         }
 
-        $width = $post->getImageWidth();
-        $height = $post->getImageHeight();
+        $width = $post->image_width;
+        $height = $post->image_height;
         return $width > $max_width || $height > $max_height
             ? [$max_width, $max_height]
             : [$width, $height];
@@ -379,5 +379,30 @@ class Functions
     public static function installedViaGit()
     {
         return is_dir('.git');
+    }
+
+    /**
+     * Format exception string.
+     *
+     * @param \Throwable $exception
+     *
+     * @return string
+     */
+    public static function formatException(\Throwable $exception) : string
+    {
+        $trace = $exception->getTrace();
+        $trace_lines = array_map(function ($key, $value) {
+            $file = isset($value['file']) ? basename($value['file']) : '';
+            $line = isset($value['line']) ? $value['line'] : '';
+            $function = $value['function'];
+            $args = isset($value['args']) ? implode(', ', array_map('gettype', $value['args'])) : '';
+            return "#$key $file:$line $function($args)";
+        }, array_keys($trace), $trace);
+
+        $type = get_class($exception);
+        $exception_message = $exception->getMessage();
+        $file = basename($exception->getFile());
+        $line = $exception->getLine();
+        return "$type '$exception_message' at $file:$line. Stack trace:\n" . implode("\n", $trace_lines);
     }
 }

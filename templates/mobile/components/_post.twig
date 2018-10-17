@@ -37,29 +37,29 @@
         {% endif %}
       </span>
 
-      <time class="post__date" datetime="{{ post.createTime|date('c') }}">
-        {{ post.createTime|date('d F Y H:i:s') }}
+      <time class="post__date" datetime="{{ post.createdTimestamp|date('c') }}">
+        {{ post.createdTimestamp|date('d F Y H:i:s') }}
       </time>
     </div>
   {% endblock %}
 
   {% block content %}
     <div class="post__content">
-      {% if post.fileName %}
+      {% if post.file %}
         {% set alt = 'Thumbnail #' ~ post.id %}
 
-        {% set thumb_url = base_url ~ '/thumb/' ~ post.thumbnailName %}
-        {% set thumb_w = post.thumbnailWidth %}
-        {% set thumb_h = post.thumbnailHeight %}
+        {% set thumb_url = base_url ~ '/thumb/' ~ post.thumb %}
+        {% set thumb_w = post.thumb_width %}
+        {% set thumb_h = post.thumb_height %}
 
-        {% set file_url = base_url ~ '/src/' ~ post.fileName %}
-        {% set file_w = post.imageWidth %}
+        {% set file_url = base_url ~ '/src/' ~ post.file %}
+        {% set file_w = post.image_width %}
 
         <div class="post__thumbnail">
           <a class="post__thumbnail-link" href="{{ file_url }}" target="_blank"
             data-file-type="{{ post.fileType }}"
-            data-file-width="{{ post.imageWidth }}"
-            data-file-height="{{ post.imageHeight }}">
+            data-file-width="{{ post.image_width }}"
+            data-file-height="{{ post.image_height }}">
             <img class="post__thumbnail-image" src="{{ thumb_url }}"
               width="{{ thumb_w }}" height="{{ thumb_h }}" alt="{{ alt }}" />
           </a>

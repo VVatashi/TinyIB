@@ -2,6 +2,7 @@
 
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
+use Illuminate\Database\Capsule\Manager as Capsule;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
@@ -37,20 +38,7 @@ $container = new Container();
 
 // Setup exception handling.
 set_exception_handler(function (Throwable $exception) use ($container) {
-    $trace = $exception->getTrace();
-    $trace_lines = array_map(function ($key, $value) {
-        $file = isset($value['file']) ? basename($value['file']) : '';
-        $line = isset($value['line']) ? $value['line'] : '';
-        $function = $value['function'];
-        $args = isset($value['args']) ? implode(', ', array_map('gettype', $value['args'])) : '';
-        return "#$key $file:$line $function($args)";
-    }, array_keys($trace), $trace);
-
-    $type = get_class($exception);
-    $exception_message = $exception->getMessage();
-    $file = basename($exception->getFile());
-    $line = $exception->getLine();
-    $message = "$type '$exception_message' at $file:$line. Stack trace:\n" . implode("\n", $trace_lines);
+    $message = Functions::formatException($exception);
 
     if ($container->has(LoggerInterface::class)) {
         /** @var LoggerInterface $logger */
@@ -169,6 +157,21 @@ if (TINYIB_CACHE === 'memory') {
     $container->registerType(CacheInterface::class, DatabaseCache::class);
 }
 
+$capsule = new Capsule();
+$capsule->addConnection([
+    'driver'    => TINYIB_DBDRIVER,
+    'host'      => TINYIB_DBHOST,
+    'database'  => TINYIB_DBNAME,
+    'username'  => TINYIB_DBUSERNAME,
+    'password'  => TINYIB_DBPASSWORD,
+    'charset'   => 'utf8',
+    'collation' => 'utf8_unicode_ci',
+    'prefix'    => '',
+]);
+$capsule->setAsGlobal();
+$capsule->bootEloquent();
+$container->registerInstance(Capsule::class, $capsule);
+
 $container->registerType(RouterInterface::class, Router::class);
 
 function glob_recursive($pattern, $flags = 0)
@@ -234,6 +237,7 @@ $handler = new RequestHandler(new CorsMiddleware('*', [
 
 // Add exception handler.
 $handler = new RequestHandler(new ExceptionMiddleware(
+    $container->get(LoggerInterface::class),
     $container->get(RendererServiceInterface::class)
 ), $handler);
 
