@@ -35,26 +35,26 @@
         {% endif %}
       </span>
 
-      <time class="post__date" datetime="{{ post.createTime|date('c') }}">
-        {{ post.createTime|date('d F Y H:i:s') }}
+      <time class="post__date" datetime="{{ post.createdTimestamp|date('c') }}">
+        {{ post.createdTimestamp|date('d F Y H:i:s') }}
       </time>
     </div>
   {% endblock %}
 
   {% block content %}
     <div class="post__content">
-      {% if post.fileName %}
+      {% if post.file %}
         <amp-image-lightbox id="file_{{ post.id }}" layout="nodisplay">
         </amp-image-lightbox>
 
         {% set alt = 'Thumbnail #' ~ post.id %}
 
-        {% set thumb_url = base_url ~ '/thumb/' ~ post.thumbnailName %}
-        {% set thumb_w = post.thumbnailWidth %}
-        {% set thumb_h = post.thumbnailHeight %}
+        {% set thumb_url = base_url ~ '/thumb/' ~ post.thumb %}
+        {% set thumb_w = post.thumb_width %}
+        {% set thumb_h = post.thumb_height %}
 
-        {% set file_url = base_url ~ '/src/' ~ post.fileName %}
-        {% set file_w = post.imageWidth %}
+        {% set file_url = base_url ~ '/src/' ~ post.file %}
+        {% set file_w = post.image_width %}
 
         <amp-img class="post__thumbnail"
           on="tap:file_{{ post.id }}" role="button" tabindex="0"

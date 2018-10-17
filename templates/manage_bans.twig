@@ -56,8 +56,8 @@
       {% for ban in bans %}
         <tr>
           <td>{{ ban.ip }}</td>
-          <td>{{ ban.createdDate|date }}</td>
-          <td>{{ ban.expiresDate > 0 ? ban.expiresDate|date : 'Does not expire' }}</td>
+          <td>{{ ban.createdTimestamp|date }}</td>
+          <td>{{ ban.expiresTimestamp > 0 ? ban.expiresTimestamp|date : 'Does not expire' }}</td>
           <td>{{ ban.reason ? ban.reason|e : '&nbsp;' }}</td>
           <td><a href="{{ base_url }}/manage/bans?lift={{ ban.id }}">lift</a></td>
         </tr>

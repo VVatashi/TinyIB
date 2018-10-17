@@ -9,61 +9,14 @@
 {% block content %}
   <main class="{{class is defined ? class ~ ' '}}">
     <form class="content__auth-form auth-form" method="post" action="{{ base_url }}/auth/register/submit">
-<<<<<<< HEAD
-        <ul class="auth-form__links">
-            <li><a href="{{ base_url }}/auth/login">Login</a></li>
-        </ul>
-
-        <h1 class="auth-form__header">Register</h1>
-
-	<p style="margin-bottom: 1em;"><span title="< 15.08.2018" style="text-decoration: underline; text-decoration-style: dotted;">Старая система инвайтов</span> отключена. Для доступа к доске необходимо пройти регистрацию и дождаться подтверждения учётной записи модератором.</p>
-	<p style="margin-bottom: 1em;">По любым вопросам можно писать <a href="mailto:vvatashi4259@gmail.com">vvatashi4259@gmail.com</a>, <a href="mailto:suigintoufagothread@gmail.com">suigintoufagothread@gmail.com</a>, <a href="mailto:megpoid@waifu.club">megpoid@waifu.club</a>.</p>
-
-        {% if error %}
-            <p class="auth-form__error">{{ error }}</p>
-        {% endif %}
-
-        <div class="auth-form__field">
-            <div class="auth-form__label-wrapper">
-                <label class="auth-form__label" for="email">Email</label>
-            </div>
-
-            <div class="auth-form__input-wrapper">
-                <input type="email" class="auth-form__input" id="email" name="email" placeholder="Email" value="{{ email }}" />
-            </div>
-        </div>
-
-        <div class="auth-form__field">
-            <div class="auth-form__label-wrapper">
-                <label class="auth-form__label" for="password">Password</label>
-            </div>
-
-            <div class="auth-form__input-wrapper">
-                <input type="password" class="auth-form__input" id="password" name="password" placeholder="Password" value="" />
-            </div>
-        </div>
-
-        <div class="auth-form__field">
-            <div class="auth-form__label-wrapper">
-                <label class="auth-form__label" for="captcha">CAPTCHA</label>
-            </div>
-
-            <img class="auth-form__captcha" src="{{ base_url }}/captcha" alt="CAPTCHA">
-
-            <div class="auth-form__input-wrapper">
-                <input type="text" class="auth-form__input" id="captcha" name="captcha" placeholder="CAPTCHA" value="" />
-            </div>
-        </div>
-
-        <div class="auth-form__buttons">
-            <button class="auth-form__button" type="submit">Register</button>
-        </div>
-=======
       <ul class="auth-form__links">
         <li><a href="{{ base_url }}/auth/login">Login</a></li>
       </ul>
 
       <h1 class="auth-form__header">Register</h1>
+
+      <p style="margin-bottom: 1em;">Для доступа к доске необходимо пройти регистрацию и дождаться подтверждения учётной записи модератором.</p>
+      <p style="margin-bottom: 1em;">По любым вопросам можно писать <a href="mailto:vvatashi@national.shitposting.agency">vvatashi@national.shitposting.agency</a>, <a href="mailto:suigintoufagothread@gmail.com">suigintoufagothread@gmail.com</a>, <a href="mailto:megpoid@waifu.club">megpoid@waifu.club</a>.</p>
 
       {% if error %}
         <p class="auth-form__error">{{ error }}</p>
@@ -93,7 +46,6 @@
       <div class="auth-form__buttons">
         <button class="auth-form__button" type="submit">Register</button>
       </div>
->>>>>>> origin/master
     </form>
   </main>
 {% endblock %}

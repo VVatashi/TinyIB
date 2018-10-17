@@ -8,8 +8,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use TinyIB\Cache\CacheInterface;
 use TinyIB\Functions;
 use TinyIB\Model\Post;
-use TinyIB\Repository\PostRepositoryInterface;
-use TinyIB\Service\BanServiceInterface;
 use TinyIB\Service\PostServiceInterface;
 use TinyIB\Service\RendererServiceInterface;
 use TinyIB\NotFoundException;
@@ -18,12 +16,6 @@ class MobilePostController implements MobilePostControllerInterface
 {
     /** @var \TinyIB\Cache\CacheInterface $cache */
     protected $cache;
-
-    /** @var \TinyIB\Repository\PostRepositoryInterface $post_repository */
-    protected $post_repository;
-
-    /** @var \TinyIB\Service\BanServiceInterface $ban_service */
-    protected $ban_service;
 
     /** @var \TinyIB\Service\PostServiceInterface $post_service */
     protected $post_service;
@@ -35,21 +27,15 @@ class MobilePostController implements MobilePostControllerInterface
      * Constructs new Mobile post controller.
      *
      * @param \TinyIB\Cache\CacheInterface $cache
-     * @param \TinyIB\Repository\PostRepositoryInterface $post_repository
-     * @param \TinyIB\Service\BanServiceInterface $renderer
-     * @param \TinyIB\Service\PostServiceInterface $renderer
+     * @param \TinyIB\Service\PostServiceInterface $post_service
      * @param \TinyIB\Service\RendererServiceInterface $renderer
      */
     public function __construct(
         CacheInterface $cache,
-        PostRepositoryInterface $post_repository,
-        BanServiceInterface $ban_service,
         PostServiceInterface $post_service,
         RendererServiceInterface $renderer
     ) {
         $this->cache = $cache;
-        $this->post_repository = $post_repository;
-        $this->ban_service = $ban_service;
         $this->post_service = $post_service;
         $this->renderer = $renderer;
     }
@@ -82,16 +68,15 @@ class MobilePostController implements MobilePostControllerInterface
         $headers = [];
         $content = $this->cache->get($cache_key);
         if (!isset($content)) {
-            $threads = $this->post_repository->getThreadsByPage($page);
-            $threads = array_map(function ($thread) {
-                $message = $thread->getMessage();
+            $threads = Post::getThreadsByPage($page);
+            $threads = $threads->map(function ($thread) {
+                $message = $thread->message;
                 $message = $thread->markup($message);
-                $thread->setMessage($message);
+                $thread->message = $message;
 
-                $id = $thread->getID();
-                $thread->replyCount = $this->post_repository->getReplyCountByThreadID($id);
+                $thread->replyCount = Post::getReplyCountByThreadID($thread->id);
                 return $thread;
-            }, $threads);
+            });
 
             $content = $this->renderer->render('mobile/board.twig', [
                 'title' => '/' . TINYIB_BOARD,
@@ -126,22 +111,22 @@ class MobilePostController implements MobilePostControllerInterface
         $content = $this->cache->get($cache_key);
         if (!isset($content)) {
             $limit = 50;
-            $thread = $this->post_repository->getPostByID($thread_id);
+            $thread = Post::find($thread_id);
             if (!isset($thread)) {
                 throw new NotFoundException("Thread #$thread_id not found.");
             }
 
-            $posts = $this->post_repository->getPostsByThreadID($thread_id, true, $limit, $page * $limit);
-            $posts = array_map(function ($post) use ($thread_id) {
-                $message = $post->getMessage();
+            $posts = Post::getPostsByThreadID($thread_id, true, $limit, $page * $limit);
+            $posts = $posts->map(function ($post) use ($thread_id) {
+                $message = $post->message;
                 $message = $post->markup($message);
                 $message = $this->fixLinks($message, $thread_id);
-                $post->setMessage($message);
+                $post->message = $message;
                 return $post;
-            }, $posts);
+            });
 
             $content = $this->renderer->render('mobile/thread.twig', [
-                'title' => '/' . TINYIB_BOARD . ' &ndash; ' . $thread->getSubject(),
+                'title' => '/' . TINYIB_BOARD . ' &ndash; ' . $thread->subject,
                 'board' => TINYIB_BOARDDESC,
                 'thread' => $thread,
                 'posts' => $posts,
@@ -171,7 +156,7 @@ class MobilePostController implements MobilePostControllerInterface
 
         $password = '';
         $ip = $_SERVER['REMOTE_ADDR'];
-        $user_id = $request->getAttribute('user')->getID();
+        $user_id = $request->getAttribute('user')->id;
         $parent = isset($data['parent']) ? (int)$data['parent'] : 0;
 
         $post = $this->post_service->create(
@@ -185,7 +170,7 @@ class MobilePostController implements MobilePostControllerInterface
             $parent
         );
 
-        $thread_id = $post->isThread() ? $post->getID() : $post->getParentID();
+        $thread_id = $post->isThread() ? $post->id : $post->parent_id;
         $destination = TINYIB_BASE_URL . TINYIB_BOARD . '/mobile/thread/' . $thread_id . '#footer';
 
         return new Response(303, [
@@ -206,21 +191,22 @@ class MobilePostController implements MobilePostControllerInterface
         $after = isset($query['after']) ? (int)$query['after'] : 0;
 
         $limit = 50;
-        $thread = $this->post_repository->getPostByID($thread_id);
+        $thread = Post::find($thread_id);
         if (!isset($thread)) {
             throw new NotFoundException("Thread #$thread_id not found.");
         }
 
-        $posts = $this->post_repository->getPostsByThreadID($thread_id, true, $limit, 0, [
-            ['id' => ['#op' => '>', $after]],
-        ]);
-        $posts = array_map(function ($post) use ($thread_id) {
-            $message = $post->getMessage();
+        $posts = Post::getPostsByThreadID($thread_id, true, $limit, 0);
+
+        $posts = $posts->filter(function ($post) use ($after) {
+            return $post->id > $after;
+        })->map(function ($post) use ($thread_id) {
+            $message = $post->message;
             $message = $post->markup($message);
             $message = $this->fixLinks($message, $thread_id);
-            $post->setMessage($message);
+            $post->message = $message;
             return $post;
-        }, $posts);
+        });
 
         $content = $this->renderer->render('mobile/ajax/thread.twig', [
             'posts' => $posts,

@@ -2,115 +2,85 @@
 
 namespace TinyIB\Model;
 
-class Ban implements BanInterface
+use \Illuminate\Database\Eloquent\Model;
+use \Illuminate\Database\Eloquent\SoftDeletes;
+
+/**
+ * @property int $id
+ * @property int $created_at
+ * @property int $updated_at
+ * @property int $deleted_at
+ * @property int $expires_at
+ * @property string $ip
+ * @property string $reason
+ */
+class Ban extends Model
 {
-    use ImmutableTrait;
+    use SoftDeletes;
 
-    /** @var int $id */
-    protected $id;
+    protected $table = TINYIB_DBBANS;
 
-    /** @var string $ip */
-    protected $ip;
+    protected $fillable = [
+        'ip',
+        'expires_at',
+        'reason',
+    ];
 
-    /** @var int $created_at */
-    protected $created_at;
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+        'expires_at',
+    ];
 
-    /** @var int $expires_at */
-    protected $expires_at;
-
-    /** @var string $reason */
-    protected $reason;
+    protected $dateFormat = 'U';
 
     /**
-     * {@inheritDoc}
+     * Returns created timestamp of the ban.
+     *
+     * @return int
+     *   Ban created timestamp.
      */
-    public function getID() : int
+    public function getCreatedTimestamp() : int
     {
-        return $this->id;
+        return $this->created_at->getTimestamp();
     }
 
     /**
-     * {@inheritDoc}
+     * Returns expires timestamp of the ban.
+     *
+     * @return int
+     *   Ban expires timestamp.
      */
-    public function withID(int $id) : BanInterface
+    public function getExpiresTimestamp() : int
     {
-        return $this->with('id', $id);
+        return $this->expires_at->getTimestamp();
     }
 
     /**
-     * {@inheritDoc}
-     */
-    public function getIP() : string
-    {
-        return $this->ip;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function withIP(string $ip) : BanInterface
-    {
-        return $this->with('ip', $ip);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getCreatedDate() : int
-    {
-        return $this->created_at;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function withCreatedDate(int $created_at) : BanInterface
-    {
-        return $this->with('created_at', $created_at);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getExpiresDate() : int
-    {
-        return $this->expires_at;
-    }
-
-    /**
-     * {@inheritDoc}
+     * Checks if ban is permanent.
+     *
+     * @return bool
      */
     public function isPermanent() : bool
     {
-        return $this->expires_at === 0;
+        return $this->getExpiresTimestamp() === 0;
     }
 
     /**
-     * {@inheritDoc}
+     * Checks if ban is expired.
+     *
+     * @return bool
      */
     public function isExpired() : bool
     {
-        return !$this->isPermanent() && $this->expires_at < time();
+        return !$this->isPermanent() && $this->getExpiresTimestamp() < time();
     }
 
     /**
-     * {@inheritDoc}
-     */
-    public function withExpiresDate(int $expires_at) : BanInterface
-    {
-        return $this->with('expires_at', $expires_at);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getReason() : string
-    {
-        return $this->reason;
-    }
-
-    /**
-     * {@inheritDoc}
+     * Checks if ban has a reason phrase.
+     *
+     * @return bool
      */
     public function hasReason() : bool
     {
@@ -118,27 +88,13 @@ class Ban implements BanInterface
     }
 
     /**
-     * {@inheritDoc}
+     * Removes expired bans.
      */
-    public function withReason(string $reason) : BanInterface
+    public static function removeExpired() : void
     {
-        return $this->with('reason', $reason);
-    }
-
-    /**
-     * Creates a new instance of a ban.
-     */
-    public function __construct(
-        int $id,
-        string $ip,
-        int $created_at,
-        int $expires_at,
-        string $reason = ''
-    ) {
-        $this->id = $id;
-        $this->ip = $ip;
-        $this->created_at = $created_at;
-        $this->expires_at = $expires_at;
-        $this->reason = $reason;
+        Ban::where([
+            ['expires_at', '>', 0],
+            ['expires_at', '<=', time()],
+        ])->delete();
     }
 }

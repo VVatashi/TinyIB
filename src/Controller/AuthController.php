@@ -7,8 +7,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TinyIB\Service\CaptchaServiceInterface;
 use TinyIB\Service\RendererServiceInterface;
-use TinyIB\Service\UserServiceInterface;
 use TinyIB\ValidationException;
+use TinyIB\Model\User;
 
 class AuthController implements AuthControllerInterface
 {
@@ -18,22 +18,15 @@ class AuthController implements AuthControllerInterface
     /** @var \TinyIB\Service\RendererServiceInterface $renderer */
     protected $renderer;
 
-    /** @var \TinyIB\Service\UserServiceInterface $user_service */
-    protected $user_service;
-
     /**
      * Creates a new AuthController instance.
-     *
-     * @param UserServiceInterface $service
      */
     public function __construct(
         CaptchaServiceInterface $captcha_service,
-        RendererServiceInterface $renderer,
-        UserServiceInterface $user_service
+        RendererServiceInterface $renderer
     ) {
         $this->captcha_service = $captcha_service;
         $this->renderer = $renderer;
-        $this->user_service = $user_service;
     }
 
     /**
@@ -41,7 +34,7 @@ class AuthController implements AuthControllerInterface
      */
     public function registerForm(ServerRequestInterface $request) : ResponseInterface
     {
-        /** @var \TinyIB\Model\UserInterface $user */
+        /** @var \TinyIB\Model\User $user */
         $user = $request->getAttribute('user');
         if (!$user->isAnonymous()) {
             // Allow only anonymous user access.
@@ -70,7 +63,7 @@ class AuthController implements AuthControllerInterface
      */
     public function register(ServerRequestInterface $request) : ResponseInterface
     {
-        /** @var \TinyIB\Model\UserInterface $user */
+        /** @var \TinyIB\Model\User $user */
         $user = $request->getAttribute('user');
         if (!$user->isAnonymous()) {
             // Allow only anonymous user access.
@@ -94,8 +87,8 @@ class AuthController implements AuthControllerInterface
         }
 
         try {
-            $this->user_service->register($email, $password);
-            //$this->user_service->login($email, $password);
+            User::register($email, $password);
+            //User::login($email, $password);
         }
         catch(ValidationException $e) {
             $_SESSION['error'] = $e->getMessage();
@@ -111,7 +104,7 @@ class AuthController implements AuthControllerInterface
      */
     public function loginForm(ServerRequestInterface $request) : ResponseInterface
     {
-        /** @var \TinyIB\Model\UserInterface $user */
+        /** @var \TinyIB\Model\User $user */
         $user = $request->getAttribute('user');
         if (!$user->isAnonymous()) {
             // Allow only anonymous user access.
@@ -140,7 +133,7 @@ class AuthController implements AuthControllerInterface
      */
     public function login(ServerRequestInterface $request) : ResponseInterface
     {
-        /** @var \TinyIB\Model\UserInterface $user */
+        /** @var \TinyIB\Model\User $user */
         $user = $request->getAttribute('user');
         if (!$user->isAnonymous()) {
             // Allow only anonymous user access.
@@ -164,7 +157,7 @@ class AuthController implements AuthControllerInterface
         }
 
         try {
-            $this->user_service->login($email, $password);
+            User::login($email, $password);
         }
         catch(ValidationException $e) {
             $_SESSION['error'] = $e->getMessage();
@@ -180,7 +173,7 @@ class AuthController implements AuthControllerInterface
      */
     public function logout(ServerRequestInterface $request) : ResponseInterface
     {
-        $this->user_service->logout();
+        User::logout();
 
         // Redirect to the index page.
         return new Response(302, ['Location' => '/' . TINYIB_BOARD]);

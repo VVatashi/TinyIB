@@ -3,6 +3,12 @@ import ModuleManager from '../ModuleManager';
 import { qid, qs, qsa } from '../utils/DOM';
 import * as Cookie from '../utils/Cookie';
 
+declare global {
+  interface Window {
+    dataLayer?: any;
+  }
+}
+
 export default class StyleSwitcher extends BaseModule {
   protected readonly styles: { [key: string]: string } = {};
 
@@ -43,6 +49,9 @@ export default class StyleSwitcher extends BaseModule {
         this.setStyle(style_switcher.value);
       });
     }
+
+    const selected_style = Cookie.get('tinyib_style', 'Synthwave');
+    window.dataLayer.push({ 'theme': selected_style });
   }
 
   protected setStyle(style: string) {

@@ -5,23 +5,15 @@ namespace TinyIB\Service;
 use TinyIB\AccessDeniedException;
 use TinyIB\Cache\CacheInterface;
 use TinyIB\Functions;
+use TinyIB\Model\Ban;
 use TinyIB\Model\Post;
-use TinyIB\Model\PostInterface;
 use TinyIB\NotFoundException;
-use TinyIB\Repository\BanRepositoryInterface;
-use TinyIB\Repository\PostRepositoryInterface;
 use TinyIB\ValidationException;
 
 class PostService implements PostServiceInterface
 {
     /** @var CacheInterface $cache */
     protected $cache;
-
-    /** @var BanRepositoryInterface $ban_repository */
-    protected $ban_repository;
-
-    /** @var PostRepositoryInterface $post_repository */
-    protected $post_repository;
 
     /** @var CryptographyServiceInterface $cryptography_service */
     protected $cryptography_service;
@@ -30,19 +22,13 @@ class PostService implements PostServiceInterface
      * Creates a new PostService instance.
      *
      * @param CacheInterface $cache
-     * @param BanRepositoryInterface $ban_repository
-     * @param PostRepositoryInterface $post_repository
      * @param CryptographyServiceInterface $cryptography_service
      */
     public function __construct(
         CacheInterface $cache,
-        BanRepositoryInterface $ban_repository,
-        PostRepositoryInterface $post_repository,
         CryptographyServiceInterface $cryptography_service
     ) {
         $this->cache = $cache;
-        $this->ban_repository = $ban_repository;
-        $this->post_repository = $post_repository;
         $this->cryptography_service = $cryptography_service;
     }
 
@@ -50,14 +36,14 @@ class PostService implements PostServiceInterface
      * Checks if poster IP is not banned.
      *
      * @param string $ip
-     * @param null|BanInterface &$ban
+     * @param null|Ban &$ban
      *   (Output) Ban model.
      *
      * @return bool
      */
     protected function checkBanned(string $ip, &$ban) : bool
     {
-        $ban = $this->ban_repository->getOne(['ip' => $ip]);
+        $ban = Ban::where('ip', $ip)->first();
         if (!isset($ban)) {
             return true;
         }
@@ -97,10 +83,10 @@ class PostService implements PostServiceInterface
             return true;
         }
 
-        $post = $this->post_repository->getLastPostByIP($ip);
+        $post = Post::getLastPostByIP($ip);
         if (isset($post)) {
-            /** @var \TinyIB\Model\PostInterface $post */
-            $timestamp = $post->getCreateTime();
+            /** @var Post $post */
+            $timestamp = $post->getCreatedTimestamp();
             $remains_time = TINYIB_DELAY - (time() - $timestamp);
             return $remains_time < 0;
         }
@@ -164,10 +150,10 @@ class PostService implements PostServiceInterface
     {
         return preg_replace_callback('/&gt;&gt;([0-9]+)/', function ($matches) {
             $id = (int)$matches[1];
-            $post = $this->post_repository->getPostByID($id);
+            $post = Post::find($id);
             if ($post !== null) {
-                /** @var \TinyIB\Model\PostInterface $post */
-                $thread_id = $post->isThread() ? $post->getID() : $post->getParentID();
+                /** @var \TinyIB\Model\Post $post */
+                $thread_id = $post->isThread() ? $post->id : $post->parent_id;
                 return '<a href="/' . TINYIB_BOARD . "/res/$thread_id#$id\">" . $matches[0] . '</a>';
             }
 
@@ -241,14 +227,14 @@ class PostService implements PostServiceInterface
      * Checks duplicate file.
      *
      * @param string $hash
-     * @param PostInterface[] &$posts
+     * @param Post[] &$posts
      *   (Output) Posts with the same file.
      *
      * @return bool
      */
     protected function checkDuplicateFile(string $hash, &$posts) : bool
     {
-        $posts = $this->post_repository->getPostsByHex($hash);
+        $posts = Post::getPostsByHex($hash);
         return empty($posts);
     }
 
@@ -265,7 +251,7 @@ class PostService implements PostServiceInterface
         int $user_id = 0,
         int $parent = 0,
         bool $rawpost = false
-    ) : PostInterface {
+    ) : Post {
         global $tinyib_uploads;
 
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
@@ -276,9 +262,9 @@ class PostService implements PostServiceInterface
             if (!$this->checkBanned($ip, $ban)) {
                 $expire = $ban->isPermanent()
                     ? '<br>This ban is permanent and will not expire.'
-                    : '<br>This ban will expire ' . date('y/m/d(D)H:i:s', $ban->getExpiresDate());
-                $reason = $ban->hasReason() ? '<br>Reason: ' . $ban->getReason() : '';
-                throw new ValidationException('Your IP address ' . $ban->getIP()
+                    : '<br>This ban will expire ' . date('y/m/d(D)H:i:s', $ban->getExpiresTimestamp());
+                $reason = $ban->hasReason() ? '<br>Reason: ' . $ban->reason : '';
+                throw new ValidationException('Your IP address ' . $ban->ip
                     . ' has been banned from posting on this image board.  ' . $expire . $reason);
             }
 
@@ -299,24 +285,30 @@ class PostService implements PostServiceInterface
         }
 
         if ($parent !== TINYIB_NEWTHREAD) {
-            if (!$this->post_repository->isThreadExistsByID($parent)) {
+            $thread = Post::where([
+                ['id', $parent],
+                ['parent_id', 0],
+                ['moderated', true],
+            ])->get();
+            if (!isset($thread)) {
                 throw new NotFoundException('Invalid parent thread ID supplied, unable to create post.');
             }
         }
 
-        $post = new Post($parent);
-        $post->setIP($ip);
-        $post->setUserID($user_id);
+        $post = new Post();
+        $post->parent_id = $parent;
+        $post->ip = $ip;
+        $post->user_id = $user_id;
 
         $nameAndTripcode = $this->processName($name);
-        $post->setName($this->cleanString(substr($nameAndTripcode['name'], 0, 75)));
-        $post->setTripcode($nameAndTripcode['tripcode']);
-        $post->setEmail($this->cleanString(str_replace('"', '&quot;', substr($email, 0, 75))));
-        $post->setSubject($this->cleanString(substr($subject, 0, 75)));
+        $post->name = $this->cleanString(substr($nameAndTripcode['name'], 0, 75));
+        $post->tripcode = $nameAndTripcode['tripcode'];
+        $post->email = $this->cleanString(str_replace('"', '&quot;', substr($email, 0, 75)));
+        $post->subject = $this->cleanString(substr($subject, 0, 75));
 
         if ($rawpost) {
             // Treat message as a raw HTML.
-            $post->setMessage($message);
+            $post->message = $message;
         } else {
             $message = rtrim($message);
             $message = $this->cleanString($message);
@@ -329,10 +321,10 @@ class PostService implements PostServiceInterface
                 $message = $this->dice($message);
             }
 
-            $post->setMessage($message);
+            $post->message = $message;
         }
 
-        $post->setPassword(!empty($password) ? md5(md5($password)) : '');
+        $post->password = !empty($password) ? md5(md5($password)) : '';
 
         if (isset($_FILES['file']) && !empty($_FILES['file']['name'])) {
             $file = $_FILES['file'];
@@ -353,16 +345,16 @@ class PostService implements PostServiceInterface
                 throw new ValidationException('That file is larger than ' . TINYIB_MAXKBDESC . '.');
             }
 
-            $post->setOriginalFileName(trim(htmlentities(substr($file['name'], 0, 50), ENT_QUOTES)));
-            $post->setFileHash(md5_file($file['tmp_name']));
-            $post->setFileSize($file['size']);
+            $post->file_original = trim(htmlentities(substr($file['name'], 0, 50), ENT_QUOTES));
+            $post->file_hex = md5_file($file['tmp_name']);
+            $post->file_size = $file['size'];
 
             if (TINYIB_FILE_ALLOW_DUPLICATE === false) {
                 $posts = [];
-                if (!$this->checkDuplicateFile($post->getFileHash(), $posts)) {
+                if (!$this->checkDuplicateFile($post->file_hex, $posts)) {
                     $post = current($posts);
-                    $id = $post->getID();
-                    $thread_id = $post->isThread() ? $id : $post->getParentID();
+                    $id = $post->id;
+                    $thread_id = $post->isThread() ? $id : $post->parent_id;
                     throw new ValidationException('Duplicate file uploaded.'
                         . " That file has already been posted <a href=\"res/$thread_id.html#$id\">here</a>.");
                 }
@@ -410,9 +402,9 @@ class PostService implements PostServiceInterface
             }
 
             $file_name = time() . substr(microtime(), 2, 3);
-            $post->setFileName($file_name . '.' . $tinyib_uploads[$file_mime][0]);
+            $post->file = $file_name . '.' . $tinyib_uploads[$file_mime][0];
 
-            $file_location = 'src/' . $post->getFileName();
+            $file_location = 'src/' . $post->file;
             if (!move_uploaded_file($file['tmp_name'], $file_location)) {
                 throw new \Exception('Could not copy uploaded file.');
             }
@@ -438,22 +430,22 @@ class PostService implements PostServiceInterface
                 $width = max(0, $width);
                 $height = max(0, $height);
 
-                $post->setImageWidth($width);
-                $post->setImageHeight($height);
+                $post->image_width = $width;
+                $post->image_height = $height;
 
                 if ($width > 0 && $height > 0) {
                     // Create a video thumbnail.
                     list($thumb_maxwidth, $thumb_maxheight) = Functions::thumbnailDimensions($post);
-                    $post->setThumbnailName("${file_name}s.jpg");
+                    $post->thumb = "${file_name}s.jpg";
                     $size = max($thumb_maxwidth, $thumb_maxheight);
-                    $thumb = $post->getThumbnailName();
+                    $thumb = $post->thumb;
                     shell_exec("ffmpegthumbnailer -s $size -t 00:00:00 -i $file_location -o thumb/$thumb");
 
                     $thumb_info = getimagesize("thumb/$thumb");
-                    $post->setThumbnailWidth($thumb_info[0]);
-                    $post->setThumbnailHeight($thumb_info[1]);
+                    $post->thumb_width = $thumb_info[0];
+                    $post->thumb_height = $thumb_info[1];
 
-                    if ($post->getThumbnailWidth() <= 0 || $post->getThumbnailHeight() <= 0) {
+                    if ($post->thumb_width <= 0 || $post->thumb_height <= 0) {
                         unlink($file_location);
                         unlink("thumb/$thumb");
                         throw new ValidationException('Sorry, your video appears to be corrupt.');
@@ -484,16 +476,16 @@ class PostService implements PostServiceInterface
                 }
 
                 list($width, $height) = $output;
-                $post->setImageWidth($width);
-                $post->setImageHeight($height);
+                $post->image_width = $width;
+                $post->image_height = $height;
             }
 
             if (isset($tinyib_uploads[$file_mime][1])) {
                 // Use the static thumbnail.
                 $thumbfile_split = explode('.', $tinyib_uploads[$file_mime][1]);
-                $post->setThumbnailName($file_name . 's.' . array_pop($thumbfile_split));
+                $post->thumb = $file_name . 's.' . array_pop($thumbfile_split);
 
-                $thumb = $post->getThumbnailName();
+                $thumb = $post->thumb;
                 if (!copy($tinyib_uploads[$file_mime][1], "thumb/$thumb")) {
                     unlink($file_location);
                     throw new \Exception('Could not create thumbnail.');
@@ -509,68 +501,73 @@ class PostService implements PostServiceInterface
                 'image/gif',
             ])) {
                 // Create an image thumbnail.
-                $post->setThumbnailName($file_name . 's.' . $tinyib_uploads[$file_mime][0]);
+                $post->thumb = $file_name . 's.' . $tinyib_uploads[$file_mime][0];
                 list($thumb_maxwidth, $thumb_maxheight) = Functions::thumbnailDimensions($post);
 
-                $thumb = $post->getThumbnailName();
+                $thumb = $post->thumb;
                 if (!Functions::createThumbnail($file_location, "thumb/$thumb", $thumb_maxwidth, $thumb_maxheight)) {
                     unlink($file_location);
                     throw new \Exception('Could not create thumbnail.');
                 }
             }
 
-            $thumb = $post->getThumbnailName();
+            $thumb = $post->thumb;
             if (!empty($thumb)) {
                 $thumb_info = getimagesize("thumb/$thumb");
-                $post->setThumbnailWidth($thumb_info[0]);
-                $post->setThumbnailHeight($thumb_info[1]);
+                $post->thumb_width = $thumb_info[0];
+                $post->thumb_height = $thumb_info[1];
             }
         }
 
-        if (empty($post->getFileName())) {
+        if (empty($post->file)) {
             // No file uploaded.
             if ($post->isThread() && !empty($tinyib_uploads) && !TINYIB_NOFILEOK) {
                 throw new ValidationException('A file is required to start a thread.');
             }
 
-            if (empty(str_replace('<br>', '', $post->getMessage()))) {
+            if (empty(str_replace('<br>', '', $post->message))) {
                 $allowed = !empty($tinyib_uploads) ? ' and/or upload a file' : '';
                 throw new ValidationException("Please enter a message$allowed.");
             }
         }
 
-        if (!$logged_in && ((empty($post->getFileName()) && TINYIB_REQMOD == 'files') || TINYIB_REQMOD == 'all')) {
-            $post->setModerated(false);
+        if (!$logged_in && ((empty($post->file) && TINYIB_REQMOD == 'files') || TINYIB_REQMOD == 'all')) {
+            $post->moderated = false;
+        } else {
+            $post->moderated = true;
         }
 
         $now = (new \DateTime())->getTimestamp();
-        $post->setCreateTime($now);
-        $post->setBumpTime($now);
-        $post->setID($this->post_repository->insertPost($post));
+        $post->bumped_at = $now;
+        $post->save();
 
         if ($post->isModerated()) {
-            $this->post_repository->trimThreads();
+            Post::trimThreads();
 
             if ($post->isReply()) {
-                $id = $post->getID();
+                $id = $post->id;
                 $this->cache->delete(TINYIB_BOARD . ":post:$id");
                 $this->cache->delete(TINYIB_BOARD . ":index_post:$id");
 
-                $parent = $post->getParentID();
+                $parent = $post->parent_id;
                 $this->cache->delete(TINYIB_BOARD . ":post:$parent");
                 $this->cache->delete(TINYIB_BOARD . ":index_post:$parent");
                 $this->cache->delete(TINYIB_BOARD . ":thread:$parent");
                 $this->cache->deletePattern(TINYIB_BOARD . ":mobile:thread:$parent:page:*");
                 $this->cache->deletePattern(TINYIB_BOARD . ":amp:thread:$parent:page:*");
 
-                if (strtolower($post->getEmail()) !== 'sage') {
+                if (strtolower($post->email) !== 'sage') {
                     if (TINYIB_MAXREPLIES == 0
-                        || $this->post_repository->getReplyCountByThreadID($parent) <= TINYIB_MAXREPLIES) {
-                        $this->post_repository->bumpThreadByID($parent);
+                        || Post::getReplyCountByThreadID($parent) <= TINYIB_MAXREPLIES) {
+                        $thread = Post::find($parent);
+                        if (isset($thread)) {
+                            $thread->bumped_at = time();
+                            $thread->save();
+                        }
                     }
                 }
             } else {
-                $id = $post->getID();
+                $id = $post->id;
                 $this->cache->delete(TINYIB_BOARD . ":post:$id");
                 $this->cache->delete(TINYIB_BOARD . ":index_post:$id");
                 $this->cache->delete(TINYIB_BOARD . ":thread:$id");
@@ -591,20 +588,20 @@ class PostService implements PostServiceInterface
      */
     public function delete(int $id, string $password)
     {
-        /** @var \TinyIB\Model\PostInterface $post */
-        $post = $this->post_repository->getPostByID($id);
+        /** @var Post $post */
+        $post = Post::find($id);
         if ($post === null) {
             throw new NotFoundException("Post #$id not found.");
         }
 
         $password_hash = md5(md5($password));
-        if ($password_hash !== $post->getPassword()) {
+        if ($password_hash !== $post->password) {
             throw new AccessDeniedException('Invalid password.');
         }
 
-        $this->post_repository->deletePostByID($id);
+        Post::deletePostByID($id);
 
-        $thread_id = $post->isThread() ? $id : $post->getParentID();
+        $thread_id = $post->isThread() ? $id : $post->parent_id;
         $this->cache->delete(TINYIB_BOARD . ':post:' . $id);
         $this->cache->delete(TINYIB_BOARD . ':index_post:' . $thread_id);
         $this->cache->delete(TINYIB_BOARD . ':thread:' . $thread_id);
