@@ -43,7 +43,7 @@ export default class PostForm extends BaseModule {
   }
 
   onReady() {
-    const form = qid('postform');
+    const form = qid('postform') as HTMLFormElement;
     if (!form) {
       console.warn('#postform is not found.');
       return;
@@ -130,6 +130,21 @@ export default class PostForm extends BaseModule {
         }
       });
     });
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      fetch(`${window.baseUrl}/mobile/post/create`, {
+        method: 'POST',
+        body: formData,
+      }).then(response => {
+        if (response.status < 400) {
+          form.reset();
+          this.manager.emit('updateThread');
+        }
+      });
+    })
   }
 
   onEvent(event: string, data?: any) {
