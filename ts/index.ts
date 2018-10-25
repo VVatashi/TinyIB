@@ -17,7 +17,7 @@ declare global {
   }
 }
 
-const moduleManager = new ModuleManager();
+const moduleManager = new ModuleManager(true);
 moduleManager.addModule('Captcha', new Captcha(moduleManager));
 moduleManager.addModule('CorrectTime', new CorrectTime(moduleManager));
 moduleManager.addModule('DeleteForm', new DeleteForm(moduleManager));

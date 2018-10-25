@@ -5,55 +5,48 @@ import IModule from './modules/IModule';
 export default class ModuleManager {
   protected readonly modules: { [key: string]: IModule } = {};
 
-  constructor() {
-    const observer = new MutationObserver(mutations => {
-      const posts = mutations
-        // Get added posts, if any.
-        .map(mutation => {
-          const nodeList = mutation.addedNodes;
-          const nodes = Array.prototype.slice.call(nodeList) as Node[];
+  constructor(useMutationObserver = false) {
+    if (useMutationObserver) {
+      const observer = new MutationObserver(mutations => {
+        const posts = mutations
+          // Get added posts, if any.
+          .map(mutation => {
+            const nodeList = mutation.addedNodes;
+            const nodes = Array.prototype.slice.call(nodeList) as Node[];
 
-          const elements = nodes.filter(node =>
-            node.nodeType === Node.ELEMENT_NODE) as Element[];
+            const elements = nodes.filter(node =>
+              node.nodeType === Node.ELEMENT_NODE) as Element[];
 
-          return elements
-            // If element is post itself, return it,
-            // else query for element children.
-            .map(element =>
-              element.classList.contains('post')
-                ? [element]
-                : qsa('.post', element))
-            // Flatten posts array.
-            .reduce((total, current) =>
-              total.concat(current), []);
-        })
-        // Flatten posts array.
-        .reduce((total, current) =>
-          total.concat(current), []);
+            return elements
+              // If element is post itself, return it,
+              // else query for element children.
+              .map(element =>
+                element.classList.contains('post')
+                  ? [element]
+                  : qsa('.post', element))
+              // Flatten posts array.
+              .reduce((total, current) =>
+                total.concat(current), []);
+          })
+          // Flatten posts array.
+          .reduce((total, current) =>
+            total.concat(current), []);
 
-      // Call onPostInsert() for each post x module.
-      this.forEachModule((moduleName, module) => {
-        return new Promise((resolve, reject) => {
-          try {
-            posts.forEach(post => module.onPostInsert(post));
-          }
-          catch (error) {
-            console.error(`Error in ${moduleName}.onPostInsert(): ${error}`);
-            reject(error);
-          }
+        if (posts.length > 0) {
+          this.insertPosts(posts);
+        }
+      });
 
-          resolve();
+      document.addEventListener('DOMContentLoaded', () => {
+        // Setup MutationObserver.
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true,
         });
       });
-    });
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
-      // Setup MutationObserver.
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-      });
-
       // Call onReady() for each module.
       this.forEachModule((moduleName, module) => {
         return new Promise((resolve, reject) => {
@@ -111,6 +104,25 @@ export default class ModuleManager {
         catch (error) {
           console.error(`Error in ${moduleName}.onEvent(${event}): ${error}`);
         }
+      });
+    });
+  }
+
+  insertPosts(posts: Element[]) {
+    console.debug('Inserted posts: ', posts);
+
+    // Call onPostInsert() for each post x module.
+    this.forEachModule((moduleName, module) => {
+      return new Promise((resolve, reject) => {
+        try {
+          posts.forEach(post => module.onPostInsert(post));
+        }
+        catch (error) {
+          console.error(`Error in ${moduleName}.onPostInsert(): ${error}`);
+          reject(error);
+        }
+
+        resolve();
       });
     });
   }
