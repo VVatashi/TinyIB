@@ -201,7 +201,7 @@ class ManageController implements ManageControllerInterface
         Ban::removeExpired();
 
         $query = $request->getQueryParams();
-        $id = (int)$query['lift'];
+        $id = (int)explode('/', $request->getUri()->getPath())[3];
         $ban = Ban::find($id);
         if (!isset($ban)) {
             $message = "Ban No.$id not found.";
@@ -251,9 +251,9 @@ class ManageController implements ManageControllerInterface
         $data['has_ban'] = Ban::where('ip', $post_ip)->first() !== null;
         $data['post'] = $post->createViewModel(TINYIB_INDEXPAGE);
 
-        $posts = $post->isThread() ? Post::getPostsByThreadID($post->id) : [$post];
+        $posts = $post->isThread() ? Post::getPostsByThreadID($post->id) : collect([$post]);
 
-        $data['posts'] = array_map(function ($post) {
+        $data['posts'] = $posts->map(function ($post) {
             /** @var Post $post */
             $view_model = $post->createViewModel(TINYIB_INDEXPAGE);
             if (TINYIB_CACHE === 'database') {
@@ -270,7 +270,7 @@ class ManageController implements ManageControllerInterface
             }
 
             return $view_model;
-        }, $posts);
+        });
 
         return new Response(200, [], $this->renderer->render('manage_moderate_post.twig', $data));
     }
