@@ -10,9 +10,7 @@ interface CaptchaControllerInterface
     /**
      * Returns a captcha image.
      *
-     * @param \Psr\Http\Message\ServerRequestInterface
-     *
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function captcha(ServerRequestInterface $request) : ResponseInterface;
+    public function captcha() : ResponseInterface;
 }

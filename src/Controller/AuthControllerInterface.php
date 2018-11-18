@@ -46,9 +46,7 @@ interface AuthControllerInterface
     /**
      * Returns logs out user.
      *
-     * @param \Psr\Http\Message\ResponseInterface $request
-     *
      * @return \Psr\Http\Message\ServerRequestInterface $response
      */
-    public function logout(ServerRequestInterface $request) : ResponseInterface;
+    public function logout() : ResponseInterface;
 }

@@ -133,6 +133,7 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
         $path = '/' . $path;
         $uri = $uri->withPath($path);
         $request = $request->withUri($uri);
+        $this->container->registerInstance(ServerRequestInterface::class, $request);
 
         $result = $this->dispatcher->dispatch($method, $path);
         switch ($result[0]) {
@@ -148,7 +149,8 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
                 [$controller_id, $action] = $handler;
 
                 $controller = $this->container->get($controller_id);
-                return $controller->$action($request);
+                $args = $this->container->getParameters([$controller, $action]);
+                return $controller->$action(...$args);
         }
     }
 }

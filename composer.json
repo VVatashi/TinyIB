@@ -6,7 +6,7 @@
         "predis/predis": "^1.1",
         "twig/twig": "~2.0",
         "vvatashi/bbcode": "dev-master",
-        "vvatashi/di": "dev-master",
+        "vvatashi/di": "^1.0",
         "guzzlehttp/psr7": "^1.4",
         "psr/http-server-middleware": "^1.0",
         "illuminate/database": "^5.7",
