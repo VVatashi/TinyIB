@@ -24,7 +24,7 @@ class CaptchaController implements CaptchaControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function captcha(ServerRequestInterface $request) : ResponseInterface
+    public function captcha() : ResponseInterface
     {
         // Create CAPTCHA text and store it in the session.
         $text = $this->captcha_service->getText();

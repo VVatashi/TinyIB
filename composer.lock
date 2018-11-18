@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8d515d6a15975dfdbcfbb5bfd6af260c",
+    "content-hash": "405af2aaaa9798fd4579cd7c1cbe80bf",
     "packages": [
         {
             "name": "doctrine/inflector",
@@ -476,6 +476,52 @@
                 "time"
             ],
             "time": "2018-09-20T19:36:25+00:00"
+        },
+        {
+            "name": "nikic/fast-route",
+            "version": "v1.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nikic/FastRoute.git",
+                "reference": "181d480e08d9476e61381e04a71b34dc0432e812"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nikic/FastRoute/zipball/181d480e08d9476e61381e04a71b34dc0432e812",
+                "reference": "181d480e08d9476e61381e04a71b34dc0432e812",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.8.35|~5.7"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "FastRoute\\": "src/"
+                },
+                "files": [
+                    "src/functions.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Nikita Popov",
+                    "email": "nikic@php.net"
+                }
+            ],
+            "description": "Fast request router for PHP",
+            "keywords": [
+                "router",
+                "routing"
+            ],
+            "time": "2018-02-13T20:26:39+00:00"
         },
         {
             "name": "predis/predis",
@@ -1117,16 +1163,16 @@
         },
         {
             "name": "vvatashi/di",
-            "version": "dev-master",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/VVatashi/DI.git",
-                "reference": "17056642b6886ed641ace20cd4572dc90f33f5a4"
+                "reference": "71ade9bdcb2372f2ec78f03061a9707468c87846"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/VVatashi/DI/zipball/17056642b6886ed641ace20cd4572dc90f33f5a4",
-                "reference": "17056642b6886ed641ace20cd4572dc90f33f5a4",
+                "url": "https://api.github.com/repos/VVatashi/DI/zipball/71ade9bdcb2372f2ec78f03061a9707468c87846",
+                "reference": "71ade9bdcb2372f2ec78f03061a9707468c87846",
                 "shasum": ""
             },
             "require": {
@@ -1155,42 +1201,7 @@
                     "email": "vvatashi4259@gmail.com"
                 }
             ],
-            "time": "2018-06-09T07:13:03+00:00"
-        },
-        {
-            "name": "vvatashi/router",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/VVatashi/Router.git",
-                "reference": "5a35acaa29272ea642b67cf540c435304f066b1b"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/VVatashi/Router/zipball/5a35acaa29272ea642b67cf540c435304f066b1b",
-                "reference": "5a35acaa29272ea642b67cf540c435304f066b1b",
-                "shasum": ""
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^7.2"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "VVatashi\\Router\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Nina Lisitsinskaya",
-                    "email": "vvatashi4259@gmail.com"
-                }
-            ],
-            "time": "2018-07-28T10:06:36+00:00"
+            "time": "2018-09-08T17:32:51+00:00"
         }
     ],
     "packages-dev": [
@@ -2603,9 +2614,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "vvatashi/bbcode": 20,
-        "vvatashi/di": 20,
-        "vvatashi/router": 20
+        "vvatashi/bbcode": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

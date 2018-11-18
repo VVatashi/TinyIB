@@ -131,20 +131,41 @@ export default class PostForm extends BaseModule {
       });
     });
 
-    form.addEventListener('submit', e => {
+    form.addEventListener('submit', async e => {
       e.preventDefault();
 
       const formData = new FormData(form);
-      fetch(`${window.baseUrl}/mobile/post/create`, {
+      const response = await fetch(`${window.baseUrl}/ajax/mobile/post/create`, {
         method: 'POST',
         body: formData,
-      }).then(response => {
-        if (response.status < 400) {
-          form.reset();
-          this.manager.emit('updateThread');
-        }
       });
-    })
+
+      const isOnBoardPage = qsa('.thread').length === 0;
+      if (isOnBoardPage) {
+        if (response.headers.has('Location')) {
+          window.location.href = response.headers.get('Location');
+        }
+      }
+
+      if (response.status < 400) {
+        // Clear form message and file.
+        message.value = '';
+        file_inputs.forEach(el => {
+          el.type = 'text';
+          el.value = '';
+          el.type = 'file';
+        });
+
+        // Clear form file preview.
+        qsa('.form__file-preview', form).forEach(el => el.remove());
+
+        // Refresh thread.
+        this.manager.emit('updateThread');
+      } else {
+        // TODO: show error in the form.
+        console.error(response);
+      }
+    });
   }
 
   onEvent(event: string, data?: any) {

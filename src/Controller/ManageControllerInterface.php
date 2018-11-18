@@ -10,11 +10,9 @@ interface ManageControllerInterface
     /**
      * Show status page.
      *
-     * @param \Psr\Http\Message\ServerRequestInterface
-     *
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function status(ServerRequestInterface $request) : ResponseInterface;
+    public function status() : ResponseInterface;
 
     /**
      * List bans.
@@ -82,36 +80,28 @@ interface ManageControllerInterface
     /**
      * Show raw post form.
      *
-     * @param \Psr\Http\Message\ServerRequestInterface
-     *
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function rawPost(ServerRequestInterface $request) : ResponseInterface;
+    public function rawPost() : ResponseInterface;
 
     /**
      * Rebuild all pages.
      *
-     * @param \Psr\Http\Message\ServerRequestInterface
-     *
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function rebuildAll(ServerRequestInterface $request) : ResponseInterface;
+    public function rebuildAll() : ResponseInterface;
 
     /**
      * Update TinyIB.
      *
-     * @param \Psr\Http\Message\ServerRequestInterface
-     *
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function update(ServerRequestInterface $request) : ResponseInterface;
+    public function update() : ResponseInterface;
 
     /**
      * Logout.
      *
-     * @param \Psr\Http\Message\ServerRequestInterface
-     *
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function logout(ServerRequestInterface $request) : ResponseInterface;
+    public function logout() : ResponseInterface;
 }

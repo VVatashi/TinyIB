@@ -3,7 +3,7 @@
 {% set body_attribs = 'onload="document.tinyib.managepassword.focus();"' %}
 
 {% block manage %}
-  <form id="tinyib" name="tinyib" method="post" action="{{ base_url }}/manage">
+  <form id="tinyib" name="tinyib" method="get" action="{{ base_url }}/manage">
     <fieldset>
       <legend align="center">Enter an administrator or moderator password</legend>
 

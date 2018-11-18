@@ -10,9 +10,7 @@ interface SettingsControllerInterface
     /**
      * Shows settings form.
      *
-     * @param \Psr\Http\Message\ServerRequestInterface
-     *
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function settings(ServerRequestInterface $request) : ResponseInterface;
+    public function settings() : ResponseInterface;
 }

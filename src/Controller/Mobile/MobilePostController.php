@@ -214,4 +214,39 @@ class MobilePostController implements MobilePostControllerInterface
 
         return new Response(200, [], $content);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function ajaxCreatePost(ServerRequestInterface $request) : ResponseInterface
+    {
+        $data = $request->getParsedBody();
+        $name = isset($data['name']) ? $data['name'] : '';
+        $email = isset($data['email']) ? $data['email'] : '';
+        $subject = isset($data['subject']) ? $data['subject'] : '';
+        $message = isset($data['message']) ? $data['message'] : '';
+
+        $password = '';
+        $ip = $_SERVER['REMOTE_ADDR'];
+        $user_id = $request->getAttribute('user')->id;
+        $parent = isset($data['parent']) ? (int)$data['parent'] : 0;
+
+        $post = $this->post_service->create(
+            $name,
+            $email,
+            $subject,
+            $message,
+            $password,
+            $ip,
+            $user_id,
+            $parent
+        );
+
+        $thread_id = $post->isThread() ? $post->id : $post->parent_id;
+        $destination = TINYIB_BASE_URL . TINYIB_BOARD . '/mobile/thread/' . $thread_id . '#footer';
+
+        return new Response(201, [
+            'Location' => $destination,
+        ]);
+    }
 }

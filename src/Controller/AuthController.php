@@ -171,7 +171,7 @@ class AuthController implements AuthControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function logout(ServerRequestInterface $request) : ResponseInterface
+    public function logout() : ResponseInterface
     {
         User::logout();
 

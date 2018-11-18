@@ -59,7 +59,7 @@
           <td>{{ ban.createdTimestamp|date }}</td>
           <td>{{ ban.expiresTimestamp > 0 ? ban.expiresTimestamp|date : 'Does not expire' }}</td>
           <td>{{ ban.reason ? ban.reason|e : '&nbsp;' }}</td>
-          <td><a href="{{ base_url }}/manage/bans?lift={{ ban.id }}">lift</a></td>
+          <td><a href="{{ base_url }}/manage/bans/{{ ban.id }}/lift">lift</a></td>
         </tr>
       {% endfor %}
     </table>

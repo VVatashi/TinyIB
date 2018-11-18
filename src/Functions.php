@@ -63,10 +63,10 @@ class Functions
     {
         $loggedin = false;
         $isadmin = false;
-        if (isset($_POST['managepassword'])) {
-            if ($_POST['managepassword'] === TINYIB_ADMINPASS) {
+        if (isset($_GET['managepassword'])) {
+            if ($_GET['managepassword'] === TINYIB_ADMINPASS) {
                 $_SESSION['tinyib'] = TINYIB_ADMINPASS;
-            } elseif (TINYIB_MODPASS != '' && $_POST['managepassword'] === TINYIB_MODPASS) {
+            } elseif (TINYIB_MODPASS != '' && $_GET['managepassword'] === TINYIB_MODPASS) {
                 $_SESSION['tinyib'] = TINYIB_MODPASS;
             }
         }
