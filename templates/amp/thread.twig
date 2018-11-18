@@ -50,7 +50,7 @@
         <div items class="thread__posts">
           {% for post in posts %}
             <section id="item_{{ post.id }}" class="thread__post"
-              data-sort-time="{{ post.createTime }}">
+              data-sort-time="{{ post.createdTimestamp }}">
               {% include 'amp/components/_post.twig' %}
             </section>
           {% endfor %}

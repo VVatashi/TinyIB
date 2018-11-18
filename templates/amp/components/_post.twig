@@ -36,8 +36,8 @@
         {% endif %}
       </span>
 
-      <time class="post__date" datetime="{{ post.createTime|date('c') }}">
-        {{ post.createTime|date('d F Y H:i:s') }}
+      <time class="post__date" datetime="{{ post.createdTimestamp|date('c') }}">
+        {{ post.createdTimestamp|date('d F Y H:i:s') }}
       </time>
     </div>
   {% endblock %}

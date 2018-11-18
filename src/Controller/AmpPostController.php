@@ -49,11 +49,11 @@ class AmpPostController implements AmpPostControllerInterface
         $page = isset($query['page']) ? (int)$query['page'] : 0;
 
         $threads = Post::getThreadsByPage($page);
-        $threads = array_map(function ($thread) {
+        $threads = $threads->map(function ($thread) {
             $id = $thread->id;
             $thread->replyCount = Post::getReplyCountByThreadID($id);
             return $thread;
-        }, $threads);
+        });
 
         return new Response(200, [], $this->renderer->render('amp/board.twig', [
             'amp_style' => file_get_contents(__DIR__ . '/../../webroot/css/amp.css'),
@@ -88,8 +88,8 @@ class AmpPostController implements AmpPostControllerInterface
         $inv_refmap = [];
         $own_posts = [];
 
-        $posts = array_reverse(Post::getPostsByThreadID($thread_id, true, $limit, $page * $limit));
-        $posts = array_map(function ($post) use ($thread_id, $poster_name, &$refmap, &$inv_refmap, &$own_posts) {
+        $posts = Post::getPostsByThreadID($thread_id, true, $limit, $page * $limit)->reverse();
+        $posts = $posts->map(function ($post) use ($thread_id, $poster_name, &$refmap, &$inv_refmap, &$own_posts) {
             $message = $post->message;
             $message = $post->markup($message);
             $post_id = $post->id;
@@ -118,9 +118,9 @@ class AmpPostController implements AmpPostControllerInterface
 
             $post->message = $message;
             return $post;
-        }, $posts);
+        });
 
-        $posts = array_map(function ($post) use ($refmap, $inv_refmap, $own_posts) {
+        $posts = $posts->map(function ($post) use ($refmap, $inv_refmap, $own_posts) {
             $post_id = $post->id;
             if (isset($refmap[$post_id])) {
                 $post->references = $refmap[$post_id];
@@ -131,7 +131,7 @@ class AmpPostController implements AmpPostControllerInterface
             }
 
             return $post;
-        }, $posts);
+        });
 
         $last_updated = $thread->getBumpedTimestamp();
 

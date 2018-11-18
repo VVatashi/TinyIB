@@ -47,7 +47,12 @@ class ExceptionMiddleware implements MiddlewareInterface
 			$message = Functions::formatException($exception);
 			$this->logger->critical($message);
 
-			$content = $this->renderer->render('error.twig', ['message' => "<pre>$code: $message</pre>"]);
+			if ($code < 500) {
+				// Hide exception details in the response, if it is not a server fault.
+				$message = $exception->getMessage();
+			}
+
+			$content = $this->renderer->render('error.twig', ['message' => "<pre>$code $message</pre>"]);
 			return new Response($code, [], $content);
 		}
 		catch (\Exception $exception) {

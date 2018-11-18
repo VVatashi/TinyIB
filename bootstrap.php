@@ -21,8 +21,6 @@ use TinyIB\Functions;
 use TinyIB\Service\RendererServiceInterface;
 use TinyIB\Service\RoutingServiceInterface;
 use VVatashi\DI\Container;
-use VVatashi\Router\Router;
-use VVatashi\Router\RouterInterface;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -171,8 +169,6 @@ $capsule->addConnection([
 $capsule->setAsGlobal();
 $capsule->bootEloquent();
 $container->registerInstance(Capsule::class, $capsule);
-
-$container->registerType(RouterInterface::class, Router::class);
 
 function glob_recursive($pattern, $flags = 0)
 {

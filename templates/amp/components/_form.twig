@@ -11,7 +11,7 @@
   </script>
 </amp-state>
 
-<form id="form" class="thread__form form" method="POST" target="_top"
+<form id="form" class="thread__form form" method="POST" target="_top" enctype="multipart/form-data"
   action-xhr="{{ base_url }}/amp/post{{ name ? '?name=' ~ name }}" on="tap:AMP.setState({})">
 
   <input type="hidden" name="parent" value="{{ parent|default(0) }}" />

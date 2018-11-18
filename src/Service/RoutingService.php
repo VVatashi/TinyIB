@@ -2,11 +2,12 @@
 
 namespace TinyIB\Service;
 
-use GuzzleHttp\Psr7\Response;
+use FastRoute\Dispatcher;
+use FastRoute\RouteCollector;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use TinyIB\Cache\CacheInterface;
 use TinyIB\Controller\Admin\UserCrudControllerInterface;
 use TinyIB\Controller\AmpPostControllerInterface;
 use TinyIB\Controller\AuthControllerInterface;
@@ -15,109 +16,77 @@ use TinyIB\Controller\ManageControllerInterface;
 use TinyIB\Controller\PostControllerInterface;
 use TinyIB\Controller\SettingsControllerInterface;
 use TinyIB\NotFoundException;
-use VVatashi\Router\RouterInterface;
 
 class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
 {
-    /** @var \VVatashi\Router\RouterInterface $router */
-    protected $router;
+    /** @var ContainerInterface $container */
+    protected $container;
 
-    /** @var \TinyIB\Controller\AuthControllerInterface $auth_controller */
-    protected $auth_controller;
-
-    /** @var \TinyIB\Controller\UserCrudControllerInterface $user_crud_controller */
-    protected $user_crud_controller;
-
-    /** @var \TinyIB\Controller\ManageControllerInterface $manage_controller */
-    protected $manage_controller;
-
-    /** @var \TinyIB\Controller\PostControllerInterface $post_controller */
-    protected $post_controller;
-
-    /** @var \TinyIB\Controller\AmpPostControllerInterface $amp_post_controller */
-    protected $amp_post_controller;
-
-    /** @var \TinyIB\Controller\SettingsControllerInterface $settings_controller */
-    protected $settings_controller;
-
-    /** @var \TinyIB\Controller\CaptchaControllerInterface $captcha_controller */
-    protected $captcha_controller;
+    /** @var Dispatcher $dispatcher */
+    protected $dispatcher;
 
     /**
      * Creates a new RoutingService instance.
      */
     public function __construct(
-        RouterInterface $router,
-        AuthControllerInterface $auth_controller,
-        UserCrudControllerInterface $user_crud_controller,
-        CaptchaControllerInterface $captcha_controller,
-        ManageControllerInterface $manage_controller,
-        PostControllerInterface $post_controller,
-        AmpPostControllerInterface $amp_post_controller,
-        SettingsControllerInterface $settings_controller
+        ContainerInterface $container
     ) {
-        $this->router = $router;
-        $this->auth_controller = $auth_controller;
-        $this->user_crud_controller = $user_crud_controller;
-        $this->captcha_controller = $captcha_controller;
-        $this->manage_controller = $manage_controller;
-        $this->post_controller = $post_controller;
-        $this->amp_post_controller = $amp_post_controller;
-        $this->settings_controller = $settings_controller;
+        $this->container = $container;
 
-        $this->router->add('auth/register', [$this->auth_controller, 'registerForm']);
-        $this->router->add('auth/register/submit', [$this->auth_controller, 'register']);
-        $this->router->add('auth/login', [$this->auth_controller, 'loginForm']);
-        $this->router->add('auth/login/submit', [$this->auth_controller, 'login']);
-        $this->router->add('auth/logout', [$this->auth_controller, 'logout']);
+        $this->dispatcher = \FastRoute\simpleDispatcher(function (RouteCollector $routes) {
+            $routes->addGroup('/auth', function (RouteCollector $routes) {
+                $routes->addRoute('GET',  '/register', [AuthControllerInterface::class, 'registerForm']);
+                $routes->addRoute('POST', '/register', [AuthControllerInterface::class, 'register']);
+                $routes->addRoute('GET',  '/login',    [AuthControllerInterface::class, 'loginForm']);
+                $routes->addRoute('POST', '/login',    [AuthControllerInterface::class, 'login']);
+                $routes->addRoute('GET',  '/logout',   [AuthControllerInterface::class, 'logout']);
+            });
 
-        $this->router->add('admin/user', [$this->user_crud_controller, 'list']);
-        $this->router->add('admin/user/create', [$this->user_crud_controller, 'createForm']);
-        $this->router->add('admin/user/create/submit', [$this->user_crud_controller, 'create']);
-        $this->router->add('admin/user/:id', [$this->user_crud_controller, 'show']);
-        $this->router->add('admin/user/:id/edit', [$this->user_crud_controller, 'editForm']);
-        $this->router->add('admin/user/:id/edit/submit', [$this->user_crud_controller, 'edit']);
-        $this->router->add('admin/user/:id/delete', [$this->user_crud_controller, 'deleteConfirm']);
-        $this->router->add('admin/user/:id/delete/submit', [$this->user_crud_controller, 'delete']);
+            $routes->addGroup('/admin', function (RouteCollector $routes) {
+                $routes->addGroup('/user', function (RouteCollector $routes) {
+                    $routes->addRoute('GET',  '',                        [UserCrudControllerInterface::class, 'list']);
+                    $routes->addRoute('GET',  '/create',                 [UserCrudControllerInterface::class, 'createForm']);
+                    $routes->addRoute('POST', '/create/submit',          [UserCrudControllerInterface::class, 'create']);
+                    $routes->addRoute('GET',  '/{id:\d+}',               [UserCrudControllerInterface::class, 'show']);
+                    $routes->addRoute('GET',  '/{id:\d+}/edit',          [UserCrudControllerInterface::class, 'editForm']);
+                    $routes->addRoute('POST', '/{id:\d+}/edit/submit',   [UserCrudControllerInterface::class, 'edit']);
+                    $routes->addRoute('GET',  '/{id:\d+}/delete',        [UserCrudControllerInterface::class, 'deleteConfirm']);
+                    $routes->addRoute('POST', '/{id:\d+}/delete/submit', [UserCrudControllerInterface::class, 'delete']);
+                });
+            });
 
-        $this->router->add('captcha', [$this->captcha_controller, 'captcha']);
+            $routes->addGroup('/manage', function (RouteCollector $routes) {
+                $routes->addRoute('GET',  '',                    [ManageControllerInterface::class, 'status']);
+                $routes->addRoute('GET',  '/rebuildall',         [ManageControllerInterface::class, 'rebuildAll']);
+                $routes->addRoute('GET',  '/approve/{id:\d+}',   [ManageControllerInterface::class, 'approve']);
+                $routes->addRoute('GET',  '/bans',               [ManageControllerInterface::class, 'listBans']);
+                $routes->addRoute('POST', '/bans',               [ManageControllerInterface::class, 'addBan']);
+                $routes->addRoute('GET',  '/bans/{id:\d+}/lift', [ManageControllerInterface::class, 'liftBan']);
+                $routes->addRoute('GET',  '/delete/{id:\d+}',    [ManageControllerInterface::class, 'delete']);
+                $routes->addRoute('GET',  '/logout',             [ManageControllerInterface::class, 'logout']);
+                $routes->addRoute('GET',  '/moderate',           [ManageControllerInterface::class, 'moderate']);
+                $routes->addRoute('GET',  '/moderate/{id:\d+}',  [ManageControllerInterface::class, 'moderate']);
+                $routes->addRoute('GET',  '/rawpost',            [ManageControllerInterface::class, 'rawPost']);
+                $routes->addRoute('GET',  '/sticky/{id:\d+}',    [ManageControllerInterface::class, 'setSticky']);
+                $routes->addRoute('GET',  '/update',             [ManageControllerInterface::class, 'update']);
+            });
 
-        $this->router->add('manage', [$this->manage_controller, 'status']);
-        $this->router->add('manage/rebuildall', [$this->manage_controller, 'rebuildAll']);
-        $this->router->add('manage/approve/:id', [$this->manage_controller, 'approve']);
+            $routes->addGroup('/amp', function (RouteCollector $routes) {
+                $routes->addRoute('GET',  '',                 [AmpPostControllerInterface::class, 'index']);
+                $routes->addRoute('GET',  '/thread/{id:\d+}', [AmpPostControllerInterface::class, 'thread']);
+                $routes->addRoute('POST', '/post',            [AmpPostControllerInterface::class, 'createPost']);
+                $routes->addRoute('GET',  '/form-state',      [AmpPostControllerInterface::class, 'formState']);
+            });
 
-        $this->router->add('manage/bans', function (ServerRequestInterface $request) {
-            $data = $request->getParsedBody();
-            $query = $request->getQueryParams();
-            if (!empty($data['ip'])) {
-                return $this->manage_controller->addBan($request);
-            } elseif (!empty($query['lift'])) {
-                return $this->manage_controller->liftBan($request);
-            } else {
-                return $this->manage_controller->listBans($request);
-            }
+            $routes->addRoute('GET', '/captcha',  [CaptchaControllerInterface::class,  'captcha']);
+            $routes->addRoute('GET', '/settings', [SettingsControllerInterface::class, 'settings']);
+
+            $routes->addRoute('GET',  '/',             [PostControllerInterface::class, 'board']);
+            $routes->addRoute('GET',  '/{page:\d+}',   [PostControllerInterface::class, 'board']);
+            $routes->addRoute('GET',  '/res/{id:\d+}', [PostControllerInterface::class, 'thread']);
+            $routes->addRoute('POST', '/post/create',  [PostControllerInterface::class, 'create']);
+            $routes->addRoute('POST', '/post/delete',  [PostControllerInterface::class, 'delete']);
         });
-
-        $this->router->add('manage/delete/:id', [$this->manage_controller, 'delete']);
-        $this->router->add('manage/logout', [$this->manage_controller, 'logout']);
-        $this->router->add('manage/moderate', [$this->manage_controller, 'moderate']);
-        $this->router->add('manage/moderate/:id', [$this->manage_controller, 'moderate']);
-        $this->router->add('manage/rawpost', [$this->manage_controller, 'rawPost']);
-        $this->router->add('manage/sticky/:id', [$this->manage_controller, 'setSticky']);
-        $this->router->add('manage/update', [$this->manage_controller, 'update']);
-
-        $this->router->add('', [$this->post_controller, 'board']);
-        $this->router->add(':page', [$this->post_controller, 'board']);
-        $this->router->add('res/:id', [$this->post_controller, 'thread']);
-        $this->router->add('post/create', [$this->post_controller, 'create']);
-        $this->router->add('post/delete', [$this->post_controller, 'delete']);
-
-        $this->router->add('amp', [$this->amp_post_controller, 'index']);
-        $this->router->add('amp/post', [$this->amp_post_controller, 'createPost']);
-        $this->router->add('amp/form-state', [$this->amp_post_controller, 'formState']);
-        $this->router->add('amp/thread/:id', [$this->amp_post_controller, 'thread']);
-
-        $this->router->add('settings', [$this->settings_controller, 'settings']);
     }
 
     /**
@@ -126,9 +95,10 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
     public function handle(ServerRequestInterface $request) : ResponseInterface
     {
         $uri = $request->getUri();
+        $method = $request->getMethod();
         $path = $uri->getPath();
 
-        // Remove board params.
+        // Remove board prefix.
         $prefix = '/' . TINYIB_BOARD . '/';
         $prefix_length = strlen($prefix);
         if (strncmp($path, $prefix, $prefix_length) === 0) {
@@ -148,14 +118,25 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
             $path = substr($path, 0, -1);
         }
 
-        $uri = $uri->withPath('/' . $path);
+        $path = '/' . $path;
+        $uri = $uri->withPath($path);
         $request = $request->withUri($uri);
 
-        $handler = $this->router->resolve($path);
-        if (!isset($handler)) {
-            throw new NotFoundException();
-        }
+        $result = $this->dispatcher->dispatch($method, $path);
+        switch ($result[0]) {
+            default:
+            case Dispatcher::NOT_FOUND:
+            case Dispatcher::METHOD_NOT_ALLOWED:
+                throw new NotFoundException();
 
-        return $handler($request);
+            case Dispatcher::FOUND:
+                $handler = $result[1];
+                $args = $result[2];
+
+                [$controller_id, $action] = $handler;
+
+                $controller = $this->container->get($controller_id);
+                return $controller->$action($request);
+        }
     }
 }
