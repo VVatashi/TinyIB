@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2050341022ef8dcae10b59e94783f9c6",
+    "content-hash": "405af2aaaa9798fd4579cd7c1cbe80bf",
     "packages": [
         {
             "name": "doctrine/inflector",
@@ -1163,16 +1163,16 @@
         },
         {
             "name": "vvatashi/di",
-            "version": "dev-master",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/VVatashi/DI.git",
-                "reference": "17056642b6886ed641ace20cd4572dc90f33f5a4"
+                "reference": "71ade9bdcb2372f2ec78f03061a9707468c87846"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/VVatashi/DI/zipball/17056642b6886ed641ace20cd4572dc90f33f5a4",
-                "reference": "17056642b6886ed641ace20cd4572dc90f33f5a4",
+                "url": "https://api.github.com/repos/VVatashi/DI/zipball/71ade9bdcb2372f2ec78f03061a9707468c87846",
+                "reference": "71ade9bdcb2372f2ec78f03061a9707468c87846",
                 "shasum": ""
             },
             "require": {
@@ -1201,7 +1201,7 @@
                     "email": "vvatashi4259@gmail.com"
                 }
             ],
-            "time": "2018-06-09T07:13:03+00:00"
+            "time": "2018-09-08T17:32:51+00:00"
         }
     ],
     "packages-dev": [
@@ -2614,8 +2614,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "vvatashi/bbcode": 20,
-        "vvatashi/di": 20
+        "vvatashi/bbcode": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

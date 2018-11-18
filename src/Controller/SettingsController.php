@@ -31,7 +31,7 @@ class SettingsController implements SettingsControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function settings(ServerRequestInterface $request) : ResponseInterface
+    public function settings() : ResponseInterface
     {
         return new Response(200, [], $this->renderer->render('settings.twig'));
     }

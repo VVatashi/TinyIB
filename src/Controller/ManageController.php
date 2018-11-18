@@ -51,7 +51,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function status(ServerRequestInterface $request) : ResponseInterface
+    public function status() : ResponseInterface
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -419,7 +419,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function rawPost(ServerRequestInterface $request) : ResponseInterface
+    public function rawPost() : ResponseInterface
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -439,7 +439,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function rebuildAll(ServerRequestInterface $request) : ResponseInterface
+    public function rebuildAll() : ResponseInterface
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -465,7 +465,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function update(ServerRequestInterface $request) : ResponseInterface
+    public function update() : ResponseInterface
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -489,7 +489,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function logout(ServerRequestInterface $request) : ResponseInterface
+    public function logout() : ResponseInterface
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
