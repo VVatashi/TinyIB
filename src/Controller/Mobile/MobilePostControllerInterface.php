@@ -33,4 +33,22 @@ interface MobilePostControllerInterface
      * @return \Psr\Http\Message\ResponseInterface
      */
     public function createPost(ServerRequestInterface $request) : ResponseInterface;
+
+    /**
+     * Returns a thread HTML.
+     *
+     * @param \Psr\Http\Message\ServerRequestInterface
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function ajaxThread(ServerRequestInterface $request) : ResponseInterface;
+
+    /**
+     * Creates a post.
+     *
+     * @param \Psr\Http\Message\ServerRequestInterface
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function ajaxCreatePost(ServerRequestInterface $request) : ResponseInterface;
 }

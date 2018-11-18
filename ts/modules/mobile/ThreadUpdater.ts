@@ -8,44 +8,53 @@ export default class ThreadUpdater extends PostModule {
 
   protected latestPostId = 0;
   protected intervalId = NaN;
+  protected isLoadingPosts = false;
 
   constructor(manager: ModuleManager) {
     super(manager);
   }
 
   protected processPost(post: Element) {
-    const id = post.getAttribute('data-post-id');
-    this.latestPostId = Math.max(this.latestPostId, +id);
+    const id = +post.getAttribute('data-post-id');
+    this.latestPostId = Math.max(this.latestPostId, id);
   }
 
-  protected checkNewPosts(thread: Element) {
+  protected async checkNewPosts(thread: Element) {
+    if (this.isLoadingPosts) {
+      return;
+    }
+
+    this.isLoadingPosts = true;
+
     const threadId = +thread.getAttribute('data-thread-id');
     const latestPostId = this.latestPostId;
-    axios.get(`${window.baseUrl}/ajax/mobile/thread/${threadId}?after=${latestPostId}`)
-      .then(result => {
-        const postsWrapper = qs('.thread__posts', thread);
-        if (postsWrapper && result.data && result.data.length) {
-          // Fade-in new posts.
-          const newPostsWrapper = document.createElement('div');
-          newPostsWrapper.classList.add('fadable', 'fade');
-          newPostsWrapper.insertAdjacentHTML('beforeend', result.data);
-          postsWrapper.appendChild(newPostsWrapper);
+    const response = await axios.get(`${window.baseUrl}/ajax/mobile/thread/${threadId}?after=${latestPostId}`);
+    const postsWrapper = qs('.thread__posts', thread);
+    if (postsWrapper && response.data && response.data.length) {
+      postsWrapper.insertAdjacentHTML('beforeend', response.data);
 
-          this.manager.insertPosts(qsa('.post', newPostsWrapper));
+      const newPosts = qsa('.post', postsWrapper)
+        .filter(post => {
+          const id = +post.getAttribute('data-post-id');
+          return id > latestPostId;
+        });
 
-          setTimeout(() => {
-            newPostsWrapper.classList.remove('fade');
-          }, 100);
+      // Fade-in new posts.
+      newPosts.forEach(post => post.classList.add('fadable', 'fade'));
+      setTimeout(() => {
+        newPosts.forEach(post => post.classList.remove('fade'));
+      }, 100);
 
-          // Remove old posts.
-          const posts = qsa('.thread__post', postsWrapper);
-          for (let i = 0; i < posts.length - 50; ++i) {
-            posts[i].remove();
-          }
+      this.manager.insertPosts(newPosts);
 
-          // TODO: add check for empty post wrappers.
-        }
-      });
+      // Remove old posts.
+      const posts = qsa('.thread__post', postsWrapper);
+      for (let i = 0; i < posts.length - 50; ++i) {
+        posts[i].remove();
+      }
+    }
+
+    this.isLoadingPosts = false;
   }
 
   protected clearInterval() {
@@ -57,7 +66,6 @@ export default class ThreadUpdater extends PostModule {
   protected setInterval() {
     const thread = qs('.thread');
     if (!thread) {
-      console.warn('.thread is not found.');
       return;
     }
 
