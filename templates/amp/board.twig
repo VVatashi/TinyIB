@@ -9,7 +9,7 @@
         </li>
       {% else %}
         <li class="breadcrumbs__item">
-          <a class="breadcrumbs__link" href="{{ base_url }}/amp{{ name ? '?name=' ~ name }}">{{ board }}</a>
+          <a class="breadcrumbs__link" href="{{ base_url }}/amp">{{ board }}</a>
         </li>
 
         <li class="breadcrumbs__item">
@@ -23,13 +23,9 @@
 {% block content %}
   {% spaceless %}
     <article class="board">
-      {% if page == 0 %}
-        {% include 'amp/components/_form.twig' %}
-      {% endif %}
-
       {% if page > 0 %}
         <div class="board__pagination">
-          <a href="?page={{ page - 1 }}{{ name ? '&name=' ~ name }}">Show newer threads</a>
+          <a href="?page={{ page - 1 }}">Show newer threads</a>
         </div>
       {% endif %}
 
@@ -43,9 +39,19 @@
 
       {% if threads|length == limit %}
         <div class="board__pagination">
-          <a href="?page={{ page + 1 }}{{ name ? '&name=' ~ name }}">Show older threads</a>
+          <a href="?page={{ page + 1 }}">Show older threads</a>
         </div>
       {% endif %}
     </article>
   {% endspaceless %}
+{% endblock %}
+
+{% block footer_links %}
+  {{ parent() }}
+
+  <li class="links__item">
+    <a class="links__link" href="{{ base_url }}/mobile{{ page != 0 ? '?page=' ~ page }}">
+      Mobile version
+    </a>
+  </li>
 {% endblock %}

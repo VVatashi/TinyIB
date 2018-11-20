@@ -9,7 +9,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use TinyIB\Controller\Admin\UserCrudControllerInterface;
-use TinyIB\Controller\AmpPostControllerInterface;
+use TinyIB\Controller\Amp\AmpPostControllerInterface;
+use TinyIB\Controller\Mobile\MobilePostControllerInterface;
 use TinyIB\Controller\AuthControllerInterface;
 use TinyIB\Controller\CaptchaControllerInterface;
 use TinyIB\Controller\ManageControllerInterface;
@@ -71,11 +72,22 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
                 $routes->addRoute('GET',  '/update',             [ManageControllerInterface::class, 'update']);
             });
 
+            $routes->addGroup('/ajax', function (RouteCollector $routes) {
+                $routes->addGroup('/mobile', function (RouteCollector $routes) {
+                    $routes->addRoute('GET',  '/thread/{id:\d+}', [MobilePostControllerInterface::class, 'ajaxThread']);
+                    $routes->addRoute('POST', '/post/create',     [MobilePostControllerInterface::class, 'ajaxCreatePost']);
+                });
+            });
+
             $routes->addGroup('/amp', function (RouteCollector $routes) {
-                $routes->addRoute('GET',  '',                 [AmpPostControllerInterface::class, 'index']);
-                $routes->addRoute('GET',  '/thread/{id:\d+}', [AmpPostControllerInterface::class, 'thread']);
-                $routes->addRoute('POST', '/post',            [AmpPostControllerInterface::class, 'createPost']);
-                $routes->addRoute('GET',  '/form-state',      [AmpPostControllerInterface::class, 'formState']);
+                $routes->addRoute('GET', '',                 [AmpPostControllerInterface::class, 'index']);
+                $routes->addRoute('GET', '/thread/{id:\d+}', [AmpPostControllerInterface::class, 'thread']);
+            });
+
+            $routes->addGroup('/mobile', function (RouteCollector $routes) {
+                $routes->addRoute('GET',  '',                 [MobilePostControllerInterface::class, 'index']);
+                $routes->addRoute('GET',  '/thread/{id:\d+}', [MobilePostControllerInterface::class, 'thread']);
+                $routes->addRoute('POST', '/post/create',     [MobilePostControllerInterface::class, 'createPost']);
             });
 
             $routes->addRoute('GET', '/captcha',  [CaptchaControllerInterface::class,  'captcha']);

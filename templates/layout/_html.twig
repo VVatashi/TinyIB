@@ -23,7 +23,15 @@
         {% block content %}{% endblock %}
       {% endwith %}
 
-      {% include 'layout/_footer.twig' with {'class': 'layout__footer'} %}
+      <footer class="layout__footer footer">
+        <ul class="footer__list">
+          {% block footer_links %}
+            <li class="footer__list-item">
+              <a class="footer__link" href="{{ base_url }}/mobile">Mobile version</a>
+            </li>
+          {% endblock %}
+        </ul>
+      </footer>
     </div>
   </body>
 </html>

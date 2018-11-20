@@ -11,6 +11,7 @@ module.exports = {
     }],
   },
   externals: {
+    axios: 'axios',
     luxon: 'luxon',
   },
   resolve: {

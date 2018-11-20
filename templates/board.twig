@@ -3,13 +3,8 @@
 {% block head %}
   {{ parent() }}
 
-  {% if this_page == 0 %}
-    <link rel="canonical" href="{{ base_url }}" />
-    <link rel="amphtml" href="{{ base_url }}/amp" />
-  {% else %}
-    <link rel="canonical" href="{{ base_url }}/{{ this_page }}" />
-    <link rel="amphtml" href="{{ base_url }}/amp?page={{ this_page }}" />
-  {% endif %}
+  <link rel="canonical" href="{{ base_url }}{{ this_page ? '/' ~ this_page  }}" />
+  <link rel="amphtml" href="{{ base_url }}/amp{{ this_page ? '?page=' ~ this_page }}" />
 {% endblock %}
 
 {% block content %}
@@ -40,4 +35,10 @@
 
     {% include 'components/_pager.twig' with {'class': 'content__pager'} %}
   </main>
+{% endblock %}
+
+{% block footer_links %}
+  <li class="footer__list-item">
+    <a class="footer__link" href="{{ base_url }}/mobile{{ this_page ? '?page=' ~ this_page }}">Mobile version</a>
+  </li>
 {% endblock %}

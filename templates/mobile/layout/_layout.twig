@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <title>{{ title }}</title>
+    <link rel="canonical" href="{{ base_url }}" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1" />
+
+    <link rel="shortcut icon" href="{{ base_url }}/favicon.ico" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans" />
+
+    <link rel="stylesheet" type="text/css"
+      href="{{ base_url }}/css/mobile.css?mtime={{ mtime('css/mobile.css') }}" />
+
+    {% if constant('TINYIB_GTM') %}
+      <!-- Google Tag Manager -->
+      <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','{{ constant('TINYIB_GTM') }}');</script>
+      <!-- End Google Tag Manager -->
+    {% endif %}
+
+    <script src="{{ base_url }}/js/vendor/axios.min.js?mtime={{ mtime('js/vendor/axios.min.js') }}"></script>
+    <script src="{{ base_url }}/js/vendor/luxon.min.js?mtime={{ mtime('js/vendor/luxon.min.js') }}"></script>
+    <script>window.baseUrl = '{{ base_url }}';</script>
+    <script src="{{ base_url }}/js/mobile.js?mtime={{ mtime('js/mobile.js') }}"></script>
+  </head>
+
+  <body>
+    {% if constant('TINYIB_GTM') %}
+      <!-- Google Tag Manager (noscript) -->
+      <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ constant('TINYIB_GTM') }}"
+      height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+      <!-- End Google Tag Manager (noscript) -->
+    {% endif %}
+
+    <div class="layout">
+      <header id="header" class="layout__header">
+        <div class="layout__page-nav layout__page-nav--top">
+          <a class="layout__page-nav-link" href="#footer" title="Go to the page bottom">▼</a>
+        </div>
+
+        {% block breadcrumbs %}
+        {% endblock %}
+      </header>
+
+      <main class="layout__content">
+        {% block content %}
+        {% endblock %}
+      </main>
+
+      <footer id="footer" class="layout__footer">
+        <div class="layout__page-nav layout__page-nav--bottom">
+          <a class="layout__page-nav-link" href="#header" title="Go to the page top">▲</a>
+        </div>
+
+        <ul class="links">
+          {% block footer_links %}
+          {% endblock %}
+        </ul>
+      </footer>
+    </div>
+  </body>
+</html>

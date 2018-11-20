@@ -1,11 +1,11 @@
 <?php
 
-namespace TinyIB\Controller;
+namespace TinyIB\Controller\Mobile;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-interface AmpPostControllerInterface
+interface MobilePostControllerInterface
 {
     /**
      * Returns an index page.
@@ -33,4 +33,22 @@ interface AmpPostControllerInterface
      * @return \Psr\Http\Message\ResponseInterface
      */
     public function createPost(ServerRequestInterface $request) : ResponseInterface;
+
+    /**
+     * Returns a thread HTML.
+     *
+     * @param \Psr\Http\Message\ServerRequestInterface
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function ajaxThread(ServerRequestInterface $request) : ResponseInterface;
+
+    /**
+     * Creates a post.
+     *
+     * @param \Psr\Http\Message\ServerRequestInterface
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function ajaxCreatePost(ServerRequestInterface $request) : ResponseInterface;
 }

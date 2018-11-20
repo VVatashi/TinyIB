@@ -1,0 +1,75 @@
+<div id="post_{{ post.id }}" class="post" data-post-id="{{ post.id }}">
+  {% block header %}
+    <div class="post__header">
+      <span class="post__id">
+        <a class="post__id-link" href="#post_{{ post.id }}" data-post-id="{{ post.id }}">
+          №{{ post.id }}
+        </a>
+      </span>
+
+      {% if post.subject %}
+        <span class="post__subject">{{ post.subject }}</span>
+      {% endif %}
+
+      <span class="post__author">
+        {% if post.email %}
+          <a class="post__email" href="mailto:{{ post.email }}">
+            {% if post.name %}
+              <span class="post__name">{{ post.name }}</span>
+            {% elseif not post.tripcode %}
+              <span class="post__name">Anonymous</span>
+            {% endif %}
+
+            {% if post.tripcode %}
+              <span class="post__tripcode">!{{ post.tripcode }}</span>
+            {% endif %}
+          </a>
+        {% else %}
+          {% if post.name %}
+            <span class="post__name">{{ post.name }}</span>
+          {% elseif not post.tripcode %}
+            <span class="post__name">Anonymous</span>
+          {% endif %}
+
+          {% if post.tripcode %}
+            <span class="post__tripcode">!{{ post.tripcode }}</span>
+          {% endif %}
+        {% endif %}
+      </span>
+
+      <time class="post__date" datetime="{{ post.createdTimestamp|date('c') }}">
+        {{ post.createdTimestamp|date('d F Y H:i:s') }}
+      </time>
+    </div>
+  {% endblock %}
+
+  {% block content %}
+    <div class="post__content">
+      {% if post.file %}
+        {% set alt = 'Thumbnail #' ~ post.id %}
+
+        {% set thumb_url = base_url ~ '/thumb/' ~ post.thumb %}
+        {% set thumb_w = post.thumb_width %}
+        {% set thumb_h = post.thumb_height %}
+
+        {% set file_url = base_url ~ '/src/' ~ post.file %}
+        {% set file_w = post.image_width %}
+
+        <div class="post__thumbnail">
+          <a class="post__thumbnail-link" href="{{ file_url }}" target="_blank"
+            data-file-type="{{ post.fileType }}"
+            data-file-width="{{ post.image_width }}"
+            data-file-height="{{ post.image_height }}">
+            <img class="post__thumbnail-image" src="{{ thumb_url }}"
+              width="{{ thumb_w }}" height="{{ thumb_h }}" alt="{{ alt }}" />
+          </a>
+        </div>
+      {% endif %}
+
+      <div class="post__message">{{ post.message }}</div>
+    </div>
+  {% endblock %}
+
+  {% block footer %}
+  {% endblock %}
+</div>

@@ -301,6 +301,44 @@ class Post extends Model
     }
 
     /**
+     * @return string
+     */
+    public function getFileExtension() : string
+    {
+        if (empty($this->file)) {
+            return '';
+        }
+
+        $file_parts = explode('.', $this->file);
+        return end($file_parts);
+    }
+
+    /**
+     * @return string
+     */
+    public function getFileType() : string
+    {
+        $extension = $this->getFileExtension();
+
+        switch ($extension) {
+            case 'jpg':
+            case 'png':
+            case 'gif':
+                return 'image';
+
+            case 'mp3':
+                return 'audio';
+
+            case 'mp4':
+            case 'webm':
+                return 'video';
+
+            default:
+                return '';
+        }
+    }
+
+    /**
      * Creates a post view model from this post model.
      *
      * @param bool $res

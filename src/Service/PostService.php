@@ -327,19 +327,27 @@ class PostService implements PostServiceInterface
         $post->password = !empty($password) ? md5(md5($password)) : '';
 
         if (isset($_FILES['file']) && !empty($_FILES['file']['name'])) {
-            Functions::validateFileUpload();
+            $file = $_FILES['file'];
+        } elseif (isset($_FILES['file_mobile']) && !empty($_FILES['file_mobile']['name'])) {
+            $file = $_FILES['file_mobile'];
+        } else {
+            $file = null;
+        }
 
-            if (!is_file($_FILES['file']['tmp_name']) || !is_readable($_FILES['file']['tmp_name'])) {
+        if (!empty($file)) {
+            Functions::validateFileUpload($file);
+
+            if (!is_file($file['tmp_name']) || !is_readable($file['tmp_name'])) {
                 throw new ValidationException('File transfer failure. Please retry the submission.');
             }
 
-            if (TINYIB_MAXKB > 0 && filesize($_FILES['file']['tmp_name']) > TINYIB_MAXKB * 1024) {
+            if (TINYIB_MAXKB > 0 && filesize($file['tmp_name']) > TINYIB_MAXKB * 1024) {
                 throw new ValidationException('That file is larger than ' . TINYIB_MAXKBDESC . '.');
             }
 
-            $post->file_original = trim(htmlentities(substr($_FILES['file']['name'], 0, 50), ENT_QUOTES));
-            $post->file_hex = md5_file($_FILES['file']['tmp_name']);
-            $post->file_size = $_FILES['file']['size'];
+            $post->file_original = trim(htmlentities(substr($file['name'], 0, 50), ENT_QUOTES));
+            $post->file_hex = md5_file($file['tmp_name']);
+            $post->file_size = $file['size'];
 
             if (TINYIB_FILE_ALLOW_DUPLICATE === false) {
                 $posts = [];
@@ -352,16 +360,16 @@ class PostService implements PostServiceInterface
                 }
             }
 
-            $file_mime_split = explode(' ', trim(mime_content_type($_FILES['file']['tmp_name'])));
+            $file_mime_split = explode(' ', trim(mime_content_type($file['tmp_name'])));
             if (count($file_mime_split) > 0) {
                 $file_mime = strtolower(array_pop($file_mime_split));
             } else {
-                if (!@getimagesize($_FILES['file']['tmp_name'])) {
+                if (!@getimagesize($file['tmp_name'])) {
                     throw new ValidationException('Failed to read the MIME type and size of the uploaded file.'
                         . ' Please retry the submission.');
                 }
 
-                $file_info = getimagesize($_FILES['file']['tmp_name']);
+                $file_info = getimagesize($file['tmp_name']);
                 $file_mime = mime_content_type($file_location);
             }
 
@@ -377,7 +385,7 @@ class PostService implements PostServiceInterface
                     'webm' => 'video/webm',
                 ];
 
-                $parts = explode('.', $_FILES['file']['name']);
+                $parts = explode('.', $file['name']);
                 $extension = end($parts);
 
                 if (isset($mime_types[$extension])) {
@@ -397,11 +405,11 @@ class PostService implements PostServiceInterface
             $post->file = $file_name . '.' . $tinyib_uploads[$file_mime][0];
 
             $file_location = 'src/' . $post->file;
-            if (!move_uploaded_file($_FILES['file']['tmp_name'], $file_location)) {
+            if (!move_uploaded_file($file['tmp_name'], $file_location)) {
                 throw new \Exception('Could not copy uploaded file.');
             }
 
-            if ($_FILES['file']['size'] !== filesize($file_location)) {
+            if ($file['size'] !== filesize($file_location)) {
                 unlink($file_location);
                 throw new ValidationException('File transfer failure. Please go back and try again.');
             }
@@ -545,6 +553,8 @@ class PostService implements PostServiceInterface
                 $this->cache->delete(TINYIB_BOARD . ":post:$parent");
                 $this->cache->delete(TINYIB_BOARD . ":index_post:$parent");
                 $this->cache->delete(TINYIB_BOARD . ":thread:$parent");
+                $this->cache->deletePattern(TINYIB_BOARD . ":mobile:thread:$parent:page:*");
+                $this->cache->deletePattern(TINYIB_BOARD . ":amp:thread:$parent:page:*");
 
                 if (strtolower($post->email) !== 'sage') {
                     if (TINYIB_MAXREPLIES == 0
@@ -561,9 +571,13 @@ class PostService implements PostServiceInterface
                 $this->cache->delete(TINYIB_BOARD . ":post:$id");
                 $this->cache->delete(TINYIB_BOARD . ":index_post:$id");
                 $this->cache->delete(TINYIB_BOARD . ":thread:$id");
+                $this->cache->deletePattern(TINYIB_BOARD . ":mobile:thread:$id:page:*");
+                $this->cache->deletePattern(TINYIB_BOARD . ":amp:thread:$id:page:*");
             }
 
             $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
+            $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
+            $this->cache->deletePattern(TINYIB_BOARD . ':amp:page:*');
         }
 
         return $post;
@@ -592,5 +606,7 @@ class PostService implements PostServiceInterface
         $this->cache->delete(TINYIB_BOARD . ':index_post:' . $thread_id);
         $this->cache->delete(TINYIB_BOARD . ':thread:' . $thread_id);
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
+        $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
+        $this->cache->deletePattern(TINYIB_BOARD . ':amp:page:*');
     }
 }

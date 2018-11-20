@@ -10,18 +10,15 @@ export default class StyleSwitcher extends BaseModule {
     super(manager);
 
     // Parse selectable styles from <head>
-    const styles = qsa('link[title]');
-
-    for (let i = 0; i < styles.length; ++i) {
-      const style = styles[i] as HTMLElement;
-
+    const styles = qsa('link[title]') as HTMLElement[];
+    styles.forEach(style => {
       const title = style.title;
       const url = style.getAttribute('href');
 
       this.styles[title] = url;
 
       style.remove();
-    }
+    });
 
     // Get selected style
     const selected_style = Cookie.get('tinyib_style', 'Synthwave');

@@ -4,7 +4,7 @@
   {% spaceless %}
     <ul class="breadcrumbs">
       <li class="breadcrumbs__item">
-        <a class="breadcrumbs__link" href="{{ base_url }}/amp{{ name ? '?name=' ~ name }}">{{ board }}</a>
+        <a class="breadcrumbs__link" href="{{ base_url }}/amp">{{ board }}</a>
       </li>
 
       {% set subject = thread.subject ? thread.subject : 'Thread #' ~ thread.id %}
@@ -15,7 +15,7 @@
         </li>
       {% else %}
         <li class="breadcrumbs__item">
-          <a class="breadcrumbs__link" href="{{ base_url }}/amp/thread/{{ thread.id }}{{ name ? '?name=' ~ name }}">{{ subject }}</a>
+          <a class="breadcrumbs__link" href="{{ base_url }}/amp/thread/{{ thread.id }}">{{ subject }}</a>
         </li>
 
         <li class="breadcrumbs__item">
@@ -29,39 +29,44 @@
 {% block content %}
   {% spaceless %}
     <article class="thread">
-      {% if page == 0 %}
-        {% include 'amp/components/_form.twig' with {
-          parent: thread.id,
-        } %}
-      {% endif %}
-
-      <amp-live-list id="thread" {{ page != 0 ? 'disabled' }}
+      <amp-live-list id="thread" {{ page != 0 ? 'disabled' }} sort="ascending"
         data-poll-interval="15000" data-max-items-per-page="{{ limit }}">
-        {% if page > 0 %}
-          <div class="thread__pagination">
-            <a href="?page={{ page - 1 }}{{ name ? '&name=' ~ name }}">Show newer posts</a>
+        {% if posts|length == limit %}
+          <div pagination class="thread__pagination">
+            <a href="?page={{ page + 1 }}#footer">Show older posts</a>
           </div>
         {% endif %}
-
-        <div update class="thread__update">
-          <button class="button" on="tap:thread.update">New posts available. Click to load</button>
-        </div>
 
         <div items class="thread__posts">
           {% for post in posts %}
             <section id="item_{{ post.id }}" class="thread__post"
-              data-sort-time="{{ post.createdTimestamp }}">
+              data-sort-time="{{ post.createdTimestamp }}"
+              {% if post.updateTime %}data-update-time="{{ post.updateTime }}"{% endif %}>
               {% include 'amp/components/_post.twig' %}
             </section>
           {% endfor %}
         </div>
 
-        {% if posts|length == limit %}
-          <div pagination class="thread__pagination">
-            <a href="?page={{ page + 1 }}{{ name ? '&name=' ~ name }}">Show older posts</a>
+        <div update class="thread__update">
+          <button class="button" on="tap:thread.update">New posts available. Click to load</button>
+        </div>
+
+        {% if page > 0 %}
+          <div class="thread__pagination">
+            <a href="?page={{ page - 1 }}">Show newer posts</a>
           </div>
         {% endif %}
       </amp-live-list>
     </article>
   {% endspaceless %}
+{% endblock %}
+
+{% block footer_links %}
+  {{ parent() }}
+
+  <li class="links__item">
+    <a class="links__link" href="{{ base_url }}/mobile/thread/{{ thread.id }}{{ page != 0 ? '?page=' ~ page }}">
+      Mobile version
+    </a>
+  </li>
 {% endblock %}

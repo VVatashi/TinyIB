@@ -1,100 +1,128 @@
-import { mapValues } from 'lodash-es';
-import { throttle } from 'lodash-es';
+import { qsa } from './utils/DOM';
 
 import IModule from './modules/IModule';
-
-import Captcha from './modules/Captcha';
-import CorrectTime from './modules/CorrectTime';
-import DeleteForm from './modules/DeleteForm';
-import ExpandFile from './modules/ExpandFile';
-import PostForm from './modules/PostForm';
-import QuotePost from './modules/QuotePost';
-import Settings from './modules/Settings';
-import StyleSwitcher from './modules/StyleSwitcher';
 
 export default class ModuleManager {
   protected readonly modules: { [key: string]: IModule } = {};
 
-  constructor() {
-    this.modules['Captcha'] = new Captcha(this);
-    this.modules['CorrectTime'] = new CorrectTime(this);
-    this.modules['DeleteForm'] = new DeleteForm(this);
-    this.modules['ExpandFile'] = new ExpandFile(this);
-    this.modules['PostForm'] = new PostForm(this);
-    this.modules['QuotePost'] = new QuotePost(this);
-    this.modules['Settings'] = new Settings(this);
-    this.modules['StyleSwitcher'] = new StyleSwitcher(this);
+  constructor(useMutationObserver = false) {
+    if (useMutationObserver) {
+      const observer = new MutationObserver(mutations => {
+        const posts = mutations
+          // Get added posts, if any.
+          .map(mutation => {
+            const nodeList = mutation.addedNodes;
+            const nodes = Array.prototype.slice.call(nodeList) as Node[];
 
-    const observer = new MutationObserver(mutations => {
-      mutations.forEach(mutation => {
-        for (let i = 0; i < mutation.addedNodes.length; ++i) {
-          const node = mutation.addedNodes[i];
+            const elements = nodes.filter(node =>
+              node.nodeType === Node.ELEMENT_NODE) as Element[];
 
-          if (node.nodeType !== Node.ELEMENT_NODE) {
-            continue;
-          }
+            return elements
+              // If element is post itself, return it,
+              // else query for element children.
+              .map(element =>
+                element.classList.contains('post')
+                  ? [element]
+                  : qsa('.post', element))
+              // Flatten posts array.
+              .reduce((total, current) =>
+                total.concat(current), []);
+          })
+          // Flatten posts array.
+          .reduce((total, current) =>
+            total.concat(current), []);
 
-          const element = node as Element;
-
-          if (element.classList.contains('post')) {
-            mapValues(this.modules, (module, key) => {
-              return new Promise(() => {
-                try {
-                  module.onPostInsert(element);
-                }
-                catch (error) {
-                  console.error(`Error in ${key}.onPostInsert(): ${error}`);
-                }
-              });
-            });
-          }
+        if (posts.length > 0) {
+          this.insertPosts(posts);
         }
       });
-    });
+
+      document.addEventListener('DOMContentLoaded', () => {
+        // Setup MutationObserver.
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true,
+        });
+      });
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-      });
-
-      mapValues(this.modules, (module, key) => {
-        return new Promise(() => {
+      // Call onReady() for each module.
+      this.forEachModule((moduleName, module) => {
+        return new Promise((resolve, reject) => {
           try {
             module.onReady();
           }
           catch (error) {
-            console.error(`Error in ${key}.onReady(): ${error}`);
+            console.error(`Error in ${moduleName}.onReady(): ${error}`);
+            reject(error);
           }
+
+          resolve();
         });
       });
     });
 
-    const resize = throttle(() => {
-      mapValues(this.modules, (module, key) => {
+    const resize = () => {
+      // Call onResize() for each module.
+      this.forEachModule((moduleName, module) => {
         return new Promise(() => {
           try {
             module.onResize();
           }
           catch (error) {
-            console.error(`Error in ${key}.onResize(): ${error}`);
+            console.error(`Error in ${moduleName}.onResize(): ${error}`);
           }
         });
       });
-    }, 50);
+    };
 
     window.addEventListener('resize', resize);
   }
 
+  protected forEachModule(
+    callback: (moduleName: string, module: IModule) => any
+  ) {
+    const moduleNames = Object.keys(this.modules);
+    return moduleNames.map(moduleName => {
+      const module = this.modules[moduleName];
+      return callback(moduleName, module);
+    });
+  }
+
+  addModule(key: string, value: IModule) {
+    this.modules[key] = value;
+  }
+
   emit(event: string, data?: any) {
-    mapValues(this.modules, (module, key) => {
+    // Call onEvent() for each module.
+    this.forEachModule((moduleName, module) => {
       return new Promise(() => {
         try {
           module.onEvent(event, data);
         }
         catch (error) {
-          console.error(`Error in ${key}.onEvent(): ${error}`);
+          console.error(`Error in ${moduleName}.onEvent(${event}): ${error}`);
         }
+      });
+    });
+  }
+
+  insertPosts(posts: Element[]) {
+    console.debug('Inserted posts: ', posts);
+
+    // Call onPostInsert() for each post x module.
+    this.forEachModule((moduleName, module) => {
+      return new Promise((resolve, reject) => {
+        try {
+          posts.forEach(post => module.onPostInsert(post));
+        }
+        catch (error) {
+          console.error(`Error in ${moduleName}.onPostInsert(): ${error}`);
+          reject(error);
+        }
+
+        resolve();
       });
     });
   }

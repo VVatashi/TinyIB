@@ -1,7 +1,7 @@
 import BaseModule from './BaseModule';
 import ISettingsDto from '../ISettingsDto';
 import ModuleManager from '../ModuleManager';
-import { qid, qsa, qs } from '../utils/DOM';
+import { qid, qs } from '../utils/DOM';
 import * as Cookie from '../utils/Cookie';
 import Time from '../utils/Time';
 import { DateTime } from 'luxon';

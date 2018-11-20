@@ -88,9 +88,9 @@ class Functions
      *
      * @throws \Exception
      */
-    public static function validateFileUpload()
+    public static function validateFileUpload(array $file)
     {
-        switch ($_FILES['file']['error']) {
+        switch ($file['error']) {
             case UPLOAD_ERR_OK:
                 break;
             case UPLOAD_ERR_FORM_SIZE:

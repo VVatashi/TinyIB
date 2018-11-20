@@ -63,12 +63,12 @@ class PDOHelper
      *
      * @return array
      */
-    public static function rowsToArray($statement)
+    public static function rowsToArray($statement, string $id = 'id')
     {
         $data = [];
 
         while ($row = $statement->fetch()) {
-            $data[] = $row;
+            $data[$row[$id]] = $row;
         }
 
         return $data;
