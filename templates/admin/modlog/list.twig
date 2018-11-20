@@ -1,0 +1,33 @@
+{% extends 'layout/_html.twig' %}
+
+{% block head %}
+  {{ parent() }}
+
+  <link rel="canonical" href="{{ base_url }}/admin/modlog" />
+{% endblock %}
+
+{% block content %}
+  <main class="{{class is defined ? class ~ ' '}}">
+    <div class="content__entity-list entity-list">
+      <h1 class="entity-list__header">Moderation log</h1>
+
+      <table class="entity-list__entities">
+        <thead>
+          <tr>
+            <th class="entity-list__property-label">Date</th>
+            <th class="entity-list__property-label">Event</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for entry in modlog %}
+            <tr class="entity-list__entity">
+              <th class="entity-list__property-value" scope="row">{{ entry.createdTimestamp|date() }}</th>
+              <td class="entity-list__property-value">{{ entry.message|raw }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </main>
+{% endblock %}
