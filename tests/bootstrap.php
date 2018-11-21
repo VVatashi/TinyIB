@@ -42,6 +42,17 @@ if (!Capsule::schema()->hasTable('users')) {
     });
 }
 
+if (!Capsule::schema()->hasTable('mod_log')) {
+    Capsule::schema()->create('mod_log', function (Blueprint $table) {
+        $table->increments('id');
+        $table->string('message');
+        $table->integer('created_at');
+        $table->integer('updated_at');
+        $table->integer('user_id')->nullable();
+        $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+    });
+}
+
 if (!Capsule::schema()->hasTable(TINYIB_DBPOSTS)) {
     Capsule::schema()->create(TINYIB_DBPOSTS, function (Blueprint $table) {
         $table->increments('id');

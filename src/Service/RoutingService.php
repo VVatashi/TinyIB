@@ -8,6 +8,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use TinyIB\Controller\Admin\ModLogControllerInterface;
 use TinyIB\Controller\Admin\UserCrudControllerInterface;
 use TinyIB\Controller\Amp\AmpPostControllerInterface;
 use TinyIB\Controller\Mobile\MobilePostControllerInterface;
@@ -44,6 +45,10 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
             });
 
             $routes->addGroup('/admin', function (RouteCollector $routes) {
+                $routes->addGroup('/modlog', function (RouteCollector $routes) {
+                    $routes->addRoute('GET',  '', [ModLogControllerInterface::class, 'list']);
+                });
+
                 $routes->addGroup('/user', function (RouteCollector $routes) {
                     $routes->addRoute('GET',  '',                        [UserCrudControllerInterface::class, 'list']);
                     $routes->addRoute('GET',  '/create',                 [UserCrudControllerInterface::class, 'createForm']);

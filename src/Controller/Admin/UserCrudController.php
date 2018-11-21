@@ -6,6 +6,7 @@ use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TinyIB\AccessDeniedException;
+use TinyIB\Model\ModLog;
 use TinyIB\Model\User;
 use TinyIB\NotFoundException;
 use TinyIB\Service\RendererServiceInterface;
@@ -24,6 +25,24 @@ class UserCrudController implements UserCrudControllerInterface
         RendererServiceInterface $renderer
     ) {
         $this->renderer = $renderer;
+    }
+
+    /**
+     * Returns links to the user entity.
+     *
+     * @param User $user User entity.
+     *
+     * @return string
+     */
+    protected function userLink(User $user) : string
+    {
+        $id = $user->id;
+        $email = htmlentities($user->email, ENT_QUOTES);
+
+        $id_link = "<a href=\"/" . TINYIB_BOARD . "/admin/user/$id\">#$id</a>";
+        $email_link = "<a href=\"mailto:$email\">$email</a>";
+
+        return "$id_link ($email_link)";
     }
 
     /**
@@ -151,6 +170,13 @@ class UserCrudController implements UserCrudControllerInterface
             ]);
             $user->setPassword($password);
             $user->save();
+
+            $user_link = $this->userLink($current_user);
+            $created_user_link = $this->userLink($user);
+            ModLog::create([
+                'message' => "User $user_link has created user $created_user_link",
+                'user_id' => $current_user->id,
+            ]);
         }
         catch(\Exception $e) {
             $_SESSION['error'] = $e->getMessage();
@@ -229,6 +255,13 @@ class UserCrudController implements UserCrudControllerInterface
             }
 
             $user->save();
+
+            $user_link = $this->userLink($current_user);
+            $edited_user_link = $this->userLink($user);
+            ModLog::create([
+                'message' => "User $user_link has edited user $edited_user_link",
+                'user_id' => $current_user->id,
+            ]);
         }
         catch(\Exception $e) {
             $_SESSION['error'] = $e->getMessage();
@@ -285,6 +318,13 @@ class UserCrudController implements UserCrudControllerInterface
         if (!isset($user)) {
             throw new NotFoundException("User #$id not found.");
         }
+
+        $user_link = $this->userLink($current_user);
+        $deleted_user_link = $this->userLink($user);
+        ModLog::create([
+            'message' => "User $user_link has deleted user $deleted_user_link",
+            'user_id' => $current_user->id,
+        ]);
 
         $user->delete();
 

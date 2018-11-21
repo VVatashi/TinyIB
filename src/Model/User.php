@@ -90,6 +90,14 @@ class User extends Model
     }
 
     /**
+     * Returns mod log entries related to this user.
+     */
+    public function modlog()
+    {
+        return $this->hasMany(ModLog::class);
+    }
+
+    /**
      * Returns anonymous user instance.
      *
      * @return \TinyIB\Model\User
