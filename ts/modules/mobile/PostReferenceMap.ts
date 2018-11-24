@@ -85,19 +85,19 @@ export default class PostReferenceMap extends PostModule {
       link.classList.add('post__reference-link');
       link.href = `#post_${postId}`;
 
-      const nameEl = qs('.post__name', referencedPost);
-      const name = nameEl ? nameEl.innerHTML : '';
+      const refNameEl = qs('.post__name', referencedPost);
+      const refName = refNameEl ? refNameEl.innerHTML : '';
 
-      const tripcodeEl = qs('.post__tripcode', referencedPost);
-      const tripcode = tripcodeEl ? tripcodeEl.innerHTML : '';
+      const refTripcodeEl = qs('.post__tripcode', referencedPost);
+      const refTripcode = refTripcodeEl ? refTripcodeEl.innerHTML : '';
 
       // Check if it is reply to user own post.
-      if (this.user.tripcode && this.user.tripcode.length && this.user.tripcode === tripcode
-        || this.user.name && this.user.name.length && this.user.name === name) {
+      if (this.user.tripcode && this.user.tripcode.length && this.user.tripcode === refTripcode
+        || this.user.name && this.user.name.length && this.user.name === refName) {
         post.classList.add('post_own-reply');
       }
 
-      if (name.length || tripcode.length) {
+      if (refName.length || refTripcode.length) {
         link.innerHTML = `<span class="post__reference-link-id">&gt;&gt;${postId}</span>`
           + ` <span class="post__reference-link-author">`
           + `(<span class="post__reference-link-name">${name}</span>`
