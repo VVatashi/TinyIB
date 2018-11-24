@@ -69,7 +69,7 @@ export default class PostForm extends BaseModule {
       }
 
       name.addEventListener('change', e => {
-        localStorage.setItem('postform.name', name.value)
+        localStorage.setItem('postform.name', name.value);
       });
     }
 
@@ -81,7 +81,7 @@ export default class PostForm extends BaseModule {
       }
 
       email.addEventListener('change', e => {
-        localStorage.setItem('postform.email', email.value)
+        localStorage.setItem('postform.email', email.value);
       });
     }
 
@@ -158,6 +158,19 @@ export default class PostForm extends BaseModule {
 
         // Clear form file preview.
         qsa('.form__file-preview', form).forEach(el => el.remove());
+
+        const data = await response.json();
+        if (data.name) {
+          localStorage.setItem('user.name', data.name);
+        } else {
+          localStorage.removeItem('user.name');
+        }
+
+        if (data.tripcode) {
+          localStorage.setItem('user.tripcode', data.tripcode);
+        } else {
+          localStorage.removeItem('user.tripcode');
+        }
 
         // Refresh thread.
         this.manager.emit('updateThread');

@@ -6,8 +6,14 @@ $post-bottom-color: mix(#000, $post-color, 20%);
 
 .post {
   background: $post-color;
-  border-radius: 0.25em;
-  box-shadow: 1px 2px 2px $post-top-color inset, -1px -2px 2px $post-bottom-color inset;
+  border-radius: 2px;
+  box-shadow: 1px 1px 1px $post-top-color inset, -1px -1px 1px $post-bottom-color inset;
+
+  &_own,
+  &_own-reply {
+    box-shadow: 1px 1px 1px $post-top-color inset, -1px -1px 1px $post-bottom-color inset,
+    2px 0 0 rgba(#1de9b6, 0.75) inset, -2px 0 0 rgba(#1de9b6, 0.75) inset;
+  }
 
   &__header,
   &__content,
@@ -32,9 +38,6 @@ $post-bottom-color: mix(#000, $post-color, 20%);
 
   &__footer {
     border-top: 1px solid rgba(158, 158, 158, 0.1);
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: space-between;
   }
 
   &__subject,
@@ -77,16 +80,30 @@ $post-bottom-color: mix(#000, $post-color, 20%);
     height: 100%;
   }
 
-  &__id {
+  &__id,
+  &__reply-link {
     float: right;
-  }
-
-  &__references {
-    display: flex;
   }
 
   &__reference-link {
     margin-right: 0.5em;
+  }
+
+  &__reference-link-id,
+  &__reference-link-author {
+    vertical-align: middle;
+  }
+
+  &__reference-link-author {
+    font-size: 0.8em;
+  }
+
+  &__reference-link-name {
+    @extend .post__name;
+  }
+
+  &__reference-link-tripcode {
+    @extend .post__tripcode;
   }
 
   @include breakpoint($xs-up) {

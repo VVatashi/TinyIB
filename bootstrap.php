@@ -72,7 +72,7 @@ EOF;
 });
 
 session_start();
-setcookie(session_name(), session_id(), time() + 2592000);
+setcookie(session_name(), session_id(), time() + 24 * 60 * 60, '/');
 
 ob_implicit_flush();
 if (function_exists('ob_get_level')) {
