@@ -47,12 +47,14 @@ class MobilePostController implements MobilePostControllerInterface
             $target_post_id = (int)$matches[2];
             if ($target_thread_id !== $thread_id) {
                 // If link to another thread.
-                return 'href="/' . TINYIB_BOARD . "/mobile/thread/$target_thread_id#post_$target_post_id\""
+                return 'class="post__reference-link"'
+                    . ' href="/' . TINYIB_BOARD . "/mobile/thread/$target_thread_id#post_$target_post_id\""
                     . " data-target-post-id=\"$target_post_id\"";
             }
 
             // If link to the same thread.
-            return "href=\"#post_$target_post_id\" data-target-post-id=\"$target_post_id\"";
+            return 'class="post__reference-link"'
+                . "href=\"#post_$target_post_id\" data-target-post-id=\"$target_post_id\"";
         }, $message);
     }
 
@@ -246,7 +248,17 @@ class MobilePostController implements MobilePostControllerInterface
         $destination = TINYIB_BASE_URL . TINYIB_BOARD . '/mobile/thread/' . $thread_id . '#footer';
 
         return new Response(201, [
+            'Content-type' => 'application/json',
             'Location' => $destination,
-        ]);
+        ], json_encode([
+            'id'         => $post->id,
+            'parent_id'  => $post->parent_id,
+            'name'       => $post->name,
+            'tripcode'   => '!' . $post->tripcode,
+            'email'      => $post->email,
+            'subject'    => $post->subject,
+            'file'       => $post->file,
+            'created_at' => $post->getCreatedTimestamp(),
+        ]));
     }
 }
