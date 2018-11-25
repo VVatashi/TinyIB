@@ -54,7 +54,7 @@ class MobilePostController implements MobilePostControllerInterface
 
             // If link to the same thread.
             return 'class="post__reference-link"'
-                . "href=\"#post_$target_post_id\" data-target-post-id=\"$target_post_id\"";
+                . " href=\"#post_$target_post_id\" data-target-post-id=\"$target_post_id\"";
         }, $message);
     }
 

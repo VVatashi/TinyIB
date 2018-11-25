@@ -4,7 +4,9 @@
 {% if post['rendered'] %}
   {{ post['rendered'] }}
 {% else %}
-  <section id="reply_{{ post['id'] }}" class="post {{ is_op ? 'content__oppost post_oppost oppost' : 'content__post post_reply reply' }}">
+  <section id="reply_{{ post['id'] }}"
+    class="post {{ is_op ? 'content__oppost post_oppost oppost' : 'content__post post_reply reply' }}"
+    data-post-id="{{ post['id'] }}">
     <div class="post__inner">
       <a id="{{ post['id'] }}" name="{{ post['id'] }}"></a>
       {% include 'components/_post_header.twig' with {'class': 'post__header'} %}

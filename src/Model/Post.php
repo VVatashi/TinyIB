@@ -389,6 +389,17 @@ class Post extends Model
             // TODO: log error.
         }
 
+        $link_pattern = '#href="/' . TINYIB_BOARD . '/res/(\d+)\#(\d+)"#';
+        $post['message'] = preg_replace_callback($link_pattern, function ($matches) {
+            $target_thread_id = (int)$matches[1];
+            $target_post_id = (int)$matches[2];
+
+            // If link to the same thread.
+            return 'class="post__reference-link"'
+                . ' href="/' . TINYIB_BOARD . "/res/$target_post_id#$target_post_id\""
+                . " data-target-post-id=\"$target_post_id\"";
+        }, $post['message']);
+
         // Process post file.
         if (isset($post['file'])) {
             $file_parts = explode('.', $post['file']);
