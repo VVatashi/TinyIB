@@ -1,6 +1,6 @@
-import BaseModule from '../BaseModule';
-import ModuleManager from '../../ModuleManager';
-import { qsa } from '../../utils/DOM';
+import BaseModule from './BaseModule';
+import ModuleManager from '../ModuleManager';
+import { qsa } from '../utils/DOM';
 
 export default abstract class PostModule extends BaseModule {
   constructor(manager: ModuleManager) {

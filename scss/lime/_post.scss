@@ -30,6 +30,14 @@
     color: #f5f5f5;
   }
 
+  &__reference-link-name {
+    @extend .post-header__name;
+  }
+
+  &__reference-link-tripcode {
+    @extend .post-header__tripcode;
+  }
+
   &__omitted {
     color: #666;
   }

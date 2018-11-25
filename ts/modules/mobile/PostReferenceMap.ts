@@ -1,4 +1,4 @@
-import PostModule from './PostModule';
+import PostModule from '../PostModule';
 import ModuleManager from '../../ModuleManager';
 import { qs, qsa } from '../../utils/DOM';
 
@@ -11,6 +11,36 @@ export default class PostReferenceMap extends PostModule {
 
     this.user.name = localStorage.getItem('user.name');
     this.user.tripcode = localStorage.getItem('user.tripcode');
+  }
+
+  protected getPostAuthor(post: Element) {
+    const nameEl = qs('.post__name', post);
+    const tripcodeEl = qs('.post__tripcode', post);
+
+    return {
+      name: nameEl ? nameEl.textContent : '',
+      tripcode: tripcodeEl ? tripcodeEl.textContent : '',
+    };
+  }
+
+  protected getPostRefLinkHtml(post: Element) {
+    const postId = +post.getAttribute('data-post-id');
+
+    const nameEl = qs('.post__name', post);
+    const tripcodeEl = qs('.post__tripcode', post);
+
+    const name = nameEl ? nameEl.innerHTML : '';
+    const tripcode = tripcodeEl ? tripcodeEl.innerHTML : '';
+
+    if (name.length || tripcode.length) {
+      return `<span class="post__reference-link-id">&gt;&gt;${postId}</span>`
+        + ` <span class="post__reference-link-author">`
+        + `(<span class="post__reference-link-name">${name}</span>`
+        + `<span class="post__reference-link-tripcode">${tripcode}</span>)`
+        + `</span>`;
+    } else {
+      return `<span class="post__reference-link-id">&gt;&gt;${postId}</span>`;
+    }
   }
 
   protected processPost(post: Element) {
@@ -41,32 +71,13 @@ export default class PostReferenceMap extends PostModule {
         return;
       }
 
-      const nameEl = qs('.post__name', post);
-      const name = nameEl ? nameEl.innerHTML : '';
-
-      const tripcodeEl = qs('.post__tripcode', post);
-      const tripcode = tripcodeEl ? tripcodeEl.innerHTML : '';
-
-      if (name.length || tripcode.length) {
-        reference.element.innerHTML = `<span class="post__reference-link-id">&gt;&gt;${reference.id}</span>`
-          + ` <span class="post__reference-link-author">`
-          + `(<span class="post__reference-link-name">${name}</span>`
-          + `<span class="post__reference-link-tripcode">${tripcode}</span>)`
-          + `</span>`;
-      } else {
-        reference.element.innerHTML = `<span class="post__reference-link-id">&gt;&gt;${reference.id}</span>`;
-      }
+      reference.element.innerHTML = this.getPostRefLinkHtml(post);
     });
 
     // Check if it is user own post.
-    const nameEl = qs('.post__name', post);
-    const name = nameEl ? nameEl.textContent : '';
-
-    const tripcodeEl = qs('.post__tripcode', post);
-    const tripcode = tripcodeEl ? tripcodeEl.textContent : '';
-
-    if (this.user.tripcode && this.user.tripcode.length && this.user.tripcode === tripcode
-      || this.user.name && this.user.name.length && this.user.name === name) {
+    const author = this.getPostAuthor(post);
+    if (this.user.tripcode && this.user.tripcode.length && this.user.tripcode === author.tripcode
+      || this.user.name && this.user.name.length && this.user.name === author.name) {
       post.classList.add('post_own');
     }
 
@@ -85,28 +96,14 @@ export default class PostReferenceMap extends PostModule {
       link.classList.add('post__reference-link');
       link.href = `#post_${postId}`;
 
-      const refNameEl = qs('.post__name', referencedPost);
-      const refName = refNameEl ? refNameEl.innerHTML : '';
-
-      const refTripcodeEl = qs('.post__tripcode', referencedPost);
-      const refTripcode = refTripcodeEl ? refTripcodeEl.innerHTML : '';
-
       // Check if it is reply to user own post.
-      if (this.user.tripcode && this.user.tripcode.length && this.user.tripcode === refTripcode
-        || this.user.name && this.user.name.length && this.user.name === refName) {
+      const refPostAuthor = this.getPostAuthor(referencedPost);
+      if (this.user.tripcode && this.user.tripcode.length && this.user.tripcode === refPostAuthor.tripcode
+        || this.user.name && this.user.name.length && this.user.name === refPostAuthor.name) {
         post.classList.add('post_own-reply');
       }
 
-      if (refName.length || refTripcode.length) {
-        link.innerHTML = `<span class="post__reference-link-id">&gt;&gt;${postId}</span>`
-          + ` <span class="post__reference-link-author">`
-          + `(<span class="post__reference-link-name">${name}</span>`
-          + `<span class="post__reference-link-tripcode">${tripcode}</span>)`
-          + `</span>`;
-      } else {
-        link.innerHTML = `<span class="post__reference-link-id">&gt;&gt;${postId}</span>`;
-      }
-
+      link.innerHTML = this.getPostRefLinkHtml(post);
       footer.appendChild(link);
     });
   }

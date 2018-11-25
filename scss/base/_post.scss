@@ -38,6 +38,28 @@
     word-wrap: break-word;
   }
 
+  &__reference-link {
+    // To vertically center a text node without wrapper (DE comptability)
+    display: inline-flex;
+    align-items: center;
+  }
+
+  &__reference-link-author {
+    font-size: 0.8em;
+    margin-left: 0.25em;
+
+    // To allow pointer events bubble up to the .post__reference-link (DE comptability)
+    pointer-events: none;
+  }
+
+  &__reference-link-name {
+    @extend .post-header__name !optional;
+  }
+
+  &__reference-link-tripcode {
+    @extend .post-header__tripcode !optional;
+  }
+
   @include breakpoint($phone-up) {
     @include clearfix;
 

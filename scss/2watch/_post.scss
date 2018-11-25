@@ -17,6 +17,14 @@
     text-decoration: none;
   }
 
+  &__reference-link-name {
+    @extend .post-header__name;
+  }
+
+  &__reference-link-tripcode {
+    @extend .post-header__tripcode;
+  }
+
   &__omitted {
     color: #707070;
   }

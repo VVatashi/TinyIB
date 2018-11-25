@@ -1,4 +1,4 @@
-import PostModule from './PostModule';
+import PostModule from '../PostModule';
 import ModuleManager from '../../ModuleManager';
 import { qs } from '../../utils/DOM';
 
