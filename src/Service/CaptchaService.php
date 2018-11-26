@@ -53,7 +53,7 @@ class CaptchaService extends SimpleCaptcha implements CaptchaServiceInterface
             return true;
         }
 
-        return $captcha_response === $_SESSION[$this->session_var];
+        return strcasecmp($captcha_response, $_SESSION[$this->session_var]) === 0;
     }
 
     /**
