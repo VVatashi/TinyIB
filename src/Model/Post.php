@@ -394,9 +394,8 @@ class Post extends Model
             $target_thread_id = (int)$matches[1];
             $target_post_id = (int)$matches[2];
 
-            // If link to the same thread.
             return 'class="post__reference-link"'
-                . ' href="/' . TINYIB_BOARD . "/res/$target_post_id#$target_post_id\""
+                . ' href="/' . TINYIB_BOARD . "/res/$target_thread_id#$target_post_id\""
                 . " data-target-post-id=\"$target_post_id\"";
         }, $post['message']);
 
