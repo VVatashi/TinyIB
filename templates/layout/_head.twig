@@ -34,7 +34,10 @@
 {% endif %}
 
 <script src="https://cdn.rawgit.com/VVatashi/Dollchan-Extension-Tools/master/Dollchan_Extension_Tools.user.js"></script>
+<script src="{{ base_url }}/js/vendor/promise-polyfill.min.js?mtime={{ mtime('js/vendor/promise-polyfill.min.js') }}"></script>
+<script src="{{ base_url }}/js/vendor/fetch.min.js?mtime={{ mtime('js/vendor/fetch.min.js') }}"></script>
 <script src="{{ base_url }}/js/vendor/luxon.min.js?mtime={{ mtime('js/vendor/luxon.min.js') }}"></script>
+<script>window.baseUrl = '{{ base_url|raw }}';</script>
 <script src="{{ base_url }}/js/index.js?mtime={{ mtime('js/index.js') }}"></script>
 
 {% if constant('TINYIB_CAPTCHA') == 'recaptcha' %}
