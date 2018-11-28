@@ -12,6 +12,7 @@ import StyleSwitcher from './modules/StyleSwitcher';
 
 declare global {
   interface Window {
+    baseUrl: string;
     tinyib?: {
       moduleManager?: ModuleManager,
     }
