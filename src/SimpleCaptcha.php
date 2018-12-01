@@ -219,19 +219,14 @@ class SimpleCaptcha
             $length = rand($this->minWordLength, $this->maxWordLength);
         }
 
-        $words = "abcdefghijlmnopqrstvwyz";
-        $vocals = "aeiou";
-
-        $text = "";
-        $vocal = rand(0, 1);
-        for ($i = 0; $i < $length; $i++) {
-            if ($vocal) {
-                $text .= substr($vocals, mt_rand(0, 4), 1);
-            } else {
-                $text .= substr($words, mt_rand(0, 22), 1);
-            }
-            $vocal = !$vocal;
+        $chars = 'awwooo';
+        $count = mb_strlen($chars);
+        $text = '';
+        for ($i = 0; $i < $length; ++$i) {
+            $index = mt_rand(0, $count - 1);
+            $text .= mb_substr($chars, $index, 1);
         }
+
         return $text;
     }
 
