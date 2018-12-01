@@ -7,6 +7,7 @@
   &__inner {
     background: $post-background;
     border: $post-border;
+    border-radius: $post-border-radius;
   }
 
   &__header {
@@ -17,8 +18,11 @@
     @include clearfix;
 
     padding: $post-content-padding;
-    overflow: auto;
+    overflow-y: auto;
     max-height: 80vh;
+
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
 
   &__file {
