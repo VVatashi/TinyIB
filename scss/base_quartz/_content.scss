@@ -1,0 +1,48 @@
+@import '../utils/index';
+@import 'vars';
+
+.content {
+  &__links {
+    display: flex;
+    float: right;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__oppost,
+  &__post {
+    margin: $post-margin;
+  }
+
+  &__userdelete {
+    /*display: flex;
+    float: right;*/
+
+    display: none;
+  }
+
+  &__postarea {
+    @include clearfix;
+  }
+
+  &__postform {
+    // DE fix.
+    border: $post-border !important;
+    padding: 10px !important;
+
+    min-height: 200px;
+    min-width: 300px;
+
+    max-width: 80vw;
+    max-height: 80vh;
+  }
+
+  &__pager {
+    margin: 0;
+  }
+
+  &__footer {
+    margin: 0;
+  }
+}

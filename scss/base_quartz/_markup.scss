@@ -1,0 +1,24 @@
+@import 'vars';
+
+.dice {
+  color: $dice-color;
+  font: $dice-font;
+}
+
+.spoiler,
+.rp {
+  background-color: $spoiler-background;
+  color: $spoiler-background;
+
+  &:hover {
+    color: $spoiler-color;
+  }
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.unkfunc {
+  color: $quote-color;
+}

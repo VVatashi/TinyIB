@@ -1,0 +1,114 @@
+// DE fixes.
+#de-pform input[type=text],
+#de-pform input[type=file] {
+  width: 100% !important;
+}
+
+#de-sagebtn {
+  display: none !important;
+}
+
+.postform {
+  position: relative;
+
+  // Reset table layout, required by DE.
+  table, thead, tbody, tr {
+    display: block;
+  }
+
+  th, td {
+    display: inline-block;
+  }
+
+  & &__inner {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+  }
+
+  & &__markup-group,
+  & &__name-group,
+  & &__message-group {
+    display: flex;
+  }
+
+  & &__markup-group,
+  & &__name-group {
+    flex-flow: row wrap;
+  }
+
+  & &__message-group {
+    flex: 1;
+  }
+
+  & &__rules-group {
+    display: none;
+  }
+
+  & &__field-row {
+    flex: 1;
+  }
+
+  & &__field-wrapper {
+    display: block;
+  }
+
+  & &__markup-row {
+    flex: 1;
+    max-width: 25%;
+  }
+
+  & &__markup-wrapper {
+    display: block;
+  }
+
+  & &__markup {
+    width: 100%;
+  }
+
+  & &__message-row {
+    width: 100%;
+  }
+
+  & &__message-wrapper {
+    display: flex;
+    height: 100%;
+  }
+
+  & &__message {
+    width: 100%;
+    height: 100%;
+    resize: none;
+  }
+
+  & &__label {
+    display: none;
+  }
+
+  &__right-border {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 10px;
+    height: 100%;
+    cursor: ew-resize;
+  }
+
+  &__bottom-border {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 10px;
+    cursor: ns-resize;
+  }
+
+  &__corner {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 10px;
+    height: 10px;
+    cursor: nwse-resize;
+  }
+}

@@ -1,0 +1,19 @@
+.header {
+  &__style-switcher {
+    float: left;
+  }
+
+  &__admin-bar {
+    float: right;
+  }
+
+  &__logo {
+    clear: both;
+    text-align: center;
+  }
+
+  &__title {
+    display: inline;
+    margin: 0;
+  }
+}

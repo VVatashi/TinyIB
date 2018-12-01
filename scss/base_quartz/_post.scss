@@ -1,0 +1,61 @@
+@import '../utils/index';
+@import 'vars';
+
+.post {
+  overflow: hidden;
+
+  &__inner {
+    background: $post-background;
+    border: $post-border;
+  }
+
+  &__header {
+    padding: $post-header-padding;
+  }
+
+  &__content {
+    @include clearfix;
+
+    padding: $post-content-padding;
+    overflow: auto;
+    max-height: 80vh;
+  }
+
+  &__file {
+    margin-right: 0.5em;
+  }
+
+  &__reference-link {
+    // To vertically center a text node without wrapper (DE comptability)
+    display: inline-flex;
+    align-items: center;
+  }
+
+  &__reference-link-author {
+    font-size: 0.8em;
+    margin-left: 0.25em;
+
+    // To allow pointer events bubble up to the .post__reference-link (DE comptability)
+    pointer-events: none;
+  }
+
+  &__reference-link-name {
+    @extend .post-header__name !optional;
+  }
+
+  &__reference-link-tripcode {
+    @extend .post-header__tripcode !optional;
+  }
+
+  @include breakpoint($xs-up) {
+    &__inner {
+      display: inline-block;
+      min-width: 560px;
+      max-width: 100%;
+    }
+
+    &__file {
+      float: left;
+    }
+  }
+}

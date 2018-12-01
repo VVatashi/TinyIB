@@ -151,7 +151,7 @@ export default class PostForm extends BaseModule {
       preview_field.classList.add('form__field', 'form__field_fixed-width', 'field');
 
       const preview_label_wrapper = document.createElement('td');
-      preview_label_wrapper.classList.add('field__label-wrapper');
+      preview_label_wrapper.classList.add('postform__label', 'field__label-wrapper');
       preview_field.appendChild(preview_label_wrapper);
 
       const preview_input_wrapper = document.createElement('td');
