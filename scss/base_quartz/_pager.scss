@@ -1,10 +1,6 @@
 @import '../utils/index';
 
 .pager {
-  display: flex;
-  padding: 0;
-  list-style: none;
-
   &__item {
     margin-right: 0.25em;
 

@@ -1,25 +1,41 @@
 $background: #e5e5e5 !default;
-$color: #333333 !default;
-$font: 14px Roboto, Helvetica, Arial, sans-serif !default;
-$padding: 13px !default;
+$color:      #333333 !default;
+$font:       14px Roboto, Helvetica, Arial, sans-serif !default;
+$padding:    13px !default;
 
-$link-color: $color !default;
+$link-color:       $color !default;
 $link-hover-color: $color !default;
 
-$post-background: #ffffff !default;
-$post-border: 1px solid #d8d8d8 !default;
-$post-header-padding: 5px 10px 4px !default;
-$post-content-padding: 7px 10px 5px !default;
-$post-margin: 10px 0 !default;
+$form-background: #ffffff !default;
 
-$post-subject-color: #002244 !default;
-$post-name-color: $color !default;
+$input-background:    #ffffff !default;
+$input-border:        1px solid #ccc !default;
+$input-border-radius: 2px !default;
+$input-padding:       3px 7px !default;
+
+$btn-background:    $input-background !default;
+$btn-color:         #333333 !default;
+$btn-border:        $input-border !default;
+$btn-border-radius: $input-border-radius !default;
+$btn-padding:       $input-padding !default;
+
+$btn-hover-background: #e5e5e5 !default;
+
+$post-background:      #ffffff !default;
+$post-border:          1px solid #d8d8d8 !default;
+$post-border-radius:   4px !default;
+$post-header-padding:  5px 10px 4px !default;
+$post-content-padding: 7px 10px 5px !default;
+$post-margin:          10px 0 !default;
+
+$post-subject-color:  #002244 !default;
+$post-name-color:     $color !default;
 $post-tripcode-color: #228854 !default;
 
 $dice-color: #228854 !default;
-$dice-font: 600 0.8em monospace;
+$dice-font:  600 0.8em monospace;
 
 $spoiler-background: #000000 !default;
-$spoiler-color: #ffffff !default;
+$spoiler-color:      #ffffff !default;
 
 $quote-color: #789922 !default;

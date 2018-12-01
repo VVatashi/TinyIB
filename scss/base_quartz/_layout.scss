@@ -2,7 +2,7 @@
 
 .layout {
   &__header {
-    padding: $padding $padding 0;
+    padding: $padding;
   }
 
   &__content {
@@ -10,6 +10,6 @@
   }
 
   &__footer {
-    padding: 0 $padding $padding;
+    padding: $padding;
   }
 }

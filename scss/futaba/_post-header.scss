@@ -1,0 +1,14 @@
+.post-header {
+  &__subject {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+
+  &__name {
+    font-weight: bold;
+  }
+
+  &__reflink {
+    color: inherit;
+  }
+}
