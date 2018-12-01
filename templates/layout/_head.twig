@@ -1,3 +1,14 @@
+{% macro style(title, filename, relation) %}
+  <link rel="{{ relation|default('alternate stylesheet') }}" type="text/css" title="{{ title }}"
+    href="{{ base_url }}/css/{{ filename }}.css?mtime={{ mtime('css/{{ filename }}.css') }}" />
+{% endmacro %}
+
+{% macro script(filename) %}
+  <script src="{{ base_url }}/js/{{ filename }}.js?mtime={{ mtime('js/{{ filename }}.js') }}"></script>
+{% endmacro %}
+
+{% import _self as self %}
+
 <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
 <meta http-equiv="cache-control" content="max-age=0" />
 <meta http-equiv="cache-control" content="no-cache" />
@@ -9,19 +20,13 @@
 <title>{{ constant('TINYIB_BOARDDESC') }}</title>
 
 <link rel="shortcut icon" href="{{ base_url }}/favicon.ico" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans">
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Roboto:300,400,700&amp;subset=cyrillic" rel="stylesheet">
 
-<link rel="alternate stylesheet" type="text/css" title="2watch"
-  href="{{ base_url }}/css/2watch.css?mtime={{ mtime('css/2watch.css') }}" />
-
-<link rel="alternate stylesheet" type="text/css" title="Lime"
-  href="{{ base_url }}/css/lime.css?mtime={{ mtime('css/lime.css') }}" />
-
-<link rel="alternate stylesheet" type="text/css" title="Nocturnal"
-  href="{{ base_url }}/css/nocturnal.css?mtime={{ mtime('css/nocturnal.css') }}" />
-
-<link rel="stylesheet" type="text/css" title="Synthwave"
-  href="{{ base_url }}/css/synthwave.css?mtime={{ mtime('css/synthwave.css') }}" />
+{{ self.style('2watch',    '2watch') }}
+{{ self.style('Lime',      'lime') }}
+{{ self.style('Nocturnal', 'nocturnal') }}
+{{ self.style('Quartz',    'quartz', 'stylesheet') }}
+{{ self.style('Synthwave', 'synthwave') }}
 
 {% if constant('TINYIB_GTM') %}
   <!-- Google Tag Manager -->
@@ -34,11 +39,14 @@
 {% endif %}
 
 <script src="https://cdn.rawgit.com/VVatashi/Dollchan-Extension-Tools/master/Dollchan_Extension_Tools.user.js"></script>
-<script src="{{ base_url }}/js/vendor/promise-polyfill.min.js?mtime={{ mtime('js/vendor/promise-polyfill.min.js') }}"></script>
-<script src="{{ base_url }}/js/vendor/fetch.min.js?mtime={{ mtime('js/vendor/fetch.min.js') }}"></script>
-<script src="{{ base_url }}/js/vendor/luxon.min.js?mtime={{ mtime('js/vendor/luxon.min.js') }}"></script>
+
+{{ self.script('vendor/promise-polyfill.min') }}
+{{ self.script('vendor/fetch.min') }}
+{{ self.script('vendor/luxon.min') }}
+
 <script>window.baseUrl = '{{ base_url|raw }}';</script>
-<script src="{{ base_url }}/js/index.js?mtime={{ mtime('js/index.js') }}"></script>
+
+{{ self.script('index') }}
 
 {% if constant('TINYIB_CAPTCHA') == 'recaptcha' %}
   <script src="https://www.google.com/recaptcha/api.js?render={{ constant('TINYIB_RECAPTCHA_SITE') }}"></script>

@@ -1,0 +1,15 @@
+@import 'vars';
+
+.layout {
+  &__header {
+    padding: $padding $padding 0;
+  }
+
+  &__content {
+    padding: 0 $padding;
+  }
+
+  &__footer {
+    padding: 0 $padding $padding;
+  }
+}

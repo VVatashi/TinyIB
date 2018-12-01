@@ -1,0 +1,31 @@
+@import '../utils/index';
+@import 'vars';
+
+.post-header {
+  &__delete {
+    /*display: inline;
+    margin: 0 0.25em 0 0;*/
+
+    display: none;
+  }
+
+  &__delete-label {
+    display: none;
+  }
+
+  &__subject {
+    color: $post-subject-color;
+  }
+
+  &__name {
+    color: $post-name-color;
+  }
+
+  &__tripcode {
+    color: $post-tripcode-color;
+  }
+
+  &__reply-link {
+    @include brackets;
+  }
+}

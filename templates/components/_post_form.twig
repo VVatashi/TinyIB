@@ -1,10 +1,10 @@
 {% macro markup(id, content) %}
-  <tr class="form__field field">
-    <td class="field__label-wrapper">
+  <tr class="postform__markup-row form__field field">
+    <td class="postform__label field__label-wrapper">
     </td>
 
-    <td class="field__input-wrapper">
-      <button type="button" class="field__input field__input_button field__input_markup field__input_markup-{{ id }}" id="markup_{{ id }}">
+    <td class="postform__markup-wrapper field__input-wrapper">
+      <button type="button" class="postform__markup field__input field__input_button field__input_markup field__input_markup-{{ id }}" id="markup_{{ id }}">
         {{ content }}
       </button>
     </td>
@@ -12,12 +12,12 @@
 {% endmacro %}
 
 {% macro field(id, title) %}
-  <tr class="form__field form__field_{{ id }} field field_{{ id }}">
-    <td class="field__label-wrapper">
+  <tr class="postform__field-row form__field form__field_{{ id }} field field_{{ id }}">
+    <td class="postform__label field__label-wrapper">
       <label class="field__label field__label_hidden" for="{{ id }}">{{ title }}</label>
     </td>
 
-    <td class="field__input-wrapper">
+    <td class="postform__field-wrapper field__input-wrapper">
       <input type="text" class="field__input" id="{{ id }}" name="{{ id }}" placeholder="{{ title }}" autocomplete="off" />
     </td>
   </tr>
@@ -26,7 +26,7 @@
 {% import _self as self %}
 
 <div class="{{ class is defined ? class }}">
-  <form class="content__postform form form_resizable form_postform" id="postform" name="postform" action="{{ base_url }}/post/create" method="post" enctype="multipart/form-data">
+  <form class="content__postform postform form form_resizable form_postform" id="postform" name="postform" action="{{ base_url }}/post/create" method="post" enctype="multipart/form-data">
     {% if uploads and constant('TINYIB_MAXKB') > 0 %}
       <input type="hidden" name="MAX_FILE_SIZE" value="{{ constant('TINYIB_MAXKB') * 1024 }}" />
     {% endif %}
@@ -44,14 +44,14 @@
     {% endif %}
 
     {% spaceless %}
-      <table class="form__inner">
-        <tbody class="form__group form__group_inline form__group_name">
+      <table class="postform__inner form__inner">
+        <tbody class="postform__name-group form__group form__group_inline form__group_name">
           {{ self.field('subject', 'Subject') }}
           {{ self.field('email', 'E-mail') }}
           {{ self.field('name', 'Name') }}
 
           <tr class="form__field form__field_actions field field_actions">
-            <td class="field__label-wrapper"></td>
+            <td class="postform__label field__label-wrapper"></td>
 
             <td class="field__input-wrapper">
               <input type="submit" class="field__input field__input_button field__input_submit" value="Submit" />
@@ -59,7 +59,7 @@
           </tr>
         </tbody>
 
-        <tbody class="form__group form__group_inline form__group_markup">
+        <tbody class="postform__markup-group form__group form__group_inline form__group_markup">
           {{ self.markup('b', '<strong>b</strong>') }}
           {{ self.markup('i', '<em>i</em>') }}
           {{ self.markup('u', '<span class="underline">u</span>') }}
@@ -72,23 +72,23 @@
           {{ self.markup('quote', '<span class="quote">&gt;</span>') }}
         </tbody>
 
-        <tbody class="form__group form__group_inline form__group_message">
-          <tr class="form__field form__field_message field field_message">
-            <td class="field__label-wrapper">
+        <tbody class="postform__message-group form__group form__group_inline form__group_message">
+          <tr class="postform__message-row form__field form__field_message field field_message">
+            <td class="postform__label field__label-wrapper">
               <label class="field__label field__label_hidden" for="message">Message</label>
             </td>
 
-            <td class="field__input-wrapper">
-              <textarea class="field__input field__input_message" id="message" name="message" placeholder="Message">
+            <td class="postform__message-wrapper field__input-wrapper">
+              <textarea class="postform__message field__input field__input_message" id="message" name="message" placeholder="Message">
               </textarea>
             </td>
           </tr>
         </tbody>
 
-        <tbody class="form__group form__group_inline form__group_attachment">
+        <tbody class="postform__attachment-group form__group form__group_inline form__group_attachment">
           {% if constant('TINYIB_CAPTCHA') == 'simple' %}
             <tr class="form__field form__field_attachment field field_captcha">
-              <td class="field__label-wrapper">
+              <td class="postform__label field__label-wrapper">
                 <label class="field__label field__label_hidden" for="file">CAPTCHA</label>
               </td>
 
@@ -108,7 +108,7 @@
 
           {% if uploads %}
             <tr class="form__field form__field_attachment field field_attachment">
-              <td class="field__label-wrapper">
+              <td class="postform__label field__label-wrapper">
                 <label class="field__label field__label_hidden" for="file">File</label>
               </td>
 
@@ -119,7 +119,7 @@
           {% endif %}
 
           <tr class="form__field form__field_password field field_password">
-            <td class="field__label-wrapper">
+            <td class="postform__label field__label-wrapper">
               <label class="field__label field__label_hidden" for="newpostpassword">Password</label>
             </td>
 
@@ -129,9 +129,9 @@
           </tr>
         </tbody>
 
-        <tbody class="form__group form__group_rules">
+        <tbody class="postform__rules-group form__group form__group_rules">
           <tr class="form__field form__field_rules field field_rules">
-            <td class="field__label-wrapper"></td>
+            <td class="postform__label field__label-wrapper"></td>
 
             <td class="field__input-wrapper rules">
               <ul class="rules__list">
@@ -169,6 +169,10 @@
           </tr>
         </tbody>
       </table>
+
+      <div class="postform__right-border"></div>
+      <div class="postform__bottom-border"></div>
+      <div class="postform__corner"></div>
     {% endspaceless %}
   </form>
 </div>

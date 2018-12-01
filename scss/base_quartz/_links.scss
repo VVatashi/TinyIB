@@ -1,0 +1,7 @@
+@import '../utils/index';
+
+.links {
+  &__item {
+    @include brackets;
+  }
+}

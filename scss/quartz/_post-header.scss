@@ -1,0 +1,13 @@
+.post-header {
+  font-size: 1.1em;
+  font-weight: 100;
+
+  &__subject {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+
+  &__name {
+    font-weight: normal;
+  }
+}
