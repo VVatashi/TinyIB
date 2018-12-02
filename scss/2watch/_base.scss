@@ -1,22 +1,18 @@
-@import 'vars';
-
-html,
-body {
-  background-color: $bg-color;
-  color: $text-color;
-}
-
 a {
-  color: $link-color;
-  text-decoration: none;
   transition: color .3s ease, text-shadow .3s ease;
 
   &:hover {
-    color: $link-active-color;
-    text-shadow: $link-active-color 0 0 10px;
+    text-shadow: $color 0 0 10px;
   }
 }
 
-hr {
-  background: #fff;
+textarea, input, button {
+  transition: background-color, border-color, box-shadow 0.4s;
+
+  &:focus {
+    background: #2d2d2d;
+    border: 1px solid rgba(216, 216, 216, 0.62);
+    box-shadow: inset 0 0 40px rgba(220, 220, 220, 0.32);
+    color: #d8d8d8;
+  }
 }

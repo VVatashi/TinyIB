@@ -1,30 +1,20 @@
-@import '../utils/index';
-
 .post-header {
-  padding: 5px 5px 0;
+  border-bottom: 1px solid #707070;
 
   &__subject {
-    background: inherit;
-    color: #cc1105;
     font-size: 1.2em;
     font-weight: 800;
   }
 
   &__name {
-    color: #117743;
     font-weight: 800;
   }
 
   &__tripcode {
-    color: #f00;
     text-shadow: #f92b2b 0 0 10px;
   }
 
   &__reflink {
     color: inherit;
-
-    &:hover {
-      font-weight: bold;
-    }
   }
 }

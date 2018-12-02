@@ -144,29 +144,24 @@ export default class PostForm extends BaseModule {
       message_resizer.setAttribute('style', 'display: none !important;');
     }
 
-    const file_preview = qs('.de-file', this.form);
+    const file_preview = qs('.de-file', this.form) as HTMLElement;
     if (file_preview) {
       // Fix DE file preview.
-      const preview_field = document.createElement('tr');
-      preview_field.classList.add('form__field', 'form__field_fixed-width', 'field');
-
-      const preview_label_wrapper = document.createElement('td');
-      preview_label_wrapper.classList.add('postform__label', 'field__label-wrapper');
-      preview_field.appendChild(preview_label_wrapper);
-
-      const preview_input_wrapper = document.createElement('td');
-      preview_input_wrapper.classList.add('field__input-wrapper');
-      preview_input_wrapper.appendChild(file_preview);
-      preview_field.appendChild(preview_input_wrapper);
-
-      const message_group = qs('.form__group_message', this.form);
-
-      if (this.settings.form_preview_align === 'left') {
-        message_group.insertBefore(preview_field, message_group.firstChild);
-      } else {
-        message_group.appendChild(preview_field);
+      const form_inner = qs('.postform__inner', this.form);
+      if (form_inner) {
+        this.form.insertBefore(file_preview, form_inner);
+        if (this.settings.form_preview_align === 'left') {
+          file_preview.style.cssFloat = 'left';
+          file_preview.style.marginRight = '0.5em';
+        } else {
+          file_preview.style.cssFloat = 'right';
+          file_preview.style.marginLeft = '0.5em';
+        }
       }
     }
+
+    this.form.style.width = `${this.form.clientWidth}px`;
+    this.form.style.height = `${this.form.clientHeight}px`;
 
     const new_post_password = qid('newpostpassword') as HTMLInputElement;
     if (new_post_password) {

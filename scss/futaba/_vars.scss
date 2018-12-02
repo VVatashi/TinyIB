@@ -6,14 +6,18 @@ $padding:    8px;
 $link-color:       #0000ee;
 $link-hover-color: #dd0000;
 
-$form-background: #eeaa88;
+$link-decoration: underline;
+
+$line-border: 1px solid #bbbbbb;
 
 $post-background:      #f0e0d6;
+$post-omitted-color:   #666666;
 $post-border:          1px solid #ddccc5;
 $post-border-radius:   5px;
 $post-header-padding:  0 20px;
 $post-content-padding: 0.5em 20px;
-$post-margin:          0;
+$post-file-margin:     0 20px 0 0;
+$post-margin:          0 0 4px;
 
 $post-subject-color:  #cc1105;
 $post-name-color:     #117743;
