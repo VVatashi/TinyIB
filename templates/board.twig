@@ -10,6 +10,7 @@
 {% block content %}
   <main class="{{class is defined ? class ~ ' '}}">
     <ul class="content__links links">
+      <li class="links__item"><a class="links__link" href="{{ base_url }}/mobile">Mobile version</a></li>
       <li class="links__item"><a class="links__link" href="{{ base_url }}/settings">Settings</a></li>
     </ul>
 
@@ -38,7 +39,4 @@
 {% endblock %}
 
 {% block footer_links %}
-  <li class="footer__list-item">
-    <a class="footer__link" href="{{ base_url }}/mobile{{ this_page ? '?page=' ~ this_page }}">Mobile version</a>
-  </li>
 {% endblock %}

@@ -1,19 +1,28 @@
+@import '../utils/index';
 @import 'vars';
 
 body, html {
-  background-color: $background;
+  background: $background;
   color: $color;
   font: $font;
+  line-height: 1.4;
 }
 
 a {
   color: $link-color;
-  text-decoration: none;
+  text-decoration: $link-decoration;
 
   &:hover {
     color: $link-hover-color;
-    text-decoration: underline;
+    text-decoration: $link-hover-decoration;
   }
+}
+
+hr {
+  border: 0;
+  border-top: $line-border;
+  height: 0;
+  margin: 20px 0;
 }
 
 ul, ol {
@@ -25,6 +34,7 @@ ul, ol {
 
 textarea, input {
   box-sizing: border-box;
+  color: $input-color;
   background: $input-background;
   border: $input-border;
   border-radius: $input-border-radius;
@@ -60,4 +70,3 @@ input[type=submit], button {
   background: $post-background;
   color: $color;
 }
-

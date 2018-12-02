@@ -1,46 +1,6 @@
 .post {
-  background: transparent;
-  color: #fff;
-
   &_reply &__inner {
-    background-image: url('synthwave/bgpostnew.jpg');
-    border: 2px solid transparent;
     border-image: linear-gradient(to bottom right, #fb99f9 0%, #f632fe 100%);
     border-image-slice: 1;
-  }
-
-  &__header {
-    color: #9a9a9a;
-    text-shadow: none;
-  }
-
-  &__content {
-    border-top: solid 1px #505050;
-    padding: 2px 8px 8px;
-  }
-
-  &__file-info {
-    font-size: 10px;
-  }
-
-  &__file {
-    border: none;
-    margin: 7px 15px 5px 5px;
-  }
-
-  &__message {
-    color: #fff;
-  }
-
-  &__reference-link-name {
-    @extend .post-header__name;
-  }
-
-  &__reference-link-tripcode {
-    @extend .post-header__tripcode;
-  }
-
-  &__omitted {
-    color: #0ff;
   }
 }

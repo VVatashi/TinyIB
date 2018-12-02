@@ -8,6 +8,8 @@
 
   &__oppost,
   &__post {
+    @include clearfix;
+
     margin: $post-margin;
   }
 
@@ -23,6 +25,8 @@
   }
 
   &__postform {
+    box-sizing: border-box;
+
     // DE fix.
     border: $post-border !important;
     padding: 10px !important;
@@ -40,5 +44,11 @@
 
   &__footer {
     margin: 0;
+  }
+
+  @include breakpoint($xs-up) {
+    &__postform {
+      min-width: 550px;
+    }
   }
 }

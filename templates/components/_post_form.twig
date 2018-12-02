@@ -18,7 +18,7 @@
     </td>
 
     <td class="postform__field-wrapper field__input-wrapper">
-      <input type="text" class="field__input" id="{{ id }}" name="{{ id }}" placeholder="{{ title }}" autocomplete="off" />
+      <input type="text" class="postform__input field__input" id="{{ id }}" name="{{ id }}" placeholder="{{ title }}" autocomplete="off" />
     </td>
   </tr>
 {% endmacro %}
@@ -50,11 +50,11 @@
           {{ self.field('email', 'E-mail') }}
           {{ self.field('name', 'Name') }}
 
-          <tr class="form__field form__field_actions field field_actions">
+          <tr class="postform__field-row postform__field-row_nostretch form__field form__field_actions field field_actions">
             <td class="postform__label field__label-wrapper"></td>
 
-            <td class="field__input-wrapper">
-              <input type="submit" class="field__input field__input_button field__input_submit" value="Submit" />
+            <td class="postform__field-wrapper field__input-wrapper">
+              <input type="submit" class="postform__submit field__input field__input_button field__input_submit" value="Submit" />
             </td>
           </tr>
         </tbody>

@@ -1,8 +1,10 @@
 {% macro link(title, url) %}
+  {% spaceless %}
   <li class="admin-bar__list-item">
     {% set url = base_url ~ '/' ~ url %}
     <a class="admin-bar__link" href="{{ url }}">{{ title }}</a>
   </li>
+  {% endspaceless %}
 {% endmacro %}
 
 {% import _self as self %}

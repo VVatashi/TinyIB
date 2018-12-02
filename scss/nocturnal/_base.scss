@@ -1,40 +1,7 @@
-@import 'vars';
-
-body,
-html {
-  background: $alt-bg repeat fixed center center;
-  color: $main-text;
-  font-family: 'Open Sans', 'Segoe UI', sans-serif;
-  font-size: 13px;
+html, body {
   font-weight: 600;
-  overflow-x: hidden;
 }
 
 a {
-  color: $third-text;
-  text-decoration: none;
-
-  &:hover {
-    color: $secondary-text;
-    transition: color ease-in-out .2s;
-  }
-}
-
-hr {
-  border: 0;
-  margin-top: 0;
-  padding-top: 0;
-}
-
-code {
-  color: $secondary-text;
-}
-
-select {
-  color: $title-text;
-}
-
-textarea {
-  background: transparent;
-  color: white;
+  transition: color ease-in-out 0.2s;
 }

@@ -1,58 +1,37 @@
-@import 'vars';
 @import '../utils/index';
+@import 'vars';
 
 .post {
-  background: $post-bg;
-  border: 0 solid;
-  box-shadow: 3px 3px 5px rgba(0, 0, 0, .2);
-  box-sizing: border-box;
-  color: $main-text;
-
-  &:hover {
-    box-shadow: 8px 8px 8px rgba(0, 0, 0, .2);
-  }
-
-  &_reply &__inner {
-    float: unset;
-  }
-
-  &__header {
-    float: left;
+  &__inner {
+    box-sizing: border-box;
+    background: $post-background;
+    border: $post-border;
+    border-radius: $post-border-radius;
   }
 
   &__content {
-    padding: 10px;
+    // Overflow breaks header float.
+    max-height: unset;
+    overflow: unset;
   }
 
-  &__file-info {
-    color: $third-text;
-    margin-left: -3px;
-    margin-top: 0;
-    padding: 4px;
-  }
-
-  &__file {
-    @include breakpoint($phone-up) {
-      float: right;
-      margin-right: 4px;
+  &__reference-link {
+    &:hover {
+      color: #b294bb;
     }
   }
 
-  &__message {
-    clear: left;
-    border: 0 solid;
-    max-width: 100%;
-  }
+  @include breakpoint($xs-up) {
+    &__header {
+      float: left;
+    }
 
-  &__reference-link-name {
-    @extend .post-header__name;
-  }
+    &__message {
+      clear: left;
+    }
 
-  &__reference-link-tripcode {
-    @extend .post-header__tripcode;
-  }
-
-  &__omitted {
-    color: #a88085;
+    &__file {
+      float: right;
+    }
   }
 }

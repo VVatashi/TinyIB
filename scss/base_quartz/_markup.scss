@@ -1,5 +1,9 @@
 @import 'vars';
 
+code {
+  white-space: pre-line !important;
+}
+
 .dice {
   color: $dice-color;
   font: $dice-font;

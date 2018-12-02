@@ -2,20 +2,17 @@
 @import 'vars';
 
 .post {
-  overflow: hidden;
-
   &__inner {
-    background: $post-background;
-    border: $post-border;
-    border-radius: $post-border-radius;
+    @include clearfix;
   }
 
   &__header {
+    color: $post-header-color;
     padding: $post-header-padding;
   }
 
   &__content {
-    @include clearfix;
+    color: $post-content-color;
 
     padding: $post-content-padding;
     overflow-y: auto;
@@ -25,8 +22,12 @@
     word-wrap: break-word;
   }
 
+  &__file-info {
+    font-size: 0.8em;
+  }
+
   &__file {
-    margin-right: 0.5em;
+    margin: $post-file-margin;
   }
 
   &__reference-link {
@@ -38,6 +39,7 @@
   &__reference-link-author {
     font-size: 0.8em;
     margin-left: 0.25em;
+    text-decoration: none;
 
     // To allow pointer events bubble up to the .post__reference-link (DE comptability)
     pointer-events: none;
@@ -45,17 +47,39 @@
 
   &__reference-link-name {
     @extend .post-header__name !optional;
+
+    text-shadow: none;
   }
 
   &__reference-link-tripcode {
     @extend .post-header__tripcode !optional;
+
+    text-shadow: none;
+  }
+
+  &__omitted {
+    color: $post-omitted-color;
+  }
+
+  &_reply &__inner {
+    box-sizing: border-box;
+    background: $post-background;
+    border: $post-border;
+    border-radius: $post-border-radius;
   }
 
   @include breakpoint($xs-up) {
     &__inner {
-      display: inline-block;
-      min-width: 560px;
+      @if $post-align-left {
+        float: left;
+        clear: left;
+      }
+
       max-width: 100%;
+    }
+
+    &_reply &__inner {
+      min-width: 560px;
     }
 
     &__file {
