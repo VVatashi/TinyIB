@@ -1,10 +1,10 @@
 {% macro style(title, filename, relation) %}
   <link rel="{{ relation|default('alternate stylesheet') }}" type="text/css" title="{{ title }}"
-    href="{{ base_url }}/css/{{ filename }}.css?mtime={{ mtime('css/{{ filename }}.css') }}" />
+    href="{{ base_url }}/css/{{ filename }}.css?mtime={{ mtime('css/' ~ filename ~ '.css') }}" />
 {% endmacro %}
 
 {% macro script(filename) %}
-  <script src="{{ base_url }}/js/{{ filename }}.js?mtime={{ mtime('js/{{ filename }}.js') }}"></script>
+  <script src="{{ base_url }}/js/{{ filename }}.js?mtime={{ mtime('js/' ~ filename ~ '.js') }}"></script>
 {% endmacro %}
 
 {% import _self as self %}
