@@ -2,12 +2,6 @@
   {% set direct_link = base_url ~ '/src/' ~ post.file %}
 {% endif %}
 
-{% if post.imageWidth > 0 and post.imageHeight > 0 %}
-  {% set dimensions = 'width="' ~ post.imageWidth ~ '" height="' ~ post.imageHeight ~ '"' %}
-{% else %}
-  {% set dimensions = 'width="500" height="50"' %}
-{% endif %}
-
 <div class="{{ class is defined ? class ~ ' ' }}file"
   {% if post.thumbWidth > 0 %}
     style="max-width: {{ max(120, post.thumbWidth) }}px;"
@@ -17,30 +11,10 @@
 
   {% if post.thumbWidth > 0 and post.thumbHeight > 0 %}
     <a class="file__thumbnail thumbnail" id="thumbnail_wrapper_{{ post.id }}"
-      href="{{ direct_link }}" data-id="{{ post.id }}" target="_blank">
+      href="{{ direct_link }}" target="_blank">
       <img src="{{ base_url }}/thumb/{{ post.thumb }}" alt="{{ post.id }}"
         class="thumbnail__content thumbnail__content_image" id="thumbnail_{{ post.id }}"
         width="{{ post.thumbWidth }}" height="{{ post.thumbHeight }}" />
     </a>
   {% endif %}
-
-  {# Stores the encoded original file markup, so the browser doesn't load it until it's needed #}
-  <div id="expand_{{ post.id }}" style="display: none;">
-    {% if post.fileType == 'image' %}
-      {{ ('<img class="original__content original__content_image"'
-  ~ ' src="' ~ direct_link ~ '" width="' ~ post.thumbWidth ~ '"/>')|url_encode }}
-    {% elseif post.fileType == 'audio' %}
-      {{ ('<audio class="original__content original__content_audio" controls autoplay loop ' ~ dimensions
-  ~ ' onclick="event.stopPropagation();">'
-  ~ '<source src="' ~ direct_link ~ '"></source>'
-  ~ '</audio>')|url_encode }}
-    {% elseif post.fileType == 'video' %}
-      {{ ('<video class="original__content original__content_video" controls autoplay loop ' ~ dimensions
-  ~ ' onclick="event.stopPropagation();">'
-  ~ '<source src="' ~ direct_link ~ '"></source>'
-  ~ '</video>')|url_encode }}
-    {% endif %}
-  </div>
-
-  <div class="file__original original" id="original_wrapper_{{ post.id }}" style="display: none;" data-id="{{ post.id }}"></div>
 </div>

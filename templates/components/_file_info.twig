@@ -8,13 +8,11 @@
 <div class="{{ class is defined ? class ~ ' ' }}file-info filesize">
   {% spaceless %}
     {% if post.file %}
-      <a class="file-info__link" href="{{ direct_link }}" data-id="{{ post.id }}" target="_blank">
-        {{ post.file }}
-      </a>
-      &ndash;
+      <a class="file-info__link" href="{{ direct_link }}" data-id="{{ post.id }}" target="_blank">.{{ post.fileExtension }}</a>,
       <span class="file-info__size">
-        ({{ post.fileSizeFormatted }}{% if has_size %},&nbsp;{{ post.imageWidth }}x{{ post.imageHeight }}{% endif %}{% if show_name %},
-        {{ post.fileOriginal }}{% endif %})
+        {{ post.fileSizeFormatted }}{% if has_size %},
+        {{ post.imageWidth }}x{{ post.imageHeight }}{% endif %}{% if show_name %},
+        {{ post.fileOriginal }}{% endif %}
       </span>
     {% endif %}
   {% endspaceless %}

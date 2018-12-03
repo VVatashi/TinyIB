@@ -10,6 +10,11 @@ $input-margin: 0 $input-margin-h $input-margin-v 0;
   width: 100% !important;
 }
 
+.de-file {
+  flex-shrink: 0;
+  align-self: center;
+}
+
 #de-sagebtn {
   display: none !important;
 }
@@ -31,6 +36,7 @@ $input-margin: 0 $input-margin-h $input-margin-v 0;
     display: flex;
     flex-flow: column;
     height: 100%;
+    order: -1;
     /*overflow-x: hidden;
     overflow-y: auto;*/
   }
