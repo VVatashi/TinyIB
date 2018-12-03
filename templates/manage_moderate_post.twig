@@ -1,10 +1,10 @@
 {% extends 'layout/_manage.twig' %}
 
-{% set is_thread = post['parent'] == constant('TINYIB_NEWTHREAD') %}
+{% set is_thread = post.isThread() %}
 
 {% block manage %}
   <fieldset>
-    <legend>Moderating No.{{ post['id'] }}</legend>
+    <legend>Moderating No.{{ post.id }}</legend>
 
     <fieldset>
       <legend>Action</legend>
@@ -12,7 +12,7 @@
       <table border="0" cellspacing="0" cellpadding="0" width="100%">
         <tr>
           <td align="right" width="50%;">
-            <form method="get" action="{{ base_url }}/manage/delete/{{ post['id'] }}">
+            <form method="get" action="{{ base_url }}/manage/delete/{{ post.id }}">
               <input type="submit" value="Delete {{ is_thread ? 'Thread' : 'Post' }}"
                 class="managebutton" style="width: 50%;" />
             </form>
@@ -32,7 +32,7 @@
         <tr>
           <td align="right" width="50%;">
             <form method="get" action="{{ base_url }}/manage/bans">
-              <input type="hidden" name="bans" value="{{ post['ip'] }}" />
+              <input type="hidden" name="bans" value="{{ post.ip }}" />
               <input type="submit" value="Ban Poster"
                 class="managebutton" style="width: 50%;"
                 {{ has_ban or not is_admin ? 'disabled' }} />
@@ -45,10 +45,10 @@
                 {% if not is_admin %}
                   Only an administrator may ban an IP address.
                 {% else %}
-                  IP address: {{ post['ip'] }}
+                  IP address: {{ post.ip }}
                 {% endif %}
               {% else %}
-                A ban record already exists for {{ post['ip'] }}
+                A ban record already exists for {{ post.ip }}
               {% endif %}
             </small>
           </td>
@@ -57,7 +57,7 @@
         {% if is_thread %}
           <tr>
             <td align="right" width="50%;">
-              <form method="get" action="{{ base_url }}/manage/sticky/{{ post['id'] }}">
+              <form method="get" action="{{ base_url }}/manage/sticky/{{ post.id }}">
                 <input type="hidden" name="setsticky" value="{{ post['stickied'] ? '0' : '1' }}" />
                 <input type="submit" value="{{ post['stickied'] ? 'Un-sticky' : 'Sticky' }} Thread"
                   class="managebutton" style="width: 50%;" />
@@ -66,7 +66,7 @@
 
             <td>
               <small>
-                {% if post['stickied'] %}
+                {% if post.isStickied %}
                   Return this thread to a normal state.
                 {% else %}
                   Keep this thread at the top of the board.

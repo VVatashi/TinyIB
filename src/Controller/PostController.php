@@ -140,33 +140,6 @@ class PostController implements PostControllerInterface
     }
 
     /**
-     * Renders a post view model.
-     *
-     * @param array $viewModel
-     *
-     * @return string
-     */
-    protected function renderPostViewModel(array $view_model, bool $res) : string
-    {
-        return $this->renderer->render('components/_post.twig', [
-            'post' => $view_model,
-            'res' => $res,
-        ]);
-    }
-
-    /**
-     * @param Post $post
-     * @param bool $res
-     *
-     * @return string
-     */
-    protected function renderPost(Post $post, bool $res) : string
-    {
-        $view_model = $post->createViewModel($res);
-        return $this->renderPostViewModel($view_model, $res);
-    }
-
-    /**
      * @return string
      */
     protected function supportedFileTypes() : string
@@ -193,28 +166,9 @@ class PostController implements PostControllerInterface
     protected function renderThreadPage(int $id) : string
     {
         $posts = Post::getPostsByThreadID($id);
-        $post_vms = $posts->map(function ($post) {
-            /** @var Post $post */
-            $view_model = $post->createViewModel(TINYIB_RESPAGE);
-            if (TINYIB_CACHE === 'database') {
-                // Do not cache individual posts in database mode.
-                $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_RESPAGE);
-                return $view_model;
-            }
-
-            $key = TINYIB_BOARD . ':post:' . $post->id;
-            $view_model['rendered'] = $this->cache->get($key);
-            if ($view_model['rendered'] === null) {
-                $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_RESPAGE);
-                $this->cache->set($key, $view_model['rendered'], 4 * 60 * 60);
-            }
-
-            return $view_model;
-        });
-
         return $this->renderer->render('thread.twig', [
             'filetypes' => $this->supportedFileTypes(),
-            'posts' => $post_vms,
+            'posts' => $posts,
             'parent' => $id,
             'res' => TINYIB_RESPAGE,
             'thumbnails' => true,
@@ -231,45 +185,24 @@ class PostController implements PostControllerInterface
         $threads = Post::getThreadsByPage($page);
         $threads_count = Post::getThreadCount();
         $pages = ceil($threads_count / TINYIB_THREADSPERPAGE) - 1;
-        $post_vms = [];
+        $posts = [];
 
         foreach ($threads as $thread) {
             $replies = Post::getPostsByThreadID($thread->id);
-            $omitted_count = max(0, $replies->count() - TINYIB_PREVIEWREPLIES - 1);
+            $omitted = max(0, $replies->count() - TINYIB_PREVIEWREPLIES - 1);
             $replies = $replies->take(-TINYIB_PREVIEWREPLIES);
+
             if ($replies->count() === 0 || $replies->first()->id !== $thread->id) {
                 $replies->prepend($thread);
             }
 
-            $thread_reply_vms = $replies->map(function ($post) use ($omitted_count) {
-                /** @var \TinyIB\Models\PostInterface $post */
-                $view_model = $post->createViewModel(TINYIB_INDEXPAGE);
-                if ($post->isThread() && $omitted_count > 0) {
-                    $view_model['omitted'] = $omitted_count;
-                }
-
-                if (TINYIB_CACHE === 'database') {
-                    // Do not cache individual posts in database mode.
-                    $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
-                    return $view_model;
-                }
-
-                $key = TINYIB_BOARD . ':index_post:' . $post->id;
-                $view_model['rendered'] = $this->cache->get($key);
-                if ($view_model['rendered'] === null) {
-                    $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
-                    $this->cache->set($key, $view_model['rendered'], 4 * 60 * 60);
-                }
-
-                return $view_model;
-            });
-
-            $post_vms = collect([$post_vms, $thread_reply_vms])->collapse();
+            $replies->first()->omitted = $omitted;
+            $posts = collect([$posts, $replies])->collapse();
         }
 
         return $this->renderer->render('board.twig', [
             'filetypes' => $this->supportedFileTypes(),
-            'posts' => $post_vms,
+            'posts' => $posts,
             'pages' => max($pages, 0),
             'this_page' => $page,
             'parent' => 0,

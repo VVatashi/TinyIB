@@ -72,8 +72,7 @@ class MobilePostController implements MobilePostControllerInterface
         if (!isset($content)) {
             $threads = Post::getThreadsByPage($page);
             $threads = $threads->map(function ($thread) {
-                $message = $thread->message;
-                $message = $thread->markup($message);
+                $message = $thread->getMessageFormatted();
                 $thread->message = $message;
 
                 $thread->replyCount = Post::getReplyCountByThreadID($thread->id);
@@ -120,8 +119,7 @@ class MobilePostController implements MobilePostControllerInterface
 
             $posts = Post::getPostsByThreadID($thread_id, true, $limit, $page * $limit);
             $posts = $posts->map(function ($post) use ($thread_id) {
-                $message = $post->message;
-                $message = $post->markup($message);
+                $message = $post->getMessageFormatted();
                 $message = $this->fixLinks($message, $thread_id);
                 $post->message = $message;
                 return $post;
@@ -203,8 +201,7 @@ class MobilePostController implements MobilePostControllerInterface
         $posts = $posts->filter(function ($post) use ($after) {
             return $post->id > $after;
         })->map(function ($post) use ($thread_id) {
-            $message = $post->message;
-            $message = $post->markup($message);
+            $message = $post->getMessageFormatted();
             $message = $this->fixLinks($message, $thread_id);
             $post->message = $message;
             return $post;

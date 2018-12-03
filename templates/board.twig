@@ -9,18 +9,13 @@
 
 {% block content %}
   <main class="{{class is defined ? class ~ ' '}}">
-    <ul class="content__links links">
-      <li class="links__item"><a class="links__link" href="{{ base_url }}/mobile">Mobile version</a></li>
-      <li class="links__item"><a class="links__link" href="{{ base_url }}/settings">Settings</a></li>
-    </ul>
-
     {% include 'components/_post_form.twig' with {'class': 'content__postarea'} %}
 
     <form id="delform" action="{{ base_url }}/post/delete" method="post">
       <input type="hidden" name="board" value="{{ constant('TINYIB_BOARD') }}" />
 
       {% for post in posts %}
-        {% if post['parent'] == constant('TINYIB_NEWTHREAD') %}
+        {% if post.isThread() %}
           <hr />
         {% endif %}
 

@@ -545,13 +545,7 @@ class PostService implements PostServiceInterface
             Post::trimThreads();
 
             if ($post->isReply()) {
-                $id = $post->id;
-                $this->cache->delete(TINYIB_BOARD . ":post:$id");
-                $this->cache->delete(TINYIB_BOARD . ":index_post:$id");
-
                 $parent = $post->parent_id;
-                $this->cache->delete(TINYIB_BOARD . ":post:$parent");
-                $this->cache->delete(TINYIB_BOARD . ":index_post:$parent");
                 $this->cache->delete(TINYIB_BOARD . ":thread:$parent");
                 $this->cache->deletePattern(TINYIB_BOARD . ":mobile:thread:$parent:page:*");
                 $this->cache->deletePattern(TINYIB_BOARD . ":amp:thread:$parent:page:*");
@@ -568,8 +562,6 @@ class PostService implements PostServiceInterface
                 }
             } else {
                 $id = $post->id;
-                $this->cache->delete(TINYIB_BOARD . ":post:$id");
-                $this->cache->delete(TINYIB_BOARD . ":index_post:$id");
                 $this->cache->delete(TINYIB_BOARD . ":thread:$id");
                 $this->cache->deletePattern(TINYIB_BOARD . ":mobile:thread:$id:page:*");
                 $this->cache->deletePattern(TINYIB_BOARD . ":amp:thread:$id:page:*");
@@ -602,8 +594,6 @@ class PostService implements PostServiceInterface
         Post::deletePostByID($id);
 
         $thread_id = $post->isThread() ? $id : $post->parent_id;
-        $this->cache->delete(TINYIB_BOARD . ':post:' . $id);
-        $this->cache->delete(TINYIB_BOARD . ':index_post:' . $thread_id);
         $this->cache->delete(TINYIB_BOARD . ':thread:' . $thread_id);
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
         $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
