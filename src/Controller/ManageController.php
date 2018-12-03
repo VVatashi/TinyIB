@@ -34,21 +34,6 @@ class ManageController implements ManageControllerInterface
     }
 
     /**
-     * Renders a post view model.
-     *
-     * @param array $viewModel
-     *
-     * @return string
-     */
-    protected function renderPostViewModel(array $view_model, bool $res) : string
-    {
-        return $this->renderer->render('components/_post.twig', [
-            'post' => $view_model,
-            'res' => $res,
-        ]);
-    }
-
-    /**
      * {@inheritDoc}
      */
     public function status() : ResponseInterface
@@ -73,41 +58,13 @@ class ManageController implements ManageControllerInterface
         if (TINYIB_REQMOD === 'files' || TINYIB_REQMOD === 'all') {
             $data['reqmod_posts'] = Post::getLatestPosts(false)->map(function ($post) {
                 /** @var Post $post */
-                $view_model = $post->createViewModel(TINYIB_INDEXPAGE);
-                if (TINYIB_CACHE === 'database') {
-                    // Do not cache individual posts in database mode.
-                    $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
-                    return $view_model;
-                }
-
-                $key = TINYIB_BOARD . ':index_post:' . $post->id;
-                $view_model['rendered'] = $this->cache->get($key);
-                if ($view_model['rendered'] === null) {
-                    $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
-                    $this->cache->set($key, $view_model['rendered'], 4 * 60 * 60);
-                }
-
-                return $view_model;
+                return $post->createViewModel(TINYIB_INDEXPAGE);
             });
         }
 
         $data['posts'] = Post::getLatestPosts(true)->map(function ($post) {
             /** @var Post $post */
-            $view_model = $post->createViewModel(TINYIB_INDEXPAGE);
-            if (TINYIB_CACHE === 'database') {
-                // Do not cache individual posts in database mode.
-                $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
-                return $view_model;
-            }
-
-            $key = TINYIB_BOARD . ':index_post:' . $post->id;
-            $view_model['rendered'] = $this->cache->get($key);
-            if ($view_model['rendered'] === null) {
-                $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
-                $this->cache->set($key, $view_model['rendered'], 4 * 60 * 60);
-            }
-
-            return $view_model;
+            return $post->createViewModel(TINYIB_INDEXPAGE);
         });
 
         return new Response(200, [], $this->renderer->render('manage_status.twig', $data));
@@ -255,21 +212,7 @@ class ManageController implements ManageControllerInterface
 
         $data['posts'] = $posts->map(function ($post) {
             /** @var Post $post */
-            $view_model = $post->createViewModel(TINYIB_INDEXPAGE);
-            if (TINYIB_CACHE === 'database') {
-                // Do not cache individual posts in database mode.
-                $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
-                return $view_model;
-            }
-
-            $key = TINYIB_BOARD . ':index_post:' . $post->id;
-            $view_model['rendered'] = $this->cache->get($key);
-            if ($view_model['rendered'] === null) {
-                $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
-                $this->cache->set($key, $view_model['rendered'], 4 * 60 * 60);
-            }
-
-            return $view_model;
+            return $post->createViewModel(TINYIB_INDEXPAGE);
         });
 
         return new Response(200, [], $this->renderer->render('manage_moderate_post.twig', $data));
@@ -301,14 +244,12 @@ class ManageController implements ManageControllerInterface
         }
 
         Post::deletePostByID($id);
-        $this->cache->delete(TINYIB_BOARD . ":post:$id");
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
         $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
         $this->cache->deletePattern(TINYIB_BOARD . ':amp:page:*');
 
         if ($post->isReply()) {
             $parent = $post->parent_id;
-            $this->cache->delete(TINYIB_BOARD . ":index_post:$parent");
             $this->cache->delete(TINYIB_BOARD . ":thread:$parent");
         }
 
@@ -363,8 +304,6 @@ class ManageController implements ManageControllerInterface
             }
         }
 
-        $this->cache->delete(TINYIB_BOARD . ":post:$id");
-        $this->cache->delete(TINYIB_BOARD . ":index_post:$thread_id");
         $this->cache->delete(TINYIB_BOARD . ":thread:$thread_id");
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
         $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
@@ -409,8 +348,6 @@ class ManageController implements ManageControllerInterface
         $post->stickied = $sticky;
         $post->save();
 
-        $this->cache->delete(TINYIB_BOARD . ':post:' . $id);
-        $this->cache->delete(TINYIB_BOARD . ':index_post:' . $id);
         $this->cache->delete(TINYIB_BOARD . ':thread:' . $id);
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
         $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');

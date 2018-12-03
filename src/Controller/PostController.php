@@ -140,33 +140,6 @@ class PostController implements PostControllerInterface
     }
 
     /**
-     * Renders a post view model.
-     *
-     * @param array $viewModel
-     *
-     * @return string
-     */
-    protected function renderPostViewModel(array $view_model, bool $res) : string
-    {
-        return $this->renderer->render('components/_post.twig', [
-            'post' => $view_model,
-            'res' => $res,
-        ]);
-    }
-
-    /**
-     * @param Post $post
-     * @param bool $res
-     *
-     * @return string
-     */
-    protected function renderPost(Post $post, bool $res) : string
-    {
-        $view_model = $post->createViewModel($res);
-        return $this->renderPostViewModel($view_model, $res);
-    }
-
-    /**
      * @return string
      */
     protected function supportedFileTypes() : string
@@ -195,21 +168,7 @@ class PostController implements PostControllerInterface
         $posts = Post::getPostsByThreadID($id);
         $post_vms = $posts->map(function ($post) {
             /** @var Post $post */
-            $view_model = $post->createViewModel(TINYIB_RESPAGE);
-            if (TINYIB_CACHE === 'database') {
-                // Do not cache individual posts in database mode.
-                $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_RESPAGE);
-                return $view_model;
-            }
-
-            $key = TINYIB_BOARD . ':post:' . $post->id;
-            $view_model['rendered'] = $this->cache->get($key);
-            if ($view_model['rendered'] === null) {
-                $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_RESPAGE);
-                $this->cache->set($key, $view_model['rendered'], 4 * 60 * 60);
-            }
-
-            return $view_model;
+            return $post->createViewModel(TINYIB_RESPAGE);
         });
 
         return $this->renderer->render('thread.twig', [
@@ -243,25 +202,7 @@ class PostController implements PostControllerInterface
 
             $thread_reply_vms = $replies->map(function ($post) use ($omitted_count) {
                 /** @var \TinyIB\Models\PostInterface $post */
-                $view_model = $post->createViewModel(TINYIB_INDEXPAGE);
-                if ($post->isThread() && $omitted_count > 0) {
-                    $view_model['omitted'] = $omitted_count;
-                }
-
-                if (TINYIB_CACHE === 'database') {
-                    // Do not cache individual posts in database mode.
-                    $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
-                    return $view_model;
-                }
-
-                $key = TINYIB_BOARD . ':index_post:' . $post->id;
-                $view_model['rendered'] = $this->cache->get($key);
-                if ($view_model['rendered'] === null) {
-                    $view_model['rendered'] = $this->renderPostViewModel($view_model, TINYIB_INDEXPAGE);
-                    $this->cache->set($key, $view_model['rendered'], 4 * 60 * 60);
-                }
-
-                return $view_model;
+                return $post->createViewModel(TINYIB_INDEXPAGE);
             });
 
             $post_vms = collect([$post_vms, $thread_reply_vms])->collapse();
