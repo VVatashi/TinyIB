@@ -1,21 +1,20 @@
-{% set is_thread = post['parent'] == constant('TINYIB_NEWTHREAD') %}
-{% set has_size = post['image_width'] > 0 and post['image_height'] > 0 %}
-{% set show_name = constant('TINYIB_FILE_SHOW_ORIG_NAME') and post['file_original'] %}
+{% set has_size = post.imageWidth > 0 and post.imageHeight > 0 %}
+{% set show_name = constant('TINYIB_FILE_SHOW_ORIG_NAME') and post.fileOriginal %}
 
-{% if post['file_type'] %}
-  {% set direct_link = '/' ~ constant('TINYIB_BOARD') ~ '/src/' ~ post['file'] %}
+{% if post.fileType %}
+  {% set direct_link = '/' ~ constant('TINYIB_BOARD') ~ '/src/' ~ post.file %}
 {% endif %}
 
 <div class="{{ class is defined ? class ~ ' ' }}file-info filesize">
   {% spaceless %}
-    {% if post['file'] %}
-      <a class="file-info__link" href="{{ direct_link }}" data-id="{{ post['id'] }}" target="_blank">
-        {{ post['file'] }}
+    {% if post.file %}
+      <a class="file-info__link" href="{{ direct_link }}" data-id="{{ post.id }}" target="_blank">
+        {{ post.file }}
       </a>
       &ndash;
       <span class="file-info__size">
-        ({{ post['file_size_formatted'] }}{% if has_size %},&nbsp;{{ post['image_width'] }}x{{ post['image_height'] }}{% endif %}{% if show_name %},
-        {{ post['file_original'] }}{% endif %})
+        ({{ post.fileSizeFormatted }}{% if has_size %},&nbsp;{{ post.imageWidth }}x{{ post.imageHeight }}{% endif %}{% if show_name %},
+        {{ post.fileOriginal }}{% endif %})
       </span>
     {% endif %}
   {% endspaceless %}

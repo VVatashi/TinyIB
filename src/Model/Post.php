@@ -88,6 +88,26 @@ class Post extends Model
         return $this->belongsTo(static::class, 'parent_id');
     }
 
+    public function getImageWidth()
+    {
+        return $this->image_width;
+    }
+
+    public function getImageHeight()
+    {
+        return $this->image_height;
+    }
+
+    public function getThumbWidth()
+    {
+        return $this->thumb_width;
+    }
+
+    public function getThumbHeight()
+    {
+        return $this->thumb_height;
+    }
+
     /**
      * Checks if post instance is not saved to the database.
      *
@@ -185,18 +205,56 @@ class Post extends Model
     }
 
     /**
+     * @return string
+     */
+    public function getFileExtension() : string
+    {
+        if (empty($this->file)) {
+            return '';
+        }
+
+        $file_parts = explode('.', $this->file);
+        return end($file_parts);
+    }
+
+    /**
+     * @return string
+     */
+    public function getFileType() : string
+    {
+        $extension = $this->getFileExtension();
+
+        switch ($extension) {
+            case 'jpg':
+            case 'png':
+            case 'gif':
+                return 'image';
+
+            case 'mp3':
+                return 'audio';
+
+            case 'mp4':
+            case 'webm':
+                return 'video';
+
+            default:
+                return '';
+        }
+    }
+
+    /**
      * @param string $message
      *
      * @return string
      */
-    protected function wakabamark(string $message) : string
+    protected static function wakabamark(string $message) : string
     {
-        $patterns = array(
+        $patterns = [
             '/\*\*(.*?)\*\*/si' => '[b]\\1[/b]',
             '/\*(.*?)\*/si' => '[i]\\1[/i]',
             '/~~(.*?)~~/si' => '[s]\\1[/s]',
             '/%%(.*?)%%/si' => '[spoiler]\\1[/spoiler]',
-        );
+        ];
 
         $tags = [
             'b' => BBCodeDefinition::create('strong'),
@@ -220,7 +278,7 @@ class Post extends Model
      *
      * @return string
      */
-    protected function bbcode(string $message) : string
+    protected static function bbcode(string $message) : string
     {
         $tags = [
             'b' => BBCodeDefinition::create('strong'),
@@ -261,7 +319,7 @@ class Post extends Model
                 case Token::TEXT:
                     if (!$is_code) {
                         $text = $token->getText();
-                        $text = $this->wakabamark($text);
+                        $text = static::wakabamark($text);
                         $tokens[$i] = Token::text($text);
                     }
                     break;
@@ -290,130 +348,31 @@ class Post extends Model
         return $generator->generate($nodes);
     }
 
-    /**
-     * @param string $message
-     *
-     * @return string
-     */
-    public function markup(string $message) : string
+    protected static function fixLinks(string $message) : string
     {
-        return $this->bbcode($message);
-    }
-
-    /**
-     * @return string
-     */
-    public function getFileExtension() : string
-    {
-        if (empty($this->file)) {
-            return '';
-        }
-
-        $file_parts = explode('.', $this->file);
-        return end($file_parts);
-    }
-
-    /**
-     * @return string
-     */
-    public function getFileType() : string
-    {
-        $extension = $this->getFileExtension();
-
-        switch ($extension) {
-            case 'jpg':
-            case 'png':
-            case 'gif':
-                return 'image';
-
-            case 'mp3':
-                return 'audio';
-
-            case 'mp4':
-            case 'webm':
-                return 'video';
-
-            default:
-                return '';
-        }
-    }
-
-    /**
-     * Creates a post view model from this post model.
-     *
-     * @param bool $res
-     *   False for index pages, true for res pages.
-     */
-    public function createViewModel(bool $res) : array
-    {
-        $post = [
-            'id' => $this->id,
-            'parent' => $this->parent_id,
-            'timestamp' => $this->getCreatedTimestamp(),
-            'bumped' => $this->getBumpedTimestamp(),
-            'ip' => $this->ip,
-            'user_id' => $this->user_id,
-            'name' => $this->name,
-            'tripcode' => $this->tripcode,
-            'email' => $this->email,
-            'subject' => $this->subject,
-            'message' => $this->message,
-            'password' => $this->password,
-            'file' => $this->file,
-            'file_hex' => $this->file_hex,
-            'file_original' => $this->file_original,
-            'file_size' => $this->file_size,
-            'file_size_formatted' => $this->getFileSizeFormatted(),
-            'image_width' => $this->image_width,
-            'image_height' => $this->image_height,
-            'thumb' => $this->thumb,
-            'thumb_width' => $this->thumb_width,
-            'thumb_height' => $this->thumb_height,
-            'stickied' => $this->isSticky() ? 1 : 0,
-            'moderated' => $this->isModerated() ? 1 : 0,
-        ];
-
-        // Truncate messages on board index pages for readability
-        if (TINYIB_TRUNCATE > 0 && !$res
-            && substr_count($post['message'], '<br>') > TINYIB_TRUNCATE) {
-            $br_offsets = Functions::strallpos($post['message'], '<br>');
-            $post['message'] = substr($post['message'], 0, $br_offsets[TINYIB_TRUNCATE - 1]);
-            $post['is_truncated'] = true;
-        }
-
-        // Process post message.
-        try {
-            $post['message'] = $this->markup($post['message']);
-        }
-        catch (\Exception $e) {
-            // TODO: log error.
-        }
-
         $link_pattern = '#href="/' . TINYIB_BOARD . '/res/(\d+)\#(\d+)"#';
-        $post['message'] = preg_replace_callback($link_pattern, function ($matches) {
+        return preg_replace_callback($link_pattern, function ($matches) {
             $target_thread_id = (int)$matches[1];
             $target_post_id = (int)$matches[2];
 
             return 'class="post__reference-link"'
-                . ' href="/' . TINYIB_BOARD . "/res/$target_post_id#$target_post_id\""
+                . ' href="/' . TINYIB_BOARD . "/res/$target_thread_id#$target_post_id\""
                 . " data-target-post-id=\"$target_post_id\"";
-        }, $post['message']);
+        }, $message);
+    }
 
-        // Process post file.
-        if (isset($post['file'])) {
-            $file_parts = explode('.', $post['file']);
-            $post['file_extension'] = end($file_parts);
-
-            if (in_array($post['file_extension'], ['jpg', 'png', 'gif'])) {
-                $post['file_type'] = 'image';
-            } elseif (in_array($post['file_extension'], ['mp3'])) {
-                $post['file_type'] = 'audio';
-            } elseif (in_array($post['file_extension'], ['mp4', 'webm'])) {
-                $post['file_type'] = 'video';
-            }
+    public function getMessageFormatted() : string
+    {
+        // Process post message.
+        try {
+            $message = static::bbcode($this->message);
+        }
+        catch (\Exception $e) {
+            // TODO: log error.
+            $message = $this->message;
         }
 
-        return $post;
+        return static::fixLinks($message);
     }
 
     /**

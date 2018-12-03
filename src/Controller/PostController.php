@@ -166,14 +166,9 @@ class PostController implements PostControllerInterface
     protected function renderThreadPage(int $id) : string
     {
         $posts = Post::getPostsByThreadID($id);
-        $post_vms = $posts->map(function ($post) {
-            /** @var Post $post */
-            return $post->createViewModel(TINYIB_RESPAGE);
-        });
-
         return $this->renderer->render('thread.twig', [
             'filetypes' => $this->supportedFileTypes(),
-            'posts' => $post_vms,
+            'posts' => $posts,
             'parent' => $id,
             'res' => TINYIB_RESPAGE,
             'thumbnails' => true,
@@ -190,27 +185,24 @@ class PostController implements PostControllerInterface
         $threads = Post::getThreadsByPage($page);
         $threads_count = Post::getThreadCount();
         $pages = ceil($threads_count / TINYIB_THREADSPERPAGE) - 1;
-        $post_vms = [];
+        $posts = [];
 
         foreach ($threads as $thread) {
             $replies = Post::getPostsByThreadID($thread->id);
-            $omitted_count = max(0, $replies->count() - TINYIB_PREVIEWREPLIES - 1);
+            $omitted = max(0, $replies->count() - TINYIB_PREVIEWREPLIES - 1);
             $replies = $replies->take(-TINYIB_PREVIEWREPLIES);
+
             if ($replies->count() === 0 || $replies->first()->id !== $thread->id) {
                 $replies->prepend($thread);
             }
 
-            $thread_reply_vms = $replies->map(function ($post) use ($omitted_count) {
-                /** @var \TinyIB\Models\PostInterface $post */
-                return $post->createViewModel(TINYIB_INDEXPAGE);
-            });
-
-            $post_vms = collect([$post_vms, $thread_reply_vms])->collapse();
+            $replies->first()->omitted = $omitted;
+            $posts = collect([$posts, $replies])->collapse();
         }
 
         return $this->renderer->render('board.twig', [
             'filetypes' => $this->supportedFileTypes(),
-            'posts' => $post_vms,
+            'posts' => $posts,
             'pages' => max($pages, 0),
             'this_page' => $page,
             'parent' => 0,

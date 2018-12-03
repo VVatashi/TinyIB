@@ -56,17 +56,10 @@ class ManageController implements ManageControllerInterface
             . $bans_count . ' ' . Functions::plural('ban', $bans_count);
 
         if (TINYIB_REQMOD === 'files' || TINYIB_REQMOD === 'all') {
-            $data['reqmod_posts'] = Post::getLatestPosts(false)->map(function ($post) {
-                /** @var Post $post */
-                return $post->createViewModel(TINYIB_INDEXPAGE);
-            });
+            $data['reqmod_posts'] = Post::getLatestPosts(false);
         }
 
-        $data['posts'] = Post::getLatestPosts(true)->map(function ($post) {
-            /** @var Post $post */
-            return $post->createViewModel(TINYIB_INDEXPAGE);
-        });
-
+        $data['posts'] = Post::getLatestPosts(true);
         return new Response(200, [], $this->renderer->render('manage_status.twig', $data));
     }
 
@@ -206,14 +199,8 @@ class ManageController implements ManageControllerInterface
 
         $post_ip = $post->ip;
         $data['has_ban'] = Ban::where('ip', $post_ip)->first() !== null;
-        $data['post'] = $post->createViewModel(TINYIB_INDEXPAGE);
-
-        $posts = $post->isThread() ? Post::getPostsByThreadID($post->id) : collect([$post]);
-
-        $data['posts'] = $posts->map(function ($post) {
-            /** @var Post $post */
-            return $post->createViewModel(TINYIB_INDEXPAGE);
-        });
+        $data['post'] = $post;
+        $data['posts'] = $post->isThread() ? Post::getPostsByThreadID($post->id) : collect([$post]);
 
         return new Response(200, [], $this->renderer->render('manage_moderate_post.twig', $data));
     }

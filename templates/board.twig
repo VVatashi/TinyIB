@@ -20,7 +20,7 @@
       <input type="hidden" name="board" value="{{ constant('TINYIB_BOARD') }}" />
 
       {% for post in posts %}
-        {% if post['parent'] == constant('TINYIB_NEWTHREAD') %}
+        {% if post.isThread() %}
           <hr />
         {% endif %}
 

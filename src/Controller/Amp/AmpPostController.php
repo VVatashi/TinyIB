@@ -54,8 +54,7 @@ class AmpPostController implements AmpPostControllerInterface
         if (!isset($content)) {
             $threads = Post::getThreadsByPage($page);
             $threads = $threads->map(function ($thread) {
-                $message = $thread->message;
-                $message = $thread->markup($message);
+                $message = $thread->getMessageFormatted();
                 $thread->message = $message;
 
                 $thread->replyCount = Post::getReplyCountByThreadID($thread->id);
@@ -106,8 +105,7 @@ class AmpPostController implements AmpPostControllerInterface
 
             $posts = Post::getPostsByThreadID($thread_id, true, $limit, $page * $limit);
             $posts = $posts->map(function ($post) use ($thread_id, &$refmap) {
-                $message = $post->message;
-                $message = $post->markup($message);
+                $message = $post->getMessageFormatted();
                 $post_id = $post->id;
 
                 // Fix links in thread and populate the reference map.
