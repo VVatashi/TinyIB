@@ -9,9 +9,7 @@ export default class PostReferenceMap extends PostModule {
     super(manager);
   }
 
-  protected getPostRefLinkHtml(post: Element) {
-    const postId = +post.getAttribute('data-post-id');
-
+  protected getPostRefLinkAuthorHtml(post: Element) {
     const nameEl = qs('.post-header__name', post);
     const tripcodeEl = qs('.post-header__tripcode', post);
 
@@ -19,13 +17,10 @@ export default class PostReferenceMap extends PostModule {
     const tripcode = tripcodeEl ? tripcodeEl.innerHTML : '';
 
     if (name.length || tripcode.length) {
-      return `&gt;&gt;${postId}`
-        + ` <span class="post__reference-link-author">`
-        + `(<span class="post__reference-link-name">${name}</span>`
-        + `<span class="post__reference-link-tripcode">${tripcode}</span>)`
-        + `</span>`;
+      return `(<span class="post__reference-link-name">${name}</span>`
+        + `<span class="post__reference-link-tripcode">${tripcode}</span>)`;
     } else {
-      return `&gt;&gt;${postId}`;
+      return ``;
     }
   }
 
@@ -51,7 +46,13 @@ export default class PostReferenceMap extends PostModule {
         return;
       }
 
-      reference.element.innerHTML = this.getPostRefLinkHtml(post);
+      const referenceAuthor = document.createElement('span');
+      referenceAuthor.classList.add('post__reference-link-author');
+      referenceAuthor.innerHTML = this.getPostRefLinkAuthorHtml(post);
+
+      const parent = reference.element.parentElement;
+      const nextSibling = reference.element.nextSibling;
+      parent.insertBefore(referenceAuthor, nextSibling);
     });
   }
 }
