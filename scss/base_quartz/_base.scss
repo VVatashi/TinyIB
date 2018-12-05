@@ -32,12 +32,13 @@ ul, ol {
   list-style: none;
 }
 
-textarea, input {
+input, textarea, select {
   box-sizing: border-box;
   color: $input-color;
   background: $input-background;
   border: $input-border;
   border-radius: $input-border-radius;
+  font: $input-font;
   padding: $input-padding;
   margin: 0;
 }
@@ -50,6 +51,7 @@ input[type=submit], button {
   border-radius: $btn-border-radius;
   padding: $btn-padding;
   margin: 0;
+  cursor: pointer;
 
   &:hover {
     background: $btn-hover-background;
