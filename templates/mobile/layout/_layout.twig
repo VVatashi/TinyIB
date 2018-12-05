@@ -1,3 +1,9 @@
+{% macro script(filename) %}
+  <script src="{{ base_url }}/js/{{ filename }}.js?mtime={{ mtime('js/' ~ filename ~ '.js') }}"></script>
+{% endmacro %}
+
+{% import _self as self %}
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -24,12 +30,14 @@
       <!-- End Google Tag Manager -->
     {% endif %}
 
-    <script src="{{ base_url }}/js/vendor/promise-polyfill.min.js?mtime={{ mtime('js/vendor/promise-polyfill.min.js') }}"></script>
-    <script src="{{ base_url }}/js/vendor/fetch.min.js?mtime={{ mtime('js/vendor/fetch.min.js') }}"></script>
-    <script src="{{ base_url }}/js/vendor/axios.min.js?mtime={{ mtime('js/vendor/axios.min.js') }}"></script>
-    <script src="{{ base_url }}/js/vendor/luxon.min.js?mtime={{ mtime('js/vendor/luxon.min.js') }}"></script>
+    {{ self.script('vendor/promise-polyfill.min') }}
+    {{ self.script('vendor/fetch.min') }}
+    {{ self.script('vendor/luxon.min') }}
+    {{ self.script('vendor/vue.min') }}
+
     <script>window.baseUrl = '{{ base_url|raw }}';</script>
-    <script src="{{ base_url }}/js/mobile.js?mtime={{ mtime('js/mobile.js') }}"></script>
+
+    {{ self.script('mobile') }}
   </head>
 
   <body>

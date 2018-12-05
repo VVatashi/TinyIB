@@ -12,7 +12,8 @@ declare global {
     baseUrl: string;
     tinyib?: {
       moduleManager?: ModuleManager,
-    }
+    },
+    Vue: any,
   }
 }
 
