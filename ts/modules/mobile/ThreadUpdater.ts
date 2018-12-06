@@ -1,5 +1,4 @@
 import PostModule from '../PostModule';
-import ModuleManager from '../../ModuleManager';
 import { qs, qsa } from '../../utils/DOM';
 
 interface ViewModel {
@@ -112,7 +111,9 @@ export default class ThreadUpdater extends PostModule {
     if (postsWrapper) {
       const threadId = +thread.getAttribute('data-thread-id');
       const latestPostId = this.latestPostId;
-      const response = await fetch(`${window.baseUrl}/ajax/mobile/thread/${threadId}?after=${latestPostId}`);
+      const response = await fetch(`${window.baseUrl}/ajax/mobile/thread/${threadId}?after=${latestPostId}`, {
+        credentials: 'same-origin',
+      });
       if (response.status < 400) {
         const data = await response.text();
         postsWrapper.insertAdjacentHTML('beforeend', data);

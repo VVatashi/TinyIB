@@ -138,6 +138,7 @@ export default class PostForm extends BaseModule {
       const response = await fetch(`${window.baseUrl}/ajax/mobile/post/create`, {
         method: 'POST',
         body: formData,
+        credentials: 'same-origin',
       });
 
       const isOnBoardPage = qsa('.thread').length === 0;
