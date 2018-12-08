@@ -19,7 +19,7 @@ export default class QuotePost extends BaseModule {
       }
     }
 
-    const links = qsa('.post-header__reflink');
+    const links = qsa('.post-header__reflink,.post-header-mobile__reflink');
     links.forEach(link => {
       const id = Number(link.getAttribute('data-id'));
       link.addEventListener('click', () => this.quotePost(id));

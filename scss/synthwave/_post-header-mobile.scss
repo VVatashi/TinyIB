@@ -1,16 +1,9 @@
 .post-header {
   &__subject {
-    font-size: 1.1em;
-    font-weight: 800;
     text-shadow: 0 0 6px rgba(178, 26, 197, 0.7);
   }
 
   &__name {
-    font-weight: 800;
     text-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
-  }
-
-  &__tripcode {
-    font-weight: 400;
   }
 }

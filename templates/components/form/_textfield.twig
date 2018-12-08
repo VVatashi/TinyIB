@@ -18,7 +18,7 @@
 
 {% set class = class|default([])|merge(['field'])|join(' ') %}
 {% set label_class = label_class|default([])|merge(['field__label'])|join(' ') %}
-{% set input_class = input_class|default([])|merge(['field__input'])|join(' ') %}
+{% set input_class = input_class|default([])|merge(['input', 'field__input'])|join(' ') %}
 
 {% if name is defined %}
   {# If id is not defined, use the name. #}

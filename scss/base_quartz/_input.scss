@@ -1,0 +1,12 @@
+@import 'vars';
+
+.input {
+  box-sizing: border-box;
+  color: $input-color;
+  background: $input-background;
+  border: $input-border;
+  border-radius: $input-border-radius;
+  font: $input-font;
+  padding: $input-padding;
+  margin: 0;
+}

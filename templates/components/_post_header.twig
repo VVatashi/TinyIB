@@ -38,14 +38,17 @@
   </span>
 
   {% set date_iso = post.createdTimestamp|date('c') %}
-  {% set date = post.createdTimestamp|date('l, dS F Y H:i:s') %}
+  {% set date = post.createdTimestamp|date('j.m.Y H:i:s') %}
 
-  <time class="post-header__datetime" datetime="{{ date_iso }}" title="{{ date_iso }}">
+  <time class="post-header__datetime" datetime="{{ date_iso }}">
     {{ date }}
   </time>
 
+  {% set reflink = base_url ~ '/res/' ~ post.parent_id ~ '#q' ~ post.id %}
+  {% set replylink = base_url ~ '/res/' ~ post.id %}
+
   <span class="post-header__reflink-wrapper">
-    №<a class="post-header__reflink reflink" href="{{ base_url }}/res/{{ thread_id }}#q{{ post.id }}" data-id="{{ post.id }}">
+    №<a class="post-header__reflink reflink" href="{{ reflink }}" data-id="{{ post.id }}">
       {{- post.id -}}
     </a>
 
@@ -53,9 +56,9 @@
       <img src="{{ base_url }}/images/sticky.png" alt="Stickied" title="Stickied" width="16" height="16" />
     {% endif %}
 
-    {% if post.isThread() %}
+    {% if post.isThread() and res == constant('TINYIB_INDEXPAGE') %}
       <span class="post-header__reply-wrapper">
-        <a class="post-header__reply-link" href="{{ base_url }}/res/{{ post.id }}">Reply</a>
+        <a class="post-header__reply-link" href="{{ replylink }}">Reply</a>
       </span>
     {% endif %}
   </span>

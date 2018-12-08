@@ -1,6 +1,4 @@
 .post-header {
-  border-bottom: 1px solid #707070;
-
   &__subject {
     font-size: 1.2em;
     font-weight: 800;
@@ -12,9 +10,5 @@
 
   &__tripcode {
     text-shadow: #f92b2b 0 0 10px;
-  }
-
-  &__reflink {
-    color: inherit;
   }
 }

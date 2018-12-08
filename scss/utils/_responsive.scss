@@ -1,12 +1,7 @@
-$phone-up: 600px;
-$tablet-portrait-up: 900px;
-$tablet-landscape-up: 1200px;
-$desktop-up: 1800px;
-
-$xs-up: $phone-up;
-$sm-up: $tablet-portrait-up;
-$md-up: $tablet-landscape-up;
-$lg-up: $desktop-up;
+$xs-up: 600px;
+$sm-up: 900px;
+$md-up: 1200px;
+$lg-up: 1800px;
 
 @mixin breakpoint($min-width) {
   @media screen and (min-width: $min-width) {
@@ -20,25 +15,13 @@ $lg-up: $desktop-up;
   }
 }
 
-.phone-only {
-  @include breakpoint($phone-up) {
-    display: none;
-  }
-}
-
-.phone-hidden {
-  @include breakpoint-max($phone-up) {
-    display: none;
-  }
-}
-
-.xs-only {
+%xs-only {
   @include breakpoint($xs-up) {
     display: none;
   }
 }
 
-.xs-hidden {
+%xs-hidden {
   @include breakpoint-max($xs-up) {
     display: none;
   }

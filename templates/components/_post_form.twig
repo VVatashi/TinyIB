@@ -4,7 +4,7 @@
     </td>
 
     <td class="postform__markup-wrapper field__input-wrapper">
-      <button type="button" class="postform__markup field__input field__input_button field__input_markup field__input_markup-{{ id }}" id="markup_{{ id }}">
+      <button type="button" class="button postform__markup field__input field__input_button field__input_markup field__input_markup-{{ id }}" id="markup_{{ id }}">
         {{ content }}
       </button>
     </td>
@@ -18,7 +18,7 @@
     </td>
 
     <td class="postform__field-wrapper field__input-wrapper">
-      <input type="text" class="postform__input field__input" id="{{ id }}" name="{{ id }}" placeholder="{{ title }}" autocomplete="off" />
+      <input type="text" class="input postform__input field__input" id="{{ id }}" name="{{ id }}" placeholder="{{ title }}" autocomplete="off" />
     </td>
   </tr>
 {% endmacro %}
@@ -54,7 +54,7 @@
             <td class="postform__label field__label-wrapper"></td>
 
             <td class="postform__field-wrapper field__input-wrapper">
-              <input type="submit" class="postform__submit field__input field__input_button field__input_submit" value="Submit" />
+              <input type="submit" class="button postform__submit field__input field__input_button field__input_submit" value="Submit" />
             </td>
           </tr>
         </tbody>
@@ -79,7 +79,7 @@
             </td>
 
             <td class="postform__message-wrapper field__input-wrapper">
-              <textarea class="postform__message field__input field__input_message" id="message" name="message" placeholder="Message">
+              <textarea class="input postform__message field__input field__input_message" id="message" name="message" placeholder="Message">
               </textarea>
             </td>
           </tr>
@@ -96,7 +96,7 @@
                 {% include 'components/form/_captcha.twig' with {
                   'class': ['form__field form__field_captcha'],
                   'label_class': ['field__label'],
-                  'input_class': ['field__input'],
+                  'input_class': ['input', 'field__input'],
                   'action': 'create_post',
                   'id': 'captcha',
                   'name': 'captcha',
@@ -113,7 +113,7 @@
               </td>
 
               <td class="field__input-wrapper">
-                <input type="file" class="field__input" id="file" name="file" placeholder="File" />
+                <input type="file" class="input field__input" id="file" name="file" placeholder="File" />
               </td>
             </tr>
           {% endif %}
@@ -124,7 +124,7 @@
             </td>
 
             <td class="field__input-wrapper">
-              <input type="text" class="field__input field__input_password" id="newpostpassword" name="password" placeholder="Delete post password" autocomplete="off" />
+              <input type="text" class="input field__input field__input_password" id="newpostpassword" name="password" placeholder="Delete post password" autocomplete="off" />
             </td>
           </tr>
         </tbody>

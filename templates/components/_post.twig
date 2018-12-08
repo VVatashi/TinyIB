@@ -3,6 +3,7 @@
   data-post-id="{{ post.id }}">
   <div class="post__inner">
     <a id="{{ post.id }}" name="{{ post.id }}"></a>
+    {% include 'components/_post_header_mobile.twig' with {'class': 'post__header-mobile'} %}
     {% include 'components/_post_header.twig' with {'class': 'post__header'} %}
 
     <div class="post__content">
