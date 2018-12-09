@@ -13,6 +13,8 @@ $file-preview-size: 150px;
   }
 
   &__file-column {
+    @extend %xs-hidden;
+
     display: flex;
     margin-right: 0.5rem;
   }
@@ -112,5 +114,16 @@ $file-preview-size: 150px;
     max-width: $file-preview-size;
 
     margin: 0 auto;
+  }
+
+  &__submit {
+    @extend .form__field;
+    @extend %xs-hidden;
+  }
+
+  &__file-mobile,
+  &__submit-mobile {
+    @extend .form__row;
+    @extend %xs-only;
   }
 }

@@ -52,11 +52,12 @@
     margin: $post-file-margin;
   }
 
-  &__message {
+  // TODO: another way to remove empty line.
+  /*&__message {
     br:first-child {
       display: none;
     }
-  }
+  }*/
 
   &__reference-link-author {
     font-size: 0.8em;

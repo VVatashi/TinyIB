@@ -9,11 +9,18 @@ export class PostingForm {
 
   protected subject: HTMLInputElement;
   protected name: HTMLInputElement;
-  protected file: HTMLInputElement;
+  protected fileInput: HTMLInputElement;
   protected message: HTMLTextAreaElement;
+
   protected status: HTMLElement;
+  protected preview: HTMLElement;
+
+  // Overrides file in the form.
+  protected file: File = null;
 
   protected submit: HTMLButtonElement;
+  protected close: HTMLButtonElement;
+  protected previewRemove: HTMLButtonElement;
 
   dispatchEvent(event: Event, data: any) {
     switch (event) {
@@ -40,11 +47,15 @@ export class PostingForm {
 
     this.subject = qs('[name="subject"]', this.form) as HTMLInputElement;
     this.name = qs('[name="name"]', this.form) as HTMLInputElement;
-    this.file = qs('[name="file"]', this.form) as HTMLInputElement;
+    this.fileInput = qs('[name="file"]', this.form) as HTMLInputElement;
     this.message = qs('[name="message"]', this.form) as HTMLTextAreaElement;
+
     this.status = qs('#posting-form-status', this.form) as HTMLElement;
+    this.preview = qs('#posting-form-preview', this.form) as HTMLElement;
 
     this.submit = qs('[type="submit"]', this.form) as HTMLButtonElement;
+    this.close = qs('#posting-form-close', this.form) as HTMLButtonElement;
+    this.previewRemove = qs('#posting-form-preview-remove', this.form) as HTMLButtonElement;
 
     // Load saved name.
     const name = localStorage['posting-form.name'];
@@ -57,67 +68,58 @@ export class PostingForm {
       localStorage['posting-form.name'] = this.name.value;
     });
 
+    this.fileInput.addEventListener('change', e => {
+      // Reset file override on file field change.
+      this.file = null;
+
+      if (this.fileInput.files && this.fileInput.files.length) {
+        this.showPreview(this.fileInput.files[0]);
+      } else {
+        this.hidePreview();
+      }
+    });
+
+    // Submit form on the Ctrl+Enter in the message field.
+    this.message.addEventListener('keydown', e => {
+      if ((e.keyCode == 10 || e.keyCode == 13) && e.ctrlKey) {
+        this.submitForm();
+      }
+    });
+
+    // Paste file.
+    this.message.addEventListener('paste', e => {
+      const data = e.clipboardData || (e as any).originalEvent.clipboardData as DataTransfer;
+      const items = Array.prototype.slice.call(data.items) as DataTransferItem[];
+      const item = items.filter(item => {
+        return item.type.startsWith('image/')
+          || item.type.startsWith('audio/')
+          || item.type.startsWith('video/');
+      })[0];
+
+      if (item) {
+        this.file = item.getAsFile();
+
+        // Show preview.
+        this.showPreview(this.file);
+      }
+    });
+
     // Handle form submit.
     this.form.addEventListener('submit', e => {
       e.preventDefault();
+      this.submitForm();
+    });
 
-      // Submit create post request.
-      const url = `${window.baseUrl}/ajax/post/create`;
-      const data = new FormData(this.form);
+    // Handle form close.
+    this.close.addEventListener('click', e => {
+      e.preventDefault();
+      this.restoreForm();
+    });
 
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', url, true);
-      xhr.setRequestHeader('Accept', 'application/json');
-      xhr.withCredentials = true;
-
-      xhr.upload.addEventListener('progress', e => {
-        const progressPercent = Math.ceil(e.loaded / e.total * 100);
-        this.status.textContent = `Uploading... ${progressPercent}%`;
-      });
-
-      xhr.addEventListener('readystatechange', e => {
-        if (xhr.readyState !== XMLHttpRequest.DONE) {
-          return;
-        }
-
-        // Enable form.
-        this.setFormState({ enabled: true });
-
-        if (xhr.status === 201) {
-          this.resetForm();
-          this.status.textContent = '';
-
-          // Move form to the initial location.
-          this.wrapper.insertBefore(this.form, null);
-          this.wrapper.scrollIntoView();
-
-          if (this.isInThread) {
-            // Trigger DE thread update.
-            const update = qs('.de-thr-updater-link') as HTMLAnchorElement;
-            if (update) {
-              update.click();
-            }
-          } else {
-            // Redirect to thread.
-            const location = xhr.getResponseHeader('Location');
-            if (location) {
-              window.location.href = location;
-            }
-          }
-        } else {
-          const data = JSON.parse(xhr.responseText);
-          if (data && data.error) {
-            this.status.textContent = `Error: ${data.error}`;
-          } else {
-            this.status.textContent = `Error: ${xhr.status} ${xhr.statusText}`;
-          }
-        }
-      });
-
-      xhr.send(data);
-
-      // Disable form.
-      this.setFormState({ enabled: false });
+    // Handle preview remove.
+    this.previewRemove.addEventListener('click', e => {
+      e.preventDefault();
+      this.resetFileField();
     });
   }
 
@@ -131,7 +133,7 @@ export class PostingForm {
 
           if (this.isInThread) {
             // Move form to the post.
-            post.parentElement.insertBefore(this.form, post.nextSibling);
+            this.moveFormToPost(post);
           }
 
           // Insert markup.
@@ -141,11 +143,75 @@ export class PostingForm {
     });
   }
 
+  protected submitForm() {
+    // Submit create post request.
+    const url = `${window.baseUrl}/ajax/post/create`;
+    const data = new FormData(this.form);
+
+    // Override file from the form.
+    if (this.file) {
+      data.append('file', this.file);
+    }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url, true);
+    xhr.setRequestHeader('Accept', 'application/json');
+    xhr.withCredentials = true;
+
+    xhr.upload.addEventListener('progress', e => {
+      const progressPercent = Math.ceil(e.loaded / e.total * 100);
+      this.status.textContent = `Uploading... ${progressPercent}%`;
+    });
+
+    xhr.addEventListener('readystatechange', e => {
+      if (xhr.readyState !== XMLHttpRequest.DONE) {
+        return;
+      }
+
+      // Enable form.
+      this.setFormState({ enabled: true });
+
+      if (xhr.status === 201) {
+        this.resetForm();
+        this.status.textContent = '';
+
+        // Move form to the initial location.
+        this.restoreForm();
+
+        if (this.isInThread) {
+          // Trigger DE thread update.
+          const update = qs('.de-thr-updater-link') as HTMLAnchorElement;
+          if (update) {
+            update.click();
+          }
+        } else {
+          // Redirect to thread.
+          const location = xhr.getResponseHeader('Location');
+          if (location) {
+            window.location.href = location;
+          }
+        }
+      } else {
+        const data = JSON.parse(xhr.responseText);
+        if (data && data.error) {
+          this.status.textContent = `Error: ${data.error}`;
+        } else {
+          this.status.textContent = `Error: ${xhr.status} ${xhr.statusText}`;
+        }
+      }
+    });
+
+    xhr.send(data);
+
+    // Disable form.
+    this.setFormState({ enabled: false });
+  }
+
   protected setFormState({ enabled }: { enabled: boolean }) {
     const controls = [
       this.subject,
       this.name,
-      this.file,
+      this.fileInput,
       this.message,
       this.submit,
     ];
@@ -169,11 +235,53 @@ export class PostingForm {
       });
 
     // File field needs special handling.
-    if (this.file) {
-      this.file.type = 'text';
-      this.file.value = '';
-      this.file.type = 'file';
+    this.resetFileField();
+  }
+
+  protected resetFileField() {
+    if (this.fileInput) {
+      this.fileInput.type = 'text';
+      this.fileInput.value = '';
+      this.fileInput.type = 'file';
     }
+
+    this.file = null;
+
+    this.hidePreview();
+  }
+
+  protected moveFormToPost(post: HTMLElement) {
+    this.form.style.marginLeft = '0';
+    this.close.classList.remove('hidden');
+    post.parentElement.insertBefore(this.form, post.nextSibling);
+  }
+
+  protected restoreForm() {
+    this.form.style.marginLeft = 'auto';
+    this.close.classList.add('hidden');
+    this.wrapper.insertBefore(this.form, null);
+    this.wrapper.scrollIntoView();
+  }
+
+  protected showPreview(file: File) {
+    const reader = new FileReader();
+    reader.addEventListener('load', e => {
+      let image = qs('#posting-form-preview-image', this.preview) as HTMLImageElement;
+      if (!image) {
+        image = document.createElement('img');
+        image.id = 'posting-form-preview-image';
+        image.classList.add('posting-form__preview-image');
+        this.preview.appendChild(image);
+      }
+
+      image.src = (e.target as any).result;
+      this.preview.classList.remove('hidden');
+    });
+    reader.readAsDataURL(file);
+  }
+
+  protected hidePreview() {
+    this.preview.classList.add('hidden');
   }
 
   protected insert(str: string, { newLine }: { newLine: boolean } = { newLine: false }) {
