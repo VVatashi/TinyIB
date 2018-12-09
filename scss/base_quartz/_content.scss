@@ -2,6 +2,11 @@
 @import 'vars';
 
 .content {
+  &__auth-form {
+    margin: 0 auto;
+    max-width: 530px;
+  }
+
   &__oppost,
   &__post {
     @include clearfix;
@@ -9,32 +14,15 @@
     margin: $post-margin;
   }
 
+  &__posting-form {
+    max-width: 560px;
+    margin: $post-margin;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   &__userdelete {
-    /*display: flex;
-    float: right;*/
-
     display: none;
-  }
-
-  &__postarea {
-    @include clearfix;
-  }
-
-  &__postform {
-    display: inline-flex !important;
-    flex-flow: column;
-
-    box-sizing: border-box;
-
-    // DE fix.
-    border: $post-border !important;
-    padding: 10px !important;
-
-    min-height: 200px;
-    min-width: 300px;
-
-    max-width: 80vw;
-    max-height: 80vh;
   }
 
   &__pager {
@@ -43,12 +31,5 @@
 
   &__footer {
     margin: 0;
-  }
-
-  @include breakpoint($xs-up) {
-    &__postform {
-      display: inline-block !important;
-      min-width: 550px;
-    }
   }
 }

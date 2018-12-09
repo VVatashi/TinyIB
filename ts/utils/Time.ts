@@ -23,11 +23,7 @@ export default class Time {
       return time.toFormat(format_value);
     }
     else {
-      const format = { ...DateTime.DATETIME_FULL_WITH_SECONDS };
-      format.timeZone = undefined;
-      format.timeZoneName = undefined;
-
-      return time.toLocaleString(format);
+      return time.toFormat('d.LL.yyyy HH:mm:ss');
     }
   }
 }

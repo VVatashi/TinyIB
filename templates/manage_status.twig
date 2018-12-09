@@ -31,13 +31,13 @@
                   <tr>
                     <td>
                       <form method="get" action="{{ base_url }}/manage/approve/{{ post['id'] }}">
-                        <input type="submit" value="Approve" class="managebutton" />
+                        <input type="submit" value="Approve" class="button managebutton" />
                       </form>
                     </td>
 
                     <td>
                       <form method="get" action="{{ base_url }}/manage/moderate/{{ post['id'] }}">
-                        <input type="submit" value="More Info" class="managebutton" />
+                        <input type="submit" value="More Info" class="button managebutton" />
                       </form>
                     </td>
                   </tr>
@@ -45,7 +45,7 @@
                   <tr>
                     <td align="right" colspan="2">
                       <form method="get" action="{{ base_url }}/manage/delete/{{ post['id'] }}">
-                        <input type="submit" value="Delete" class="managebutton" />
+                        <input type="submit" value="Delete" class="button managebutton" />
                       </form>
                     </td>
                   </tr>
@@ -72,7 +72,7 @@
             </td>
             <td valign="top" align="right">
               <form method="get" action="{{ base_url }}/manage/moderate/{{ post['id'] }}">
-                <input type="submit" value="Moderate" class="managebutton" />
+                <input type="submit" value="Moderate" class="button managebutton" />
               </form>
             </td>
           </tr>

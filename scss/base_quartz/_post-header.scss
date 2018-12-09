@@ -2,6 +2,8 @@
 @import 'vars';
 
 .post-header {
+  @extend %xs-hidden;
+
   &__delete {
     /*display: inline;
     margin: 0 0.25em 0 0;*/
@@ -27,5 +29,9 @@
 
   &__reply-link {
     @include brackets;
+  }
+
+  &__reflink {
+    color: inherit;
   }
 }

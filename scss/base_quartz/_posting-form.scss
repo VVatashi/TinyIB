@@ -1,0 +1,71 @@
+@import '../utils/index';
+@import 'vars';
+
+.posting-form {
+  $submit-width: 120px;
+  $submit-height: 36px;
+
+  background: $form-background;
+  padding: $padding;
+
+  &__subject {
+    margin: 0 9px 9px 0;
+
+    width: calc(50% - 9px - 17px);
+    height: 31px;
+  }
+
+  &__name {
+    margin: 0 17px 9px 0;
+
+    width: calc(50% - 9px - 17px);
+    height: 31px;
+  }
+
+  &__attachment {
+    @extend %clickable;
+    @extend %icon-attachment;
+
+    display: inline-block;
+
+    width: 16px;
+    height: 16px;
+
+    vertical-align: middle;
+  }
+
+  &__attachment-input {
+    display: none;
+  }
+
+  &__message {
+    margin: 0 0 $padding 0;
+
+    width: 100%;
+    min-height: 100px;
+
+    resize: vertical;
+  }
+
+  &__status {
+    float: right;
+  }
+
+  &__submit {
+    @extend %clickable;
+
+    background: $submit-background;
+    border: 0;
+    border-radius: $submit-height / 2;
+    color: $submit-color;
+    font-weight: bold;
+
+    min-width: $submit-width;
+    height: $submit-height;
+  }
+
+  @include breakpoint($xs-up) {
+    border: $form-border;
+    border-radius: $form-border-radius;
+  }
+}

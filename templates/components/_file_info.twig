@@ -5,7 +5,7 @@
   {% set direct_link = '/' ~ constant('TINYIB_BOARD') ~ '/src/' ~ post.file %}
 {% endif %}
 
-<div class="{{ class is defined ? class ~ ' ' }}file-info filesize">
+<div class="{{ class is defined ? class ~ ' ' }}file-info">
   {% spaceless %}
     {% if post.file %}
       <a class="file-info__link" href="{{ direct_link }}" data-id="{{ post.id }}" target="_blank">.{{ post.fileExtension }}</a>,
