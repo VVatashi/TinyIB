@@ -5,8 +5,14 @@
   $submit-width: 120px;
   $submit-height: 36px;
 
+  position: relative;
+
   background: $form-background;
   padding: $padding;
+
+  &__preview {
+    float: right;
+  }
 
   &__subject {
     margin: 0 9px 9px 0;
@@ -62,6 +68,36 @@
 
     min-width: $submit-width;
     height: $submit-height;
+  }
+
+  &__close {
+    position: absolute;
+    top: -0.5em;
+    right: -0.5em;
+    z-index: 1;
+  }
+
+  &__preview {
+    position: absolute;
+    top: -105px;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: $form-background;
+    border: $form-border;
+    border-radius: $form-border-radius;
+    overflow: hidden;
+  }
+
+  &__preview-image {
+    width: 100%;
+  }
+
+  &__preview-remove {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
   }
 
   @include breakpoint($xs-up) {
