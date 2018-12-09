@@ -1,6 +1,8 @@
 @import 'vars';
 
 .button {
+  @extend %clickable;
+
   box-sizing: border-box;
   color: $btn-color;
   background: $btn-background;
@@ -8,13 +10,8 @@
   border-radius: $btn-border-radius;
   padding: $btn-padding;
   margin: 0;
-  cursor: pointer;
 
   &:hover {
     background: $btn-hover-background;
-  }
-
-  &:active {
-    transform: translateY(1px);
   }
 }

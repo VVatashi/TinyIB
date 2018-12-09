@@ -12,10 +12,11 @@ $link-decoration: underline;
 
 $line-border: 1px solid #bbbbbb;
 
-$post-background:      #f0e0d6;
+$block-background:    #f0e0d6;
+$block-border:        1px solid #ddccc5;
+$block-border-radius: 5px;
+
 $post-omitted-color:   #666666;
-$post-border:          1px solid #ddccc5;
-$post-border-radius:   5px;
 $post-header-padding:  0 10px;
 $post-header-border:   0;
 $post-content-padding: 0.5em 10px;

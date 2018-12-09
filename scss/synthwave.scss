@@ -22,12 +22,13 @@ $btn-background:    linear-gradient(180deg, #777, #6f6f6f);
 
 $btn-hover-background: linear-gradient(180deg, #6f6f6f, #888);
 
-$post-background:      url('synthwave/bgpostnew.jpg');
+$block-background:    url('synthwave/bgpostnew.jpg');
+$block-border:        2px solid transparent;
+$block-border-radius: 0;
+
 $post-header-color:    #9a9a9a;
 $post-content-color:   #ffffff;
 $post-omitted-color:   $link-color;
-$post-border:          2px solid transparent;
-$post-border-radius:   0;
 $post-header-border:   1px solid #505050;
 $post-header-padding:  8px 13px 2px;
 $post-content-padding: 4px 13px 8px;

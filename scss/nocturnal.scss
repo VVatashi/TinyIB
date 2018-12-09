@@ -20,10 +20,11 @@ $input-padding:       0.5em 0.5em;
 
 $btn-hover-background: $input-background;
 
-$post-background:      #14151f;
+$block-background:    #14151f;
+$block-border:        0;
+$block-border-radius: 0;
+
 $post-omitted-color:   $link-color;
-$post-border:          0;
-$post-border-radius:   0;
 $post-header-border:   0;
 $post-header-padding:  10px 10px 0px;
 $post-content-padding: 10px;
