@@ -135,12 +135,6 @@
 
             <td class="field__input-wrapper rules">
               <ul class="rules__list">
-                {% if constant('TINYIB_REQMOD') == 'files' or constant('TINYIB_REQMOD') == 'all' %}
-                  <li class="rules__list-item">
-                    All posts {{ constant('TINYIB_REQMOD') == 'files' ? ' with a file attached' }} will be moderated before being shown.
-                  </li>
-                {% endif %}
-
                 {% if uploads %}
                   <li class="rules__list-item">
                     {{ filetypes }}

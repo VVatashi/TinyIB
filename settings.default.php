@@ -6,17 +6,12 @@
 # Contact the author via tslocum@gmail.com if you need support.
 # See README for instructions on configuring, moderating and upgrading your board.
 
-// Administrator/moderator credentials
-define('TINYIB_ADMINPASS', '');       // Administrators have full access to the board
-define('TINYIB_MODPASS', '');         // Moderators only have access to delete (and moderate if TINYIB_REQMOD is set) posts  ['' to disable]
-
 // Board description and behavior
 define('TINYIB_BASE_URL', 'https://localhost/');
 define('TINYIB_BOARD', 'b');          // Unique identifier for this board using only letters and numbers
 define('TINYIB_BOARDDESC', 'TinyIB'); // Displayed at the top of every page
 define('TINYIB_ALWAYSNOKO', false);   // Redirect to thread after posting
 define('TINYIB_CAPTCHA', '');         // Reduce spam by requiring users to pass a CAPTCHA when posting: simple / recaptcha  (click Rebuild All in the management panel after enabling)  ['' to disable]
-define('TINYIB_REQMOD', '');          // Require moderation before displaying posts: files / all  (see README for instructions, only MySQL is supported)  ['' to disable]
 
 // Board appearance
 define('TINYIB_LOGO', '');            // Logo HTML

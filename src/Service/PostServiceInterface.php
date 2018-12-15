@@ -43,8 +43,7 @@ interface PostServiceInterface
         string $password,
         string $ip,
         int $user_id = 0,
-        int $parent = 0,
-        bool $rawpost = false
+        int $parent = 0
     ) : Post;
 
     /**

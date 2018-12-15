@@ -4,8 +4,8 @@ namespace TinyIB\Model;
 
 use \Illuminate\Database\Eloquent\Model;
 use \Illuminate\Database\Eloquent\SoftDeletes;
-use \TinyIB\ValidationException;
 use TinyIB\NotFoundException;
+use TinyIB\ValidationException;
 
 /**
  * @property int $id
@@ -16,7 +16,7 @@ use TinyIB\NotFoundException;
  * @property int $updated_at
  * @property int $deleted_at
  */
-class User extends Model
+class User extends Model implements CurrentUserInterface
 {
     use SoftDeletes;
 

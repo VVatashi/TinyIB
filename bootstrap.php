@@ -13,11 +13,11 @@ use TinyIB\Cache\CacheInterface;
 use TinyIB\Cache\DatabaseCache;
 use TinyIB\Cache\InMemoryCache;
 use TinyIB\Cache\RedisCache;
+use TinyIB\Functions;
 use TinyIB\Middleware\AuthMiddleware;
 use TinyIB\Middleware\CorsMiddleware;
 use TinyIB\Middleware\ExceptionMiddleware;
 use TinyIB\Middleware\RequestHandler;
-use TinyIB\Functions;
 use TinyIB\Service\RendererServiceInterface;
 use TinyIB\Service\RoutingServiceInterface;
 use VVatashi\DI\Container;
@@ -30,6 +30,20 @@ ini_set('display_errors', 1);
 set_error_handler(function ($code, $message, $file, $line) {
     throw new ErrorException($message, 0, $code, $file, $line);
 });
+
+function sendResponse(Response $response) {
+    $version = $response->getProtocolVersion();
+    $status = $response->getStatusCode();
+    $status_phrase = $response->getReasonPhrase();
+    header("HTTP/$version $status $status_phrase", TRUE);
+
+    foreach ($response->getHeaders() as $name => $values) {
+        $header_line = $response->getHeaderLine($name);
+        header("$name: $header_line", FALSE);
+    }
+
+    echo $response->getBody();
+}
 
 // Create DIC.
 $container = new Container();
@@ -58,17 +72,7 @@ set_exception_handler(function (Throwable $exception) use ($container) {
 EOF;
 
     $response = new Response(500, [], $html);
-    $version = $response->getProtocolVersion();
-    $status = $response->getStatusCode();
-    $status_phrase = $response->getReasonPhrase();
-    header("HTTP/$version $status $status_phrase", TRUE);
-
-    foreach ($response->getHeaders() as $name => $values) {
-        $header_line = $response->getHeaderLine($name);
-        header("$name: $header_line", FALSE);
-    }
-
-    echo $response->getBody();
+    sendResponse($response);
 });
 
 session_start();
@@ -97,11 +101,6 @@ if (!file_exists(__DIR__ . '/settings.php')) {
 require_once __DIR__ . '/settings.php';
 
 // Check settings.
-if (TINYIB_TRIPSEED == '' || TINYIB_ADMINPASS == '') {
-    $message = 'TINYIB_TRIPSEED and TINYIB_ADMINPASS must be configured.';
-    throw new Exception($message);
-}
-
 if (TINYIB_CAPTCHA === 'recaptcha'
     && (TINYIB_RECAPTCHA_SITE == '' || TINYIB_RECAPTCHA_SECRET == '')) {
     $message = 'TINYIB_RECAPTCHA_SITE and TINYIB_RECAPTCHA_SECRET must be configured.';
@@ -207,11 +206,8 @@ foreach ($directories as $directory => $regex) {
 /** @var \TinyIB\Service\RoutingServiceInterface $routing_service */
 $handler = $container->get(RoutingServiceInterface::class);
 
-// Setup middleware.
-$middlewares = [AuthMiddleware::class];
-foreach ($middlewares as $middleware) {
-    $handler = new RequestHandler(new $middleware(), $handler);
-}
+// Add auth handler.
+$handler = new RequestHandler(new AuthMiddleware($container), $handler);
 
 // Add CORS handler.
 $handler = new RequestHandler(new CorsMiddleware('*', [
@@ -246,16 +242,4 @@ if (!function_exists('getallheaders')) {
 
 // Handle request.
 $response = $handler->handle($request);
-
-// Send response.
-$version = $response->getProtocolVersion();
-$status = $response->getStatusCode();
-$status_phrase = $response->getReasonPhrase();
-header("HTTP/$version $status $status_phrase", TRUE);
-
-foreach ($response->getHeaders() as $name => $values) {
-    $header_line = $response->getHeaderLine($name);
-    header("$name: $header_line", FALSE);
-}
-
-echo $response->getBody();
+sendResponse($response);

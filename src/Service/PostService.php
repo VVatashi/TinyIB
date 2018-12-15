@@ -239,6 +239,33 @@ class PostService implements PostServiceInterface
     }
 
     /**
+     * Validates uploaded file.
+     *
+     * @throws \Exception
+     */
+    protected function validateFileUpload(array $file)
+    {
+        switch ($file['error']) {
+            case UPLOAD_ERR_OK:
+                break;
+            case UPLOAD_ERR_FORM_SIZE:
+                throw new \Exception("That file is larger than " . TINYIB_MAXKBDESC . ".");
+            case UPLOAD_ERR_INI_SIZE:
+                throw new \Exception("The uploaded file exceeds the upload_max_filesize directive (" . ini_get('upload_max_filesize') . ") in php.ini.");
+            case UPLOAD_ERR_PARTIAL:
+                throw new \Exception("The uploaded file was only partially uploaded.");
+            case UPLOAD_ERR_NO_FILE:
+                throw new \Exception("No file was uploaded.");
+            case UPLOAD_ERR_NO_TMP_DIR:
+                throw new \Exception("Missing a temporary folder.");
+            case UPLOAD_ERR_CANT_WRITE:
+                throw new \Exception("Failed to write file to disk");
+            default:
+                throw new \Exception("Unable to save the uploaded file.");
+        }
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function create(
@@ -249,39 +276,33 @@ class PostService implements PostServiceInterface
         string $password,
         string $ip,
         int $user_id = 0,
-        int $parent = 0,
-        bool $rawpost = false
+        int $parent = 0
     ) : Post {
         global $tinyib_uploads;
 
-        list($logged_in, $is_admin) = Functions::manageCheckLogIn();
-        $rawpost = $logged_in && $rawpost;
+        $ban = null;
+        if (!$this->checkBanned($ip, $ban)) {
+            $expire = $ban->isPermanent()
+                ? '<br>This ban is permanent and will not expire.'
+                : '<br>This ban will expire ' . date('y/m/d(D)H:i:s', $ban->getExpiresTimestamp());
+            $reason = $ban->hasReason() ? '<br>Reason: ' . $ban->reason : '';
+            throw new ValidationException('Your IP address ' . $ban->ip
+                . ' has been banned from posting on this image board.  ' . $expire . $reason);
+        }
 
-        if (!$logged_in) {
-            $ban = null;
-            if (!$this->checkBanned($ip, $ban)) {
-                $expire = $ban->isPermanent()
-                    ? '<br>This ban is permanent and will not expire.'
-                    : '<br>This ban will expire ' . date('y/m/d(D)H:i:s', $ban->getExpiresTimestamp());
-                $reason = $ban->hasReason() ? '<br>Reason: ' . $ban->reason : '';
-                throw new ValidationException('Your IP address ' . $ban->ip
-                    . ' has been banned from posting on this image board.  ' . $expire . $reason);
-            }
+        $length = 0;
+        if (!$this->checkMessageSize($message, $length)) {
+            // @todo Configure max message length.
+            $max_length = 8000;
+            throw new ValidationException('Please shorten your message, or post it in multiple parts.'
+                . " Your message is $length characters long, and the maximum allowed is $max_length.");
+        }
 
-            $length = 0;
-            if (!$this->checkMessageSize($message, $length)) {
-                // @todo Configure max message length.
-                $max_length = 8000;
-                throw new ValidationException('Please shorten your message, or post it in multiple parts.'
-                    . " Your message is $length characters long, and the maximum allowed is $max_length.");
-            }
-
-            $remains_time = 0;
-            if (!$this->checkFlood($ip, $remains_time)) {
-                throw new ValidationException('Please wait a moment before posting again.'
-                    . " You will be able to make another post in $remains_time "
-                    . Functions::plural('second', $remains_time) . '.');
-            }
+        $remains_time = 0;
+        if (!$this->checkFlood($ip, $remains_time)) {
+            throw new ValidationException('Please wait a moment before posting again.'
+                . " You will be able to make another post in $remains_time second"
+                . ($remains_time === 1 ? 's' : '') . '.');
         }
 
         if ($parent !== TINYIB_NEWTHREAD) {
@@ -306,24 +327,18 @@ class PostService implements PostServiceInterface
         $post->email = $this->cleanString(str_replace('"', '&quot;', substr($email, 0, 75)));
         $post->subject = $this->cleanString(substr($subject, 0, 75));
 
-        if ($rawpost) {
-            // Treat message as a raw HTML.
-            $post->message = $message;
-        } else {
-            $message = rtrim($message);
-            $message = $this->cleanString($message);
-            $message = $this->postLink($message);
-            $message = $this->colorQuote($message);
-            $message = $this->makeLinksClickable($message);
-            $message = str_replace("\n", '<br>', $message);
+        $message = rtrim($message);
+        $message = $this->cleanString($message);
+        $message = $this->postLink($message);
+        $message = $this->colorQuote($message);
+        $message = $this->makeLinksClickable($message);
+        $message = str_replace("\n", '<br>', $message);
 
-            if (TINYIB_DICE_ENABLED) {
-                $message = $this->dice($message);
-            }
-
-            $post->message = $message;
+        if (TINYIB_DICE_ENABLED) {
+            $message = $this->dice($message);
         }
 
+        $post->message = $message;
         $post->password = !empty($password) ? md5(md5($password)) : '';
 
         if (isset($_FILES['file']) && !empty($_FILES['file']['name'])) {
@@ -335,7 +350,7 @@ class PostService implements PostServiceInterface
         }
 
         if (!empty($file)) {
-            Functions::validateFileUpload($file);
+            $this->validateFileUpload($file);
 
             if (!is_file($file['tmp_name']) || !is_readable($file['tmp_name'])) {
                 throw new ValidationException('File transfer failure. Please retry the submission.');
@@ -531,14 +546,9 @@ class PostService implements PostServiceInterface
             }
         }
 
-        if (!$logged_in && ((empty($post->file) && TINYIB_REQMOD == 'files') || TINYIB_REQMOD == 'all')) {
-            $post->moderated = false;
-        } else {
-            $post->moderated = true;
-        }
-
         $now = (new \DateTime())->getTimestamp();
         $post->bumped_at = $now;
+        $post->moderated = true;
         $post->save();
 
         if ($post->isModerated()) {

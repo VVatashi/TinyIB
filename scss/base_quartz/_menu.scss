@@ -1,7 +1,9 @@
 @import '../utils/index';
 
-.admin-bar {
+.menu {
   &__list-item {
     @include brackets;
+
+    margin-right: 0.25em;
   }
 }

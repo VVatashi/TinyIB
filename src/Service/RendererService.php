@@ -29,7 +29,6 @@ class RendererService implements RendererServiceInterface
 
         $this->twig->addGlobal('base_url', TINYIB_BASE_URL . TINYIB_BOARD);
         $this->twig->addGlobal('uploads', $tinyib_uploads);
-        $this->twig->addGlobal('is_installed_via_git', Functions::installedViaGit());
 
         $mtime = new Twig_SimpleFunction('mtime', function ($path) {
             $filename = basename($path);
@@ -43,6 +42,14 @@ class RendererService implements RendererServiceInterface
             }
         });
         $this->twig->addFunction($mtime);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function registerGlobal(string $name, $value)
+    {
+        $this->twig->addGlobal($name, $value);
     }
 
     /**

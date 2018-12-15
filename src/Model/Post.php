@@ -494,6 +494,30 @@ class Post extends Model
     }
 
     /**
+     * Deletes image & thumbnail of the post.
+     *
+     * @param Post $post
+     */
+    public function deletePostImages()
+    {
+        // TODO: Exception handling & logging.
+
+        if (!empty($this->file)) {
+            $path = 'src/' . $this->file;
+            if (file_exists($path)) {
+                unlink($path);
+            }
+        }
+
+        if (!empty($this->thumb)) {
+            $path = 'thumb/' . $this->thumb;
+            if (file_exists($path)) {
+                unlink($path);
+            }
+        }
+    }
+
+    /**
      * Deletes a post by ID.
      *
      * @param int $id
@@ -504,7 +528,7 @@ class Post extends Model
         $posts = static::getPostsByThreadID($id, false);
 
         foreach ($posts as $post) {
-            Functions::deletePostImages($post);
+            $post->deletePostImages();
             $post->delete();
         }
     }

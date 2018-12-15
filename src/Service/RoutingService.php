@@ -14,7 +14,6 @@ use TinyIB\Controller\Amp\AmpPostControllerInterface;
 use TinyIB\Controller\Mobile\MobilePostControllerInterface;
 use TinyIB\Controller\AuthControllerInterface;
 use TinyIB\Controller\CaptchaControllerInterface;
-use TinyIB\Controller\ManageControllerInterface;
 use TinyIB\Controller\PostControllerInterface;
 use TinyIB\Controller\SettingsControllerInterface;
 use TinyIB\NotFoundException;
@@ -59,22 +58,6 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
                     $routes->addRoute('GET',  '/{id:\d+}/delete',        [UserCrudControllerInterface::class, 'deleteConfirm']);
                     $routes->addRoute('POST', '/{id:\d+}/delete/submit', [UserCrudControllerInterface::class, 'delete']);
                 });
-            });
-
-            $routes->addGroup('/manage', function (RouteCollector $routes) {
-                $routes->addRoute('GET',  '',                    [ManageControllerInterface::class, 'status']);
-                $routes->addRoute('GET',  '/rebuildall',         [ManageControllerInterface::class, 'rebuildAll']);
-                $routes->addRoute('GET',  '/approve/{id:\d+}',   [ManageControllerInterface::class, 'approve']);
-                $routes->addRoute('GET',  '/bans',               [ManageControllerInterface::class, 'listBans']);
-                $routes->addRoute('POST', '/bans',               [ManageControllerInterface::class, 'addBan']);
-                $routes->addRoute('GET',  '/bans/{id:\d+}/lift', [ManageControllerInterface::class, 'liftBan']);
-                $routes->addRoute('GET',  '/delete/{id:\d+}',    [ManageControllerInterface::class, 'delete']);
-                $routes->addRoute('GET',  '/logout',             [ManageControllerInterface::class, 'logout']);
-                $routes->addRoute('GET',  '/moderate',           [ManageControllerInterface::class, 'moderate']);
-                $routes->addRoute('GET',  '/moderate/{id:\d+}',  [ManageControllerInterface::class, 'moderate']);
-                $routes->addRoute('GET',  '/rawpost',            [ManageControllerInterface::class, 'rawPost']);
-                $routes->addRoute('GET',  '/sticky/{id:\d+}',    [ManageControllerInterface::class, 'setSticky']);
-                $routes->addRoute('GET',  '/update',             [ManageControllerInterface::class, 'update']);
             });
 
             $routes->addGroup('/ajax', function (RouteCollector $routes) {
