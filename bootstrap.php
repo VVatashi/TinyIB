@@ -74,13 +74,6 @@ EOF;
 session_start();
 setcookie(session_name(), session_id(), time() + 24 * 60 * 60, '/');
 
-ob_implicit_flush();
-if (function_exists('ob_get_level')) {
-    while (ob_get_level() > 0) {
-        ob_end_flush();
-    }
-}
-
 if (get_magic_quotes_gpc()) {
     foreach ($_GET as $key => $val) {
         $_GET[$key] = stripslashes($val);
