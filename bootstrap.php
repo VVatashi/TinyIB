@@ -10,14 +10,13 @@ use Monolog\Processor\PsrLogMessageProcessor;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use TinyIB\Cache\CacheInterface;
-use TinyIB\Cache\DatabaseCache;
-use TinyIB\Cache\InMemoryCache;
+use TinyIB\Cache\NoCache;
 use TinyIB\Cache\RedisCache;
+use TinyIB\Functions;
 use TinyIB\Middleware\AuthMiddleware;
 use TinyIB\Middleware\CorsMiddleware;
 use TinyIB\Middleware\ExceptionMiddleware;
 use TinyIB\Middleware\RequestHandler;
-use TinyIB\Functions;
 use TinyIB\Service\RendererServiceInterface;
 use TinyIB\Service\RoutingServiceInterface;
 use VVatashi\DI\Container;
@@ -68,6 +67,8 @@ EOF;
         header("$name: $header_line", FALSE);
     }
 
+    $execution_time = round(microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'], 3);
+    header("X-Execution-Time: " . $execution_time, FALSE);
     echo $response->getBody();
 });
 
@@ -138,14 +139,12 @@ $container->registerCallback(LoggerInterface::class, function ($container) {
     return $logger;
 });
 
-if (TINYIB_CACHE === 'memory') {
-    $container->registerType(CacheInterface::class, InMemoryCache::class);
-} elseif (TINYIB_CACHE === 'redis') {
+if (TINYIB_CACHE === 'redis') {
     $container->registerCallback(CacheInterface::class, function ($container) {
         return new RedisCache(TINYIB_CACHE_REDIS_HOST);
     });
 } else {
-    $container->registerType(CacheInterface::class, DatabaseCache::class);
+    $container->registerType(CacheInterface::class, NoCache::class);
 }
 
 $capsule = new Capsule();
@@ -177,7 +176,6 @@ function glob_recursive($pattern, $flags = 0)
 $directories = [
     'Controller' => ['#Interface$#', ''],
     'Model' => ['#Interface$#', ''],
-    'Repository' => ['#([^\\\\]+Repository)Interface$#', 'PDO$1'],
     'Service' => ['#Interface$#', ''],
 ];
 foreach ($directories as $directory => $regex) {
@@ -258,4 +256,6 @@ foreach ($response->getHeaders() as $name => $values) {
     header("$name: $header_line", FALSE);
 }
 
+$execution_time = round(microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'], 3);
+header("X-Execution-Time: " . $execution_time, FALSE);
 echo $response->getBody();

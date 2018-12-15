@@ -219,13 +219,17 @@ class PostController implements PostControllerInterface
         $args = explode('/', $request->getUri()->getPath());
         $page = count($args) > 1 ? (int)$args[1] : 0;
         $key = TINYIB_BOARD . ':page:' . $page;
+        $headers = [];
         $data = $this->cache->get($key);
-        if (!isset($data)) {
+        if (isset($data)) {
+            $headers['X-Cached'] = 'true';
+        } else {
+            $headers['X-Cached'] = 'false';
             $data = $this->renderBoardPage($page);
             $this->cache->set($key, $data, 4 * 60 * 60);
         }
 
-        return new Response(200, [], $data);
+        return new Response(200, $headers, $data);
     }
 
     /**
@@ -236,12 +240,16 @@ class PostController implements PostControllerInterface
         $args = explode('/', $request->getUri()->getPath());
         $id = (int)$args[2];
         $key = TINYIB_BOARD . ':thread:' . $id;
+        $headers = [];
         $data = $this->cache->get($key);
-        if (!isset($data)) {
+        if (isset($data)) {
+            $headers['X-Cached'] = 'true';
+        } else {
+            $headers['X-Cached'] = 'false';
             $data = $this->renderThreadPage($id);
             $this->cache->set($key, $data, 4 * 60 * 60);
         }
 
-        return new Response(200, [], $data);
+        return new Response(200, $headers, $data);
     }
 }
