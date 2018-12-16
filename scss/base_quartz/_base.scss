@@ -26,13 +26,12 @@ hr {
 }
 
 ul, ol {
-  display: flex;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-input, textarea, select {
+input, textarea, select, .input {
   box-sizing: border-box;
   color: $input-color;
   background: $input-background;
@@ -43,7 +42,7 @@ input, textarea, select {
   margin: 0;
 }
 
-input[type=submit], button {
+input[type=submit], button, .button {
   box-sizing: border-box;
   color: $btn-color;
   background: $btn-background;
@@ -52,9 +51,11 @@ input[type=submit], button {
   padding: $btn-padding;
   margin: 0;
   cursor: pointer;
+  text-decoration: none;
 
   &:hover {
     background: $btn-hover-background;
+    text-decoration: none;
   }
 
   &:active {

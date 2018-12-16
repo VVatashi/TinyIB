@@ -26,19 +26,27 @@ $btn-padding:       $input-padding !default;
 
 $btn-hover-background: #e5e5e5 !default;
 
-$post-background:      #ffffff !default;
-$post-header-color:    $color !default;
-$post-content-color:   $color !default;
+$block-background:      #ffffff !default;
+$block-header-color:    $color !default;
+$block-content-color:   $color !default;
+$block-border:          1px solid #d8d8d8 !default;
+$block-border-radius:   4px !default;
+$block-header-padding:  5px 10px 4px !default;
+$block-content-padding: 7px 10px 5px !default;
+
+$post-background:      $block-background !default;
+$post-header-color:    $block-header-color !default;
+$post-content-color:   $block-content-color !default;
 $post-omitted-color:   $color !default;
-$post-border:          1px solid #d8d8d8 !default;
-$post-border-radius:   4px !default;
-$post-header-padding:  5px 10px 4px !default;
-$post-content-padding: 7px 10px 5px !default;
+$post-border:          $block-border !default;
+$post-border-radius:   $block-border-radius !default;
+$post-header-padding:  $block-header-padding !default;
+$post-content-padding: $block-content-padding !default;
 $post-file-margin:     0 0.5em 0 0 !default;
 $post-margin:          0 0 10px !default;
 $post-align-left:      true !default;
 
-$form-background: $post-background !default;
+$form-background: $block-background !default;
 
 $post-subject-color:  #002244 !default;
 $post-name-color:     $color !default;

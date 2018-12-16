@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    {% block head %}
+      <meta charset="utf-8" />
+
+      <title>{{ title|default('Admin') }}</title>
+
+      <link rel="shortcut icon" href="{{ base_url }}/favicon.ico" />
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans">
+
+      <link rel="stylesheet" type="text/css"
+        href="{{ base_url }}/css/admin.css?mtime={{ mtime('css/admin.css') }}" />
+    {% endblock %}
+  </head>
+
+  <body class="layout">
+    <header class="header layout__header">
+      {% block header %}
+        {% if breadcrumb %}
+          <nav>
+            <ul class="header__breadcrumb">
+              {% spaceless %}
+                {% for item in breadcrumb %}
+                  <li class="header__breadcrumb-item">
+                    {% if item.url %}
+                      <a href="{{ item.url }}">{{ item.title }}</a>
+                    {% else %}
+                      <span>{{ item.title }}</span>
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              {% endspaceless %}
+            </ul>
+          </nav>
+        {% endif %}
+      {% endblock %}
+    </header>
+
+    <main class="content layout__content">
+      {% block content %}
+      {% endblock %}
+    </main>
+
+    <footer class="footer layout__footer">
+      {% block footer %}
+      {% endblock %}
+    </footer>
+  </body>
+</html>

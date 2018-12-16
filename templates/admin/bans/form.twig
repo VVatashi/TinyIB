@@ -1,0 +1,59 @@
+{% set title = 'Add Ban' %}
+
+{% set breadcrumb = [
+  { url: base_url, title: constant('TINYIB_BOARDDESC') },
+  { url: base_url ~ '/admin', title: 'Admin Dashboard' },
+  { url: base_url ~ '/admin/bans', title: 'Bans' },
+] %}
+
+{% extends 'admin/layout/_html.twig' %}
+
+{% block content %}
+  <div class="form content__form">
+    <div class="form__header">
+      <h1 class="form__title">{{ title }}</h1>
+    </div>
+
+    <div class="form__content">
+      {% if messages|length %}
+        <div class="messages list__messages">
+          <ul class="messages__list">
+            {% for message in messages %}
+              <li class="messages__list-item messages__list-item--{{ message.type }}">
+                <span>{{ message.text }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+      <form method="post" action="{{ base_url }}/admin/bans/create">
+        <div class="form__row">
+          <label class="form__label" for="ip">IP:</label>
+          <input type="text" class="input form__input" id="ip" name="ip" value="{{ fields.ip }}" />
+        </div>
+
+        <div class="form__row">
+          <label class="form__label" for="expires_in">Expires in:</label>
+          <select class="input form__input" id="expires_in" name="expires_in" value="{{ fields.expires_in }}">
+            <option value="{{ 60 * 60 }}">1 hour</option>
+            <option value="{{ 60 * 60 * 24 }}">1 day</option>
+            <option value="{{ 60 * 60 * 24 * 7 }}">1 week</option>
+            <option value="{{ 60 * 60 * 24 * 31 }}">1 month</option>
+            <option value="0">Permanent</option>
+          </select>
+        </div>
+
+        <div class="form__row">
+          <label class="form__label" for="reason">Reason:</label>
+          <input type="text" class="input form__input" id="reason" name="reason" value="{{ fields.reason }}" />
+        </div>
+
+        <div class="form__row form__row--centered">
+          <button type="submit" class="button form__button">Add ban</button>
+          <a class="button form__button" href="{{ base_url }}/admin/bans">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

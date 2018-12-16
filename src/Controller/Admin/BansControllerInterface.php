@@ -5,10 +5,10 @@ namespace TinyIB\Controller\Admin;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-interface ModLogControllerInterface
+interface BansControllerInterface
 {
     /**
-     * Returns the list of log entries.
+     * Returns the list of bans.
      *
      * @param \Psr\Http\Message\ResponseInterface $request
      *

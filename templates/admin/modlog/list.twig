@@ -1,33 +1,44 @@
-{% extends 'layout/_html.twig' %}
+{% set title = 'Moderation log' %}
 
-{% block head %}
-  {{ parent() }}
+{% set breadcrumb = [
+  { url: base_url, title: constant('TINYIB_BOARDDESC') },
+  { url: base_url ~ '/admin', title: 'Admin Dashboard' },
+] %}
 
-  <link rel="canonical" href="{{ base_url }}/admin/modlog" />
-{% endblock %}
+{% extends 'admin/layout/_html.twig' %}
 
 {% block content %}
-  <main class="{{class is defined ? class ~ ' '}}">
-    <div class="content__entity-list entity-list">
-      <h1 class="entity-list__header">Moderation log</h1>
-
-      <table class="entity-list__entities">
-        <thead>
-          <tr>
-            <th class="entity-list__property-label">Date</th>
-            <th class="entity-list__property-label">Event</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {% for entry in modlog %}
-            <tr class="entity-list__entity">
-              <th class="entity-list__property-value" scope="row">{{ entry.createdTimestamp|date() }}</th>
-              <td class="entity-list__property-value">{{ entry.message|raw }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  <div class="list content__list">
+    <div class="list__header">
+      <h1 class="list__title">{{ title }}</h1>
     </div>
-  </main>
+
+    <div class="list__content">
+      {% if items|length %}
+        <table class="list__table list__table--striped">
+          <thead>
+            <tr class="list__table-header">
+              <th class="list__cell">#</th>
+              <th class="list__cell">Date</th>
+              <th class="list__cell">Event</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for item in items %}
+              <tr class="list__row">
+                <th class="list__cell list__cell--nostretch" scope="row">{{ item.id }}</th>
+
+                <td class="list__cell list__cell--nostretch">
+                  {{ item.createdTimestamp|date() }}
+                </td>
+
+                <td class="list__cell">{{ item.message|raw }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+    </div>
+  </div>
 {% endblock %}

@@ -20,16 +20,17 @@ $btn-background:    linear-gradient(180deg, #777, #6f6f6f);
 
 $btn-hover-background: linear-gradient(180deg, #6f6f6f, #888);
 
-$post-background:      url('synthwave/bgpostnew.jpg');
-$post-header-color:    #9a9a9a;
-$post-content-color:   #ffffff;
-$post-omitted-color:   $link-color;
-$post-border:          2px solid transparent;
-$post-border-radius:   0;
-$post-header-padding:  8px 13px 2px;
-$post-content-padding: 2px 13px 8px;
-$post-file-margin:     0 15px 0 0;
-$post-margin:          0 0 7px;
+$block-background:      url('synthwave/bgpostnew.jpg');
+$block-header-color:    #9a9a9a;
+$block-content-color:   #ffffff;
+$block-border:          2px solid transparent;
+$block-border-radius:   0;
+$block-header-padding:  8px 13px 2px;
+$block-content-padding: 2px 13px 8px;
+
+$post-omitted-color: $link-color;
+$post-file-margin:   0 15px 0 0;
+$post-margin:        0 0 7px;
 
 $post-subject-color:  $color;
 $post-name-color:     $link-color;

@@ -1,0 +1,83 @@
+{% set title = 'Ban List' %}
+
+{% set breadcrumb = [
+  { url: base_url, title: constant('TINYIB_BOARDDESC') },
+  { url: base_url ~ '/admin', title: 'Admin Dashboard' },
+] %}
+
+{% extends 'admin/layout/_html.twig' %}
+
+{% block content %}
+  <div class="list content__list">
+    <div class="list__header">
+      <h1 class="list__title">{{ title }}</h1>
+    </div>
+
+    <div class="list__content">
+      <div class="list__actions">
+        <ul class="list__actions-list">
+          <li class="list__actions-list-item">
+            <a href="{{ base_url }}/admin/bans/create">Add ban</a>
+          </li>
+        </ul>
+      </div>
+
+      {% if messages|length %}
+        <div class="messages list__messages">
+          <ul class="messages__list">
+            {% for message in messages %}
+              <li class="messages__list-item messages__list-item--{{ message.type }}">
+                <span>{{ message.text }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+      {% if items|length %}
+        <table class="list__table list__table--striped">
+          <thead>
+            <tr class="list__table-header">
+              <th class="list__cell">#</th>
+              <th class="list__cell">IP Address</th>
+              <th class="list__cell">Set At</th>
+              <th class="list__cell">Expires At</th>
+              <th class="list__cell">Reason</th>
+              <th class="list__cell">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for item in items %}
+              <tr class="list__row">
+                <th class="list__cell list__cell--nostretch" scope="row">{{ item.id }}</th>
+                <td class="list__cell list__cell--nostretch">{{ item.ip }}</td>
+
+                <td class="list__cell list__cell--nostretch">
+                  <time>{{ item.createdTimestamp|date() }}</time>
+                </td>
+
+                <td class="list__cell list__cell--nostretch">
+                  {% if not item.isPermanent() %}
+                    <time>{{ item.expiresTimestamp|date() }}</time>
+                  {% else %}
+                    <span>Permanent</span>
+                  {% endif %}
+                </td>
+
+                <td class="list__cell">{{ item.reason }}</td>
+
+                <td class="list__cell list__cell--nostretch">
+                  <form method="post" action="{{ base_url }}/admin/bans/delete">
+                    <input type="hidden" name="id" value="{{ item.id }}" />
+                    <button class="button button--delete">Lift</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

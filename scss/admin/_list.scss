@@ -1,0 +1,23 @@
+.list {
+  @include block;
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  &__row {
+    &:nth-child(2n+1) {
+      background: $background;
+    }
+  }
+
+  &__cell {
+    padding: 0.25em 0.5em;
+
+    &--nostretch {
+      width: 1px;
+      white-space: nowrap;
+    }
+  }
+}

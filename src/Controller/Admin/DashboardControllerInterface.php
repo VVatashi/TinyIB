@@ -5,10 +5,10 @@ namespace TinyIB\Controller\Admin;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-interface ModLogControllerInterface
+interface DashboardControllerInterface
 {
     /**
-     * Returns the list of log entries.
+     * Returns the admin dashboard.
      *
      * @param \Psr\Http\Message\ResponseInterface $request
      *
@@ -17,5 +17,5 @@ interface ModLogControllerInterface
      * @throws \TinyIB\AccessDeniedException
      *   If current user is not an admin.
      */
-    public function list(ServerRequestInterface $request) : ResponseInterface;
+    public function index(ServerRequestInterface $request) : ResponseInterface;
 }

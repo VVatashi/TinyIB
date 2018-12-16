@@ -8,12 +8,14 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use TinyIB\Controller\Admin\BansControllerInterface;
+use TinyIB\Controller\Admin\DashboardControllerInterface;
 use TinyIB\Controller\Admin\ModLogControllerInterface;
 use TinyIB\Controller\Admin\UserCrudControllerInterface;
 use TinyIB\Controller\Amp\AmpPostControllerInterface;
-use TinyIB\Controller\Mobile\MobilePostControllerInterface;
 use TinyIB\Controller\AuthControllerInterface;
 use TinyIB\Controller\CaptchaControllerInterface;
+use TinyIB\Controller\Mobile\MobilePostControllerInterface;
 use TinyIB\Controller\PostControllerInterface;
 use TinyIB\Controller\SettingsControllerInterface;
 use TinyIB\NotFoundException;
@@ -44,6 +46,15 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
             });
 
             $routes->addGroup('/admin', function (RouteCollector $routes) {
+                $routes->addRoute('GET',  '', [DashboardControllerInterface::class, 'index']);
+
+                $routes->addGroup('/bans', function (RouteCollector $routes) {
+                    $routes->addRoute('GET',  '',        [BansControllerInterface::class, 'list']);
+                    $routes->addRoute('GET',  '/create', [BansControllerInterface::class, 'createForm']);
+                    $routes->addRoute('POST', '/create', [BansControllerInterface::class, 'create']);
+                    $routes->addRoute('POST', '/delete', [BansControllerInterface::class, 'delete']);
+                });
+
                 $routes->addGroup('/modlog', function (RouteCollector $routes) {
                     $routes->addRoute('GET',  '', [ModLogControllerInterface::class, 'list']);
                 });

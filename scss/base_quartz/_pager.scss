@@ -1,9 +1,14 @@
 @import '../utils/index';
 
 .pager {
-  &__item {
-    margin-right: 0.25em;
+  &__list {
+    display: flex;
+    flex-flow: row wrap;
+  }
 
+  &__list-item {
     @include brackets;
+
+    margin-right: 0.25em;
   }
 }

@@ -1,0 +1,7 @@
+.links {
+  @include block;
+
+  &__content {
+    font-size: 1.5em;
+  }
+}

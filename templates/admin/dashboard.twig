@@ -1,0 +1,22 @@
+{% set title = 'Admin dashboard' %}
+
+{% set breadcrumb = [
+  { url: base_url, title: constant('TINYIB_BOARDDESC') },
+] %}
+
+{% extends 'admin/layout/_html.twig' %}
+
+{% block content %}
+  <div class="links content__links">
+    <div class="links__header">
+      <h1 class="links__title">{{ title }}</h1>
+    </div>
+
+    <div class="links__content">
+      <ul class="links__list">
+        <li class="links__list-item"><a href="{{ base_url }}/admin/bans">Bans</a></li>
+        <li class="links__list-item"><a href="{{ base_url }}/admin/modlog">Moderation log</a></li>
+      </ul>
+    </div>
+  </div>
+{% endblock %}

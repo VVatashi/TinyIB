@@ -10,14 +10,15 @@ $link-decoration: underline;
 
 $line-border: 1px solid #bbbbbb;
 
-$post-background:      #f0e0d6;
-$post-omitted-color:   #666666;
-$post-border:          1px solid #ddccc5;
-$post-border-radius:   5px;
-$post-header-padding:  0 20px;
-$post-content-padding: 0.5em 20px;
-$post-file-margin:     0 20px 0 0;
-$post-margin:          0 0 4px;
+$block-background:      #f0e0d6;
+$block-border:          1px solid #ddccc5;
+$block-border-radius:   5px;
+$block-header-padding:  0 20px;
+$block-content-padding: 0.5em 20px;
+
+$post-omitted-color: #666666;
+$post-file-margin:   0 20px 0 0;
+$post-margin:        0 0 4px;
 
 $post-subject-color:  #cc1105;
 $post-name-color:     #117743;

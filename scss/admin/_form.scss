@@ -1,0 +1,33 @@
+.form {
+  @include block;
+
+  &__content {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  &__row {
+    display: flex;
+    flex-flow: row;
+    margin-bottom: 1em;
+
+    &--centered {
+      justify-content: center;
+    }
+  }
+
+  &__label {
+    width: 20%;
+  }
+
+  &__input {
+    width: 80%;
+    flex: 1;
+  }
+
+  &__button {
+    & + & {
+      margin-left: 0.25em;
+    }
+  }
+}

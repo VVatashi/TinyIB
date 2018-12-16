@@ -21,15 +21,16 @@ $btn-border-radius: 4px;
 
 $btn-hover-background: linear-gradient(180deg, #6f6f6f, #888);
 
-$post-background:      #424242;
-$post-content-color:   #f5f5f5;
-$post-omitted-color:   #707070;
-$post-border:          0;
-$post-border-radius:   5px;
-$post-header-padding:  5px 10px 2px;
-$post-content-padding: 2px 10px 5px;
-$post-file-margin:     0 10px 0 0;
-$post-margin:          0 0 5px;
+$block-background:      #424242;
+$block-content-color:   #f5f5f5;
+$block-border:          0;
+$block-border-radius:   5px;
+$block-header-padding:  5px 10px 2px;
+$block-content-padding: 2px 10px 5px;
+
+$post-omitted-color: #707070;
+$post-file-margin:   0 10px 0 0;
+$post-margin:        0 0 5px;
 
 $post-subject-color:  #005a83;
 $post-name-color:     #60debf;

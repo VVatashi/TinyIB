@@ -1,6 +1,11 @@
 @import '../utils/index';
 
 .menu {
+  &__list {
+    display: flex;
+    flex-flow: row wrap;
+  }
+
   &__list-item {
     @include brackets;
 
