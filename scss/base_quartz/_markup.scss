@@ -1,7 +1,31 @@
 @import 'vars';
 
+.markup {
+  &__spoiler,
+  &__rp {
+    background-color: $spoiler-background;
+    color: $spoiler-background;
+
+    &:hover {
+      color: $spoiler-color;
+    }
+  }
+
+  &__underline {
+    text-decoration: underline;
+  }
+
+  &__quote {
+    color: $quote-color;
+  }
+}
+
 code {
   white-space: pre-line !important;
+
+  br {
+    display: none;
+  }
 }
 
 .dice {
