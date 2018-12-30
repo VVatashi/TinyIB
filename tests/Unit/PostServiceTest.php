@@ -3,7 +3,7 @@
 namespace TinyIB\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use TinyIB\Cache\InMemoryCache;
+use TinyIB\Cache\NoCache;
 use TinyIB\Service\PostService;
 use TinyIB\Service\PostServiceInterface;
 use TinyIB\Tests\Mock\CryptographyServiceMock;
@@ -15,7 +15,7 @@ final class PostServiceTest extends TestCase
 
     public function setUp() : void
     {
-        $cache = new InMemoryCache();
+        $cache = new NoCache();
         $cryptography_service = new CryptographyServiceMock();
 
         $this->service = new PostService(

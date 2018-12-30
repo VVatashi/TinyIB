@@ -7,3 +7,15 @@
     content: ']';
   }
 }
+
+%clickable {
+  cursor: pointer;
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+.hidden {
+  display: none;
+}

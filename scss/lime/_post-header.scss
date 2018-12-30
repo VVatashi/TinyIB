@@ -1,6 +1,4 @@
 .post-header {
-  border-bottom: 1px solid #9e9e9e;
-
   &__name-wrapper {
     font: 1em sans-serif;
   }
@@ -19,7 +17,6 @@
   }
 
   &__reflink {
-    color: inherit;
     transition: color 0.3s;
     font: 1em sans-serif;
 

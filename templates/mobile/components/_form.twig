@@ -2,7 +2,7 @@
   action="{{ base_url }}/mobile/post/create">
   <input type="hidden" name="parent" value="{{ parent|default(0) }}" />
 
-  <div class="form__file-column xs-hidden">
+  <div class="form__file-column">
     <div class="form__row form__row--file">
       <label class="form__field form__field--file">
         <input type="file" id="file" class="form__input form__input--hidden"
@@ -27,7 +27,7 @@
         <input type="text" id="email" class="form__input" placeholder="Email" name="email" value="" />
       </label>
 
-      <div class="form__field xs-hidden">
+      <div class="form__submit">
         <button type="submit" class="form__button button">Submit</button>
       </div>
     </div>
@@ -82,7 +82,7 @@
       </label>
     </div>
 
-    <div class="form__row xs-only">
+    <div class="form__file-mobile">
       <label class="form__field button">
         <input type="file" id="file" class="form__input form__input--hidden"
           placeholder="File" name="file_mobile" value="" />
@@ -91,7 +91,7 @@
       </label>
     </div>
 
-    <div class="form__row xs-only">
+    <div class="form__submit-mobile">
       <div class="form__field">
         <button type="submit" class="form__button button">Submit</submit>
       </div>

@@ -125,6 +125,53 @@ class PostController implements PostControllerInterface
     /**
      * {@inheritDoc}
      */
+    public function ajaxCreatePost(ServerRequestInterface $request) : ResponseInterface
+    {
+        $data = $request->getParsedBody();
+
+        $name    = isset($data['name'])    ? $data['name']    : '';
+        $email   = isset($data['email'])   ? $data['email']   : '';
+        $subject = isset($data['subject']) ? $data['subject'] : '';
+        $message = isset($data['message']) ? $data['message'] : '';
+
+        $password = '';
+        $ip = $_SERVER['REMOTE_ADDR'];
+        $user_id = $request->getAttribute('user')->id;
+
+        $parent = isset($data['parent']) ? (int)$data['parent'] : 0;
+
+        $post = $this->post_service->create(
+            $name,
+            $email,
+            $subject,
+            $message,
+            $password,
+            $ip,
+            $user_id,
+            $parent
+        );
+
+        $thread_id = $post->isThread() ? $post->id : $post->parent_id;
+        $destination = TINYIB_BASE_URL . TINYIB_BOARD . '/res/' . $thread_id . '#' . $post->id;
+
+        return new Response(201, [
+            'Content-type' => 'application/json',
+            'Location' => $destination,
+        ], json_encode([
+            'id'         => $post->id,
+            'parent_id'  => $post->parent_id,
+            'name'       => $post->name,
+            'tripcode'   => '!' . $post->tripcode,
+            'email'      => $post->email,
+            'subject'    => $post->subject,
+            'file'       => $post->file,
+            'created_at' => $post->getCreatedTimestamp(),
+        ]));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function delete(ServerRequestInterface $request) : ResponseInterface
     {
         if (TINYIB_DBMIGRATE) {
@@ -219,13 +266,17 @@ class PostController implements PostControllerInterface
         $args = explode('/', $request->getUri()->getPath());
         $page = count($args) > 1 ? (int)$args[1] : 0;
         $key = TINYIB_BOARD . ':page:' . $page;
+        $headers = [];
         $data = $this->cache->get($key);
-        if (!isset($data)) {
+        if (isset($data)) {
+            $headers['X-Cached'] = 'true';
+        } else {
+            $headers['X-Cached'] = 'false';
             $data = $this->renderBoardPage($page);
             $this->cache->set($key, $data, 4 * 60 * 60);
         }
 
-        return new Response(200, [], $data);
+        return new Response(200, $headers, $data);
     }
 
     /**
@@ -236,12 +287,16 @@ class PostController implements PostControllerInterface
         $args = explode('/', $request->getUri()->getPath());
         $id = (int)$args[2];
         $key = TINYIB_BOARD . ':thread:' . $id;
+        $headers = [];
         $data = $this->cache->get($key);
-        if (!isset($data)) {
+        if (isset($data)) {
+            $headers['X-Cached'] = 'true';
+        } else {
+            $headers['X-Cached'] = 'false';
             $data = $this->renderThreadPage($id);
             $this->cache->set($key, $data, 4 * 60 * 60);
         }
 
-        return new Response(200, [], $data);
+        return new Response(200, $headers, $data);
     }
 }

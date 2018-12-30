@@ -52,12 +52,22 @@ class ExceptionMiddleware implements MiddlewareInterface
 				$message = $exception->getMessage();
 			}
 
+			if ($request->getHeaderLine('Accept') === 'application/json') {
+				$content = json_encode(['error' => $message]);
+				return new Response($code, ['Content-Type' => 'application/json'], $content);
+			}
+
 			$content = $this->renderer->render('error.twig', ['message' => "<pre>$code $message</pre>"]);
 			return new Response($code, [], $content);
 		}
 		catch (\Exception $exception) {
 			$message = Functions::formatException($exception);
 			$this->logger->critical($message);
+
+			if ($request->getHeaderLine('Accept') === 'application/json') {
+				$content = json_encode(['error' => $message]);
+				return new Response(500, ['Content-Type' => 'application/json'], $content);
+			}
 
 			$content = $this->renderer->render('error.twig', ['message' => "<pre>500: $message</pre>"]);
 			return new Response(500, [], $content);

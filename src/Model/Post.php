@@ -2,15 +2,9 @@
 
 namespace TinyIB\Model;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\{Collection, Model, SoftDeletes};
 use TinyIB\Functions;
-use VVatashi\BBCode\BBCodeDefinition;
-use VVatashi\BBCode\HtmlGenerator;
-use VVatashi\BBCode\Parser;
-use VVatashi\BBCode\Token;
-use VVatashi\BBCode\Tokenizer;
+use VVatashi\BBCode\{Parser, TagDef};
 
 /**
  * @property int $id
@@ -242,112 +236,6 @@ class Post extends Model
         }
     }
 
-    /**
-     * @param string $message
-     *
-     * @return string
-     */
-    protected static function wakabamark(string $message) : string
-    {
-        $patterns = [
-            '/\*\*(.*?)\*\*/si' => '[b]\\1[/b]',
-            '/\*(.*?)\*/si' => '[i]\\1[/i]',
-            '/~~(.*?)~~/si' => '[s]\\1[/s]',
-            '/%%(.*?)%%/si' => '[spoiler]\\1[/spoiler]',
-        ];
-
-        $tags = [
-            'b' => BBCodeDefinition::create('strong'),
-            'i' => BBCodeDefinition::create('em'),
-            's' => BBCodeDefinition::create('del'),
-            'spoiler' => BBCodeDefinition::create('span', 'class="spoiler"'),
-        ];
-
-        $tokenizer = new Tokenizer($tags);
-        $parser = new Parser($tags);
-        $generator = new HtmlGenerator($tags);
-
-        $message = preg_replace(array_keys($patterns), array_values($patterns), $message);
-        $tokens = $tokenizer->tokenize($message);
-        $nodes = $parser->parse($tokens);
-        return $generator->generate($nodes);
-    }
-
-    /**
-     * @param string $message
-     *
-     * @return string
-     */
-    protected static function bbcode(string $message) : string
-    {
-        $tags = [
-            'b' => BBCodeDefinition::create('strong'),
-            'i' => BBCodeDefinition::create('em'),
-            'u' => BBCodeDefinition::create('span', 'style="text-decoration: underline;"'),
-            's' => BBCodeDefinition::create('del'),
-            'color' => BBCodeDefinition::create('span', function ($attribute) {
-                $matches = [];
-                if (preg_match('/#[0-9a-f]{6}/i', $attribute, $matches)) {
-                    $color = $matches[0];
-                    return "style=\"color: $color;\"";
-                }
-
-                return '';
-            }),
-            'sup' => BBCodeDefinition::create('sup'),
-            'sub' => BBCodeDefinition::create('sub'),
-            'spoiler' => BBCodeDefinition::create('span', 'class="spoiler"'),
-            'rp' => BBCodeDefinition::create('span', 'class="rp"'),
-            'code' => BBCodeDefinition::create('code', 'style="white-space: pre;"', false),
-        ];
-
-        $tokenizer = new Tokenizer($tags);
-        $parser = new Parser($tags);
-        $generator = new HtmlGenerator($tags);
-
-        $tokens = $tokenizer->tokenize($message);
-
-        // Process wakabamark.
-        $tags = [];
-        $is_code = false;
-        $count = count($tokens);
-        for ($i = 0; $i < $count; ++$i) {
-            /** @var \VVatashi\BBCode\Token $token */
-            $token = $tokens[$i];
-            $type = $token->getType();
-            switch ($type) {
-                case Token::TEXT:
-                    if (!$is_code) {
-                        $text = $token->getText();
-                        $text = static::wakabamark($text);
-                        $tokens[$i] = Token::text($text);
-                    }
-                    break;
-
-                case Token::OPENING_TAG:
-                    $text = $token->getText();
-                    $tags[] = $text;
-                    if ($text === 'code') {
-                        $is_code = true;
-                    }
-                    break;
-
-                case Token::CLOSING_TAG:
-                    if (!empty($tags)) {
-                        array_pop($tags);
-                        $text = $token->getText();
-                        if ($text === 'code') {
-                            $is_code = array_search('code', $tags, true) !== false;
-                        }
-                    }
-                    break;
-            }
-        }
-
-        $nodes = $parser->parse($tokens);
-        return $generator->generate($nodes);
-    }
-
     protected static function fixLinks(string $message) : string
     {
         $link_pattern = '#href="/' . TINYIB_BOARD . '/res/(\d+)\#(\d+)"#';
@@ -363,14 +251,55 @@ class Post extends Model
 
     public function getMessageFormatted() : string
     {
-        // Process post message.
-        try {
-            $message = static::bbcode($this->message);
-        }
-        catch (\Exception $e) {
-            // TODO: log error.
-            $message = $this->message;
-        }
+        // Convert Wakabamark to BBCodes.
+        $patterns = [
+            '/\*\*(.*?)\*\*/si' => '[b]\\1[/b]',
+            '/\*(.*?)\*/si' => '[i]\\1[/i]',
+            '/~~(.*?)~~/si' => '[s]\\1[/s]',
+            '/%%(.*?)%%/si' => '[spoiler]\\1[/spoiler]',
+        ];
+
+        $flags = PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE;
+        $rawContentPattern = '/(\[code\].+?\[\/code\])/';
+        $segments = preg_split($rawContentPattern, $this->message, -1, $flags);
+        $segments = array_map(function ($segment) use ($patterns, $rawContentPattern) {
+            $matches = [];
+            if (!preg_match($rawContentPattern, $segment, $matches)) {
+                return preg_replace(array_keys($patterns), array_values($patterns), $segment);
+            } else {
+                // Not replace Wakabamark in raw content tags.
+                return $segment;
+            }
+        }, $segments);
+        $message = implode('', $segments);
+
+        // Process BBCodes.
+        $parser = new Parser([
+            new TagDef('b', ['outputFormat' => '<strong>{content}</strong>']),
+            new TagDef('i', ['outputFormat' => '<em>{content}</em>']),
+            new TagDef('u', ['outputFormat' => '<span class="markup__underline">{content}</span>']),
+            new TagDef('s', ['outputFormat' => '<del>{content}</del>']),
+            new TagDef('sub'),
+            new TagDef('sup'),
+            new TagDef('code', [
+                'outputFormat' => '<code>{content}</code>',
+                'rawContent' => true,
+            ]),
+            new TagDef('spoiler', ['outputFormat' => '<span class="markup__spoiler">{content}</span>']),
+            new TagDef('rp',      ['outputFormat' => '<span class="markup__rp">{content}</span>']),
+            new TagDef('color', [
+                'attributePattern' =>
+'/
+    #
+    (?:
+        [0-9a-f]{3}
+    ){1,2}
+/x',
+                'outputFormat' => '<span style="color: {attribute};">{content}</span>',
+            ]),
+            new TagDef('quote', ['outputFormat' => '<span class="markup__quote">{content}</span>']),
+        ]);
+        $message = $parser->parse($message);
 
         return static::fixLinks($message);
     }

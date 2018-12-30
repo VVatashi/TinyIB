@@ -6,6 +6,7 @@
     @include clearfix;
   }
 
+  &__header-mobile,
   &__header {
     color: $post-header-color;
     padding: $post-header-padding;
@@ -23,12 +24,40 @@
   }
 
   &__file-info {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+
+    color: #ffffff;
     font-size: 0.8em;
+    font-weight: bold;
+    text-shadow: 0.1em 0 #000000, 0 0.1em #000000, -0.1em 0 #000000, 0 -0.1em #000000;
+
+    pointer-events: none;
+
+    & > a {
+      color: inherit;
+      pointer-events: initial;
+    }
+
+    & > .de-btn-src {
+      pointer-events: initial;
+    }
   }
 
   &__file {
+    position: relative;
     margin: $post-file-margin;
   }
+
+  // TODO: another way to remove empty line.
+  /*&__message {
+    br:first-child {
+      display: none;
+    }
+  }*/
 
   &__reference-link-author {
     font-size: 0.8em;
@@ -55,8 +84,6 @@
   &_reply &__inner {
     box-sizing: border-box;
     background: $post-background;
-    border: $post-border;
-    border-radius: $post-border-radius;
   }
 
   @include breakpoint($xs-up) {
@@ -69,12 +96,22 @@
       max-width: 100%;
     }
 
-    &_reply &__inner {
-      min-width: 560px;
+    &__header {
+      border-bottom: $post-header-border;
     }
 
     &__file {
       float: left;
+    }
+
+    &__file:hover &__file-info {
+      display: inline-block;
+    }
+
+    &_reply &__inner {
+      min-width: 560px;
+      border: $post-border;
+      border-radius: $post-border-radius;
     }
   }
 }

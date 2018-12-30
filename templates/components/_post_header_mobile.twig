@@ -1,0 +1,52 @@
+<div class="{{ class is defined ? class ~ ' ' }}post-header-mobile">
+  <div class="post-header-mobile__row">
+    {% if post.subject %}
+      <span class="post-header-mobile__subject">{{ post.subject }}</span>
+    {% endif %}
+  </div>
+
+  <div class="post-header-mobile__row">
+    {% if post.name %}
+        <span class="post-header-mobile__name">{{ post.name }}</span>
+    {% elseif not post.tripcode %}
+        <span class="post-header-mobile__name">Anonymous</span>
+    {% else %}
+        <span class="post-header-mobile__name"></span>
+    {% endif %}
+
+    {% if post.tripcode %}
+        <span class="post-header-mobile__tripcode">!{{ post.tripcode }}</span>
+    {% endif %}
+
+    {% set reflink = base_url ~ '/res/' ~ post.parent_id ~ '#q' ~ post.id %}
+    {% set replylink = base_url ~ '/res/' ~ post.id %}
+
+    <span class="post-header-mobile__reflink-wrapper">
+      №<a class="post-header-mobile__reflink" href="{{ reflink }}" data-reflink="{{ post.id }}">
+        {{- post.id -}}
+      </a>
+
+      {% if post.isStickied %}
+        <img src="{{ base_url }}/images/sticky.png" alt="Stickied" title="Stickied" width="16" height="16" />
+      {% endif %}
+
+      {% if post.isThread() and res == constant('TINYIB_INDEXPAGE') %}
+        <span class="post-header-mobile__reply-wrapper">
+          <a class="post-header-mobile__reply-link" href="{{ replylink }}">Reply</a>
+        </span>
+      {% endif %}
+    </span>
+  </div>
+
+  {% set date_iso = post.createdTimestamp|date('c') %}
+
+  <div class="post-header-mobile__row">
+    <time class="post-header-mobile__datetime" datetime="{{ date_iso }}">
+      {{ post.createdTimestamp|date('j.m.Y H:i:s') }}
+    </time>
+
+    {% if post.fileType %}
+      {% include 'components/_file_info.twig' with {'class': 'post-header-mobile__file-info'} %}
+    {% endif %}
+  </div>
+</div>

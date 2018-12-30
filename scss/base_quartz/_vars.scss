@@ -40,13 +40,19 @@ $post-content-color:   $block-content-color !default;
 $post-omitted-color:   $color !default;
 $post-border:          $block-border !default;
 $post-border-radius:   $block-border-radius !default;
+$post-header-border:   1px solid #f1f1f1 !default;
 $post-header-padding:  $block-header-padding !default;
 $post-content-padding: $block-content-padding !default;
 $post-file-margin:     0 0.5em 0 0 !default;
 $post-margin:          0 0 10px !default;
 $post-align-left:      true !default;
 
-$form-background: $block-background !default;
+$form-background:    $block-background !default;
+$form-border:        $block-border !default;
+$form-border-radius: $block-border-radius !default;
+
+$submit-background: $color !default;
+$submit-color:      $background !default;
 
 $post-subject-color:  #002244 !default;
 $post-name-color:     $color !default;

@@ -74,7 +74,7 @@ $post-bottom-color: mix(#000, $post-color, 20%);
     margin-right: 0.5em;
   }
 
-  @include breakpoint($phone-up) {
+  @include breakpoint($xs-up) {
     &__subject,
     &__author,
     &__date,

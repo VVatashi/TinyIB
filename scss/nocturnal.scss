@@ -1,4 +1,40 @@
 @import 'vendor/index';
-@import 'nocturnal/vars';
+
+$background: #1d1e2a;
+$color:      #cccccc;
+$font:       13px 'open sans', sans-serif;
+$padding:    1em;
+
+$link-color:       #a88085;
+$link-hover-color: #74857c;
+
+$link-hover-decoration: none;
+
+$line-border: 0;
+
+$input-background:    transparent;
+$input-color:         #cccccc;
+$input-border:        default;
+$input-border-radius: 0;
+$input-padding:       0.5em 0.5em;
+
+$btn-hover-background: $input-background;
+
+$block-background:    #14151f;
+$block-border:        0;
+$block-border-radius: 0;
+
+$post-omitted-color:   $link-color;
+$post-header-border:   0;
+$post-header-padding:  10px 10px 0px;
+$post-content-padding: 10px;
+$post-file-margin:     0 5px 5px;
+$post-margin:          0 0 10px 0;
+$post-align-left:      false;
+
+$post-subject-color:  #cc1105;
+$post-name-color:     #117743;
+$post-tripcode-color: #228854;
+
 @import 'base_quartz/index';
 @import 'nocturnal/index';

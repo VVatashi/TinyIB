@@ -62,7 +62,6 @@ define('TINYIB_RECAPTCHA_THRESHOLD', 0.5);
 
 define('TINYIB_DBMIGRATE', false);
 define('TINYIB_DBBANS', 'bans');
-define('TINYIB_DBCACHE', TINYIB_BOARD . '_cache');
 define('TINYIB_DBPOSTS', TINYIB_BOARD . '_posts');
 
 define('TINYIB_DBHOST', 'localhost');
@@ -72,9 +71,8 @@ define('TINYIB_DBPASSWORD', '');
 define('TINYIB_DBNAME', ':memory:');
 
 define('TINYIB_DBDRIVER', 'sqlite');
-define('TINYIB_DBDSN', '');
 
-define('TINYIB_CACHE', 'redis');
+define('TINYIB_CACHE', '');
 define('TINYIB_CACHE_REDIS_HOST', 'unix:/var/run/redis/redis.sock');
 
 define('TINYIB_GTM', '');
