@@ -2,13 +2,9 @@
 
 namespace TinyIB\Service;
 
-use TinyIB\AccessDeniedException;
+use TinyIB\{AccessDeniedException, Functions, NotFoundException, ValidationException};
 use TinyIB\Cache\CacheInterface;
-use TinyIB\Functions;
-use TinyIB\Model\Ban;
-use TinyIB\Model\Post;
-use TinyIB\NotFoundException;
-use TinyIB\ValidationException;
+use TinyIB\Model\{Ban, Post};
 
 class PostService implements PostServiceInterface
 {
@@ -174,24 +170,27 @@ class PostService implements PostServiceInterface
             $message .= "\n";
         }
 
-        return preg_replace('/^(&gt;[^\>](.*))\n/m', '<span class="unkfunc">\\1</span>' . "\n", $message);
+        return preg_replace('/^(&gt;[^\>](.*))\n/m', "[quote]$1[/quote]\n", $message);
     }
 
     /**
      * Processes links.
      *
-     * @param string $text
+     * @param string $message
      *
      * @return string
      */
-    protected function makeLinksClickable(string $text) : string
+    protected function makeLinksClickable(string $message) : string
     {
-        $text = preg_replace('!(((f|ht)tp(s)?://)[-a-zA-Zа-яА-Я()0-9@:%\!_+.,~#?&;//=]+)!i', '<a href="$1" target="_blank">$1</a>', $text);
-        $text = preg_replace('/\(\<a href\=\"(.*)\)"\ target\=\"\_blank\">(.*)\)\<\/a>/i', '(<a href="$1" target="_blank">$2</a>)', $text);
-        $text = preg_replace('/\<a href\=\"(.*)\."\ target\=\"\_blank\">(.*)\.\<\/a>/i', '<a href="$1" target="_blank">$2</a>.', $text);
-        $text = preg_replace('/\<a href\=\"(.*)\,"\ target\=\"\_blank\">(.*)\,\<\/a>/i', '<a href="$1" target="_blank">$2</a>,', $text);
+        $url_pattern =
+'/
+    https?:\/\/
+    [-a-zA-Z0-9@:%._\+~#=]{2,}
+    \.[a-z]{2,}\b
+    [-a-zA-Z0-9@:%_\+.~#?&\/=]*
+/x';
 
-        return $text;
+        return preg_replace($url_pattern, '<a href="$0">$0</a>', $message);
     }
 
     /**
@@ -219,7 +218,7 @@ class PostService implements PostServiceInterface
 
             $info = implode(', ', $results);
 
-            return "<span class=\"dice\" title=\"$info\">##${count}d$max## = $sum</span>";
+            return "<span class=\"dice\">##${count}d$max## = $info ($sum)</span>";
         }, $message);
     }
 

@@ -11,7 +11,7 @@ interface CacheInterface
      *
      * @return bool Is value stored.
      */
-    public function exists($key);
+    public function exists(string $key) : bool;
 
     /**
      * Returns the specified key.
@@ -20,7 +20,7 @@ interface CacheInterface
      *
      * @return string|null Stored value.
      */
-    public function get($key);
+    public function get(string $key);
 
     /**
      * @param string $key
@@ -29,16 +29,16 @@ interface CacheInterface
      *
      * @return string Stored value.
      */
-    public function set($key, $value, $expire = null);
+    public function set(string $key, string $value, $expire = null) : string;
 
     /**
      * Deletes the specified key.
      *
      * @param string $key
      *
-     * @return string
+     * @return string|null Value of deleted key.
      */
-    public function delete($key);
+    public function delete(string $key);
 
     /**
      * Deletes the keys that matches the specified pattern.
@@ -47,5 +47,5 @@ interface CacheInterface
      *
      * @return int Deleted count.
      */
-    public function deletePattern($pattern);
+    public function deletePattern(string $pattern) : int;
 }

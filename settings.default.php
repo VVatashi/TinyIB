@@ -91,7 +91,6 @@ define('TINYIB_RECAPTCHA_THRESHOLD', 0.5);
 // Database
 define('TINYIB_DBMIGRATE', false);    // Enable database migration tool  (see README for instructions)
 define('TINYIB_DBBANS', 'bans');      // Bans table name (use the same bans table across boards for global bans)
-define('TINYIB_DBCACHE', TINYIB_BOARD . '_cache'); // Cache table name
 define('TINYIB_DBPOSTS', TINYIB_BOARD . '_posts'); // Posts table name
 
 // Database configuration - MySQL
@@ -103,17 +102,18 @@ define('TINYIB_DBNAME', '');          // Database
 
 // Database configuration - PDO
 define('TINYIB_DBDRIVER', 'mysql');   // PDO driver to use (mysql / sqlite / pgsql / etc.)
-define('TINYIB_DBDSN', '');           // Enter a custom DSN to override all of the connection/driver settings above  (see README for instructions)
-//                                         When changing this, you should still set TINYIB_DBDRIVER appropriately.
-//                                         If you're using PDO with a MySQL database, you should leave this blank.
 
-// Cache.
+// Cache
+
 // TINYIB_CACHE possible values:
-//   memory - For tests only. Not stores anything between requests actually.
-//   database - Default. Uses cache table in the database.
-//   redis - Preferred if possible.
-define('TINYIB_CACHE', 'database');
-define('TINYIB_CACHE_REDIS_HOST', 'unix:/var/run/redis/redis.sock'); // Redis host.
+//   ''      - no caching.
+//   'redis' - use redis for cache.
+define('TINYIB_CACHE', '');
+
+// Redis cache host.
+define('TINYIB_CACHE_REDIS_HOST', 'unix:/var/run/redis/redis.sock');
+
+// Google Tag Manager
 
 define('TINYIB_GTM', '');
 define('TINYIB_GTM_AMP', '');
