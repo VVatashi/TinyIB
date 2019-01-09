@@ -1,5 +1,6 @@
-import PostModule from '../PostModule';
-import { qs, qsa } from '../../utils/DOM';
+import Vue from 'vue';
+import { eventBus, Events } from '../..';
+import { DOM } from '../../utils';
 
 interface ViewModel {
   module: ThreadUpdater;
@@ -11,16 +12,27 @@ interface ViewModel {
   onTick(): void;
 };
 
-export default class ThreadUpdater extends PostModule {
+export class ThreadUpdater {
   protected viewModel: ViewModel = null;
   protected interval = 10;
   protected latestPostId = 0;
   protected isUpdating = false;
 
-  onReady() {
-    super.onReady();
+  constructor() {
+    eventBus.$on(Events.Ready, this.onReady.bind(this));
+    eventBus.$on(Events.PostsInserted, (posts: Element[]) =>
+      posts.forEach(this.onPostInsert.bind(this)));
+    eventBus.$on(Events.PostCreated, () => {
+      const isAuto = this.viewModel.isAuto;
+      this.viewModel.isAuto = false;
+      this.viewModel.counter = this.interval;
+      this.updateThread();
+      this.viewModel.isAuto = isAuto;
+    });
+  }
 
-    const thread = qs('.thread');
+  onReady() {
+    const thread = DOM.qs('.thread');
     if (!thread) {
       return;
     }
@@ -31,7 +43,12 @@ export default class ThreadUpdater extends PostModule {
       return;
     }
 
-    this.viewModel = new window.Vue({
+    const posts = DOM.qsa('.post');
+    if (posts.length > 0) {
+      eventBus.$emit(Events.PostsInserted, posts);
+    }
+
+    this.viewModel = new Vue({
       el: '#thread-updater',
       template: `
 <div class="thread-updater thread__updater">
@@ -80,17 +97,7 @@ export default class ThreadUpdater extends PostModule {
     });
   }
 
-  onEvent(event: string) {
-    if (event === 'updateThread') {
-      const isAuto = this.viewModel.isAuto;
-      this.viewModel.isAuto = false;
-      this.viewModel.counter = this.interval;
-      this.updateThread();
-      this.viewModel.isAuto = isAuto;
-    }
-  }
-
-  protected processPost(post: Element) {
+  protected onPostInsert(post: Element) {
     const id = +post.getAttribute('data-post-id');
     this.latestPostId = Math.max(this.latestPostId, id);
   }
@@ -100,14 +107,14 @@ export default class ThreadUpdater extends PostModule {
       return;
     }
 
-    const thread = qs('.thread');
+    const thread = DOM.qs('.thread');
     if (!thread) {
       return;
     }
 
     this.isUpdating = true;
 
-    const postsWrapper = qs('.thread__posts', thread);
+    const postsWrapper = DOM.qs('.thread__posts', thread);
     if (postsWrapper) {
       const threadId = +thread.getAttribute('data-thread-id');
       const latestPostId = this.latestPostId;
@@ -118,7 +125,7 @@ export default class ThreadUpdater extends PostModule {
         const data = await response.text();
         postsWrapper.insertAdjacentHTML('beforeend', data);
 
-        const newPosts = qsa('.post', postsWrapper)
+        const newPosts = DOM.qsa('.post', postsWrapper)
           .filter(post => {
             const id = +post.getAttribute('data-post-id');
             return id > latestPostId;
@@ -130,10 +137,10 @@ export default class ThreadUpdater extends PostModule {
           newPosts.forEach(post => post.classList.remove('fade'));
         }, 100);
 
-        this.manager.insertPosts(newPosts);
+        eventBus.$emit(Events.PostsInserted, newPosts);
 
         // Remove old posts.
-        const posts = qsa('.thread__post', postsWrapper);
+        const posts = DOM.qsa('.thread__post', postsWrapper);
         for (let i = 0; i < posts.length - 50; ++i) {
           posts[i].remove();
         }

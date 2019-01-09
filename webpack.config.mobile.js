@@ -2,7 +2,8 @@ const path = require('path');
 
 module.exports = {
   entry: './ts/mobile.ts',
-  mode: 'production',
+  mode: 'development',
+  devtool: 'inline-source-map',
   module: {
     rules: [{
       test: /\.ts$/,
@@ -11,11 +12,12 @@ module.exports = {
     }],
   },
   externals: {
-    axios: 'axios',
-    luxon: 'luxon',
+    'axios': 'axios',
+    'luxon': 'luxon',
+    'vue': 'Vue',
   },
   resolve: {
-    extensions: ['.ts'],
+    extensions: ['.js', '.ts'],
   },
   output: {
     filename: './mobile.js',

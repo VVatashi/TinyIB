@@ -1,8 +1,7 @@
-import PostModule from '../PostModule';
-import ModuleManager from '../../ModuleManager';
-import { qs } from '../../utils/DOM';
+import { eventBus, Events } from '../..';
+import { DOM } from '../../utils';
 
-export default class PostImagePopup extends PostModule {
+export class PostImagePopup {
   protected scale = 1.0;
 
   protected offsetX = 0;
@@ -14,25 +13,20 @@ export default class PostImagePopup extends PostModule {
   protected dragStartMouseX = 0;
   protected dragStartMouseY = 0;
 
-  constructor(manager: ModuleManager) {
-    super(manager);
+  constructor() {
+    eventBus.$on(Events.PostsInserted, (posts: Element[]) =>
+      posts.forEach(this.onPostInsert.bind(this)));
   }
 
-  protected closeModal(modal: HTMLElement) {
-    this.scale = 1.0;
-    this.offsetX = 0;
-    this.offsetY = 0;
-
-    // Fade-out the modal.
-    modal.classList.add('fade');
-    setTimeout(() => {
-      modal.remove();
-    }, 333);
-  }
-
-  protected transformModal(modal: HTMLElement) {
-    const image = qs('.modal__image', modal) as HTMLElement;
-    image.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
+  protected onPostInsert(post: Element) {
+    const thumbnailLink = DOM.qs('.post__thumbnail-link', post) as HTMLAnchorElement;
+    if (thumbnailLink) {
+      thumbnailLink.addEventListener('click', e => {
+        e.preventDefault();
+        this.openModal(thumbnailLink);
+        return false;
+      });
+    }
   }
 
   protected openModal(thumbnailLink: HTMLAnchorElement) {
@@ -158,14 +152,20 @@ export default class PostImagePopup extends PostModule {
     }, 100);
   }
 
-  protected processPost(post: Element) {
-    const thumbnailLink = qs('.post__thumbnail-link', post) as HTMLAnchorElement;
-    if (thumbnailLink) {
-      thumbnailLink.addEventListener('click', e => {
-        e.preventDefault();
-        this.openModal(thumbnailLink);
-        return false;
-      });
-    }
+  protected transformModal(modal: HTMLElement) {
+    const image = DOM.qs('.modal__image', modal) as HTMLElement;
+    image.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
+  }
+
+  protected closeModal(modal: HTMLElement) {
+    this.scale = 1.0;
+    this.offsetX = 0;
+    this.offsetY = 0;
+
+    // Fade-out the modal.
+    modal.classList.add('fade');
+    setTimeout(() => {
+      modal.remove();
+    }, 333);
   }
 }

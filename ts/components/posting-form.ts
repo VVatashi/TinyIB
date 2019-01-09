@@ -1,5 +1,5 @@
-import { Event } from '../Event';
-import { qs, qsa } from '../utils/DOM';
+import { eventBus, Events } from '..';
+import { DOM } from '../utils';
 
 export class PostingForm {
   protected isInThread: boolean = false;
@@ -22,40 +22,33 @@ export class PostingForm {
   protected close: HTMLButtonElement;
   protected previewRemove: HTMLButtonElement;
 
-  dispatchEvent(event: Event, data: any) {
-    switch (event) {
-      case Event.Ready:
-        this.onReady();
-        break;
-
-      case Event.PostsInserted:
-        this.onPostsInserted(data.posts);
-        break;
-    }
+  constructor() {
+    eventBus.$on(Events.Ready, this.onReady.bind(this));
+    eventBus.$on(Events.PostsInserted, this.onPostsInserted.bind(this));
   }
 
   protected onReady() {
-    this.wrapper = qs('#posting-form-wrapper') as HTMLElement;
+    this.wrapper = DOM.qs('#posting-form-wrapper') as HTMLElement;
     if (!this.wrapper) {
       return;
     }
 
-    this.form = qs('#posting-form', this.wrapper) as HTMLFormElement;
+    this.form = DOM.qs('#posting-form', this.wrapper) as HTMLFormElement;
 
-    const parent = qs('[name="parent"]', this.form) as HTMLInputElement;
+    const parent = DOM.qs('[name="parent"]', this.form) as HTMLInputElement;
     this.isInThread = +parent.value !== 0;
 
-    this.subject = qs('[name="subject"]', this.form) as HTMLInputElement;
-    this.name = qs('[name="name"]', this.form) as HTMLInputElement;
-    this.fileInput = qs('[name="file"]', this.form) as HTMLInputElement;
-    this.message = qs('[name="message"]', this.form) as HTMLTextAreaElement;
+    this.subject = DOM.qs('[name="subject"]', this.form) as HTMLInputElement;
+    this.name = DOM.qs('[name="name"]', this.form) as HTMLInputElement;
+    this.fileInput = DOM.qs('[name="file"]', this.form) as HTMLInputElement;
+    this.message = DOM.qs('[name="message"]', this.form) as HTMLTextAreaElement;
 
-    this.status = qs('#posting-form-status', this.form) as HTMLElement;
-    this.preview = qs('#posting-form-preview', this.form) as HTMLElement;
+    this.status = DOM.qs('#posting-form-status', this.form) as HTMLElement;
+    this.preview = DOM.qs('#posting-form-preview', this.form) as HTMLElement;
 
-    this.submit = qs('[type="submit"]', this.form) as HTMLButtonElement;
-    this.close = qs('#posting-form-close', this.form) as HTMLButtonElement;
-    this.previewRemove = qs('#posting-form-preview-remove', this.form) as HTMLButtonElement;
+    this.submit = DOM.qs('[type="submit"]', this.form) as HTMLButtonElement;
+    this.close = DOM.qs('#posting-form-close', this.form) as HTMLButtonElement;
+    this.previewRemove = DOM.qs('#posting-form-preview-remove', this.form) as HTMLButtonElement;
 
     // Load saved name.
     const name = localStorage['posting-form.name'];
@@ -125,7 +118,7 @@ export class PostingForm {
 
   protected onPostsInserted(posts: HTMLElement[]) {
     posts.forEach(post => {
-      const referenceLinks = qsa('a[data-reflink]', post);
+      const referenceLinks = DOM.qsa('a[data-reflink]', post);
       referenceLinks.forEach(link => {
         const id = +link.getAttribute('data-reflink');
         link.addEventListener('click', e => {
@@ -180,7 +173,7 @@ export class PostingForm {
 
         if (this.isInThread) {
           // Trigger DE thread update.
-          const update = qs('.de-thr-updater-link') as HTMLAnchorElement;
+          const update = DOM.qs('.de-thr-updater-link') as HTMLAnchorElement;
           if (update) {
             update.click();
           }
@@ -266,7 +259,7 @@ export class PostingForm {
   protected showPreview(file: File) {
     const reader = new FileReader();
     reader.addEventListener('load', e => {
-      let image = qs('#posting-form-preview-image', this.preview) as HTMLImageElement;
+      let image = DOM.qs('#posting-form-preview-image', this.preview) as HTMLImageElement;
       if (!image) {
         image = document.createElement('img');
         image.id = 'posting-form-preview-image';

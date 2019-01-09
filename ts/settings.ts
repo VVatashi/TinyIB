@@ -1,4 +1,4 @@
-export default interface ISettingsDto {
+export interface ISettingsDto {
   form_preview_align?: string;
   time_locale?: string;
   time_locale_custom_value?: string;

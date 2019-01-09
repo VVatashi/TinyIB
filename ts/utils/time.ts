@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
-import ISettingsDto from '../ISettingsDto';
+import { ISettingsDto } from '..';
 
-export default class Time {
+export class Time {
   static format(time: DateTime, settings: ISettingsDto) {
     const locale = settings.time_locale;
     const locale_value = settings.time_locale_custom_value;
