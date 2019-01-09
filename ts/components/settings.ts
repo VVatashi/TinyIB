@@ -1,144 +1,172 @@
 import { DateTime } from 'luxon';
-import { eventBus, Events, ISettingsDto } from '..';
+import Vue from 'vue';
+import { eventBus, Events, SettingsInterface } from '..';
 import { Cookie, DOM, Time } from '../utils';
 
 export class Settings {
-  protected readonly settings: ISettingsDto;
+  protected readonly settings: SettingsInterface;
+  protected viewModel: Vue;
 
   constructor() {
-    // Load settings from a cookie
-    this.settings = JSON.parse(Cookie.get('tinyib_settings', '{}'));
     eventBus.$on(Events.Ready, this.onReady.bind(this));
   }
 
   onReady() {
-    const settings_form = DOM.qid('settings_form');
-    if (!settings_form) {
+    const settingsForm = DOM.qid('settings_form');
+    if (!settingsForm) {
       return;
     }
 
-    const status = DOM.qid('status');
-    const time_locale_custom = DOM.qid('time_locale_custom') as HTMLInputElement;
-    const time_locale_custom_value = DOM.qid('time_locale_custom_value') as HTMLInputElement;
-    const time_format_custom = DOM.qid('time_format_custom') as HTMLInputElement;
-    const time_format_custom_value = DOM.qid('time_format_custom_value') as HTMLInputElement;
-    const time_zone_fixed = DOM.qid('time_zone_fixed') as HTMLInputElement;
-    const time_zone_fixed_offset = DOM.qid('time_zone_fixed_offset') as HTMLInputElement;
-    const time_current_format = DOM.qid('time_current_format') as HTMLElement;
+    this.viewModel = new Vue({
+      el: '#settings_form',
+      template: `
+<div class="content__settings-form settings-form" id="settings_form">
+  <h3 class="settings-form__section-title">Form settings</h3>
+  <fieldset class="settings-form__section">
+    <legend class="settings-form__section-title">File preview</legend>
 
-    // Set the initial settings form state
-    if (this.settings.form_preview_align) {
-      const element = DOM.qs(`input[name="form_preview_align"][value="${this.settings.form_preview_align}"]`) as HTMLInputElement;
+    <p class="settings-form__row">
+      <input class="settings-form__radio" type="radio" id="form_preview_align_right" name="form_preview_align"
+        value="right" v-model="settings.formPreviewAlign" />
 
-      if (element) {
-        element.checked = true;
-      }
-    }
+      <label class="settings-form__label" for="form_preview_align_right">On the right</label>
+    </p>
 
-    if (this.settings.time_locale) {
-      const element = DOM.qs(`input[name="time_locale"][value="${this.settings.time_locale}"]`) as HTMLInputElement;
+    <p class="settings-form__row">
+      <input class="settings-form__radio" type="radio" id="form_preview_align_left" name="form_preview_align"
+        value="left" v-model="settings.formPreviewAlign" />
 
-      if (element) {
-        element.checked = true;
-      }
-    }
+      <label class="settings-form__label" for="form_preview_align_left">On the left</label>
+    </p>
+  </fieldset>
 
-    if (this.settings.time_format) {
-      const element = DOM.qs(`input[name="time_format"][value="${this.settings.time_format}"]`) as HTMLInputElement;
+  <h3 class="settings-form__section-title">Time settings</h3>
+  <fieldset class="settings-form__section">
+    <legend class="settings-form__section-title">Language</legend>
 
-      if (element) {
-        element.checked = true;
-      }
-    }
+    <p class="settings-form__row">
+      <input class="settings-form__radio" type="radio" id="time_locale_default" name="time_locale"
+        value="default" v-model="settings.timeLocale" />
+      <label class="settings-form__label" for="time_locale_default">Browser default</label>
+    </p>
 
-    if (this.settings.time_zone) {
-      const element = DOM.qs(`input[name="time_zone"][value="${this.settings.time_zone}"]`) as HTMLInputElement;
+    <p class="settings-form__row">
+      <input class="settings-form__radio" type="radio" id="time_locale_custom" name="time_locale"
+        value="custom" v-model="settings.timeLocale" />
+      <label class="settings-form__label" for="time_locale_custom">Custom</label>
 
-      if (element) {
-        element.checked = true;
-      }
-    }
+      <input class="input settings-form__text" type="text" v-on:click="settings.timeLocale = 'custom'"
+        v-model="settings.timeLocaleCustomValue" placeholder="en" />
+    </p>
+  </fieldset>
 
-    time_locale_custom_value.value = this.settings.time_locale_custom_value || '';
-    time_format_custom_value.value = this.settings.time_format_custom_value || '';
-    time_zone_fixed_offset.value = (this.settings.time_zone_fixed_offset || 0).toString();
+  <fieldset class="settings-form__section">
+    <legend class="settings-form__section-title">Format</legend>
 
-    // Check a radio button on a corresponding text field click
-    if (time_locale_custom && time_locale_custom_value) {
-      time_locale_custom_value.addEventListener('click', (e) => {
-        time_locale_custom.checked = true;
-      });
-    }
+    <p class="settings-form__row">
+      <input class="settings-form__radio" type="radio" id="time_format_default" name="time_format"
+        value="default" v-model="settings.timeFormat" />
 
-    if (time_format_custom && time_format_custom_value) {
-      time_format_custom_value.addEventListener('click', (e) => {
-        time_format_custom.checked = true;
-      });
-    }
+      <label class="settings-form__label" for="time_format_default">Browser default</label>
+    </p>
 
-    if (time_zone_fixed && time_zone_fixed_offset) {
-      time_zone_fixed_offset.addEventListener('click', (e) => {
-        time_zone_fixed.checked = true;
-      });
-    }
+    <p class="settings-form__row">
+      <input class="settings-form__radio" type="radio" id="time_format_custom" name="time_format"
+        value="custom" v-model="settings.timeFormat" />
 
-    // Save the settings form state in a cookie
-    settings_form.addEventListener('submit', (e) => {
-      e.preventDefault();
+      <label class="settings-form__label" for="time_format_custom">Custom</label>
 
-      const expiration_date = new Date();
-      expiration_date.setTime(expiration_date.getTime() + 365 * 24 * 60 * 60 * 1000);
+      <input class="input settings-form__text" type="text" v-on:click="settings.timeFormat = 'custom'"
+        v-model="settings.timeFormatCustomValue" placeholder="EEE, dd MMM yyyy HH:mm:ss" />
+    </p>
 
-      const settings = this.getFormValues();
-      Cookie.set('tinyib_settings', JSON.stringify(settings), expiration_date);
+    <p>See the <a href="https://github.com/moment/luxon/blob/master/docs/formatting.md#table-of-tokens">luxon documentation</a> for the custom tokens reference.</p>
+  </fieldset>
 
-      // Indicate that settings are saved
-      if (status) {
-        status.innerHTML = '';
+  <fieldset class="settings-form__section">
+    <legend class="settings-form__section-title">Time zone</legend>
 
-        setTimeout(() => {
-          status.innerHTML = 'Settings saved.';
-        }, 1000 / 3);
-      }
+    <p class="settings-form__row">
+      <input class="settings-form__radio" type="radio" id="time_zone_default" name="time_zone"
+        value="default" v-model="settings.timeZone" />
 
-      return false;
+      <label class="settings-form__label" for="time_zone_default">Browser default</label>
+    </p>
+
+    <p class="settings-form__row">
+      <input class="settings-form__radio" type="radio" id="time_zone_fixed" name="time_zone"
+        value="fixed" v-model="settings.timeZone" />
+
+      <label class="settings-form__label" for="time_zone_fixed">Fixed UTC offset</label>
+
+      <input class="input settings-form__text" type="number" v-on:click="settings.timeZone = 'fixed'"
+        v-model="settings.timeZoneFixedOffset" min="-99" max="99" />
+    </p>
+  </fieldset>
+
+  <fieldset class="settings-form__section">
+    <legend class="settings-form__section-title">Current format</legend>
+
+    <p class="settings-form__row">{{ time }}</p>
+  </fieldset>
+
+  <p class="settings-form__status" id="status">{{ status }}</p>
+
+  <p class="settings-form__buttons">
+    <button class="button settings-form__save" type="button"
+      v-on:click.prevent="saveSettings()">Save</button>
+  </p>
+</div>`,
+      data() {
+        return {
+          settings: {
+            formPreviewAlign: 'right',
+            timeLocale: 'default',
+            timeLocaleCustomValue: '',
+            timeFormat: 'default',
+            timeFormatCustomValue: '',
+            timeZone: 'default',
+            timeZoneFixedOffset: 0,
+          },
+          time: '',
+          status: '',
+        };
+      },
+      created() {
+        // Load settings from a cookie
+        const settingsStr = Cookie.get('settings', '{}');
+        const settings = JSON.parse(settingsStr);
+        this.settings = { ...this.settings, ...settings };
+        this._timer = setInterval(this.updateTime.bind(this), 1000);
+      },
+      destroyed() {
+        if (this._timer) {
+          clearInterval(this._timer);
+        }
+      },
+      methods: {
+        updateTime() {
+          try {
+            const time = DateTime.fromJSDate(new Date());
+            this.time = Time.format(time, this.settings);
+          }
+          catch {
+            this.time = 'Invalid format';
+          }
+        },
+        saveSettings() {
+          const expire = new Date();
+          // One year.
+          expire.setTime(expire.getTime() + 365 * 24 * 60 * 60 * 1000);
+          Cookie.set('settings', JSON.stringify(this.settings), expire);
+
+          // Indicate that settings are saved.
+          this.status = '';
+          setTimeout(() => {
+            this.status = 'Settings saved.';
+          }, 1000 / 3);
+        },
+      },
     });
-
-    // Show the current time format
-    const showTime = () => {
-      if (time_current_format) {
-        try {
-          const time = DateTime.fromJSDate(new Date());
-          const settings = this.getFormValues();
-          time_current_format.innerHTML = Time.format(time, settings);
-        }
-        catch {
-          time_current_format.innerHTML = 'Invalid format';
-        }
-      }
-    }
-
-    showTime();
-    setInterval(showTime, 1000);
-  }
-
-  protected getFormValues(): ISettingsDto {
-    const form_preview_align = DOM.qs('input[name="form_preview_align"]:checked') as HTMLInputElement;
-    const time_locale = DOM.qs('input[name="time_locale"]:checked') as HTMLInputElement;
-    const time_locale_custom_value = DOM.qid('time_locale_custom_value') as HTMLInputElement;
-    const time_format = DOM.qs('input[name="time_format"]:checked') as HTMLInputElement;
-    const time_format_custom_value = DOM.qid('time_format_custom_value') as HTMLInputElement;
-    const time_zone = DOM.qs('input[name="time_zone"]:checked') as HTMLInputElement;
-    const time_zone_fixed_offset = DOM.qid('time_zone_fixed_offset') as HTMLInputElement;
-
-    return {
-      form_preview_align: form_preview_align.value,
-      time_locale: time_locale.value,
-      time_locale_custom_value: time_locale_custom_value.value,
-      time_zone: time_zone.value,
-      time_zone_fixed_offset: Number(time_zone_fixed_offset.value),
-      time_format: time_format.value,
-      time_format_custom_value: time_format_custom_value.value,
-    };
   }
 }

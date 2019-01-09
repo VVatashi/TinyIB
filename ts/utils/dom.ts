@@ -1,9 +1,9 @@
 export class DOM {
-  public static qid(id: string) {
+  static qid(id: string) {
     return document.getElementById(id);
   }
 
-  public static qs(selector: string, context: Element | Document = null) {
+  static qs(selector: string, context: Element | Document = null) {
     if (!context) {
       context = document;
     }
@@ -11,7 +11,7 @@ export class DOM {
     return context.querySelector(selector);
   }
 
-  public static qsa(selector: string, context: Element | Document = null) {
+  static qsa(selector: string, context: Element | Document = null) {
     if (!context) {
       context = document;
     }

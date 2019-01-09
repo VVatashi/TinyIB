@@ -1,5 +1,5 @@
 export class Cookie {
-  public static get(name: string, _default: string = null) {
+  static get(name: string, _default: string = null) {
     const cookie_str = `; ${document.cookie}`;
     const cookie_parts = cookie_str.split(`; ${name}=`);
 
@@ -11,7 +11,7 @@ export class Cookie {
     return _default;
   }
 
-  public static set(name: string, value: string, expiration: Date) {
+  static set(name: string, value: string, expiration: Date) {
     const value_enc = encodeURIComponent(value);
     const expiration_str = expiration.toUTCString();
     document.cookie = `${name}=${value_enc}; path=/; expires=${expiration_str}`;

@@ -1,13 +1,13 @@
 import { DateTime } from 'luxon';
-import { eventBus, Events, ISettingsDto } from '..';
+import { eventBus, Events, SettingsInterface } from '..';
 import { Cookie, DOM, Time } from '../utils';
 
 export class CorrectTime {
-  protected readonly settings: ISettingsDto;
+  protected readonly settings: SettingsInterface;
 
   constructor() {
     // Load settings from a cookie
-    this.settings = JSON.parse(Cookie.get('tinyib_settings', '{}'));
+    this.settings = JSON.parse(Cookie.get('settings', '{}'));
     eventBus.$on(Events.Ready, this.onReady.bind(this));
     eventBus.$on(Events.PostsInserted, (posts: Element[]) =>
       posts.forEach(this.onPostInsert.bind(this)));
