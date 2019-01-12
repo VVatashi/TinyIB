@@ -8,28 +8,55 @@
   position: relative;
 
   background: $form-background;
-  padding: $padding;
 
-  &__preview {
+  &__header {
+    border-bottom: $post-header-border;
+    padding: $post-header-padding;
+    text-align: center;
+
+    @include clearfix;
+  }
+
+  &__header-buttons {
     float: right;
   }
 
-  &__subject {
-    margin: 0 9px 9px 0;
-
-    width: calc(50% - 9px - 17px);
-    height: 31px;
+  &__close {
+    padding: 1px;
   }
 
-  &__name {
-    margin: 0 17px 9px 0;
+  &__content {
+    padding: $post-content-padding;
+  }
 
-    width: calc(50% - 9px - 17px);
+  &__row {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    margin-bottom: 9px;
+  }
+
+  &__subject,
+  &__name {
+    width: 50%;
+    min-width: 80px;
     height: 31px;
+    margin: 0 9px 0 0;
   }
 
   &__attachment {
-    @extend %clickable;
+    @extend .button;
+
+    display: inline-block;
+
+    width: 31px;
+    height: 31px;
+    padding: 4px;
+
+    text-align: center;
+  }
+
+  &__attachment-icon {
     @extend %icon-attachment;
 
     display: inline-block;
@@ -45,12 +72,10 @@
   }
 
   &__message {
-    margin: 0 0 $padding 0;
+    margin: 0 0 4px 0;
 
-    width: 100%;
+    min-width: 100%;
     min-height: 100px;
-
-    resize: vertical;
   }
 
   &__status {
@@ -70,13 +95,6 @@
     height: $submit-height;
   }
 
-  &__close {
-    position: absolute;
-    top: -0.5em;
-    right: -0.5em;
-    z-index: 1;
-  }
-
   &__preview {
     position: absolute;
     top: -105px;
@@ -91,10 +109,14 @@
 
   &__preview-image {
     width: 100%;
+    height: 100%;
+    object-fit: scale-down;
+    object-position: 50% 50%;
   }
 
   &__preview-remove {
     position: absolute;
+    padding: 1px;
     top: 0;
     right: 0;
     z-index: 1;

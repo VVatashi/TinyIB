@@ -1,30 +1,6 @@
 {% spaceless %}
   <div id="posting-form-wrapper">
-    <form class="{{ class is defined ? class ~ ' ' }}posting-form" id="posting-form"
-      action="{{ base_url }}/post/create" method="post" enctype="multipart/form-data">
-      <div class="posting-form__preview hidden" id="posting-form-preview">
-        <button type="button"
-          class="button posting-form__preview-remove"
-          id="posting-form-preview-remove">⨯</button>
-      </div>
-
-      <input type="hidden" name="parent" value="{{ parent }}" />
-
-      <input type="text" class="input posting-form__subject" name="subject" placeholder="Subject" />
-
-      <input type="text" class="input posting-form__name" name="name" placeholder="Name" />
-
-      <label class="posting-form__attachment">
-        <input type="file" class="posting-form__attachment-input" name="file" />
-      </label>
-
-      <textarea class="input posting-form__message" name="message" placeholder="Message"></textarea>
-
-      <div class="posting-form__status" id="posting-form-status"></div>
-
-      <button type="submit" class="posting-form__submit">Reply</button>
-
-      <button type="button" class="button posting-form__close hidden" id="posting-form-close">⨯</button>
-    </form>
+    <button type="button" class="button" id="posting-form-show">Reply</button>
+    <div id="posting-form"></div>
   </div>
 {% endspaceless %}

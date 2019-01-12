@@ -1,122 +1,258 @@
+import Vue from 'vue';
 import { eventBus, Events } from '..';
 import { DOM } from '../utils';
 
+interface ViewModel {
+  fields: {
+    subject: string;
+    name: string;
+    file: string;
+    message: string;
+  };
+  file?: File;
+  previewSrc: string;
+  previewType: 'image' | 'video';
+  disabled: boolean;
+  status: string;
+  position: 'hidden' | 'bottom' | 'post';
+}
+
 export class PostingForm {
   protected isInThread: boolean = false;
-
-  protected wrapper: HTMLElement;
-  protected form: HTMLFormElement;
-
-  protected subject: HTMLInputElement;
-  protected name: HTMLInputElement;
-  protected fileInput: HTMLInputElement;
-  protected message: HTMLTextAreaElement;
-
-  protected status: HTMLElement;
-  protected preview: HTMLElement;
-
-  // Overrides file in the form.
-  protected file: File = null;
-
-  protected submit: HTMLButtonElement;
-  protected close: HTMLButtonElement;
-  protected previewRemove: HTMLButtonElement;
+  protected viewModel: Vue & ViewModel;
 
   constructor() {
     eventBus.$on(Events.Ready, this.onReady.bind(this));
     eventBus.$on(Events.PostsInserted, this.onPostsInserted.bind(this));
   }
 
-  protected onReady() {
-    this.wrapper = DOM.qs('#posting-form-wrapper') as HTMLElement;
-    if (!this.wrapper) {
+  onReady() {
+    const form = DOM.qid('posting-form');
+    if (!form) {
       return;
     }
 
-    this.form = DOM.qs('#posting-form', this.wrapper) as HTMLFormElement;
+    const match = window.location.href.match(/\/res\/(\d+)/i);
+    const isInThread = !!match;
+    const threadId = isInThread ? +match[1] : 0;
 
-    const parent = DOM.qs('[name="parent"]', this.form) as HTMLInputElement;
-    this.isInThread = +parent.value !== 0;
+    this.isInThread = isInThread;
 
-    this.subject = DOM.qs('[name="subject"]', this.form) as HTMLInputElement;
-    this.name = DOM.qs('[name="name"]', this.form) as HTMLInputElement;
-    this.fileInput = DOM.qs('[name="file"]', this.form) as HTMLInputElement;
-    this.message = DOM.qs('[name="message"]', this.form) as HTMLTextAreaElement;
+    const component = this;
+    this.viewModel = new Vue({
+      el: form,
+      template: `
+<form class="content__posting-form posting-form" id="posting-form"
+  v-on:submit.prevent="onSubmit()">
+  <template v-if="position != 'hidden'">
+    <div class="posting-form__header">
+      <span class="posting-form__title">{{
+        threadId ? 'Reply to thread #' + threadId : 'Create thread'
+      }}</span>
 
-    this.status = DOM.qs('#posting-form-status', this.form) as HTMLElement;
-    this.preview = DOM.qs('#posting-form-preview', this.form) as HTMLElement;
+      <span class="posting-form__header-buttons">
+        <button type="button" class="button posting-form__close"
+          v-on:click="onCloseClick()">⨯</button>
+      </span>
+    </div>
 
-    this.submit = DOM.qs('[type="submit"]', this.form) as HTMLButtonElement;
-    this.close = DOM.qs('#posting-form-close', this.form) as HTMLButtonElement;
-    this.previewRemove = DOM.qs('#posting-form-preview-remove', this.form) as HTMLButtonElement;
+    <div class="posting-form__content">
+      <div v-if="file" class="posting-form__preview">
+        <img v-if="previewType == 'image'"
+          class="posting-form__preview-image" v-bind:src="previewSrc" />
 
-    // Load saved name.
-    const name = localStorage['posting-form.name'];
-    if (name) {
-      this.name.value = name;
+        <video v-if="previewType == 'video'" autoplay loop muted
+          class="posting-form__preview-image" v-bind:src="previewSrc"></video>
+
+        <button type="button" class="button posting-form__preview-remove"
+          v-on:click="file = null">⨯</button>
+      </div>
+
+      <div class="posting-form__row">
+        <input type="text" class="input posting-form__subject"
+          v-model="fields.subject" v-bind:disabled="disabled" placeholder="Subject" />
+
+        <input type="text" class="input posting-form__name" placeholder="Name"
+          v-model="fields.name" v-bind:disabled="disabled" v-on:change="onNameChange()" />
+
+        <label class="posting-form__attachment">
+          <input type="file" class="posting-form__attachment-input"
+            v-model="fields.file" v-bind:disabled="disabled"
+            v-on:change="onFileChange($event.target.files)" />
+
+          <span class="posting-form__attachment-icon"></span>
+        </label>
+      </div>
+
+      <div class="posting-form__row">
+        <textarea class="input posting-form__message" placeholder="Message"
+          v-model="fields.message" v-bind:disabled="disabled"
+          v-on:keydown="onMessageKeyDown($event)"
+          v-on:paste="onMessagePaste($event)"
+          ref="message"></textarea>
+      </div>
+
+      <div class="posting-form__status">{{ status }}</div>
+
+      <button type="submit" class="posting-form__submit"
+        v-bind:disabled="disabled">Reply</button>
+    </div>
+  </template>
+</form>`,
+      data(): ViewModel {
+        return {
+          fields: {
+            subject: '',
+            name: '',
+            file: '',
+            message: '',
+          },
+          file: null,
+          previewSrc: '',
+          previewType: 'image',
+          disabled: false,
+          status: '',
+          position: 'hidden',
+        };
+      },
+      computed: {
+        threadId() {
+          return threadId;
+        },
+      },
+      created() {
+        // Load saved name.
+        const name = localStorage['posting-form.name'];
+        if (name) {
+          this.fields.name = name;
+        }
+      },
+      methods: {
+        resetFields() {
+          this.fields.subject = '';
+          this.fields.message = '';
+          this.fields.file = '';
+          this.file = null;
+        },
+        updatePreview() {
+          if (this.file) {
+            this.previewType = this.file.name.endsWith('.webm')
+              || this.file.name.endsWith('.mp4')
+              ? 'video' : 'image';
+
+            const reader = new FileReader();
+            reader.addEventListener('load', e => {
+              this.previewSrc = (e.target as any).result;
+            });
+            reader.readAsDataURL(this.file);
+          } else {
+            this.previewSrc = '';
+          }
+        },
+        onCloseClick() {
+          component.hide();
+        },
+        onNameChange() {
+          // Save name.
+          localStorage['posting-form.name'] = this.fields.name;
+        },
+        onFileChange(files: FileList) {
+          this.file = files.length ? files[0] : null;
+          this.updatePreview();
+        },
+        onMessageKeyDown(e: KeyboardEvent) {
+          // Submit form on Ctrl+Enter in the message field.
+          if ((e.keyCode == 10 || e.keyCode == 13) && e.ctrlKey) {
+            this.onSubmit();
+          }
+        },
+        onMessagePaste(e: ClipboardEvent) {
+          // Paste file.
+          const data = e.clipboardData || (e as any).originalEvent.clipboardData as DataTransfer;
+          const items = Array.prototype.slice.call(data.items) as DataTransferItem[];
+          const item = items.filter(item => {
+            return item.type.startsWith('image/')
+              || item.type.startsWith('audio/')
+              || item.type.startsWith('video/');
+          })[0];
+          if (item) {
+            this.file = item.getAsFile();
+            this.updatePreview();
+          }
+        },
+        onSubmit() {
+          // Submit request to create post.
+          const url = `${window.baseUrl}/ajax/post/create`;
+          const data = new FormData();
+          data.append('parent', threadId.toString());
+          data.append('subject', this.fields.subject);
+          data.append('name', this.fields.name);
+          data.append('message', this.fields.message);
+          data.append('file', this.file);
+
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', url, true);
+          xhr.setRequestHeader('Accept', 'application/json');
+          xhr.withCredentials = true;
+
+          xhr.upload.addEventListener('progress', e => {
+            const progressPercent = Math.ceil(e.loaded / e.total * 100);
+            this.status = `Uploading... ${progressPercent}%`;
+          });
+
+          xhr.addEventListener('readystatechange', e => {
+            if (xhr.readyState !== XMLHttpRequest.DONE) {
+              return;
+            }
+
+            // Enable form.
+            this.disabled = false;
+
+            if (xhr.status === 201) {
+              this.resetFields();
+              this.status = '';
+
+              // Move form to the initial location.
+              component.moveToBottom();
+
+              if (isInThread) {
+                // Trigger DE thread update.
+                const updater = DOM.qs('.de-thr-updater-link') as HTMLAnchorElement;
+                if (updater) {
+                  updater.click();
+                }
+              } else {
+                // Redirect to thread.
+                const location = xhr.getResponseHeader('Location');
+                if (location) {
+                  window.location.href = location;
+                }
+              }
+            } else {
+              const data = JSON.parse(xhr.responseText);
+              if (data && data.error) {
+                this.status = `Error: ${data.error}`;
+              } else {
+                this.status = `Error: ${xhr.status} ${xhr.statusText}`;
+              }
+            }
+          });
+
+          xhr.send(data);
+          this.disabled = true;
+        },
+      },
+    });
+
+    const showButton = DOM.qid('posting-form-show');
+    if (showButton) {
+      showButton.addEventListener('click', () => {
+        this.moveToBottom();
+      });
     }
-
-    // Save name on change.
-    this.name.addEventListener('change', e => {
-      localStorage['posting-form.name'] = this.name.value;
-    });
-
-    this.fileInput.addEventListener('change', e => {
-      // Reset file override on file field change.
-      this.file = null;
-
-      if (this.fileInput.files && this.fileInput.files.length) {
-        this.showPreview(this.fileInput.files[0]);
-      } else {
-        this.hidePreview();
-      }
-    });
-
-    // Submit form on the Ctrl+Enter in the message field.
-    this.message.addEventListener('keydown', e => {
-      if ((e.keyCode == 10 || e.keyCode == 13) && e.ctrlKey) {
-        this.submitForm();
-      }
-    });
-
-    // Paste file.
-    this.message.addEventListener('paste', e => {
-      const data = e.clipboardData || (e as any).originalEvent.clipboardData as DataTransfer;
-      const items = Array.prototype.slice.call(data.items) as DataTransferItem[];
-      const item = items.filter(item => {
-        return item.type.startsWith('image/')
-          || item.type.startsWith('audio/')
-          || item.type.startsWith('video/');
-      })[0];
-
-      if (item) {
-        this.file = item.getAsFile();
-
-        // Show preview.
-        this.showPreview(this.file);
-      }
-    });
-
-    // Handle form submit.
-    this.form.addEventListener('submit', e => {
-      e.preventDefault();
-      this.submitForm();
-    });
-
-    // Handle form close.
-    this.close.addEventListener('click', e => {
-      e.preventDefault();
-      this.restoreForm();
-    });
-
-    // Handle preview remove.
-    this.previewRemove.addEventListener('click', e => {
-      e.preventDefault();
-      this.resetFileField();
-    });
   }
 
-  protected onPostsInserted(posts: HTMLElement[]) {
+  onPostsInserted(posts: HTMLElement[]) {
     posts.forEach(post => {
       const referenceLinks = DOM.qsa('a[data-reflink]', post);
       referenceLinks.forEach(link => {
@@ -126,185 +262,69 @@ export class PostingForm {
 
           if (this.isInThread) {
             // Move form to the post.
-            this.moveFormToPost(post);
+            this.moveToPost(post);
           }
 
-          // Insert markup.
-          this.insert(`>>${id}\n`, { newLine: true });
+          // Insert reply markup.
+          if (this.viewModel.fields.message.length
+            && !this.viewModel.fields.message.endsWith('\n')) {
+            this.viewModel.fields.message += '\n';
+          }
+          this.viewModel.fields.message += `>>${id}\n`;
         });
       });
     });
   }
 
-  protected submitForm() {
-    // Submit create post request.
-    const url = `${window.baseUrl}/ajax/post/create`;
-    const data = new FormData(this.form);
+  protected hide() {
+    this.viewModel.position = 'hidden';
 
-    // Override file from the form.
-    if (this.file) {
-      data.append('file', this.file);
+    const showButton = DOM.qid('posting-form-show');
+    if (showButton) {
+      showButton.classList.remove('hidden');
+    }
+  }
+
+  protected moveToPost(post: HTMLElement) {
+    const form = DOM.qid('posting-form');
+    if (form) {
+      post.parentElement.insertBefore(form, post.nextSibling);
     }
 
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', url, true);
-    xhr.setRequestHeader('Accept', 'application/json');
-    xhr.withCredentials = true;
+    this.viewModel.position = 'post';
 
-    xhr.upload.addEventListener('progress', e => {
-      const progressPercent = Math.ceil(e.loaded / e.total * 100);
-      this.status.textContent = `Uploading... ${progressPercent}%`;
-    });
-
-    xhr.addEventListener('readystatechange', e => {
-      if (xhr.readyState !== XMLHttpRequest.DONE) {
-        return;
-      }
-
-      // Enable form.
-      this.setFormState({ enabled: true });
-
-      if (xhr.status === 201) {
-        this.resetForm();
-        this.status.textContent = '';
-
-        // Move form to the initial location.
-        this.restoreForm();
-
-        if (this.isInThread) {
-          // Trigger DE thread update.
-          const update = DOM.qs('.de-thr-updater-link') as HTMLAnchorElement;
-          if (update) {
-            update.click();
-          }
-        } else {
-          // Redirect to thread.
-          const location = xhr.getResponseHeader('Location');
-          if (location) {
-            window.location.href = location;
-          }
-        }
-      } else {
-        const data = JSON.parse(xhr.responseText);
-        if (data && data.error) {
-          this.status.textContent = `Error: ${data.error}`;
-        } else {
-          this.status.textContent = `Error: ${xhr.status} ${xhr.statusText}`;
-        }
-      }
-    });
-
-    xhr.send(data);
-
-    // Disable form.
-    this.setFormState({ enabled: false });
-  }
-
-  protected setFormState({ enabled }: { enabled: boolean }) {
-    const controls = [
-      this.subject,
-      this.name,
-      this.fileInput,
-      this.message,
-      this.submit,
-    ];
-
-    controls.filter(control => control)
-      .forEach(control => {
-        control.disabled = !enabled;
-      });
-  }
-
-  protected resetForm() {
-    // Reset not required for the name field.
-    const controls = [
-      this.subject,
-      this.message,
-    ];
-
-    controls.filter(control => control)
-      .forEach(control => {
-        control.value = '';
-      });
-
-    // File field needs special handling.
-    this.resetFileField();
-  }
-
-  protected resetFileField() {
-    if (this.fileInput) {
-      this.fileInput.type = 'text';
-      this.fileInput.value = '';
-      this.fileInput.type = 'file';
+    const showButton = DOM.qid('posting-form-show');
+    if (showButton) {
+      showButton.classList.remove('hidden');
     }
 
-    this.file = null;
-
-    this.hidePreview();
-  }
-
-  protected moveFormToPost(post: HTMLElement) {
-    this.form.style.marginLeft = '0';
-    this.close.classList.remove('hidden');
-    post.parentElement.insertBefore(this.form, post.nextSibling);
-  }
-
-  protected restoreForm() {
-    this.form.style.marginLeft = 'auto';
-    this.close.classList.add('hidden');
-    this.wrapper.insertBefore(this.form, null);
-    this.wrapper.scrollIntoView();
-  }
-
-  protected showPreview(file: File) {
-    const reader = new FileReader();
-    reader.addEventListener('load', e => {
-      let image = DOM.qs('#posting-form-preview-image', this.preview) as HTMLImageElement;
-      if (!image) {
-        image = document.createElement('img');
-        image.id = 'posting-form-preview-image';
-        image.classList.add('posting-form__preview-image');
-        this.preview.appendChild(image);
+    setTimeout(() => {
+      const message = this.viewModel.$refs.message as HTMLElement;
+      if (message) {
+        message.focus();
       }
-
-      image.src = (e.target as any).result;
-      this.preview.classList.remove('hidden');
     });
-    reader.readAsDataURL(file);
   }
 
-  protected hidePreview() {
-    this.preview.classList.add('hidden');
-  }
-
-  protected insert(str: string, { newLine }: { newLine: boolean } = { newLine: false }) {
-    if (this.message) {
-      const content = this.message.value;
-      const begin = this.message.selectionStart;
-      const end = this.message.selectionEnd;
-
-      const before = content.substring(0, begin);
-      const after = content.substring(end);
-
-      const insertNewLine = newLine
-        && before.length > 0
-        && !before.endsWith('\n')
-        && !str.startsWith('\n');
-
-      this.message.value = [
-        before,
-        insertNewLine ? '\n' : '',
-        str,
-        after,
-      ].join('');
-
-      this.message.focus();
-
-      const position = begin + str.length + (insertNewLine ? 1 : 0);
-      this.message.selectionStart = position;
-      this.message.selectionEnd = position;
+  protected moveToBottom() {
+    const form = DOM.qid('posting-form');
+    const wrapper = DOM.qid('posting-form-wrapper');
+    if (form && wrapper) {
+      wrapper.insertBefore(form, null);
     }
 
-    return false;
+    this.viewModel.position = 'bottom';
+
+    const showButton = DOM.qid('posting-form-show');
+    if (showButton) {
+      showButton.classList.add('hidden');
+    }
+
+    setTimeout(() => {
+      const message = this.viewModel.$refs.message as HTMLElement;
+      if (message) {
+        message.focus();
+      }
+    });
   }
 }

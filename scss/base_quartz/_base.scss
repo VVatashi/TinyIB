@@ -32,6 +32,11 @@ ul, ol {
   list-style: none;
 }
 
+.hidden {
+  display: none;
+  visibility: hidden;
+}
+
 // DE fixes.
 .de-cfg-body,
 .de-menu,

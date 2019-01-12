@@ -10,10 +10,8 @@
   }
 
   &__posting-form {
-    max-width: 560px;
+    display: inline-block;
     margin: $post-margin;
-    margin-left: auto;
-    margin-right: auto;
   }
 
   &__userdelete {
