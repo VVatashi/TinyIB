@@ -76,35 +76,70 @@
 
     min-width: 100%;
     min-height: 100px;
+
+    width: 100%;
+
+    resize: vertical;
   }
 
   &__status {
     float: right;
+    margin: 0 0 9px 9px;
   }
 
   &__submit {
-    @extend %clickable;
+    min-width: 80px;
+    height: 31px;
 
-    background: $submit-background;
-    border: 0;
-    border-radius: $submit-height / 2;
-    color: $submit-color;
-    font-weight: bold;
+    &--mobile {
+      @extend %clickable;
 
-    min-width: $submit-width;
-    height: $submit-height;
+      background: $submit-background;
+      border: 0;
+      border-radius: $submit-height / 2;
+      color: $submit-color;
+      font-weight: bold;
+
+      min-width: $submit-width;
+      height: $submit-height;
+      margin: 0 0 9px 0;
+    }
   }
 
   &__preview {
-    position: absolute;
-    top: -105px;
-    right: 0;
-    width: 100px;
-    height: 100px;
-    background: $form-background;
-    border: $form-border;
-    border-radius: $form-border-radius;
+    @extend %clickable;
+
+    position: relative;
+    box-sizing: border-box;
+
+    margin: 0 9px 0 0;
+
+    width: 140px;
+    height: 140px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: $btn-background;
+    border: $btn-border;
+    border-style: dashed;
+    border-radius: $btn-border-radius;
+    color: $btn-color;
+
     overflow: hidden;
+    cursor: pointer;
+
+    &--mobile {
+      position: absolute;
+      top: -149px;
+      right: 0;
+    }
+
+    &--right {
+      order: 1;
+      margin: 0 0 0 9px;
+    }
   }
 
   &__preview-image {
@@ -125,5 +160,18 @@
   @include breakpoint($xs-up) {
     border: $form-border;
     border-radius: $form-border-radius;
+
+    &__content {
+      display: flex;
+    }
+
+    &__message {
+      resize: both;
+    }
+
+    &__status {
+      float: unset;
+      margin: 0 0 9px;
+    }
   }
 }

@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import { eventBus, Events } from '..';
-import { DOM } from '../utils';
+import { SettingsInterface } from '../settings';
+import { DOM, Cookie } from '../utils';
 
 interface ViewModel {
   fields: {
@@ -11,10 +12,11 @@ interface ViewModel {
   };
   file?: File;
   previewSrc: string;
-  previewType: 'image' | 'video';
+  previewType: '' | 'image' | 'video';
   disabled: boolean;
   status: string;
   position: 'hidden' | 'bottom' | 'post';
+  mode: 'mobile' | 'default';
 }
 
 export class PostingForm {
@@ -38,36 +40,45 @@ export class PostingForm {
 
     this.isInThread = isInThread;
 
+    const settings = JSON.parse(Cookie.get('settings', '{}')) as SettingsInterface;
+
     const component = this;
     this.viewModel = new Vue({
       el: form,
       template: `
 <form class="content__posting-form posting-form" id="posting-form"
-  v-on:submit.prevent="onSubmit()">
-  <template v-if="position != 'hidden'">
-    <div class="posting-form__header">
-      <span class="posting-form__title">{{
-        threadId ? 'Reply to thread #' + threadId : 'Create thread'
-      }}</span>
+  v-on:submit.prevent="onSubmit()" v-show="position != 'hidden'">
+  <div class="posting-form__header">
+    <span class="posting-form__title">{{
+      threadId ? 'Reply to thread #' + threadId : 'Create thread'
+    }}</span>
 
-      <span class="posting-form__header-buttons">
-        <button type="button" class="button posting-form__close"
-          v-on:click="onCloseClick()">⨯</button>
-      </span>
+    <span class="posting-form__header-buttons">
+      <button type="button" class="button posting-form__close"
+        v-on:click="onCloseClick()">⨯</button>
+    </span>
+  </div>
+
+  <div class="posting-form__content">
+    <div class="posting-form__preview" v-on:click="showFileDialog()"
+      v-bind:class="{ 'posting-form__preview--mobile': mode == 'mobile',
+        'posting-form__preview--right': previewAlign == 'right' }"
+      v-show="mode == 'default' || file"
+      v-on:dragenter.stop.prevent
+      v-on:dragleave.stop.prevent
+      v-on:dragover.stop.prevent
+      v-on:drop.stop.prevent="onFileDrop($event)">
+      <img v-if="previewType == 'image'" class="posting-form__preview-image"
+        v-bind:src="previewSrc" />
+      <video v-else-if="previewType == 'video'" class="posting-form__preview-image"
+        v-bind:src="previewSrc" autoplay loop muted></video>
+      <p v-else-if="previewType == ''">Upload file</p>
+
+      <button type="button" class="button posting-form__preview-remove"
+        v-if="file" v-on:click.stop="file = null, updatePreview()">⨯</button>
     </div>
 
-    <div class="posting-form__content">
-      <div v-if="file" class="posting-form__preview">
-        <img v-if="previewType == 'image'"
-          class="posting-form__preview-image" v-bind:src="previewSrc" />
-
-        <video v-if="previewType == 'video'" autoplay loop muted
-          class="posting-form__preview-image" v-bind:src="previewSrc"></video>
-
-        <button type="button" class="button posting-form__preview-remove"
-          v-on:click="file = null">⨯</button>
-      </div>
-
+    <div class="posting-form__main">
       <div class="posting-form__row">
         <input type="text" class="input posting-form__subject"
           v-model="fields.subject" v-bind:disabled="disabled" placeholder="Subject" />
@@ -75,13 +86,17 @@ export class PostingForm {
         <input type="text" class="input posting-form__name" placeholder="Name"
           v-model="fields.name" v-bind:disabled="disabled" v-on:change="onNameChange()" />
 
-        <label class="posting-form__attachment">
+        <label class="posting-form__attachment" v-show="mode == 'mobile'">
           <input type="file" class="posting-form__attachment-input"
             v-model="fields.file" v-bind:disabled="disabled"
-            v-on:change="onFileChange($event.target.files)" />
+            v-on:change="onFileChange($event.target.files)"
+            ref="file" />
 
           <span class="posting-form__attachment-icon"></span>
         </label>
+
+        <button type="submit" class="button posting-form__submit"
+          v-if="mode == 'default'" v-bind:disabled="disabled">Reply</button>
       </div>
 
       <div class="posting-form__row">
@@ -92,12 +107,12 @@ export class PostingForm {
           ref="message"></textarea>
       </div>
 
-      <div class="posting-form__status">{{ status }}</div>
+      <div v-if="status" class="posting-form__status">{{ status }}</div>
 
-      <button type="submit" class="posting-form__submit"
-        v-bind:disabled="disabled">Reply</button>
+      <button type="submit" class="posting-form__submit  posting-form__submit--mobile"
+        v-if="mode == 'mobile'" v-bind:disabled="disabled">Reply</button>
     </div>
-  </template>
+  </div>
 </form>`,
       data(): ViewModel {
         return {
@@ -109,15 +124,19 @@ export class PostingForm {
           },
           file: null,
           previewSrc: '',
-          previewType: 'image',
+          previewType: '',
           disabled: false,
           status: '',
           position: 'hidden',
+          mode: 'mobile',
         };
       },
       computed: {
         threadId() {
           return threadId;
+        },
+        previewAlign() {
+          return settings.formPreviewAlign;
         },
       },
       created() {
@@ -126,6 +145,16 @@ export class PostingForm {
         if (name) {
           this.fields.name = name;
         }
+
+        this.updateMode();
+        this._resize = this.updateMode.bind(this);
+        window.addEventListener('resize', this._resize);
+      },
+      destroyed() {
+        if (this._resize) {
+          window.removeEventListener('resize', this._resize);
+          this._resize = null;
+        }
       },
       methods: {
         resetFields() {
@@ -133,19 +162,47 @@ export class PostingForm {
           this.fields.message = '';
           this.fields.file = '';
           this.file = null;
+          this.updatePreview();
+        },
+        showFileDialog() {
+          if (this.$refs.file) {
+            this.$refs.file.click();
+          }
+        },
+        updateMode() {
+          this.mode = window.innerWidth < 600 ? 'mobile' : 'default';
         },
         updatePreview() {
           if (this.file) {
-            this.previewType = this.file.name.endsWith('.webm')
-              || this.file.name.endsWith('.mp4')
-              ? 'video' : 'image';
-
             const reader = new FileReader();
             reader.addEventListener('load', e => {
+              if (this.file.type) {
+                const type = this.file.type;
+                if (type.startsWith('video/')) {
+                  this.previewType = 'video';
+                } else if (type.startsWith('audio/')) {
+                  this.previewType = 'audio';
+                } else {
+                  this.previewType = 'image';
+                }
+              } else if (this.file.name) {
+                const name = this.file.name;
+                if (name.endsWith('.webm') || name.endsWith('.mp4')) {
+                  this.previewType = 'video';
+                } else if (name.endsWith('.mp3')) {
+                  this.previewType = 'audio';
+                } else {
+                  this.previewType = 'image';
+                }
+              } else {
+                this.previewType = 'image';
+              }
+
               this.previewSrc = (e.target as any).result;
             });
             reader.readAsDataURL(this.file);
           } else {
+            this.previewType = '';
             this.previewSrc = '';
           }
         },
@@ -155,6 +212,38 @@ export class PostingForm {
         onNameChange() {
           // Save name.
           localStorage['posting-form.name'] = this.fields.name;
+        },
+        async onFileDrop(e: DragEvent) {
+          const file = e.dataTransfer.files[0];
+          if (file) {
+            this.file = file;
+            this.updatePreview();
+          } else {
+            const text = e.dataTransfer.getData('text');
+            if (text && text.match(/https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{2,}\.[a-z]{2,}\b[-a-zA-Z0-9@:%_\+.~#?&\/=]*/)) {
+              const xhr = new XMLHttpRequest();
+              xhr.open('GET', text, true);
+              xhr.responseType = 'blob';
+
+              xhr.addEventListener('readystatechange', e => {
+                if (xhr.readyState !== XMLHttpRequest.DONE) {
+                  return;
+                }
+
+                if (xhr.status < 400) {
+                  this.status = '';
+                  this.file = xhr.response;
+                  this.updatePreview();
+                } else {
+                  this.status = `Error: ${xhr.status} ${xhr.statusText}`;
+                  this.file = null;
+                  this.updatePreview();
+                }
+              });
+
+              xhr.send();
+            }
+          }
         },
         onFileChange(files: FileList) {
           this.file = files.length ? files[0] : null;
@@ -271,6 +360,11 @@ export class PostingForm {
             this.viewModel.fields.message += '\n';
           }
           this.viewModel.fields.message += `>>${id}\n`;
+
+          const selection = window.getSelection().toString();
+          if (selection) {
+            this.viewModel.fields.message += `> ${selection}\n`;
+          }
         });
       });
     });
