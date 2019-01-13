@@ -29,11 +29,16 @@
     padding: $post-content-padding;
   }
 
-  &__row {
+  &__row,
+  &__markup-row {
     display: flex;
     flex-flow: row nowrap;
     align-items: center;
     margin-bottom: 9px;
+  }
+
+  &__markup-row {
+    justify-content: space-between;
   }
 
   &__subject,
@@ -69,6 +74,14 @@
 
   &__attachment-input {
     display: none;
+  }
+
+  &__markup-button {
+    flex-grow: 1;
+
+    &:not(:last-child) {
+      margin-right: 4px;
+    }
   }
 
   &__message {
@@ -120,6 +133,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    text-align: center;
 
     background: $btn-background;
     border: $btn-border;
@@ -166,6 +180,8 @@
     }
 
     &__message {
+      min-width: 502px;
+
       resize: both;
     }
 

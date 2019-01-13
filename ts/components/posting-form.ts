@@ -99,6 +99,58 @@ export class PostingForm {
           v-if="mode == 'default'" v-bind:disabled="disabled">Reply</button>
       </div>
 
+      <div class="posting-form__markup-row markup">
+        <button type="button" class="button posting-form__markup-button"
+          v-on:click.prevent="insertMarkup('b')">
+          <strong>b</strong>
+        </button>
+
+        <button type="button" class="button posting-form__markup-button"
+          v-on:click.prevent="insertMarkup('i')">
+          <em>i</em>
+        </button>
+
+        <button type="button" class="button posting-form__markup-button"
+          v-on:click.prevent="insertMarkup('u')">
+          <span class="markup__underline">u</span>
+        </button>
+
+        <button type="button" class="button posting-form__markup-button"
+          v-on:click.prevent="insertMarkup('s')">
+          <del>s</del>
+        </button>
+
+        <button type="button" class="button posting-form__markup-button"
+          v-on:click.prevent="insertMarkup('sub')">
+          <sub>s</sub>
+        </button>
+
+        <button type="button" class="button posting-form__markup-button"
+          v-on:click.prevent="insertMarkup('sup')">
+          <sup>s</sup>
+        </button>
+
+        <button type="button" class="button posting-form__markup-button"
+          v-on:click.prevent="insertMarkup('code')">
+          <code>c</code>
+        </button>
+
+        <button type="button" class="button posting-form__markup-button"
+          v-on:click.prevent="insertMarkup('spoiler')">
+          <span class="markup__spoiler markup__spoiler--visible">sp</span>
+        </button>
+
+        <button type="button" class="button posting-form__markup-button"
+          v-on:click.prevent="insertMarkup('rp')">
+          <span class="markup__rp markup__rp--visible">rp</span>
+        </button>
+
+        <button type="button" class="button posting-form__markup-button"
+          v-on:click.prevent="insertQuote()">
+          <span class="markup__quote">&gt;</span>
+        </button>
+      </div>
+
       <div class="posting-form__row">
         <textarea class="input posting-form__message" placeholder="Message"
           v-model="fields.message" v-bind:disabled="disabled"
@@ -269,6 +321,76 @@ export class PostingForm {
             this.updatePreview();
           }
         },
+        insertMarkup(tag: string) {
+          const messageEl = this.$refs.message as HTMLTextAreaElement;
+          const selection = {
+            begin: messageEl.selectionStart,
+            end: messageEl.selectionEnd,
+            length: messageEl.selectionEnd - messageEl.selectionStart,
+          };
+          const message = this.fields.message as string;
+          const openingTag = `[${tag}]`;
+          const closingTag = `[/${tag}]`;
+
+          if (selection.length) {
+            // If text is selected, wrap it in a tag pair.
+            this.fields.message = [
+              message.substring(0, selection.begin),
+              openingTag,
+              message.substring(selection.begin, selection.end),
+              closingTag,
+              message.substring(selection.end),
+            ].join('');
+
+            // Restore selection.
+            setTimeout(() => {
+              messageEl.focus();
+              messageEl.selectionStart = selection.begin + openingTag.length;
+              messageEl.selectionEnd = selection.end + openingTag.length;
+            });
+          } else {
+            if (message.lastIndexOf(openingTag, selection.begin) > message.lastIndexOf(closingTag, selection.begin)) {
+              this.fields.message = [
+                message.substring(0, selection.begin),
+                closingTag,
+                message.substring(selection.end),
+              ].join('');
+
+              // Restore selection.
+              setTimeout(() => {
+                messageEl.focus();
+                messageEl.selectionStart = selection.begin + closingTag.length;
+                messageEl.selectionEnd = selection.end + closingTag.length;
+              });
+            } else {
+              this.fields.message = [
+                message.substring(0, selection.begin),
+                openingTag,
+                message.substring(selection.end),
+              ].join('');
+
+              // Restore selection.
+              setTimeout(() => {
+                messageEl.focus();
+                messageEl.selectionStart = selection.begin + openingTag.length;
+                messageEl.selectionEnd = selection.end + openingTag.length;
+              });
+            }
+          }
+        },
+        insertQuote() {
+          const message = this.fields.message;
+          if (message.length && !message.endsWith('\n')) {
+            this.fields.message += '\n';
+          }
+
+          const selection = window.getSelection().toString();
+          if (selection) {
+            this.fields.message += `> ${selection}\n`;
+          } else {
+            this.fields.message += '> ';
+          }
+        },
         onSubmit() {
           // Submit request to create post.
           const url = `${window.baseUrl}/ajax/post/create`;
@@ -355,8 +477,8 @@ export class PostingForm {
           }
 
           // Insert reply markup.
-          if (this.viewModel.fields.message.length
-            && !this.viewModel.fields.message.endsWith('\n')) {
+          const message = this.viewModel.fields.message;
+          if (message.length && !message.endsWith('\n')) {
             this.viewModel.fields.message += '\n';
           }
           this.viewModel.fields.message += `>>${id}\n`;

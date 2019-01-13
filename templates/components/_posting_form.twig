@@ -1,6 +1,10 @@
 {% spaceless %}
   <div id="posting-form-wrapper">
-    <button type="button" class="button content__reply-button" id="posting-form-show">Reply</button>
+    {% if res == constant('TINYIB_INDEXPAGE') %}
+      <button type="button" class="button content__reply-button" id="posting-form-show">Create thread</button>
+    {% else %}
+      <button type="button" class="button content__reply-button" id="posting-form-show">Reply</button>
+    {% endif %}
     <div id="posting-form"></div>
   </div>
 {% endspaceless %}
