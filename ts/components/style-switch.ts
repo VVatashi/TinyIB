@@ -1,7 +1,5 @@
-import BaseModule from './BaseModule';
-import ModuleManager from '../ModuleManager';
-import { qid, qs, qsa } from '../utils/DOM';
-import * as Cookie from '../utils/Cookie';
+import { eventBus, Events } from '..';
+import { Cookie, DOM } from '../utils';
 
 declare global {
   interface Window {
@@ -9,14 +7,12 @@ declare global {
   }
 }
 
-export default class StyleSwitcher extends BaseModule {
+export class StyleSwitch {
   protected readonly styles: { [key: string]: string } = {};
 
-  constructor(manager: ModuleManager) {
-    super(manager);
-
+  constructor() {
     // Parse selectable styles from <head>
-    const styles = qsa('link[title]') as HTMLElement[];
+    const styles = DOM.qsa('link[title]') as HTMLElement[];
     styles.forEach(style => {
       const title = style.title;
       const url = style.getAttribute('href');
@@ -29,10 +25,12 @@ export default class StyleSwitcher extends BaseModule {
     // Get selected style
     const selected_style = Cookie.get('tinyib_style', 'Synthwave');
     this.setStyle(selected_style);
+
+    eventBus.$on(Events.Ready, this.onReady.bind(this));
   }
 
   onReady() {
-    const style_switcher = qid('style-switcher') as HTMLSelectElement;
+    const style_switcher = DOM.qid('style-switcher') as HTMLSelectElement;
 
     if (style_switcher) {
       // Populate style switcher widget
@@ -55,14 +53,14 @@ export default class StyleSwitcher extends BaseModule {
   }
 
   protected setStyle(style: string) {
-    const head = qs('head');
+    const head = DOM.qs('head');
 
     // If no <head> element, do nothing
     if (!head) {
       return;
     }
 
-    const selected_style = qs('link[data-selected]') as HTMLElement;
+    const selected_style = DOM.qs('link[data-selected]') as HTMLElement;
 
     if (selected_style) {
       // If style already selected, do nothing
@@ -81,18 +79,11 @@ export default class StyleSwitcher extends BaseModule {
     link.type = "text/css";
     link.href = url;
     link.setAttribute('data-selected', 'true');
-
-    link.addEventListener('load', () => {
-      this.manager.emit('style loaded');
-    });
-
     head.appendChild(link);
 
     // Save selected style
     const expiration_date = new Date();
     expiration_date.setTime(expiration_date.getTime() + 365 * 24 * 60 * 60 * 1000);
     Cookie.set('tinyib_style', style, expiration_date);
-
-    this.manager.emit('style changed');
   }
 }

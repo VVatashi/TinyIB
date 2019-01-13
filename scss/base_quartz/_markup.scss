@@ -6,7 +6,8 @@
     background-color: $spoiler-background;
     color: $spoiler-background;
 
-    &:hover {
+    &:hover,
+    &--visible {
       color: $spoiler-color;
     }
   }

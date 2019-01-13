@@ -1,8 +1,9 @@
 const path = require('path');
 
 module.exports = {
-  entry: './ts/index.ts',
-  mode: 'production',
+  entry: './ts/app.ts',
+  mode: 'development',
+  devtool: 'inline-source-map',
   module: {
     rules: [{
       test: /\.ts$/,
@@ -11,11 +12,12 @@ module.exports = {
     }],
   },
   externals: {
-    axios: 'axios',
-    luxon: 'luxon',
+    'axios': 'axios',
+    'luxon': 'luxon',
+    'vue': 'Vue',
   },
   resolve: {
-    extensions: ['.ts'],
+    extensions: ['.js', '.ts'],
   },
   output: {
     filename: './index.js',

@@ -1,56 +1,26 @@
-import PostModule from '../PostModule';
-import ModuleManager from '../../ModuleManager';
-import { qs, qsa } from '../../utils/DOM';
+import { eventBus, Events } from '../..';
+import { DOM } from '../../utils';
 
-export default class PostReferenceMap extends PostModule {
+export class PostReferenceMap {
   protected readonly user: { name?: string, tripcode?: string } = {};
   protected readonly posts: { [id: number]: Element } = {};
 
-  constructor(manager: ModuleManager) {
-    super(manager);
-
+  constructor() {
     this.user.name = localStorage.getItem('user.name');
     this.user.tripcode = localStorage.getItem('user.tripcode');
+
+    eventBus.$on(Events.PostsInserted, (posts: Element[]) =>
+      posts.forEach(this.onPostInsert.bind(this)));
   }
 
-  protected getPostAuthor(post: Element) {
-    const nameEl = qs('.post__name', post);
-    const tripcodeEl = qs('.post__tripcode', post);
-
-    return {
-      name: nameEl ? nameEl.textContent : '',
-      tripcode: tripcodeEl ? tripcodeEl.textContent : '',
-    };
-  }
-
-  protected getPostRefLinkHtml(post: Element) {
-    const postId = +post.getAttribute('data-post-id');
-
-    const nameEl = qs('.post__name', post);
-    const tripcodeEl = qs('.post__tripcode', post);
-
-    const name = nameEl ? nameEl.innerHTML : '';
-    const tripcode = tripcodeEl ? tripcodeEl.innerHTML : '';
-
-    if (name.length || tripcode.length) {
-      return `<span class="post__reference-link-id">&gt;&gt;${postId}</span>`
-        + ` <span class="post__reference-link-author">`
-        + `(<span class="post__reference-link-name">${name}</span>`
-        + `<span class="post__reference-link-tripcode">${tripcode}</span>)`
-        + `</span>`;
-    } else {
-      return `<span class="post__reference-link-id">&gt;&gt;${postId}</span>`;
-    }
-  }
-
-  protected processPost(post: Element) {
+  protected onPostInsert(post: Element) {
     const postId = +post.getAttribute('data-post-id');
 
     // Store post.
     this.posts[postId] = post;
 
     // Get references.
-    const referenceElements = qsa('a[data-target-post-id]', post);
+    const referenceElements = DOM.qsa('a[data-target-post-id]', post);
     const references = referenceElements.map(element => {
       return {
         element,
@@ -84,7 +54,7 @@ export default class PostReferenceMap extends PostModule {
     // Append to posts a reference to this post.
     referencedPosts.forEach(referencedPost => {
       // Create post footer if it is not exists.
-      let footer = qs('.post__footer', referencedPost);
+      let footer = DOM.qs('.post__footer', referencedPost);
       if (!footer) {
         footer = document.createElement('div');
         footer.classList.add('post__footer');
@@ -106,5 +76,35 @@ export default class PostReferenceMap extends PostModule {
       link.innerHTML = this.getPostRefLinkHtml(post);
       footer.appendChild(link);
     });
+  }
+
+  protected getPostAuthor(post: Element) {
+    const nameEl = DOM.qs('.post__name', post);
+    const tripcodeEl = DOM.qs('.post__tripcode', post);
+
+    return {
+      name: nameEl ? nameEl.textContent : '',
+      tripcode: tripcodeEl ? tripcodeEl.textContent : '',
+    };
+  }
+
+  protected getPostRefLinkHtml(post: Element) {
+    const postId = +post.getAttribute('data-post-id');
+
+    const nameEl = DOM.qs('.post__name', post);
+    const tripcodeEl = DOM.qs('.post__tripcode', post);
+
+    const name = nameEl ? nameEl.innerHTML : '';
+    const tripcode = tripcodeEl ? tripcodeEl.innerHTML : '';
+
+    if (name.length || tripcode.length) {
+      return `<span class="post__reference-link-id">&gt;&gt;${postId}</span>`
+        + ` <span class="post__reference-link-author">`
+        + `(<span class="post__reference-link-name">${name}</span>`
+        + `<span class="post__reference-link-tripcode">${tripcode}</span>)`
+        + `</span>`;
+    } else {
+      return `<span class="post__reference-link-id">&gt;&gt;${postId}</span>`;
+    }
   }
 }

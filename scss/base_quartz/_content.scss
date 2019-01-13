@@ -15,10 +15,17 @@
   }
 
   &__posting-form {
-    max-width: 560px;
+    display: inline-block;
+
     margin: $post-margin;
-    margin-left: auto;
-    margin-right: auto;
+
+    max-width: 100%;
+  }
+
+  &__reply-button {
+    min-width: 80px;
+    height: 31px;
+    margin: 0 1em;
   }
 
   &__userdelete {
@@ -31,5 +38,10 @@
 
   &__footer {
     margin: 0;
+  }
+
+  &__settings-form {
+    max-width: 900px;
+    margin: 0 auto;
   }
 }

@@ -5,31 +5,80 @@
   $submit-width: 120px;
   $submit-height: 36px;
 
-  position: relative;
-
   background: $form-background;
-  padding: $padding;
 
-  &__preview {
+  &--floating {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+  }
+
+  &--floating &__header {
+    cursor: pointer;
+  }
+
+  &__header {
+    border-bottom: $post-header-border;
+    padding: $post-header-padding;
+    text-align: center;
+
+    @include clearfix;
+  }
+
+  &__header-buttons {
     float: right;
   }
 
-  &__subject {
-    margin: 0 9px 9px 0;
-
-    width: calc(50% - 9px - 17px);
-    height: 31px;
+  &__close,
+  &__float {
+    padding: 1px;
+    min-width: 16px;
   }
 
-  &__name {
-    margin: 0 17px 9px 0;
+  &__float {
+    margin-right: 4px;
+  }
 
-    width: calc(50% - 9px - 17px);
+  &__content {
+    position: relative;
+
+    padding: $post-content-padding;
+  }
+
+  &__row,
+  &__markup-row {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    margin-bottom: 9px;
+  }
+
+  &__markup-row {
+    justify-content: space-between;
+  }
+
+  &__subject,
+  &__name {
+    width: 50%;
+    min-width: 80px;
     height: 31px;
+    margin: 0 9px 0 0;
   }
 
   &__attachment {
-    @extend %clickable;
+    @extend .button;
+
+    display: inline-block;
+
+    width: 31px;
+    height: 31px;
+    padding: 4px;
+
+    text-align: center;
+  }
+
+  &__attachment-icon {
     @extend %icon-attachment;
 
     display: inline-block;
@@ -44,57 +93,96 @@
     display: none;
   }
 
+  &__markup-button {
+    flex-grow: 1;
+
+    &:not(:last-child) {
+      margin-right: 4px;
+    }
+  }
+
   &__message {
-    margin: 0 0 $padding 0;
+    margin: 0 0 4px 0;
+
+    min-width: 100%;
+    min-height: 100px;
 
     width: 100%;
-    min-height: 100px;
 
     resize: vertical;
   }
 
   &__status {
     float: right;
+    margin: 0 0 9px 9px;
   }
 
   &__submit {
-    @extend %clickable;
+    min-width: 80px;
+    height: 31px;
 
-    background: $submit-background;
-    border: 0;
-    border-radius: $submit-height / 2;
-    color: $submit-color;
-    font-weight: bold;
+    &--mobile {
+      @extend %clickable;
 
-    min-width: $submit-width;
-    height: $submit-height;
-  }
+      background: $submit-background;
+      border: 0;
+      border-radius: $submit-height / 2;
+      color: $submit-color;
+      font-weight: bold;
 
-  &__close {
-    position: absolute;
-    top: -0.5em;
-    right: -0.5em;
-    z-index: 1;
+      min-width: $submit-width;
+      height: $submit-height;
+      margin: 0 0 9px 0;
+    }
   }
 
   &__preview {
-    position: absolute;
-    top: -105px;
-    right: 0;
-    width: 100px;
-    height: 100px;
-    background: $form-background;
-    border: $form-border;
-    border-radius: $form-border-radius;
+    @extend %clickable;
+
+    position: relative;
+    box-sizing: border-box;
+
+    margin: 0 9px 0 0;
+
+    width: 140px;
+    height: 140px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    background: $btn-background;
+    border: $btn-border;
+    border-style: dashed;
+    border-radius: $btn-border-radius;
+    color: $btn-color;
+
     overflow: hidden;
+    cursor: pointer;
+
+    &--mobile {
+      position: absolute;
+      top: -149px;
+      right: 0;
+    }
+
+    &--right {
+      order: 1;
+      margin: 0 0 0 9px;
+    }
   }
 
   &__preview-image {
     width: 100%;
+    height: 100%;
+    object-fit: scale-down;
+    object-position: 50% 50%;
   }
 
   &__preview-remove {
     position: absolute;
+    padding: 1px;
     top: 0;
     right: 0;
     z-index: 1;
@@ -103,5 +191,20 @@
   @include breakpoint($xs-up) {
     border: $form-border;
     border-radius: $form-border-radius;
+
+    &__content {
+      display: flex;
+    }
+
+    &__message {
+      min-width: 502px;
+
+      resize: both;
+    }
+
+    &__status {
+      float: unset;
+      margin: 0 0 9px;
+    }
   }
 }

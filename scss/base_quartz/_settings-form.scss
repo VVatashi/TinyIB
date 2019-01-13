@@ -1,0 +1,19 @@
+.settings-form {
+  &__section {
+    margin-bottom: 1em;
+  }
+
+  &__row {
+    margin-bottom: 1em;
+  }
+
+  &__status {
+    float: right;
+    margin: 0;
+  }
+
+  &__save {
+    min-width: 80px;
+    min-height: 2em;
+  }
+}
