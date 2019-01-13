@@ -5,9 +5,18 @@
   $submit-width: 120px;
   $submit-height: 36px;
 
-  position: relative;
-
   background: $form-background;
+
+  &--floating {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+  }
+
+  &--floating &__header {
+    cursor: pointer;
+  }
 
   &__header {
     border-bottom: $post-header-border;
@@ -21,11 +30,19 @@
     float: right;
   }
 
-  &__close {
+  &__close,
+  &__float {
     padding: 1px;
+    min-width: 16px;
+  }
+
+  &__float {
+    margin-right: 4px;
   }
 
   &__content {
+    position: relative;
+
     padding: $post-content-padding;
   }
 

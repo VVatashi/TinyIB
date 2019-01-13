@@ -15,7 +15,7 @@ interface ViewModel {
   previewType: '' | 'image' | 'video';
   disabled: boolean;
   status: string;
-  position: 'hidden' | 'bottom' | 'post';
+  position: 'hidden' | 'bottom' | 'post' | 'float';
   mode: 'mobile' | 'default';
 }
 
@@ -47,8 +47,10 @@ export class PostingForm {
       el: form,
       template: `
 <form class="content__posting-form posting-form" id="posting-form"
-  v-on:submit.prevent="onSubmit()" v-show="position != 'hidden'">
-  <div class="posting-form__header">
+  v-bind:class="{ 'posting-form--floating': position == 'float' }"
+  v-on:submit.prevent="onSubmit()" v-show="position !== 'hidden'"
+  ref="form">
+  <div class="posting-form__header" ref="header">
     <span class="posting-form__title">{{
       threadId ? 'Reply to thread #' + threadId : 'Create thread'
     }}</span>
@@ -56,6 +58,12 @@ export class PostingForm {
     <span class="posting-form__header-buttons">
       <button type="button" class="button posting-form__close"
         v-on:click="onCloseClick()">⨯</button>
+    </span>
+
+    <span class="posting-form__header-buttons">
+      <button type="button" class="button posting-form__float"
+        v-if="position !== 'float' && mode !== 'mobile'"
+        v-on:click="position = 'float'">↑</button>
     </span>
   </div>
 
@@ -202,6 +210,13 @@ export class PostingForm {
         this._resize = this.updateMode.bind(this);
         window.addEventListener('resize', this._resize);
       },
+      mounted() {
+        const header = this.$refs.header as HTMLElement;
+        if (header) {
+          this._mouseDown = this.onMouseDown.bind(this);
+          header.addEventListener('pointerdown', this._mouseDown);
+        }
+      },
       destroyed() {
         if (this._resize) {
           window.removeEventListener('resize', this._resize);
@@ -223,6 +238,9 @@ export class PostingForm {
         },
         updateMode() {
           this.mode = window.innerWidth < 600 ? 'mobile' : 'default';
+          if (this.mode == 'mobile' && this.position == 'float') {
+            component.moveToBottom();
+          }
         },
         updatePreview() {
           if (this.file) {
@@ -256,6 +274,56 @@ export class PostingForm {
           } else {
             this.previewType = '';
             this.previewSrc = '';
+          }
+        },
+        onMouseDown(e: PointerEvent) {
+          const form = this.$refs.form as HTMLElement;
+          if (!form || this.position !== 'float') {
+            return;
+          }
+
+          this._mouseDownFormLeft = form.offsetLeft;
+          this._mouseDownFormTop = form.offsetTop;
+
+          this._mouseDownMouseLeft = e.clientX;
+          this._mouseDownMouseTop = e.clientY;
+
+          if (!this._mouseMove) {
+            this._mouseMove = this.onMouseMove.bind(this);
+            window.addEventListener('pointermove', this._mouseMove);
+          }
+
+          if (!this._mouseUp) {
+            this._mouseUp = this.onMouseUp.bind(this);
+            window.addEventListener('pointerup', this._mouseUp);
+            window.addEventListener('pointercancel', this._mouseUp);
+          }
+        },
+        onMouseMove(e: PointerEvent) {
+          const form = this.$refs.form as HTMLElement;
+          if (!form || this.position !== 'float') {
+            return;
+          }
+
+          const deltaX = e.clientX - this._mouseDownMouseLeft;
+          const deltaY = e.clientY - this._mouseDownMouseTop;
+
+          const x = this._mouseDownFormLeft + deltaX;
+          const y = this._mouseDownFormTop + deltaY;
+
+          form.style.left = `${x}px`;
+          form.style.top = `${y}px`;
+        },
+        onMouseUp(e: PointerEvent) {
+          if (this._mouseMove) {
+            window.removeEventListener('pointermove', this._mouseMove);
+            this._mouseMove = null;
+          }
+
+          if (this._mouseUp) {
+            window.removeEventListener('pointerup', this._mouseUp);
+            window.removeEventListener('pointercancel', this._mouseUp);
+            this._mouseUp = null;
           }
         },
         onCloseClick() {
@@ -423,8 +491,10 @@ export class PostingForm {
               this.resetFields();
               this.status = '';
 
-              // Move form to the initial location.
-              component.moveToBottom();
+              if (this.position !== 'float') {
+                // Move form to the initial location.
+                component.moveToBottom();
+              }
 
               if (isInThread) {
                 // Trigger DE thread update.
@@ -471,7 +541,7 @@ export class PostingForm {
         link.addEventListener('click', e => {
           e.preventDefault();
 
-          if (this.isInThread) {
+          if (this.isInThread && this.viewModel.position !== 'float') {
             // Move form to the post.
             this.moveToPost(post);
           }
@@ -487,6 +557,13 @@ export class PostingForm {
           if (selection) {
             this.viewModel.fields.message += `> ${selection}\n`;
           }
+
+          setTimeout(() => {
+            const messageEl = this.viewModel.$refs.message as HTMLTextAreaElement;
+            if (messageEl) {
+              messageEl.focus();
+            }
+          });
         });
       });
     });
