@@ -8,14 +8,19 @@
   }
 }
 
+@mixin placeholder {
+  ::-webkit-input-placeholder {@content}
+  :-moz-placeholder           {@content}
+  ::-moz-placeholder          {@content}
+  :-ms-input-placeholder      {@content}
+  ::placeholder-shown         {@content}
+  ::placeholder               {@content}
+}
+
 %clickable {
   cursor: pointer;
 
   &:active {
     transform: translateY(1px);
   }
-}
-
-.hidden {
-  display: none;
 }

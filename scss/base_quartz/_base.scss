@@ -37,6 +37,11 @@ ul, ol {
   visibility: hidden;
 }
 
+@include placeholder {
+  color: $input-color;
+  opacity: 0.5;
+}
+
 // DE fixes.
 .de-cfg-body,
 .de-menu,
