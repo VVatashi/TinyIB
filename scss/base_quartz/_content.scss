@@ -19,7 +19,14 @@
 
     margin: $post-margin;
 
+    width: 100%;
     max-width: 100%;
+  }
+
+  @include breakpoint($xs-up) {
+    &__posting-form {
+      width: unset;
+    }
   }
 
   &__reply-button {

@@ -9,8 +9,10 @@
 
   &--floating {
     position: fixed;
+
     top: 0;
     left: 0;
+
     z-index: 1;
   }
 
@@ -31,12 +33,14 @@
   }
 
   &__close,
-  &__float {
+  &__float,
+  &__reset {
     padding: 1px;
     min-width: 16px;
   }
 
-  &__float {
+  &__float,
+  &__reset {
     margin-right: 4px;
   }
 
@@ -60,9 +64,10 @@
 
   &__subject,
   &__name {
-    width: 50%;
     min-width: 80px;
+    width: 80px;
     height: 31px;
+    flex: 50%;
     margin: 0 9px 0 0;
   }
 
@@ -95,6 +100,7 @@
 
   &__markup-button {
     flex-grow: 1;
+    padding: 4px 1px;
 
     &:not(:last-child) {
       margin-right: 4px;
@@ -147,6 +153,8 @@
     width: 140px;
     height: 140px;
 
+    flex-shrink: 0;
+
     display: flex;
     align-items: center;
     justify-content: center;
@@ -197,7 +205,7 @@
     }
 
     &__message {
-      min-width: 502px;
+      min-width: 258px;
 
       resize: both;
     }

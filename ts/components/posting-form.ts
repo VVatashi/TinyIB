@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import { eventBus, Events } from '..';
-import { SettingsInterface } from '../settings';
+import { draggable } from '.';
+import { eventBus, Events, SettingsInterface } from '..';
 import { DOM, Cookie } from '../utils';
 
 interface ViewModel {
@@ -56,14 +56,15 @@ export class PostingForm {
     }}</span>
 
     <span class="posting-form__header-buttons">
-      <button type="button" class="button posting-form__close"
-        v-on:click="onCloseClick()">⨯</button>
-    </span>
+      <button type="button" class="button posting-form__reset"
+        v-on:click="resetFields()" title="Clear form">⎚</button>
 
-    <span class="posting-form__header-buttons">
       <button type="button" class="button posting-form__float"
         v-if="position !== 'float' && mode !== 'mobile'"
-        v-on:click="position = 'float'">↑</button>
+        v-on:click="makeFloating()" title="Floating form">↑</button>
+
+      <button type="button" class="button posting-form__close"
+        v-on:click="onCloseClick()" title="Close form">⨯</button>
     </span>
   </div>
 
@@ -210,26 +211,50 @@ export class PostingForm {
         this._resize = this.updateMode.bind(this);
         window.addEventListener('resize', this._resize);
       },
-      mounted() {
-        const header = this.$refs.header as HTMLElement;
-        if (header) {
-          this._mouseDown = this.onMouseDown.bind(this);
-          header.addEventListener('pointerdown', this._mouseDown);
-        }
-      },
       destroyed() {
         if (this._resize) {
           window.removeEventListener('resize', this._resize);
           this._resize = null;
         }
       },
+      mixins: [
+        draggable,
+      ],
       methods: {
+        getDragHandle() {
+          return this.$refs.header;
+        },
+        getDraggable() {
+          if (this.position !== 'float') {
+            return null;
+          }
+
+          return this.$refs.form;
+        },
         resetFields() {
           this.fields.subject = '';
           this.fields.message = '';
           this.fields.file = '';
           this.file = null;
           this.updatePreview();
+        },
+        makeFloating() {
+          this.position = 'float';
+
+          const form = this.$refs.form as HTMLElement;
+          if (!form) {
+            return;
+          }
+
+          if (!form.style.top) {
+            const rect = form.getBoundingClientRect();
+
+            const x = window.innerWidth - rect.width - 100;
+            const y = window.innerHeight - rect.height - 100;
+
+            form.style.left = `${x}px`;
+            form.style.top = `${y}px`;
+          }
         },
         showFileDialog() {
           if (this.$refs.file) {
@@ -238,7 +263,7 @@ export class PostingForm {
         },
         updateMode() {
           this.mode = window.innerWidth < 600 ? 'mobile' : 'default';
-          if (this.mode == 'mobile' && this.position == 'float') {
+          if (this.mode === 'mobile' && this.position === 'float') {
             component.moveToBottom();
           }
         },
@@ -274,56 +299,6 @@ export class PostingForm {
           } else {
             this.previewType = '';
             this.previewSrc = '';
-          }
-        },
-        onMouseDown(e: PointerEvent) {
-          const form = this.$refs.form as HTMLElement;
-          if (!form || this.position !== 'float') {
-            return;
-          }
-
-          this._mouseDownFormLeft = form.offsetLeft;
-          this._mouseDownFormTop = form.offsetTop;
-
-          this._mouseDownMouseLeft = e.clientX;
-          this._mouseDownMouseTop = e.clientY;
-
-          if (!this._mouseMove) {
-            this._mouseMove = this.onMouseMove.bind(this);
-            window.addEventListener('pointermove', this._mouseMove);
-          }
-
-          if (!this._mouseUp) {
-            this._mouseUp = this.onMouseUp.bind(this);
-            window.addEventListener('pointerup', this._mouseUp);
-            window.addEventListener('pointercancel', this._mouseUp);
-          }
-        },
-        onMouseMove(e: PointerEvent) {
-          const form = this.$refs.form as HTMLElement;
-          if (!form || this.position !== 'float') {
-            return;
-          }
-
-          const deltaX = e.clientX - this._mouseDownMouseLeft;
-          const deltaY = e.clientY - this._mouseDownMouseTop;
-
-          const x = this._mouseDownFormLeft + deltaX;
-          const y = this._mouseDownFormTop + deltaY;
-
-          form.style.left = `${x}px`;
-          form.style.top = `${y}px`;
-        },
-        onMouseUp(e: PointerEvent) {
-          if (this._mouseMove) {
-            window.removeEventListener('pointermove', this._mouseMove);
-            this._mouseMove = null;
-          }
-
-          if (this._mouseUp) {
-            window.removeEventListener('pointerup', this._mouseUp);
-            window.removeEventListener('pointercancel', this._mouseUp);
-            this._mouseUp = null;
           }
         },
         onCloseClick() {
@@ -541,30 +516,34 @@ export class PostingForm {
         link.addEventListener('click', e => {
           e.preventDefault();
 
-          if (this.isInThread && this.viewModel.position !== 'float') {
+          const vm = this.viewModel;
+          if (this.isInThread && vm.position !== 'float') {
             // Move form to the post.
             this.moveToPost(post);
           }
 
           // Insert reply markup.
-          const message = this.viewModel.fields.message;
+          const message = vm.fields.message;
           if (message.length && !message.endsWith('\n')) {
-            this.viewModel.fields.message += '\n';
+            vm.fields.message += '\n';
           }
-          this.viewModel.fields.message += `>>${id}\n`;
+
+          vm.fields.message += `>>${id}\n`;
 
           const selection = window.getSelection().toString();
           if (selection) {
-            this.viewModel.fields.message += `> ${selection}\n`;
+            vm.fields.message += `> ${selection}\n`;
           }
 
           setTimeout(() => {
-            const messageEl = this.viewModel.$refs.message as HTMLTextAreaElement;
+            const messageEl = vm.$refs.message as HTMLElement;
             if (messageEl) {
               messageEl.focus();
             }
           });
         });
+
+        link.setAttribute('title', 'Quick reply');
       });
     });
   }
@@ -584,7 +563,8 @@ export class PostingForm {
       post.parentElement.insertBefore(form, post.nextSibling);
     }
 
-    this.viewModel.position = 'post';
+    const vm = this.viewModel;
+    vm.position = 'post';
 
     const showButton = DOM.qid('posting-form-show');
     if (showButton) {
@@ -592,7 +572,7 @@ export class PostingForm {
     }
 
     setTimeout(() => {
-      const message = this.viewModel.$refs.message as HTMLElement;
+      const message = vm.$refs.message as HTMLElement;
       if (message) {
         message.focus();
       }
@@ -606,7 +586,8 @@ export class PostingForm {
       wrapper.insertBefore(form, null);
     }
 
-    this.viewModel.position = 'bottom';
+    const vm = this.viewModel;
+    vm.position = 'bottom';
 
     const showButton = DOM.qid('posting-form-show');
     if (showButton) {
@@ -614,7 +595,7 @@ export class PostingForm {
     }
 
     setTimeout(() => {
-      const message = this.viewModel.$refs.message as HTMLElement;
+      const message = vm.$refs.message as HTMLElement;
       if (message) {
         message.focus();
       }
