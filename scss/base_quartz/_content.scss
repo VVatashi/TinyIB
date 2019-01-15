@@ -1,6 +1,3 @@
-@import '../utils/index';
-@import 'vars';
-
 .content {
   &__auth-form {
     margin: 0 auto;
@@ -48,7 +45,7 @@
   }
 
   &__settings-form {
-    max-width: 900px;
+    max-width: 600px;
     margin: 0 auto;
   }
 }

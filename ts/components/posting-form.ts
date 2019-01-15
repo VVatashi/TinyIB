@@ -1,7 +1,7 @@
 import Vue from 'vue';
-import { draggable } from '.';
-import { eventBus, Events, SettingsInterface } from '..';
-import { DOM, Cookie } from '../utils';
+import { draggable, FilePreview } from '.';
+import { eventBus, Events, SettingsManager } from '..';
+import { DOM } from '../utils';
 
 interface ViewModel {
   fields: {
@@ -11,8 +11,6 @@ interface ViewModel {
     message: string;
   };
   file?: File;
-  previewSrc: string;
-  previewType: '' | 'image' | 'video';
   disabled: boolean;
   status: string;
   position: 'hidden' | 'bottom' | 'post' | 'float';
@@ -25,7 +23,6 @@ export class PostingForm {
 
   constructor() {
     eventBus.$on(Events.Ready, this.onReady.bind(this));
-    eventBus.$on(Events.PostsInserted, this.onPostsInserted.bind(this));
   }
 
   onReady() {
@@ -40,7 +37,7 @@ export class PostingForm {
 
     this.isInThread = isInThread;
 
-    const settings = JSON.parse(Cookie.get('settings', '{}')) as SettingsInterface;
+    const settings = SettingsManager.load();
 
     const component = this;
     this.viewModel = new Vue({
@@ -56,36 +53,31 @@ export class PostingForm {
     }}</span>
 
     <span class="posting-form__header-buttons">
-      <button type="button" class="button posting-form__reset"
-        v-on:click="resetFields()" title="Clear form">⎚</button>
+      <span class="posting-form__reset"
+        v-on:click="resetFields()" title="Clear form"></span>
 
-      <button type="button" class="button posting-form__float"
+      <span class="posting-form__float"
         v-if="position !== 'float' && mode !== 'mobile'"
-        v-on:click="makeFloating()" title="Floating form">↑</button>
+        v-on:click="makeFloating()" title="Floating form"></span>
 
-      <button type="button" class="button posting-form__close"
-        v-on:click="onCloseClick()" title="Close form">⨯</button>
+      <span class="posting-form__close"
+        v-on:click="onCloseClick()" title="Close form"></span>
     </span>
   </div>
 
   <div class="posting-form__content">
-    <div class="posting-form__preview" v-on:click="showFileDialog()"
-      v-bind:class="{ 'posting-form__preview--mobile': mode == 'mobile',
-        'posting-form__preview--right': previewAlign == 'right' }"
-      v-show="mode == 'default' || file"
-      v-on:dragenter.stop.prevent
-      v-on:dragleave.stop.prevent
-      v-on:dragover.stop.prevent
-      v-on:drop.stop.prevent="onFileDrop($event)">
-      <img v-if="previewType == 'image'" class="posting-form__preview-image"
-        v-bind:src="previewSrc" />
-      <video v-else-if="previewType == 'video'" class="posting-form__preview-image"
-        v-bind:src="previewSrc" autoplay loop muted></video>
-      <p v-else-if="previewType == ''">Upload file</p>
-
+    <x-file-preview class="posting-form__preview"
+      v-bind:class="{
+        'posting-form__preview--mobile': mode == 'mobile',
+        'posting-form__preview--right': settings.previewAlign == 'right',
+      }"
+      v-bind:file="file"
+      v-on:click="showFileDialog()"
+      v-on:drop="onFileDrop($event)"
+      v-show="mode == 'default' || file">
       <button type="button" class="button posting-form__preview-remove"
-        v-if="file" v-on:click.stop="file = null, updatePreview()">⨯</button>
-    </div>
+        v-if="file" v-on:click.stop="file = null">⨯</button>
+    </x-file-preview>
 
     <div class="posting-form__main">
       <div class="posting-form__row">
@@ -100,15 +92,15 @@ export class PostingForm {
             v-model="fields.file" v-bind:disabled="disabled"
             v-on:change="onFileChange($event.target.files)"
             ref="file" />
-
-          <span class="posting-form__attachment-icon"></span>
         </label>
 
         <button type="submit" class="button posting-form__submit"
           v-if="mode == 'default'" v-bind:disabled="disabled">Reply</button>
       </div>
 
-      <div class="posting-form__markup-row markup">
+      <div class="posting-form__markup-row markup"
+        v-show="(mode === 'mobile') && settings.showMarkupMobile
+          || (mode !== 'mobile') && settings.showMarkup">
         <button type="button" class="button posting-form__markup-button"
           v-on:click.prevent="insertMarkup('b')">
           <strong>b</strong>
@@ -184,8 +176,6 @@ export class PostingForm {
             message: '',
           },
           file: null,
-          previewSrc: '',
-          previewType: '',
           disabled: false,
           status: '',
           position: 'hidden',
@@ -196,8 +186,8 @@ export class PostingForm {
         threadId() {
           return threadId;
         },
-        previewAlign() {
-          return settings.formPreviewAlign;
+        settings() {
+          return settings.form;
         },
       },
       created() {
@@ -216,6 +206,9 @@ export class PostingForm {
           window.removeEventListener('resize', this._resize);
           this._resize = null;
         }
+      },
+      components: {
+        'x-file-preview': FilePreview,
       },
       mixins: [
         draggable,
@@ -236,7 +229,6 @@ export class PostingForm {
           this.fields.message = '';
           this.fields.file = '';
           this.file = null;
-          this.updatePreview();
         },
         makeFloating() {
           this.position = 'float';
@@ -267,40 +259,6 @@ export class PostingForm {
             component.moveToBottom();
           }
         },
-        updatePreview() {
-          if (this.file) {
-            const reader = new FileReader();
-            reader.addEventListener('load', e => {
-              if (this.file.type) {
-                const type = this.file.type;
-                if (type.startsWith('video/')) {
-                  this.previewType = 'video';
-                } else if (type.startsWith('audio/')) {
-                  this.previewType = 'audio';
-                } else {
-                  this.previewType = 'image';
-                }
-              } else if (this.file.name) {
-                const name = this.file.name;
-                if (name.endsWith('.webm') || name.endsWith('.mp4')) {
-                  this.previewType = 'video';
-                } else if (name.endsWith('.mp3')) {
-                  this.previewType = 'audio';
-                } else {
-                  this.previewType = 'image';
-                }
-              } else {
-                this.previewType = 'image';
-              }
-
-              this.previewSrc = (e.target as any).result;
-            });
-            reader.readAsDataURL(this.file);
-          } else {
-            this.previewType = '';
-            this.previewSrc = '';
-          }
-        },
         onCloseClick() {
           component.hide();
         },
@@ -312,7 +270,6 @@ export class PostingForm {
           const file = e.dataTransfer.files[0];
           if (file) {
             this.file = file;
-            this.updatePreview();
           } else {
             const text = e.dataTransfer.getData('text');
             if (text && text.match(/https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{2,}\.[a-z]{2,}\b[-a-zA-Z0-9@:%_\+.~#?&\/=]*/)) {
@@ -328,11 +285,9 @@ export class PostingForm {
                 if (xhr.status < 400) {
                   this.status = '';
                   this.file = xhr.response;
-                  this.updatePreview();
                 } else {
                   this.status = `Error: ${xhr.status} ${xhr.statusText}`;
                   this.file = null;
-                  this.updatePreview();
                 }
               });
 
@@ -342,7 +297,6 @@ export class PostingForm {
         },
         onFileChange(files: FileList) {
           this.file = files.length ? files[0] : null;
-          this.updatePreview();
         },
         onMessageKeyDown(e: KeyboardEvent) {
           // Submit form on Ctrl+Enter in the message field.
@@ -361,7 +315,6 @@ export class PostingForm {
           })[0];
           if (item) {
             this.file = item.getAsFile();
-            this.updatePreview();
           }
         },
         insertMarkup(tag: string) {
@@ -386,7 +339,7 @@ export class PostingForm {
             ].join('');
 
             // Restore selection.
-            setTimeout(() => {
+            this.$nextTick(() => {
               messageEl.focus();
               messageEl.selectionStart = selection.begin + openingTag.length;
               messageEl.selectionEnd = selection.end + openingTag.length;
@@ -400,7 +353,7 @@ export class PostingForm {
               ].join('');
 
               // Restore selection.
-              setTimeout(() => {
+              this.$nextTick(() => {
                 messageEl.focus();
                 messageEl.selectionStart = selection.begin + closingTag.length;
                 messageEl.selectionEnd = selection.end + closingTag.length;
@@ -413,7 +366,7 @@ export class PostingForm {
               ].join('');
 
               // Restore selection.
-              setTimeout(() => {
+              this.$nextTick(() => {
                 messageEl.focus();
                 messageEl.selectionStart = selection.begin + openingTag.length;
                 messageEl.selectionEnd = selection.end + openingTag.length;
@@ -506,46 +459,46 @@ export class PostingForm {
         this.moveToBottom();
       });
     }
-  }
 
-  onPostsInserted(posts: HTMLElement[]) {
-    posts.forEach(post => {
-      const referenceLinks = DOM.qsa('a[data-reflink]', post);
-      referenceLinks.forEach(link => {
-        const id = +link.getAttribute('data-reflink');
-        link.addEventListener('click', e => {
-          e.preventDefault();
+    const content = DOM.qs('.layout__content');
+    if (content) {
+      content.addEventListener('click', e => {
+        const target = e.target as HTMLElement;
+        if (!target.getAttribute('data-reflink')) {
+          return;
+        }
 
-          const vm = this.viewModel;
-          if (this.isInThread && vm.position !== 'float') {
-            // Move form to the post.
-            this.moveToPost(post);
+        e.preventDefault();
+
+        const vm = this.viewModel;
+        if (this.isInThread && vm.position !== 'float') {
+          // Move form to the post.
+          const post = target.closest('.post') as HTMLElement;
+          this.moveToPost(post);
+        }
+
+        // Insert reply markup.
+        const message = vm.fields.message;
+        if (message.length && !message.endsWith('\n')) {
+          vm.fields.message += '\n';
+        }
+
+        const id = target.getAttribute('data-reflink');
+        vm.fields.message += `>>${id}\n`;
+
+        const selection = window.getSelection().toString();
+        if (selection) {
+          vm.fields.message += `> ${selection}\n`;
+        }
+
+        vm.$nextTick(() => {
+          const messageEl = vm.$refs.message as HTMLElement;
+          if (messageEl) {
+            messageEl.focus();
           }
-
-          // Insert reply markup.
-          const message = vm.fields.message;
-          if (message.length && !message.endsWith('\n')) {
-            vm.fields.message += '\n';
-          }
-
-          vm.fields.message += `>>${id}\n`;
-
-          const selection = window.getSelection().toString();
-          if (selection) {
-            vm.fields.message += `> ${selection}\n`;
-          }
-
-          setTimeout(() => {
-            const messageEl = vm.$refs.message as HTMLElement;
-            if (messageEl) {
-              messageEl.focus();
-            }
-          });
         });
-
-        link.setAttribute('title', 'Quick reply');
       });
-    });
+    }
   }
 
   protected hide() {
@@ -571,7 +524,7 @@ export class PostingForm {
       showButton.classList.remove('hidden');
     }
 
-    setTimeout(() => {
+    vm.$nextTick(() => {
       const message = vm.$refs.message as HTMLElement;
       if (message) {
         message.focus();
@@ -594,7 +547,7 @@ export class PostingForm {
       showButton.classList.add('hidden');
     }
 
-    setTimeout(() => {
+    vm.$nextTick(() => {
       const message = vm.$refs.message as HTMLElement;
       if (message) {
         message.focus();

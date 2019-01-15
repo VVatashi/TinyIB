@@ -1,13 +1,9 @@
-@import '../utils/index';
-@import 'vars';
-
 .post-header {
-  @extend %xs-hidden;
+  @include breakpoint-max($xs-up) {
+    display: none;
+  }
 
   &__delete {
-    /*display: inline;
-    margin: 0 0.25em 0 0;*/
-
     display: none;
   }
 

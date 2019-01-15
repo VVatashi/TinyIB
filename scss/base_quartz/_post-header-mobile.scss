@@ -1,8 +1,7 @@
-@import '../utils/index';
-@import 'vars';
-
 .post-header-mobile {
-  @extend %xs-only;
+  @include breakpoint($xs-up) {
+    display: none;
+  }
 
   display: block;
   line-height: 1.5;

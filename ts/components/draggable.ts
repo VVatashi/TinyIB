@@ -1,6 +1,8 @@
 const pointerEvents = 'PointerEvent' in window;
 const touchEvents = 'ontouchstart' in window;
 
+interface Coords { x: number, y: number }
+
 export const draggable = {
   mounted() {
     if (!this.getDragHandle) {
@@ -86,6 +88,27 @@ export const draggable = {
         }
       }
     },
+    _checkBounds({ x, y }: Coords): Coords {
+      if (!this.getDraggable) {
+        return { x, y };
+      }
+
+      const draggable = this.getDraggable() as HTMLElement;
+      if (!draggable) {
+        return { x, y };
+      }
+
+      const rect = draggable.getBoundingClientRect();
+      const minX = 0;
+      const minY = 0;
+      const maxX = document.body.clientWidth - rect.width;
+      const maxY = window.innerHeight - rect.height;
+
+      return {
+        x: Math.min(Math.max(minX, x), maxX),
+        y: Math.min(Math.max(minY, y), maxY),
+      };
+    },
     _onMouseMove(e: PointerEvent | TouchEvent) {
       if (!this.getDraggable) {
         return;
@@ -111,15 +134,13 @@ export const draggable = {
         deltaY = touch.clientY - this._dragStart.y;
       }
 
-      const rect = draggable.getBoundingClientRect();
-      const maxX = window.innerWidth - rect.width;
-      const maxY = window.innerHeight - rect.height;
+      const coords = this._checkBounds({
+        x: this._draggablePosition.x + deltaX,
+        y: this._draggablePosition.y + deltaY,
+      });
 
-      const x = Math.min(Math.max(0, this._draggablePosition.x + deltaX), maxX);
-      const y = Math.min(Math.max(0, this._draggablePosition.y + deltaY), maxY);
-
-      draggable.style.left = `${x}px`;
-      draggable.style.top = `${y}px`;
+      draggable.style.left = `${coords.x}px`;
+      draggable.style.top = `${coords.y}px`;
     },
     _onMouseUp(e: PointerEvent | TouchEvent) {
       if (this._mouseMove) {

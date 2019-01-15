@@ -1,3 +1,9 @@
 export { eventBus } from './event-bus';
 export { Events } from './events';
-export { SettingsInterface, Settings } from './settings';
+
+export {
+  FormSettings,
+  TimeSettings,
+  Settings,
+  SettingsManager,
+} from './settings';

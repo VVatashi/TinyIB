@@ -1,10 +1,61 @@
 .settings-form {
-  &__section {
-    margin-bottom: 1em;
+  &__tabs {
+    padding: 0 2px;
   }
 
-  &__row {
-    margin-bottom: 1em;
+  &__tab {
+    @extend .button;
+
+    border: $form-border;
+    border-bottom: 0;
+
+    border-radius: $form-border-radius;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+
+    padding: 0.5em 1em;
+
+    &--active {
+      @extend .button:active;
+    }
+  }
+
+  &__tab-content {
+    background: $form-background;
+
+    border: $form-border;
+    border-bottom: 0;
+
+    border-radius: $form-border-radius;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+
+    padding: $form-content-padding;
+  }
+
+  &__option-title {
+    margin: 1em 1em 0.5em;
+  }
+
+  &__radio {
+    vertical-align: middle;
+  }
+
+  &__footer {
+    background: $form-background;
+
+    border: $form-border;
+    border-top: 0;
+
+    border-radius: $form-border-radius;
+    border-top-right-radius: 0;
+    border-top-left-radius: 0;
+
+    padding: $form-content-padding;
+  }
+
+  &__buttons {
+    padding: 0.5em 1em;
   }
 
   &__status {

@@ -1,26 +1,20 @@
 import { DateTime } from 'luxon';
-import { SettingsInterface } from '..';
+import { Settings } from '..';
 
 export class Time {
-  static format(time: DateTime, settings: SettingsInterface) {
-    const locale = settings.timeLocale;
-    const localeValue = settings.timeLocaleCustomValue;
-    const zone = settings.timeZone;
-    const zoneFixedOffset = settings.timeZoneFixedOffset;
-    const format = settings.timeFormat;
-    const formatValue = settings.timeFormatCustomValue;
-
-    if (locale === 'custom') {
-      time = time.setLocale(localeValue);
+  static format(time: DateTime, settings: Settings) {
+    if (settings.time.locale === 'custom') {
+      time = time.setLocale(settings.time.localeCustom);
     }
 
-    if (zone === 'fixed') {
-      const offsetStr = 'UTC' + (zoneFixedOffset >= 0 ? '+' : '') + zoneFixedOffset.toString();
+    if (settings.time.zone === 'fixed') {
+      const offset = settings.time.zoneFixed;
+      const offsetStr = 'UTC' + (offset >= 0 ? '+' : '') + offset.toString();
       time = time.setZone(offsetStr);
     }
 
-    if (format === 'custom') {
-      return time.toFormat(formatValue);
+    if (settings.time.format === 'custom') {
+      return time.toFormat(settings.time.formatCustom);
     }
     else {
       return time.toFormat('d.LL.yyyy HH:mm:ss');
