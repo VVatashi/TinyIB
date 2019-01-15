@@ -1,1 +1,6 @@
 @import 'normalize';
+
+$fa-font-path: '../fonts';
+
+@import 'fontawesome/fontawesome';
+@import "fontawesome/regular";

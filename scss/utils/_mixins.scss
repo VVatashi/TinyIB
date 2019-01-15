@@ -1,0 +1,44 @@
+@mixin clearfix {
+  &::before {
+    clear: both;
+    content: '';
+    display: table;
+  }
+
+  &::after {
+    clear: both;
+    content: '';
+    display: table;
+  }
+}
+
+@mixin breakpoint($min-width) {
+  @media screen and (min-width: $min-width) {
+    @content;
+  }
+}
+
+@mixin breakpoint-max($max-width) {
+  @media screen and (max-width: $max-width - 1) {
+    @content;
+  }
+}
+
+@mixin brackets {
+  &::before {
+    content: '[';
+  }
+
+  &::after {
+    content: ']';
+  }
+}
+
+@mixin placeholder {
+  ::-webkit-input-placeholder {@content}
+  :-moz-placeholder           {@content}
+  ::-moz-placeholder          {@content}
+  :-ms-input-placeholder      {@content}
+  ::placeholder-shown         {@content}
+  ::placeholder               {@content}
+}

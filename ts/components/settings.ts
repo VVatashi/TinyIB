@@ -1,10 +1,13 @@
 import { DateTime } from 'luxon';
 import Vue from 'vue';
-import { eventBus, Events, SettingsInterface } from '..';
-import { Cookie, DOM, Time } from '../utils';
+import {
+  eventBus, Events,
+  Settings as SettingsData, SettingsManager,
+} from '..';
+import { DOM, Time } from '../utils';
 
 export class Settings {
-  protected readonly settings: SettingsInterface;
+  protected readonly settings: SettingsData;
   protected viewModel: Vue;
 
   constructor() {
@@ -21,122 +24,160 @@ export class Settings {
       el: '#settings_form',
       template: `
 <div class="content__settings-form settings-form" id="settings_form">
-  <h3 class="settings-form__section-title">Form settings</h3>
-  <fieldset class="settings-form__section">
-    <legend class="settings-form__section-title">File preview</legend>
+  <ul class="settings-form__tabs">
+    <li class="settings-form__tab"
+      v-bind:class="{ 'settings-form__tab--active': tab === 'form' }"
+      v-on:click="tab = 'form'">Form</li>
 
-    <p class="settings-form__row">
-      <input class="settings-form__radio" type="radio" id="form_preview_align_right" name="form_preview_align"
-        value="right" v-model="settings.formPreviewAlign" />
+    <li class="settings-form__tab"
+      v-bind:class="{ 'settings-form__tab--active': tab === 'time' }"
+      v-on:click="tab = 'time'">Time</li>
+  </ul>
 
-      <label class="settings-form__label" for="form_preview_align_right">On the right</label>
-    </p>
+  <div class="settings-form__tab-content"
+    v-show="tab === 'form'">
+    <h3 class="settings-form__option-title">Preview Alignment</h3>
 
-    <p class="settings-form__row">
-      <input class="settings-form__radio" type="radio" id="form_preview_align_left" name="form_preview_align"
-        value="left" v-model="settings.formPreviewAlign" />
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="radio" class="settings-form__radio"
+          name="form_preview_align" value="left"
+          v-model="settings.form.previewAlign" />
+        On the left
+      </label>
+    </div>
 
-      <label class="settings-form__label" for="form_preview_align_left">On the left</label>
-    </p>
-  </fieldset>
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="radio" class="settings-form__radio"
+          name="form_preview_align" value="right"
+          v-model="settings.form.previewAlign" />
+        On the right
+      </label>
+    </div>
 
-  <h3 class="settings-form__section-title">Time settings</h3>
-  <fieldset class="settings-form__section">
-    <legend class="settings-form__section-title">Language</legend>
+    <h3 class="settings-form__option-title">Markup buttons</h3>
 
-    <p class="settings-form__row">
-      <input class="settings-form__radio" type="radio" id="time_locale_default" name="time_locale"
-        value="default" v-model="settings.timeLocale" />
-      <label class="settings-form__label" for="time_locale_default">Browser default</label>
-    </p>
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="checkbox" class="settings-form__checkbox"
+          v-model="settings.form.showMarkup" />
+        Show markup
+      </label>
+    </div>
 
-    <p class="settings-form__row">
-      <input class="settings-form__radio" type="radio" id="time_locale_custom" name="time_locale"
-        value="custom" v-model="settings.timeLocale" />
-      <label class="settings-form__label" for="time_locale_custom">Custom</label>
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="checkbox" class="settings-form__checkbox"
+          v-model="settings.form.showMarkupMobile" />
+        Show markup (mobile)
+      </label>
+    </div>
+  </div>
 
-      <input class="input settings-form__text" type="text" v-on:click="settings.timeLocale = 'custom'"
-        v-model="settings.timeLocaleCustomValue" placeholder="en" />
-    </p>
-  </fieldset>
+  <div class="settings-form__tab-content"
+    v-show="tab === 'time'">
+    <h3 class="settings-form__option-title">Language</h3>
 
-  <fieldset class="settings-form__section">
-    <legend class="settings-form__section-title">Format</legend>
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="radio" class="settings-form__radio"
+          name="time_locale" value="default"
+          v-model="settings.time.locale" />
+        Browser default
+      </label>
+    </div>
 
-    <p class="settings-form__row">
-      <input class="settings-form__radio" type="radio" id="time_format_default" name="time_format"
-        value="default" v-model="settings.timeFormat" />
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="radio" class="settings-form__radio"
+          name="time_locale" value="custom"
+          v-model="settings.time.locale" />
+        Custom
+      </label>
 
-      <label class="settings-form__label" for="time_format_default">Browser default</label>
-    </p>
+      <input type="text" class="input settings-form__text" placeholder="en"
+        v-on:click="settings.time.locale = 'custom'"
+        v-model="settings.time.localeCustom" />
+    </div>
 
-    <p class="settings-form__row">
-      <input class="settings-form__radio" type="radio" id="time_format_custom" name="time_format"
-        value="custom" v-model="settings.timeFormat" />
+    <h3 class="settings-form__option-title">Format</h3>
 
-      <label class="settings-form__label" for="time_format_custom">Custom</label>
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="radio" class="settings-form__radio"
+          name="time_format" value="default"
+          v-model="settings.time.format" />
+        Browser default
+      </label>
+    </div>
 
-      <input class="input settings-form__text" type="text" v-on:click="settings.timeFormat = 'custom'"
-        v-model="settings.timeFormatCustomValue" placeholder="EEE, dd MMM yyyy HH:mm:ss" />
-    </p>
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="radio" class="settings-form__radio"
+          name="time_format" value="custom"
+          v-model="settings.time.format" />
+        Custom
+      </label>
+
+      <input type="text" class="input settings-form__text"
+        placeholder="EEE, dd MMM yyyy HH:mm:ss"
+        v-on:click="settings.time.format = 'custom'"
+        v-model="settings.time.formatCustom" />
+    </div>
 
     <p>See the <a href="https://github.com/moment/luxon/blob/master/docs/formatting.md#table-of-tokens">luxon documentation</a> for the custom tokens reference.</p>
-  </fieldset>
 
-  <fieldset class="settings-form__section">
-    <legend class="settings-form__section-title">Time zone</legend>
+    <h3 class="settings-form__option-title">Time zone</h3>
 
-    <p class="settings-form__row">
-      <input class="settings-form__radio" type="radio" id="time_zone_default" name="time_zone"
-        value="default" v-model="settings.timeZone" />
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="radio" class="settings-form__radio"
+          name="time_zone" value="default"
+          v-model="settings.time.zone" />
+        Browser default
+      </label>
+    </div>
 
-      <label class="settings-form__label" for="time_zone_default">Browser default</label>
-    </p>
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="radio" class="settings-form__radio"
+          name="time_zone" value="fixed"
+          v-model="settings.time.zone" />
+        Fixed UTC offset
+      </label>
 
-    <p class="settings-form__row">
-      <input class="settings-form__radio" type="radio" id="time_zone_fixed" name="time_zone"
-        value="fixed" v-model="settings.timeZone" />
+      <input type="number" class="input settings-form__text"
+        min="-99" max="99"
+        v-on:click="settings.time.zone = 'fixed'"
+        v-model="settings.time.zoneFixed" />
+    </div>
 
-      <label class="settings-form__label" for="time_zone_fixed">Fixed UTC offset</label>
+    <h3 class="settings-form__option-title">Current format</h3>
 
-      <input class="input settings-form__text" type="number" v-on:click="settings.timeZone = 'fixed'"
-        v-model="settings.timeZoneFixedOffset" min="-99" max="99" />
-    </p>
-  </fieldset>
+    <p>{{ time }}</p>
+  </div>
 
-  <fieldset class="settings-form__section">
-    <legend class="settings-form__section-title">Current format</legend>
+  <div class="settings-form__footer">
+    <div class="settings-form__buttons">
+      <p class="settings-form__status" >{{ status }}</p>
 
-    <p class="settings-form__row">{{ time }}</p>
-  </fieldset>
-
-  <p class="settings-form__status" id="status">{{ status }}</p>
-
-  <p class="settings-form__buttons">
-    <button class="button settings-form__save" type="button"
-      v-on:click.prevent="saveSettings()">Save</button>
-  </p>
+      <button type="button" class="button settings-form__save"
+        v-on:click.prevent="saveSettings()">Save</button>
+    </div>
+  </div>
 </div>`,
       data() {
         return {
-          settings: {
-            formPreviewAlign: 'right',
-            timeLocale: 'default',
-            timeLocaleCustomValue: '',
-            timeFormat: 'default',
-            timeFormatCustomValue: '',
-            timeZone: 'default',
-            timeZoneFixedOffset: 0,
-          },
+          settings: null,
+          tab: 'form',
           time: '',
           status: '',
         };
       },
       created() {
         // Load settings from a cookie
-        const settingsStr = Cookie.get('settings', '{}');
-        const settings = JSON.parse(settingsStr);
-        this.settings = { ...this.settings, ...settings };
+        this.settings = SettingsManager.load();
         this._timer = setInterval(this.updateTime.bind(this), 1000);
       },
       destroyed() {
@@ -155,10 +196,7 @@ export class Settings {
           }
         },
         saveSettings() {
-          const expire = new Date();
-          // One year.
-          expire.setTime(expire.getTime() + 365 * 24 * 60 * 60 * 1000);
-          Cookie.set('settings', JSON.stringify(this.settings), expire);
+          SettingsManager.save(this.settings);
 
           // Indicate that settings are saved.
           this.status = '';

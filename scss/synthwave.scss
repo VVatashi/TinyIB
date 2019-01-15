@@ -47,5 +47,6 @@ $spoiler-color:      inherit;
 
 $quote-color: $link-color;
 
+@import 'utils/index';
 @import 'base_quartz/index';
 @import 'synthwave/index';

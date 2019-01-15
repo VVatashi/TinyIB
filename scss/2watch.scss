@@ -35,5 +35,6 @@ $post-subject-color:  #cc1105;
 $post-name-color:     #117743;
 $post-tripcode-color: #ff0000;
 
+@import 'utils/index';
 @import 'base_quartz/index';
 @import '2watch/index';
