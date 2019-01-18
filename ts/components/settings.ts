@@ -26,6 +26,10 @@ export class Settings {
 <div class="content__settings-form settings-form" id="settings_form">
   <ul class="settings-form__tabs">
     <li class="settings-form__tab"
+      v-bind:class="{ 'settings-form__tab--active': tab === 'common' }"
+      v-on:click="tab = 'common'">Common</li>
+
+    <li class="settings-form__tab"
       v-bind:class="{ 'settings-form__tab--active': tab === 'form' }"
       v-on:click="tab = 'form'">Form</li>
 
@@ -33,6 +37,29 @@ export class Settings {
       v-bind:class="{ 'settings-form__tab--active': tab === 'time' }"
       v-on:click="tab = 'time'">Time</li>
   </ul>
+
+  <div class="settings-form__tab-content"
+    v-show="tab === 'common'">
+    <h3 class="settings-form__option-title">Thread Alignment</h3>
+
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="radio" class="settings-form__radio"
+          name="common_layout_center" value="center"
+          v-model="settings.common.layout" />
+        Center
+      </label>
+    </div>
+
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="radio" class="settings-form__radio"
+          name="common_layout_left" value="left"
+          v-model="settings.common.layout" />
+        Left
+      </label>
+    </div>
+  </div>
 
   <div class="settings-form__tab-content"
     v-show="tab === 'form'">
@@ -170,7 +197,7 @@ export class Settings {
       data() {
         return {
           settings: null,
-          tab: 'form',
+          tab: 'common',
           time: '',
           status: '',
         };

@@ -1,6 +1,8 @@
 .layout {
-  max-width: 1200px;
-  margin: 0 auto;
+  &--center {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
 
   &__header {
     padding: $padding;
