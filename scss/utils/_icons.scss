@@ -33,3 +33,30 @@
     content: fa-content($fa-var-window-close);
   }
 }
+
+%icon-close-solid {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-window-close);
+  }
+}
+
+%icon-reply {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-reply);
+  }
+}
+
+%icon-down {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-arrow-down);
+  }
+}

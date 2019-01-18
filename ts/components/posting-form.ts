@@ -1,7 +1,10 @@
 import Vue from 'vue';
 import { draggable, FilePreview } from '.';
 import { eventBus, Events, SettingsManager } from '..';
+import { Coords } from './draggable';
 import { DOM } from '../utils';
+import { Settings } from '../settings';
+import { Api } from '../api';
 
 interface ViewModel {
   fields: {
@@ -13,13 +16,15 @@ interface ViewModel {
   file?: File;
   disabled: boolean;
   status: string;
-  position: 'hidden' | 'bottom' | 'post' | 'float';
+  hidden: boolean;
+  position: 'bottom' | 'post' | 'float';
   mode: 'mobile' | 'default';
 }
 
 export class PostingForm {
   protected isInThread: boolean = false;
   protected viewModel: Vue & ViewModel;
+  protected settings: Settings = SettingsManager.load();
 
   constructor() {
     eventBus.$on(Events.Ready, this.onReady.bind(this));
@@ -37,15 +42,13 @@ export class PostingForm {
 
     this.isInThread = isInThread;
 
-    const settings = SettingsManager.load();
-
     const component = this;
     this.viewModel = new Vue({
       el: form,
       template: `
 <form class="content__posting-form posting-form" id="posting-form"
   v-bind:class="{ 'posting-form--floating': position == 'float' }"
-  v-on:submit.prevent="onSubmit()" v-show="position !== 'hidden'"
+  v-on:submit.prevent="onSubmit()" v-show="!hidden"
   ref="form">
   <div class="posting-form__header" ref="header">
     <span class="posting-form__title">{{
@@ -54,14 +57,18 @@ export class PostingForm {
 
     <span class="posting-form__header-buttons">
       <span class="posting-form__reset"
-        v-on:click="resetFields()" title="Clear form"></span>
+        v-on:click.stop="resetFields()" title="Clear form"></span>
 
       <span class="posting-form__float"
         v-if="position !== 'float' && mode !== 'mobile'"
-        v-on:click="makeFloating()" title="Floating form"></span>
+        v-on:click.stop="makeFloating()" title="Floating form"></span>
+
+      <span class="posting-form__restore"
+        v-if="position === 'float' && mode !== 'mobile'"
+        v-on:click.stop="moveToBottom()" title="Move form to bottom"></span>
 
       <span class="posting-form__close"
-        v-on:click="onCloseClick()" title="Close form"></span>
+        v-on:click.stop="onCloseClick()" title="Close form"></span>
     </span>
   </div>
 
@@ -75,8 +82,8 @@ export class PostingForm {
       v-on:click="showFileDialog()"
       v-on:drop="onFileDrop($event)"
       v-show="mode == 'default' || file">
-      <button type="button" class="button posting-form__preview-remove"
-        v-if="file" v-on:click.stop="file = null">⨯</button>
+      <span class="posting-form__preview-remove"
+        v-if="file" v-on:click.stop="file = null"></span>
     </x-file-preview>
 
     <div class="posting-form__main">
@@ -178,7 +185,8 @@ export class PostingForm {
           file: null,
           disabled: false,
           status: '',
-          position: 'hidden',
+          hidden: true,
+          position: component.settings.form.float ? 'float' : 'bottom',
           mode: 'mobile',
         };
       },
@@ -187,7 +195,7 @@ export class PostingForm {
           return threadId;
         },
         settings() {
-          return settings.form;
+          return component.settings.form;
         },
       },
       created() {
@@ -200,6 +208,12 @@ export class PostingForm {
         this.updateMode();
         this._resize = this.updateMode.bind(this);
         window.addEventListener('resize', this._resize);
+      },
+      mounted() {
+        if (this.position === 'float') {
+          const position = component.settings.form.floatPosition;
+          this.setPosition(this.checkBounds(position));
+        }
       },
       destroyed() {
         if (this._resize) {
@@ -224,6 +238,25 @@ export class PostingForm {
 
           return this.$refs.form;
         },
+        setPosition(coords: Coords) {
+          const draggable = this.getDraggable();
+          if (!draggable) {
+            return;
+          }
+
+          draggable.style.left = `${coords.x}px`;
+          draggable.style.top = `${coords.y}px`;
+
+          component.settings.form.floatPosition = coords;
+          SettingsManager.save(component.settings);
+        },
+        onDraggableResize() {
+          if (this.hidden) {
+            return;
+          }
+
+          this.setPosition(this.checkBounds(this.getPosition()));
+        },
         resetFields() {
           this.fields.subject = '';
           this.fields.message = '';
@@ -231,22 +264,18 @@ export class PostingForm {
           this.file = null;
         },
         makeFloating() {
+          component.show();
+
           this.position = 'float';
 
-          const form = this.$refs.form as HTMLElement;
-          if (!form) {
-            return;
-          }
+          component.settings.form.float = true;
+          SettingsManager.save(component.settings);
 
-          if (!form.style.top) {
-            const rect = form.getBoundingClientRect();
-
-            const x = window.innerWidth - rect.width - 100;
-            const y = window.innerHeight - rect.height - 100;
-
-            form.style.left = `${x}px`;
-            form.style.top = `${y}px`;
-          }
+          const position = component.settings.form.floatPosition;
+          this.setPosition(this.checkBounds(position));
+        },
+        moveToBottom() {
+          component.moveToBottom();
         },
         showFileDialog() {
           if (this.$refs.file) {
@@ -375,80 +404,77 @@ export class PostingForm {
           }
         },
         insertQuote() {
-          const message = this.fields.message;
-          if (message.length && !message.endsWith('\n')) {
-            this.fields.message += '\n';
-          }
+          const messageEl = this.$refs.message as HTMLTextAreaElement;
+          const selection = {
+            begin: messageEl.selectionStart,
+            end: messageEl.selectionEnd,
+            length: messageEl.selectionEnd - messageEl.selectionStart,
+          };
 
-          const selection = window.getSelection().toString();
-          if (selection) {
-            this.fields.message += `> ${selection}\n`;
-          } else {
-            this.fields.message += '> ';
-          }
-        },
-        onSubmit() {
-          // Submit request to create post.
-          const url = `${window.baseUrl}/ajax/post/create`;
-          const data = new FormData();
-          data.append('parent', threadId.toString());
-          data.append('subject', this.fields.subject);
-          data.append('name', this.fields.name);
-          data.append('message', this.fields.message);
-          data.append('file', this.file);
+          const message = this.fields.message as string;
+          const before = message.substring(0, selection.begin);
+          const after = message.substring(selection.end);
+          const newLineBefore = before.length && !before.endsWith('\n') ? '\n' : '';
+          const newLineAfter = !after.length || !after.startsWith('\n') ? '\n' : '';
+          const quoteText = window.getSelection().toString();
+          const quote = `${newLineBefore}> ${quoteText}${newLineAfter}`;
 
-          const xhr = new XMLHttpRequest();
-          xhr.open('POST', url, true);
-          xhr.setRequestHeader('Accept', 'application/json');
-          xhr.withCredentials = true;
+          this.fields.message = [
+            before,
+            quote,
+            after,
+          ].join('');
 
-          xhr.upload.addEventListener('progress', e => {
-            const progressPercent = Math.ceil(e.loaded / e.total * 100);
-            this.status = `Uploading... ${progressPercent}%`;
+          this.$nextTick(() => {
+            messageEl.focus();
+            messageEl.selectionStart = selection.begin + quote.length;
+            messageEl.selectionEnd = selection.begin + quote.length;
           });
+        },
+        async onSubmit() {
+          this.disabled = true;
 
-          xhr.addEventListener('readystatechange', e => {
-            if (xhr.readyState !== XMLHttpRequest.DONE) {
-              return;
+          try {
+            const location = await Api.createPost({
+              parent: threadId,
+              subject: this.fields.subject,
+              name: this.fields.name,
+              message: this.fields.message,
+              file: this.file,
+            }, e => {
+              const progressPercent = Math.ceil(e.loaded / e.total * 100);
+              this.status = `Uploading... ${progressPercent}%`;
+            });
+
+            this.resetFields();
+            this.status = '';
+
+            if (this.position !== 'float') {
+              // Move form to the initial location.
+              component.moveToBottom();
             }
 
-            // Enable form.
-            this.disabled = false;
-
-            if (xhr.status === 201) {
-              this.resetFields();
-              this.status = '';
-
-              if (this.position !== 'float') {
-                // Move form to the initial location.
-                component.moveToBottom();
-              }
-
-              if (isInThread) {
-                // Trigger DE thread update.
-                const updater = DOM.qs('.de-thr-updater-link') as HTMLAnchorElement;
-                if (updater) {
-                  updater.click();
-                }
-              } else {
-                // Redirect to thread.
-                const location = xhr.getResponseHeader('Location');
-                if (location) {
-                  window.location.href = location;
-                }
+            if (isInThread) {
+              // Trigger DE thread update.
+              const updater = DOM.qs('.de-thr-updater-link') as HTMLAnchorElement;
+              if (updater) {
+                updater.click();
               }
             } else {
-              const data = JSON.parse(xhr.responseText);
-              if (data && data.error) {
-                this.status = `Error: ${data.error}`;
-              } else {
-                this.status = `Error: ${xhr.status} ${xhr.statusText}`;
+              // Redirect to thread.
+              if (location) {
+                window.location.href = location;
               }
             }
-          });
+          } catch (e) {
+            this.status = `Error: ${e}`;
+          }
 
-          xhr.send(data);
-          this.disabled = true;
+          this.disabled = false;
+
+          // Scroll to the bottom.
+          const scrollingEl = document.scrollingElement || document.body;
+          scrollingEl.scrollTop = scrollingEl.scrollHeight;
         },
       },
     });
@@ -456,7 +482,11 @@ export class PostingForm {
     const showButton = DOM.qid('posting-form-show');
     if (showButton) {
       showButton.addEventListener('click', () => {
-        this.moveToBottom();
+        if (this.viewModel.position === 'post') {
+          this.moveToBottom();
+        } else {
+          this.show();
+        }
       });
     }
 
@@ -471,42 +501,65 @@ export class PostingForm {
         e.preventDefault();
 
         const vm = this.viewModel;
-        if (this.isInThread && vm.position !== 'float') {
-          // Move form to the post.
-          const post = target.closest('.post') as HTMLElement;
-          this.moveToPost(post);
+        if (this.isInThread) {
+          if (vm.position !== 'float') {
+            // Move form to the post.
+            const post = target.closest('.post') as HTMLElement;
+            this.moveToPost(post);
+          } else {
+            this.show();
+          }
         }
 
         // Insert reply markup.
-        const message = vm.fields.message;
-        if (message.length && !message.endsWith('\n')) {
-          vm.fields.message += '\n';
-        }
+        const messageEl = vm.$refs.message as HTMLTextAreaElement;
+        const selection = {
+          begin: messageEl.selectionStart,
+          end: messageEl.selectionEnd,
+          length: messageEl.selectionEnd - messageEl.selectionStart,
+        };
 
+        const message = vm.fields.message as string;
+        const before = message.substring(0, selection.begin);
+        const after = message.substring(selection.end);
+        const newLineBefore = before.length && !before.endsWith('\n') ? '\n' : '';
+        const newLineAfter = !after.length || !after.startsWith('\n') ? '\n' : '';
         const id = target.getAttribute('data-reflink');
-        vm.fields.message += `>>${id}\n`;
+        const quoteText = window.getSelection().toString();
+        const quote = quoteText
+          ? `${newLineBefore}>>${id}\n> ${quoteText}${newLineAfter}`
+          : `${newLineBefore}>>${id}${newLineAfter}`;
 
-        const selection = window.getSelection().toString();
-        if (selection) {
-          vm.fields.message += `> ${selection}\n`;
-        }
+        vm.fields.message = [
+          before,
+          quote,
+          after,
+        ].join('');
 
         vm.$nextTick(() => {
-          const messageEl = vm.$refs.message as HTMLElement;
-          if (messageEl) {
-            messageEl.focus();
-          }
+          messageEl.focus();
+          messageEl.selectionStart = selection.begin + quote.length;
+          messageEl.selectionEnd = selection.begin + quote.length;
         });
       });
     }
   }
 
   protected hide() {
-    this.viewModel.position = 'hidden';
+    this.viewModel.hidden = true;
 
     const showButton = DOM.qid('posting-form-show');
     if (showButton) {
       showButton.classList.remove('hidden');
+    }
+  }
+
+  protected show() {
+    this.viewModel.hidden = false;
+
+    const showButton = DOM.qid('posting-form-show');
+    if (showButton) {
+      showButton.classList.add('hidden');
     }
   }
 
@@ -516,8 +569,13 @@ export class PostingForm {
       post.parentElement.insertBefore(form, post.nextSibling);
     }
 
+    this.show();
+
     const vm = this.viewModel;
     vm.position = 'post';
+
+    this.settings.form.float = false;
+    SettingsManager.save(this.settings);
 
     const showButton = DOM.qid('posting-form-show');
     if (showButton) {
@@ -539,13 +597,13 @@ export class PostingForm {
       wrapper.insertBefore(form, null);
     }
 
+    this.show();
+
     const vm = this.viewModel;
     vm.position = 'bottom';
 
-    const showButton = DOM.qid('posting-form-show');
-    if (showButton) {
-      showButton.classList.add('hidden');
-    }
+    this.settings.form.float = false;
+    SettingsManager.save(this.settings);
 
     vm.$nextTick(() => {
       const message = vm.$refs.message as HTMLElement;

@@ -1,7 +1,15 @@
+export interface CommonSettings {
+  layout: 'center' | 'left';
+}
+
 export interface FormSettings {
   previewAlign: 'left' | 'right';
+
   showMarkup: boolean;
   showMarkupMobile: boolean;
+
+  float: boolean;
+  floatPosition: { x: number, y: number };
 }
 
 export interface TimeSettings {
@@ -16,22 +24,32 @@ export interface TimeSettings {
 }
 
 export interface Settings {
+  common: CommonSettings;
   form: FormSettings;
   time: TimeSettings;
 }
 
 const settingsKey = 'settings';
 const defaultSettings: Settings = {
+  common: {
+    layout: 'center',
+  },
   form: {
     previewAlign: 'left',
+
     showMarkup: true,
     showMarkupMobile: false,
+
+    float: false,
+    floatPosition: { x: 100, y: 100 },
   },
   time: {
     locale: 'default',
     localeCustom: '',
+
     zone: 'default',
     zoneFixed: 0,
+
     format: 'default',
     formatCustom: '',
   },

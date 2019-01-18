@@ -9,6 +9,8 @@ import {
   Settings,
   StyleSwitch,
 } from './components';
+import { SettingsManager } from './settings';
+import { DOM } from './utils';
 
 declare global {
   interface Window {
@@ -27,4 +29,10 @@ new NewPostsDetector();
 
 document.addEventListener('DOMContentLoaded', e => {
   eventBus.$emit(Events.Ready);
+
+  const settings = SettingsManager.load();
+  const layout = DOM.qs('.layout');
+  if (layout) {
+    layout.classList.add('layout--' + settings.common.layout);
+  }
 });

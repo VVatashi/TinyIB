@@ -1,99 +1,79 @@
 const pointerEvents = 'PointerEvent' in window;
 const touchEvents = 'ontouchstart' in window;
 
-interface Coords { x: number, y: number }
+export interface Coords { x: number, y: number }
 
 export const draggable = {
   mounted() {
-    if (!this.getDragHandle) {
-      return;
-    }
-
-    const handle = this.getDragHandle() as HTMLElement;
+    const handle = this.getDragHandle();
     if (!handle) {
       return;
     }
 
-    this._mouseDown = this._onMouseDown.bind(this);
+    this.draggableResize = this.onDraggableResize.bind(this);
+    this.draggableMouseDown = this.onDraggableMouseDown.bind(this);
+
+    window.addEventListener('resize', this.draggableResize);
 
     if (pointerEvents) {
-      handle.addEventListener('pointerdown', this._mouseDown);
+      handle.addEventListener('pointerdown', this.draggableMouseDown);
     } else {
       if (touchEvents) {
-        handle.addEventListener('touchstart', this._mouseDown);
+        handle.addEventListener('touchstart', this.draggableMouseDown);
       }
 
-      handle.addEventListener('mousedown', this._mouseDown);
+      handle.addEventListener('mousedown', this.draggableMouseDown);
+    }
+
+    //this.setPosition(this.checkBounds(this.getPosition()));
+  },
+  beforeDestroy() {
+    if (this.draggableResize) {
+      window.removeEventListener('resize', this.draggableResize);
+    }
+
+    const handle = this.getDragHandle();
+    if (handle) {
+      if (pointerEvents) {
+        handle.removeEventListener('pointerdown', this.draggableMouseDown);
+      } else {
+        if (touchEvents) {
+          handle.removeEventListener('touchstart', this.draggableMouseDown);
+        }
+
+        handle.removeEventListener('mousedown', this.draggableMouseDown);
+      }
     }
   },
   methods: {
-    _onMouseDown(e: PointerEvent | TouchEvent) {
-      if (!this.getDraggable) {
-        return;
+    getDragHandle(): HTMLElement {
+      return null;
+    },
+    getDraggable(): HTMLElement {
+      return null;
+    },
+    getPosition(): Coords {
+      const draggable = this.getDraggable();
+      if (!draggable) {
+        return { x: 0, y: 0 };
       }
 
-      const draggable = this.getDraggable() as HTMLElement;
+      return {
+        x: draggable.offsetLeft,
+        y: draggable.offsetTop,
+      };
+    },
+    setPosition(coords: Coords) {
+      const draggable = this.getDraggable();
       if (!draggable) {
         return;
       }
 
-      e.preventDefault();
-      e.stopPropagation();
-
-      this._draggablePosition = {
-        x: draggable.offsetLeft,
-        y: draggable.offsetTop,
-      };
-
-      if (e instanceof MouseEvent || e instanceof PointerEvent) {
-        this._dragStart = {
-          x: e.clientX,
-          y: e.clientY,
-        };
-      } else {
-        const touch = e.touches[0];
-        this._dragStart = {
-          x: touch.clientX,
-          y: touch.clientY,
-        };
-      }
-
-      if (!this._mouseMove) {
-        this._mouseMove = this._onMouseMove.bind(this);
-
-        if (pointerEvents) {
-          window.addEventListener('pointermove', this._mouseMove);
-        } else {
-          if (touchEvents) {
-            window.addEventListener('touchmove', this._mouseMove);
-          }
-
-          window.addEventListener('mousemove', this._mouseMove);
-        }
-      }
-
-      if (!this._mouseUp) {
-        this._mouseUp = this._onMouseUp.bind(this);
-
-        if (pointerEvents) {
-          window.addEventListener('pointerup', this._mouseUp);
-          window.addEventListener('pointercancel', this._mouseUp);
-        } else {
-          if (touchEvents) {
-            window.addEventListener('touchend', this._mouseUp);
-            window.addEventListener('touchcancel', this._mouseUp);
-          }
-
-          window.addEventListener('mouseup', this._mouseUp);
-        }
-      }
+      draggable.style.left = `${coords.x}px`;
+      draggable.style.top = `${coords.y}px`;
     },
-    _checkBounds({ x, y }: Coords): Coords {
-      if (!this.getDraggable) {
-        return { x, y };
-      }
-
-      const draggable = this.getDraggable() as HTMLElement;
+    checkBounds({ x, y }: Coords): Coords {
+      const draggable = this.getDraggable();
       if (!draggable) {
         return { x, y };
       }
@@ -109,12 +89,66 @@ export const draggable = {
         y: Math.min(Math.max(minY, y), maxY),
       };
     },
-    _onMouseMove(e: PointerEvent | TouchEvent) {
-      if (!this.getDraggable) {
+    onDraggableResize() {
+      this.setPosition(this.checkBounds(this.getPosition()));
+    },
+    onDraggableMouseDown(e: PointerEvent | TouchEvent) {
+      const draggable = this.getDraggable();
+      if (!draggable) {
         return;
       }
 
-      const draggable = this.getDraggable() as HTMLElement;
+      e.preventDefault();
+      e.stopPropagation();
+
+      this._draggablePosition = this.getPosition();
+
+      if (e instanceof MouseEvent
+        || pointerEvents && e instanceof PointerEvent) {
+        this._dragStart = {
+          x: e.clientX,
+          y: e.clientY,
+        };
+      } else if (touchEvents && e instanceof TouchEvent) {
+        const touch = e.touches[0];
+        this._dragStart = {
+          x: touch.clientX,
+          y: touch.clientY,
+        };
+      }
+
+      if (!this.draggableMouseMove) {
+        this.draggableMouseMove = this.onDraggableMouseMove.bind(this);
+
+        if (pointerEvents) {
+          window.addEventListener('pointermove', this.draggableMouseMove);
+        } else {
+          if (touchEvents) {
+            window.addEventListener('touchmove', this.draggableMouseMove);
+          }
+
+          window.addEventListener('mousemove', this.draggableMouseMove);
+        }
+      }
+
+      if (!this.draggableMouseUp) {
+        this.draggableMouseUp = this.onDraggableMouseUp.bind(this);
+
+        if (pointerEvents) {
+          window.addEventListener('pointerup', this.draggableMouseUp);
+          window.addEventListener('pointercancel', this.draggableMouseUp);
+        } else {
+          if (touchEvents) {
+            window.addEventListener('touchend', this.draggableMouseUp);
+            window.addEventListener('touchcancel', this.draggableMouseUp);
+          }
+
+          window.addEventListener('mouseup', this.draggableMouseUp);
+        }
+      }
+    },
+    onDraggableMouseMove(e: PointerEvent | TouchEvent) {
+      const draggable = this.getDraggable();
       if (!draggable) {
         return;
       }
@@ -125,52 +159,50 @@ export const draggable = {
       let deltaX = 0;
       let deltaY = 0;
 
-      if (e instanceof MouseEvent || e instanceof PointerEvent) {
+      if (e instanceof MouseEvent
+        || pointerEvents && e instanceof PointerEvent) {
         deltaX = e.clientX - this._dragStart.x;
         deltaY = e.clientY - this._dragStart.y;
-      } else {
+      } else if (touchEvents && e instanceof TouchEvent) {
         const touch = e.touches[0];
         deltaX = touch.clientX - this._dragStart.x;
         deltaY = touch.clientY - this._dragStart.y;
       }
 
-      const coords = this._checkBounds({
+      this.setPosition(this.checkBounds({
         x: this._draggablePosition.x + deltaX,
         y: this._draggablePosition.y + deltaY,
-      });
-
-      draggable.style.left = `${coords.x}px`;
-      draggable.style.top = `${coords.y}px`;
+      }));
     },
-    _onMouseUp(e: PointerEvent | TouchEvent) {
-      if (this._mouseMove) {
+    onDraggableMouseUp(e: PointerEvent | TouchEvent) {
+      if (this.draggableMouseMove) {
         if (pointerEvents) {
-          window.removeEventListener('pointermove', this._mouseMove);
+          window.removeEventListener('pointermove', this.draggableMouseMove);
         } else {
           if (touchEvents) {
-            window.removeEventListener('touchmove', this._mouseMove);
+            window.removeEventListener('touchmove', this.draggableMouseMove);
           }
 
-          window.removeEventListener('mousemove', this._mouseMove);
+          window.removeEventListener('mousemove', this.draggableMouseMove);
         }
       }
 
-      if (this._mouseUp) {
+      if (this.draggableMouseUp) {
         if (pointerEvents) {
-          window.removeEventListener('pointerup', this._mouseUp);
-          window.removeEventListener('pointercancel', this._mouseUp);
+          window.removeEventListener('pointerup', this.draggableMouseUp);
+          window.removeEventListener('pointercancel', this.draggableMouseUp);
         } else {
           if (touchEvents) {
-            window.removeEventListener('touchend', this._mouseUp);
-            window.removeEventListener('touchcancel', this._mouseUp);
+            window.removeEventListener('touchend', this.draggableMouseUp);
+            window.removeEventListener('touchcancel', this.draggableMouseUp);
           }
 
-          window.removeEventListener('mouseup', this._mouseUp);
+          window.removeEventListener('mouseup', this.draggableMouseUp);
         }
       }
 
-      this._mouseMove = null;
-      this._mouseUp = null;
+      this.draggableMouseMove = null;
+      this.draggableMouseUp = null;
     },
   },
 };

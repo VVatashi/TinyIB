@@ -30,4 +30,17 @@
   &__reflink {
     color: inherit;
   }
+
+  &__reflink-icon {
+    @extend %icon-reply;
+    @extend %clickable;
+    font-size: 1.25em;
+    padding: 0 0.1em;
+  }
+
+  @include breakpoint($xs-up) {
+    &__reflink-icon {
+      font-size: 1em;
+    }
+  }
 }
