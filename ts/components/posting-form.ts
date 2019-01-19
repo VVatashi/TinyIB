@@ -505,7 +505,11 @@ export class PostingForm {
           if (vm.position !== 'float') {
             // Move form to the post.
             const post = target.closest('.post') as HTMLElement;
-            this.moveToPost(post);
+            if (post) {
+              this.moveToPost(post);
+            } else {
+              this.moveToBottom();
+            }
           } else {
             this.show();
           }
