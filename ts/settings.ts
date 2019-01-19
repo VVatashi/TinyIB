@@ -3,10 +3,14 @@ export interface CommonSettings {
 }
 
 export interface FormSettings {
+  scrollBottom: boolean;
+
+  align: 'center' | 'left';
   previewAlign: 'left' | 'right';
 
   showMarkup: boolean;
   showMarkupMobile: boolean;
+  insertTagsInPairs: boolean;
 
   float: boolean;
   floatPosition: { x: number, y: number };
@@ -32,13 +36,17 @@ export interface Settings {
 const settingsKey = 'settings';
 const defaultSettings: Settings = {
   common: {
-    layout: 'center',
+    layout: 'left',
   },
   form: {
-    previewAlign: 'left',
+    align: 'center',
+    previewAlign: 'right',
+
+    scrollBottom: true,
 
     showMarkup: true,
     showMarkupMobile: false,
+    insertTagsInPairs: true,
 
     float: false,
     floatPosition: { x: 100, y: 100 },

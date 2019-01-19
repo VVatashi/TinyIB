@@ -45,24 +45,44 @@ export class Settings {
     <div class="settings-form__row">
       <label class="settings-form__label">
         <input type="radio" class="settings-form__radio"
-          name="common_layout_center" value="center"
+          name="common_layout_left" value="left"
           v-model="settings.common.layout" />
-        Center
+        On the left
       </label>
     </div>
 
     <div class="settings-form__row">
       <label class="settings-form__label">
         <input type="radio" class="settings-form__radio"
-          name="common_layout_left" value="left"
+          name="common_layout_center" value="center"
           v-model="settings.common.layout" />
-        Left
+        In the center
       </label>
     </div>
   </div>
 
   <div class="settings-form__tab-content"
     v-show="tab === 'form'">
+    <h3 class="settings-form__option-title">Form Alignment</h3>
+
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="radio" class="settings-form__radio"
+          name="form_align" value="left"
+          v-model="settings.form.align" />
+        On the left
+      </label>
+    </div>
+
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="radio" class="settings-form__radio"
+          name="form_align" value="center"
+          v-model="settings.form.align" />
+        In the center
+      </label>
+    </div>
+
     <h3 class="settings-form__option-title">Preview Alignment</h3>
 
     <div class="settings-form__row">
@@ -83,13 +103,23 @@ export class Settings {
       </label>
     </div>
 
-    <h3 class="settings-form__option-title">Markup buttons</h3>
+    <h3 class="settings-form__option-title">Posting</h3>
+
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="checkbox" class="settings-form__checkbox"
+          v-model="settings.form.scrollBottom" />
+        Scroll to the bottom after posting
+      </label>
+    </div>
+
+    <h3 class="settings-form__option-title">Markup</h3>
 
     <div class="settings-form__row">
       <label class="settings-form__label">
         <input type="checkbox" class="settings-form__checkbox"
           v-model="settings.form.showMarkup" />
-        Show markup
+        Show markup buttons
       </label>
     </div>
 
@@ -97,7 +127,15 @@ export class Settings {
       <label class="settings-form__label">
         <input type="checkbox" class="settings-form__checkbox"
           v-model="settings.form.showMarkupMobile" />
-        Show markup (mobile)
+        Show markup buttons (mobile)
+      </label>
+    </div>
+
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="checkbox" class="settings-form__checkbox"
+          v-model="settings.form.insertTagsInPairs" />
+        Insert tags in pairs
       </label>
     </div>
   </div>

@@ -357,7 +357,7 @@ export class PostingForm {
           const openingTag = `[${tag}]`;
           const closingTag = `[/${tag}]`;
 
-          if (selection.length) {
+          if (selection.length || component.settings.form.insertTagsInPairs) {
             // If text is selected, wrap it in a tag pair.
             this.fields.message = [
               message.substring(0, selection.begin),
@@ -472,9 +472,11 @@ export class PostingForm {
 
           this.disabled = false;
 
-          // Scroll to the bottom.
-          const scrollingEl = document.scrollingElement || document.body;
-          scrollingEl.scrollTop = scrollingEl.scrollHeight;
+          if (component.settings.form.scrollBottom) {
+            // Scroll to the bottom.
+            const scrollingEl = document.scrollingElement || document.body;
+            scrollingEl.scrollTop = scrollingEl.scrollHeight;
+          }
         },
       },
     });

@@ -6,6 +6,12 @@
     margin: $post-margin;
   }
 
+  &__posting-form-wrapper {
+    &--center {
+      text-align: center;
+    }
+  }
+
   &__posting-form {
     display: inline-block;
 
