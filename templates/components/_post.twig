@@ -10,7 +10,7 @@
         {% include 'components/_file.twig' with {'class': 'post__file'} %}
       {% endif %}
 
-      <div class="post__message markup">
+      <div class="post__message message markup">
         {{ post.messageFormatted }}
 
         {% if post.isThread() and post.omitted > 0 %}
