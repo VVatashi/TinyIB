@@ -264,15 +264,7 @@ export class PostingForm {
           this.file = null;
         },
         makeFloating() {
-          component.show();
-
-          this.position = 'float';
-
-          component.settings.form.float = true;
-          SettingsManager.save(component.settings);
-
-          const position = component.settings.form.floatPosition;
-          this.setPosition(this.checkBounds(position));
+          component.makeFloating();
         },
         moveToBottom() {
           component.moveToBottom();
@@ -290,6 +282,7 @@ export class PostingForm {
         },
         onCloseClick() {
           component.hide();
+          component.updateReplyButton();
         },
         onNameChange() {
           // Save name.
@@ -484,10 +477,13 @@ export class PostingForm {
     const showButton = DOM.qid('posting-form-show');
     if (showButton) {
       showButton.addEventListener('click', () => {
-        if (this.viewModel.position === 'post') {
+        const vm = this.viewModel;
+        if (vm.position === 'post'
+          || !vm.hidden && vm.position === 'float') {
           this.moveToBottom();
         } else {
           this.show();
+          this.updateReplyButton();
         }
       });
     }
@@ -551,22 +547,40 @@ export class PostingForm {
     }
   }
 
+  protected updateReplyButton() {
+    const showButton = DOM.qid('posting-form-show');
+    if (!showButton) {
+      return;
+    }
+
+    if (this.viewModel.hidden || this.viewModel.position !== 'bottom') {
+      showButton.classList.remove('hidden');
+    } else {
+      showButton.classList.add('hidden');
+    }
+  }
+
   protected hide() {
     this.viewModel.hidden = true;
-
-    const showButton = DOM.qid('posting-form-show');
-    if (showButton) {
-      showButton.classList.remove('hidden');
-    }
   }
 
   protected show() {
     this.viewModel.hidden = false;
+  }
 
-    const showButton = DOM.qid('posting-form-show');
-    if (showButton) {
-      showButton.classList.add('hidden');
-    }
+  protected makeFloating() {
+    this.show();
+
+    const vm = this.viewModel as any;
+    vm.position = 'float';
+
+    this.settings.form.float = true;
+    SettingsManager.save(this.settings);
+
+    const position = this.settings.form.floatPosition;
+    vm.setPosition(vm.checkBounds(position));
+
+    this.updateReplyButton();
   }
 
   protected moveToPost(post: HTMLElement) {
@@ -587,6 +601,8 @@ export class PostingForm {
     if (showButton) {
       showButton.classList.remove('hidden');
     }
+
+    this.updateReplyButton();
 
     vm.$nextTick(() => {
       const message = vm.$refs.message as HTMLElement;
@@ -610,6 +626,8 @@ export class PostingForm {
 
     this.settings.form.float = false;
     SettingsManager.save(this.settings);
+
+    this.updateReplyButton();
 
     vm.$nextTick(() => {
       const message = vm.$refs.message as HTMLElement;
