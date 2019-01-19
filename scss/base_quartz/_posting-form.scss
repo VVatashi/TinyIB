@@ -193,9 +193,29 @@
       max-width: 1000px
     }
 
+    &__row,
+    &__markup-row {
+      &:not(:last-child) {
+        margin-bottom: 6px;
+      }
+    }
+
+    &__subject,
+    &__name {
+      margin: 0 4px 0 0;
+    }
+
     &__message {
       min-width: 350px;
       resize: both;
+    }
+
+    &__preview {
+      margin: 0 6px 0 0;
+
+      &--right {
+        margin: 0 0 0 6px;
+      }
     }
 
     &__status {

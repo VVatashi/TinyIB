@@ -36,6 +36,7 @@
     @extend %clickable;
     font-size: 1.25em;
     padding: 0 0.1em;
+    vertical-align: baseline;
   }
 
   @include breakpoint($xs-up) {

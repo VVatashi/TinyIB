@@ -28,6 +28,7 @@ export class PostingForm {
 
   constructor() {
     eventBus.$on(Events.Ready, this.onReady.bind(this));
+    eventBus.$on(Events.PostsInserted, this.onPostsInserted.bind(this));
   }
 
   onReady() {
@@ -468,7 +469,9 @@ export class PostingForm {
           if (component.settings.form.scrollBottom) {
             // Scroll to the bottom.
             const scrollingEl = document.scrollingElement || document.body;
-            scrollingEl.scrollTop = scrollingEl.scrollHeight;
+            setTimeout(() => {
+              scrollingEl.scrollTop = scrollingEl.scrollHeight;
+            }, 300);
           }
         },
       },
@@ -544,6 +547,20 @@ export class PostingForm {
           messageEl.selectionEnd = selection.begin + quote.length;
         });
       });
+    }
+  }
+
+  protected onPostsInserted(posts: HTMLElement[]) {
+    const scrollingEl = document.scrollingElement || document.body;
+
+    // If in the bottom area.
+    const bottomOffset = scrollingEl.scrollHeight - scrollingEl.scrollTop;
+    const bottomArea = 1.5 * window.innerHeight;
+    if (bottomOffset < bottomArea) {
+      // Scroll to the bottom.
+      setTimeout(() => {
+        scrollingEl.scrollTop = scrollingEl.scrollHeight;
+      }, 300);
     }
   }
 

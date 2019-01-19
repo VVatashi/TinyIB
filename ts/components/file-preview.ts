@@ -8,12 +8,17 @@ export const FilePreview = Vue.extend({
   v-on:dragleave.stop.prevent
   v-on:dragover.stop.prevent
   v-on:drop.stop.prevent="onDrop($event)">
+  <span class="file-preview__info"
+    v-if="type">{{ info }}</span>
+
   <img class="file-preview__content"
-    v-bind:src="previewSrc"
-    v-if="previewType === 'image' && previewSrc" />
+    v-bind:src="src"
+    v-bind:title="info"
+    v-if="type === 'image' && src" />
   <video class="file-preview__content" autoplay loop muted
-    v-bind:src="previewSrc"
-    v-else-if="previewType === 'video' && previewSrc"></video>
+    v-bind:src="src"
+    v-bind:title="info"
+    v-else-if="type === 'video' && src"></video>
   <span class="file-preview__label"
     v-else>Upload file</span>
 
@@ -22,11 +27,41 @@ export const FilePreview = Vue.extend({
   props: ['file'],
   data() {
     return {
-      previewSrc: null,
+      src: null,
     };
   },
   computed: {
-    previewType(): string {
+    name(): string {
+      if (!this.file || !this.file.name) {
+        return '';
+      }
+
+      return this.file.name;
+    },
+    size(): number {
+      if (!this.file) {
+        return 0;
+      }
+
+      return this.file.size;
+    },
+    sizeFormatted(): string {
+      const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'];
+
+      let size = this.size;
+      let i = 0;
+      for (; i < units.length && size >= 1000; ++i) {
+        size /= 1000;
+      }
+
+      return `${size.toFixed(2)} ${units[i]}`;
+    },
+    info(): string {
+      return this.name
+        ? `${this.name}, ${this.sizeFormatted}`
+        : this.sizeFormatted;
+    },
+    type(): string {
       if (!this.file) {
         return null;
       }
@@ -42,15 +77,11 @@ export const FilePreview = Vue.extend({
         }
       }
 
-      const name = this.file.name;
-      if (name) {
-        if (name.endsWith('.webm') || name.endsWith('.mp4')) {
-          return 'video';
-        } else if (name.endsWith('.mp3')) {
-          return 'audio';
-        } else {
-          return 'image';
-        }
+      const name = this.name;
+      if (name.endsWith('.webm') || name.endsWith('.mp4')) {
+        return 'video';
+      } else if (name.endsWith('.mp3')) {
+        return 'audio';
       }
 
       return 'image';
@@ -59,13 +90,13 @@ export const FilePreview = Vue.extend({
   watch: {
     file(value: File) {
       if (!value) {
-        this.previewSrc = null;
+        this.src = null;
         return;
       }
 
       const reader = new FileReader();
       reader.addEventListener('load', e => {
-        this.previewSrc = (e.target as any).result;
+        this.src = (e.target as any).result;
       });
       reader.readAsDataURL(value);
     },
