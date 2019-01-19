@@ -35,4 +35,9 @@ document.addEventListener('DOMContentLoaded', e => {
   if (layout) {
     layout.classList.add('layout--' + settings.common.layout);
   }
+
+  const formWrapper = DOM.qs('.content__posting-form-wrapper');
+  if (formWrapper) {
+    formWrapper.classList.add('content__posting-form-wrapper--' + settings.form.align);
+  }
 });
