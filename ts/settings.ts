@@ -1,5 +1,8 @@
 export interface CommonSettings {
   layout: 'center' | 'left';
+
+  showPostHeaderReflinkIcon: boolean;
+  showPostReflinkIcon: boolean;
 }
 
 export interface FormSettings {
@@ -37,6 +40,9 @@ const settingsKey = 'settings';
 const defaultSettings: Settings = {
   common: {
     layout: 'left',
+
+    showPostHeaderReflinkIcon: true,
+    showPostReflinkIcon: false,
   },
   form: {
     align: 'center',

@@ -34,6 +34,14 @@ document.addEventListener('DOMContentLoaded', e => {
   const layout = DOM.qs('.layout');
   if (layout) {
     layout.classList.add('layout--' + settings.common.layout);
+
+    if (!settings.common.showPostHeaderReflinkIcon) {
+      layout.classList.add('layout--hide-post-header-reflink-icon');
+    }
+
+    if (!settings.common.showPostReflinkIcon) {
+      layout.classList.add('layout--hide-post-reflink-icon');
+    }
   }
 
   const formWrapper = DOM.qs('.content__posting-form-wrapper');

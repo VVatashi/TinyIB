@@ -1,6 +1,8 @@
 .post {
   &__inner {
     @include clearfix;
+
+    position: relative;
   }
 
   &__header-mobile,
@@ -49,13 +51,6 @@
     margin: $post-file-margin;
   }
 
-  // TODO: another way to remove empty line.
-  /*&__message {
-    br:first-child {
-      display: none;
-    }
-  }*/
-
   &__reference-link-author {
     font-size: 0.8em;
     margin-left: 0.25em;
@@ -81,6 +76,29 @@
   &_reply &__inner {
     box-sizing: border-box;
     background: $post-background;
+  }
+
+  &__reflink-icon {
+    @extend %icon-reply;
+    @extend %clickable;
+
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    z-index: 1;
+
+    padding: 0 0.1em;
+    font-size: 1.25em;
+
+    &,
+    &:hover {
+      color: inherit;
+      text-decoration: none;
+    }
+  }
+
+  @at-root .layout--hide-post-reflink-icon &__reflink-icon {
+    display: none;
   }
 
   @include breakpoint($xs-up) {
@@ -109,6 +127,10 @@
       min-width: 560px;
       border: $post-border;
       border-radius: $post-border-radius;
+    }
+
+    &__reflink-icon {
+      font-size: 1em;
     }
   }
 }
