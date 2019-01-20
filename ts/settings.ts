@@ -3,6 +3,8 @@ export interface CommonSettings {
 
   showPostHeaderReflinkIcon: boolean;
   showPostReflinkIcon: boolean;
+
+  scrollToNewPosts: boolean;
 }
 
 export interface FormSettings {
@@ -43,6 +45,8 @@ const defaultSettings: Settings = {
 
     showPostHeaderReflinkIcon: true,
     showPostReflinkIcon: false,
+
+    scrollToNewPosts: true,
   },
   form: {
     align: 'center',
