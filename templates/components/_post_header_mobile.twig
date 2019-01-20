@@ -27,7 +27,7 @@
       </a>
 
       {% if res != constant('TINYIB_INDEXPAGE') %}
-        <span class="post-header__reflink-icon" title="Quick reply" data-reflink="{{ post.id }}"></span>
+        <a class="post-header__reflink-icon" href="{{ reflink }}" title="Quick reply" data-reflink="{{ post.id }}"></a>
       {% endif %}
 
       {% if post.isStickied %}

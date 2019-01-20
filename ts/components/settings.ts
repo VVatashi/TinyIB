@@ -59,6 +59,24 @@ export class Settings {
         In the center
       </label>
     </div>
+
+    <h3 class="settings-form__option-title">Posts</h3>
+
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="checkbox" class="settings-form__checkbox"
+          v-model="settings.common.showPostHeaderReflinkIcon" />
+        Show reply icon in the post header
+      </label>
+    </div>
+
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="checkbox" class="settings-form__checkbox"
+          v-model="settings.common.showPostReflinkIcon" />
+        Show reply icon in the bottom right corner of post message
+      </label>
+    </div>
   </div>
 
   <div class="settings-form__tab-content"

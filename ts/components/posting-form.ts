@@ -531,9 +531,19 @@ export class PostingForm {
         const newLineAfter = !after.length || !after.startsWith('\n') ? '\n' : '';
         const id = target.getAttribute('data-reflink');
         const quoteText = window.getSelection().toString();
-        const quote = quoteText
-          ? `${newLineBefore}>>${id}\n> ${quoteText}${newLineAfter}`
-          : `${newLineBefore}>>${id}${newLineAfter}`;
+        let quote = '';
+        // If quoting the same post again, not insert id.
+        const lastQuoteIndex = message.lastIndexOf('>>', selection.begin);
+        if (lastQuoteIndex !== -1
+          && message.lastIndexOf(`>>${id}`, selection.begin) >= lastQuoteIndex) {
+          quote = quoteText
+            ? `${newLineBefore}> ${quoteText}${newLineAfter}`
+            : '';
+        } else {
+          quote = quoteText
+            ? `${newLineBefore}>>${id}\n> ${quoteText}${newLineAfter}`
+            : `${newLineBefore}>>${id}${newLineAfter}`;
+        }
 
         vm.fields.message = [
           before,
