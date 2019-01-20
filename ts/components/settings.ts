@@ -77,6 +77,14 @@ export class Settings {
         Show reply icon in the bottom right corner of post message
       </label>
     </div>
+
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="checkbox" class="settings-form__checkbox"
+          v-model="settings.common.scrollToNewPosts" />
+        Scroll to new posts
+      </label>
+    </div>
   </div>
 
   <div class="settings-form__tab-content"

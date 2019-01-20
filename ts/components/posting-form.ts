@@ -561,6 +561,10 @@ export class PostingForm {
   }
 
   protected onPostsInserted(posts: HTMLElement[]) {
+    if (!this.settings.common.scrollToNewPosts) {
+      return;
+    }
+
     const scrollingEl = document.scrollingElement || document.body;
 
     // If in the bottom area.
