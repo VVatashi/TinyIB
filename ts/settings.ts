@@ -5,6 +5,7 @@ export interface CommonSettings {
   showPostReflinkIcon: boolean;
 
   scrollToNewPosts: boolean;
+  smoothScroll: boolean;
 }
 
 export interface FormSettings {
@@ -47,6 +48,7 @@ const defaultSettings: Settings = {
     showPostReflinkIcon: false,
 
     scrollToNewPosts: true,
+    smoothScroll: true,
   },
   form: {
     align: 'center',

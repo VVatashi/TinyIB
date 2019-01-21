@@ -85,6 +85,14 @@ export class Settings {
         Scroll to new posts
       </label>
     </div>
+
+    <div class="settings-form__row">
+      <label class="settings-form__label">
+        <input type="checkbox" class="settings-form__checkbox"
+          v-model="settings.common.smoothScroll" />
+        Smooth scrolling
+      </label>
+    </div>
   </div>
 
   <div class="settings-form__tab-content"
