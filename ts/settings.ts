@@ -5,6 +5,12 @@ export interface CommonSettings {
   showPostReflinkIcon: boolean;
 
   scrollToNewPosts: boolean;
+  smoothScroll: boolean;
+}
+
+export interface Replace {
+  pattern: string;
+  replace: string;
 }
 
 export interface FormSettings {
@@ -19,6 +25,8 @@ export interface FormSettings {
 
   float: boolean;
   floatPosition: { x: number, y: number };
+
+  replaces: Replace[];
 }
 
 export interface TimeSettings {
@@ -47,6 +55,7 @@ const defaultSettings: Settings = {
     showPostReflinkIcon: false,
 
     scrollToNewPosts: true,
+    smoothScroll: true,
   },
   form: {
     align: 'center',
@@ -60,6 +69,8 @@ const defaultSettings: Settings = {
 
     float: false,
     floatPosition: { x: 100, y: 100 },
+
+    replaces: [],
   },
   time: {
     locale: 'default',

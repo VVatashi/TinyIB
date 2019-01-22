@@ -3,6 +3,9 @@ body, html {
   color: $color;
   font: $font;
   line-height: 1.4;
+}
+
+.smooth-scroll {
   scroll-behavior: smooth;
 }
 

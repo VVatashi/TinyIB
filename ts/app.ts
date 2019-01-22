@@ -31,6 +31,10 @@ document.addEventListener('DOMContentLoaded', e => {
   eventBus.$emit(Events.Ready);
 
   const settings = SettingsManager.load();
+  if (settings.common.smoothScroll) {
+    document.body.classList.add('smooth-scroll');
+  }
+
   const layout = DOM.qs('.layout');
   if (layout) {
     layout.classList.add('layout--' + settings.common.layout);

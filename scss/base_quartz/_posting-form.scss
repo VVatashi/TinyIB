@@ -43,6 +43,7 @@
     @extend %clickable;
     padding: 0.1em;
     font-size: 1.5em;
+    vertical-align: middle;
   }
 
   &__close {
@@ -70,7 +71,7 @@
   &__markup-row {
     display: flex;
     flex-flow: row nowrap;
-    align-items: center;
+    align-items: stretch;
 
     &:not(:last-child) {
       margin-bottom: 9px;
@@ -124,6 +125,7 @@
   &__status {
     float: right;
     margin: 0 0 9px 9px;
+    white-space: pre-line;
   }
 
   &__submit {
@@ -203,6 +205,11 @@
     &__subject,
     &__name {
       margin: 0 4px 0 0;
+      height: unset;
+    }
+
+    &__submit {
+      height: unset;
     }
 
     &__message {

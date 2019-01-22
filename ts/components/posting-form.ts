@@ -1,10 +1,10 @@
 import Vue from 'vue';
 import { draggable, FilePreview } from '.';
 import { eventBus, Events, SettingsManager } from '..';
-import { Coords } from './draggable';
-import { DOM } from '../utils';
-import { Settings } from '../settings';
 import { Api } from '../api';
+import { Coords } from './draggable';
+import { Settings } from '../settings';
+import { DOM } from '../utils';
 
 interface ViewModel {
   fields: {
@@ -428,12 +428,19 @@ export class PostingForm {
         async onSubmit() {
           this.disabled = true;
 
+          // Apply replaces to the message.
+          const replaces = component.settings.form.replaces;
+          const message = replaces.reduce((message, item) => {
+            const regexp = new RegExp(item.pattern, 'gm');
+            return message.replace(regexp, item.replace);
+          }, this.fields.message as string);
+
           try {
             const location = await Api.createPost({
               parent: threadId,
               subject: this.fields.subject,
               name: this.fields.name,
-              message: this.fields.message,
+              message: message,
               file: this.file,
             }, e => {
               const progressPercent = Math.ceil(e.loaded / e.total * 100);
