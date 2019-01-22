@@ -4,6 +4,7 @@ import {
   eventBus, Events,
   Settings as SettingsData, SettingsManager,
 } from '..';
+import { Replace } from '../settings';
 import { DOM, Time } from '../utils';
 
 export class Settings {
@@ -20,237 +21,233 @@ export class Settings {
       return;
     }
 
+    const Checkbox = Vue.extend({
+      template: `
+<div class="settings-form__row">
+  <label class="settings-form__label">
+    <input type="checkbox" class="settings-form__checkbox"
+      :value="value"
+      :checked="checked"
+      @change="onInput" />
+    <slot></slot>
+  </label>
+</div>`,
+      model: {
+        prop: 'checked',
+        event: 'change',
+      },
+      props: {
+        value: {
+          type: Boolean,
+          default: true,
+        },
+        checked: {
+          type: Boolean,
+          default: false,
+        },
+      },
+      methods: {
+        onInput(e: Event) {
+          this.$emit('change', !this.checked);
+        },
+      },
+    });
+
+    const RadioButton = Vue.extend({
+      template: `
+<div class="settings-form__row">
+  <label class="settings-form__label">
+    <input type="radio" class="settings-form__radio"
+      :value="value"
+      :checked="value == selectedValue"
+      @change="onInput" />
+    <slot></slot>
+  </label>
+</div>`,
+      model: {
+        prop: 'selectedValue',
+        event: 'change',
+      },
+      props: {
+        value: String,
+        selectedValue: String,
+      },
+      methods: {
+        onInput(e: Event) {
+          this.$emit('change', this.value);
+        },
+      },
+    });
+
     this.viewModel = new Vue({
       el: '#settings_form',
       template: `
 <div class="content__settings-form settings-form" id="settings_form">
   <ul class="settings-form__tabs">
     <li class="settings-form__tab"
-      v-bind:class="{ 'settings-form__tab--active': tab === 'common' }"
-      v-on:click="tab = 'common'">Common</li>
+      :class="{ 'settings-form__tab--active': tab === 'common' }"
+      @click="tab = 'common'">Common</li>
 
     <li class="settings-form__tab"
-      v-bind:class="{ 'settings-form__tab--active': tab === 'form' }"
-      v-on:click="tab = 'form'">Form</li>
+      :class="{ 'settings-form__tab--active': tab === 'form' }"
+      @click="tab = 'form'">Form</li>
 
     <li class="settings-form__tab"
-      v-bind:class="{ 'settings-form__tab--active': tab === 'time' }"
-      v-on:click="tab = 'time'">Time</li>
+      :class="{ 'settings-form__tab--active': tab === 'time' }"
+      @click="tab = 'time'">Time</li>
   </ul>
 
   <div class="settings-form__tab-content"
     v-show="tab === 'common'">
     <h3 class="settings-form__option-title">Thread Alignment</h3>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="radio" class="settings-form__radio"
-          name="common_layout_left" value="left"
-          v-model="settings.common.layout" />
-        On the left
-      </label>
-    </div>
+    <x-radio-button v-model="settings.common.layout" :value="'left'">
+      On the left
+    </x-radio-button>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="radio" class="settings-form__radio"
-          name="common_layout_center" value="center"
-          v-model="settings.common.layout" />
-        In the center
-      </label>
-    </div>
+    <x-radio-button v-model="settings.common.layout" :value="'center'">
+      In the center
+    </x-radio-button>
 
     <h3 class="settings-form__option-title">Posts</h3>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="checkbox" class="settings-form__checkbox"
-          v-model="settings.common.showPostHeaderReflinkIcon" />
-        Show reply icon in the post header
-      </label>
-    </div>
+    <x-checkbox v-model="settings.common.showPostHeaderReflinkIcon">
+      Show reply icon in the post header
+    </x-checkbox>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="checkbox" class="settings-form__checkbox"
-          v-model="settings.common.showPostReflinkIcon" />
-        Show reply icon in the bottom right corner of post message
-      </label>
-    </div>
+    <x-checkbox v-model="settings.common.showPostReflinkIcon">
+      Show reply icon in the bottom right corner of post message
+    </x-checkbox>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="checkbox" class="settings-form__checkbox"
-          v-model="settings.common.scrollToNewPosts" />
-        Scroll to new posts
-      </label>
-    </div>
+    <x-checkbox v-model="settings.common.scrollToNewPosts">
+      Scroll to new posts
+    </x-checkbox>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="checkbox" class="settings-form__checkbox"
-          v-model="settings.common.smoothScroll" />
-        Smooth scrolling
-      </label>
-    </div>
+    <x-checkbox v-model="settings.common.smoothScroll">
+      Smooth scrolling
+    </x-checkbox>
   </div>
 
   <div class="settings-form__tab-content"
     v-show="tab === 'form'">
     <h3 class="settings-form__option-title">Form Alignment</h3>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="radio" class="settings-form__radio"
-          name="form_align" value="left"
-          v-model="settings.form.align" />
-        On the left
-      </label>
-    </div>
+    <x-radio-button v-model="settings.form.align" :value="'left'">
+      On the left
+    </x-radio-button>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="radio" class="settings-form__radio"
-          name="form_align" value="center"
-          v-model="settings.form.align" />
-        In the center
-      </label>
-    </div>
+    <x-radio-button v-model="settings.form.align" :value="'center'">
+      In the center
+    </x-radio-button>
 
     <h3 class="settings-form__option-title">Preview Alignment</h3>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="radio" class="settings-form__radio"
-          name="form_preview_align" value="left"
-          v-model="settings.form.previewAlign" />
-        On the left
-      </label>
-    </div>
+    <x-radio-button v-model="settings.form.previewAlign" :value="'left'">
+      On the left
+    </x-radio-button>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="radio" class="settings-form__radio"
-          name="form_preview_align" value="right"
-          v-model="settings.form.previewAlign" />
-        On the right
-      </label>
-    </div>
+    <x-radio-button v-model="settings.form.previewAlign" :value="'right'">
+      On the right
+    </x-radio-button>
 
     <h3 class="settings-form__option-title">Posting</h3>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="checkbox" class="settings-form__checkbox"
-          v-model="settings.form.scrollBottom" />
-        Scroll to the bottom after posting
-      </label>
-    </div>
+    <x-checkbox v-model="settings.form.scrollBottom">
+      Scroll to the bottom after posting
+    </x-checkbox>
 
     <h3 class="settings-form__option-title">Markup</h3>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="checkbox" class="settings-form__checkbox"
-          v-model="settings.form.showMarkup" />
-        Show markup buttons
-      </label>
-    </div>
+    <x-checkbox v-model="settings.form.showMarkup">
+      Show markup buttons
+    </x-checkbox>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="checkbox" class="settings-form__checkbox"
-          v-model="settings.form.showMarkupMobile" />
-        Show markup buttons (mobile)
-      </label>
-    </div>
+    <x-checkbox v-model="settings.form.showMarkupMobile">
+      Show markup buttons (mobile)
+    </x-checkbox>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="checkbox" class="settings-form__checkbox"
-          v-model="settings.form.insertTagsInPairs" />
-        Insert tags in pairs
-      </label>
-    </div>
+    <x-checkbox v-model="settings.form.insertTagsInPairs">
+      Insert tags in pairs
+    </x-checkbox>
+
+    <h3 class="settings-form__option-title">Replaces</h3>
+
+    <ul class="settings-form__list">
+      <li class="settings-form__list-item"
+        v-for="(item, index) in settings.form.replaces">
+        <input type="text" class="input settings-form__text"
+          v-model="item.pattern" placeholder="Pattern" />
+
+        <input type="text" class="input settings-form__text"
+          v-model="item.replace" placeholder="Replace" />
+
+        <button class="button"
+          @click="removeReplaceAt(index)">Remove</button>
+      </li>
+
+      <li class="settings-form__list-item">
+        <input type="text" class="input settings-form__text"
+          v-model="newReplace.pattern" placeholder="Pattern" />
+
+        <input type="text" class="input settings-form__text"
+          v-model="newReplace.replace" placeholder="Replace" />
+
+        <button class="button"
+          @click="addReplace(newReplace)">Add</button>
+      </li>
+    </ul>
   </div>
 
   <div class="settings-form__tab-content"
     v-show="tab === 'time'">
     <h3 class="settings-form__option-title">Language</h3>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="radio" class="settings-form__radio"
-          name="time_locale" value="default"
-          v-model="settings.time.locale" />
-        Browser default
-      </label>
-    </div>
+    <x-radio-button v-model="settings.time.locale" :value="'default'">
+      Browser default
+    </x-radio-button>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="radio" class="settings-form__radio"
-          name="time_locale" value="custom"
-          v-model="settings.time.locale" />
-        Custom
-      </label>
-
+    <x-radio-button v-model="settings.time.locale" :value="'custom'">
+      Custom
       <input type="text" class="input settings-form__text" placeholder="en"
-        v-on:click="settings.time.locale = 'custom'"
+        @click="settings.time.locale = 'custom'"
         v-model="settings.time.localeCustom" />
-    </div>
+    </x-radio-button>
 
     <h3 class="settings-form__option-title">Format</h3>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="radio" class="settings-form__radio"
-          name="time_format" value="default"
-          v-model="settings.time.format" />
-        Browser default
-      </label>
-    </div>
+    <x-radio-button v-model="settings.time.format" :value="'default'">
+      Browser default
+    </x-radio-button>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="radio" class="settings-form__radio"
-          name="time_format" value="custom"
-          v-model="settings.time.format" />
-        Custom
-      </label>
-
+    <x-radio-button v-model="settings.time.format" :value="'custom'">
+      Custom
       <input type="text" class="input settings-form__text"
         placeholder="EEE, dd MMM yyyy HH:mm:ss"
-        v-on:click="settings.time.format = 'custom'"
+        @click="settings.time.format = 'custom'"
         v-model="settings.time.formatCustom" />
-    </div>
+    </x-radio-button>
 
-    <p>See the <a href="https://github.com/moment/luxon/blob/master/docs/formatting.md#table-of-tokens">luxon documentation</a> for the custom tokens reference.</p>
+    <p>
+      See the
+      <a href="https://github.com/moment/luxon/blob/master/docs/formatting.md#table-of-tokens">
+        luxon documentation
+      </a>
+      for the custom tokens reference.
+    </p>
 
     <h3 class="settings-form__option-title">Time zone</h3>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="radio" class="settings-form__radio"
-          name="time_zone" value="default"
-          v-model="settings.time.zone" />
-        Browser default
-      </label>
-    </div>
+    <x-radio-button v-model="settings.time.zone" :value="'default'">
+      Browser default
+    </x-radio-button>
 
-    <div class="settings-form__row">
-      <label class="settings-form__label">
-        <input type="radio" class="settings-form__radio"
-          name="time_zone" value="fixed"
-          v-model="settings.time.zone" />
-        Fixed UTC offset
-      </label>
-
+    <x-radio-button v-model="settings.time.zone" :value="'fixed'">
+      Fixed UTC offset
       <input type="number" class="input settings-form__text"
         min="-99" max="99"
-        v-on:click="settings.time.zone = 'fixed'"
+        @click="settings.time.zone = 'fixed'"
         v-model="settings.time.zoneFixed" />
-    </div>
+    </x-radio-button>
 
     <h3 class="settings-form__option-title">Current format</h3>
 
@@ -262,7 +259,7 @@ export class Settings {
       <p class="settings-form__status" >{{ status }}</p>
 
       <button type="button" class="button settings-form__save"
-        v-on:click.prevent="saveSettings()">Save</button>
+        @click.prevent="saveSettings()">Save</button>
     </div>
   </div>
 </div>`,
@@ -270,6 +267,10 @@ export class Settings {
         return {
           settings: null,
           tab: 'common',
+          newReplace: {
+            pattern: '',
+            replace: '',
+          },
           time: '',
           status: '',
         };
@@ -285,6 +286,20 @@ export class Settings {
         }
       },
       methods: {
+        removeReplaceAt(index: number) {
+          this.settings.form.replaces.splice(index, 1);
+        },
+        addReplace(item: Replace) {
+          try {
+            new RegExp(item.pattern, 'gm');
+          } catch (e) {
+            this.status = `Invalid regular expression: ${e.message}`;
+            return;
+          }
+
+          this.settings.form.replaces.push({ ...item });
+          this.newReplace = { pattern: '', replace: '' };
+        },
         updateTime() {
           try {
             const time = DateTime.fromJSDate(new Date());
@@ -303,6 +318,10 @@ export class Settings {
             this.status = 'Settings saved.';
           }, 1000 / 3);
         },
+      },
+      components: {
+        'x-checkbox': Checkbox,
+        'x-radio-button': RadioButton,
       },
     });
   }

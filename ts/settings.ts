@@ -8,6 +8,11 @@ export interface CommonSettings {
   smoothScroll: boolean;
 }
 
+export interface Replace {
+  pattern: string;
+  replace: string;
+}
+
 export interface FormSettings {
   scrollBottom: boolean;
 
@@ -20,6 +25,8 @@ export interface FormSettings {
 
   float: boolean;
   floatPosition: { x: number, y: number };
+
+  replaces: Replace[];
 }
 
 export interface TimeSettings {
@@ -62,6 +69,8 @@ const defaultSettings: Settings = {
 
     float: false,
     floatPosition: { x: 100, y: 100 },
+
+    replaces: [],
   },
   time: {
     locale: 'default',

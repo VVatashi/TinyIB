@@ -1,62 +1,47 @@
-%icon-attachment {
+@mixin icon($icon) {
   @extend %fa-icon;
   @extend .far;
 
   &:before {
-    content: fa-content($fa-var-file-image);
+    content: fa-content($icon);
+    vertical-align: middle;
   }
+}
+
+@mixin solid-icon($icon) {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($icon);
+    vertical-align: middle;
+  }
+}
+
+%icon-attachment {
+  @include icon($fa-var-file-image);
 }
 
 %icon-clear {
-  @extend %fa-icon;
-  @extend .far;
-
-  &:before {
-    content: fa-content($fa-var-trash-alt);
-  }
+  @include icon($fa-var-trash-alt);
 }
 
 %icon-float {
-  @extend %fa-icon;
-  @extend .far;
-
-  &:before {
-    content: fa-content($fa-var-window-maximize);
-  }
+  @include icon($fa-var-window-maximize);
 }
 
 %icon-close {
-  @extend %fa-icon;
-  @extend .far;
-
-  &:before {
-    content: fa-content($fa-var-window-close);
-  }
+  @include icon($fa-var-window-close);
 }
 
 %icon-close-solid {
-  @extend %fa-icon;
-  @extend .fas;
-
-  &:before {
-    content: fa-content($fa-var-window-close);
-  }
+  @include solid-icon($fa-var-window-close);
 }
 
 %icon-reply {
-  @extend %fa-icon;
-  @extend .fas;
-
-  &:before {
-    content: fa-content($fa-var-reply);
-  }
+  @include solid-icon($fa-var-reply);
 }
 
 %icon-down {
-  @extend %fa-icon;
-  @extend .fas;
-
-  &:before {
-    content: fa-content($fa-var-arrow-down);
-  }
+  @include solid-icon($fa-var-arrow-down);
 }

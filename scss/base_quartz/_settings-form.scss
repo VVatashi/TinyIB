@@ -42,6 +42,14 @@
     vertical-align: middle;
   }
 
+  &__list {
+    flex-flow: column;
+  }
+
+  &__list-item:not(:last-child) {
+    margin-bottom: 0.5em;
+  }
+
   &__footer {
     background: $form-background;
 
