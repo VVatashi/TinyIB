@@ -233,7 +233,7 @@ class PostService implements PostServiceInterface
      */
     protected function checkDuplicateFile(string $hash, &$posts) : bool
     {
-        $posts = Post::getPostsByHex($hash);
+        $posts = Post::getPostsByHex($hash)->all();
         return empty($posts);
     }
 
