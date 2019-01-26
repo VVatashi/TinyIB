@@ -23,6 +23,10 @@ export interface FormSettings {
   showMarkupMobile: boolean;
   insertTagsInPairs: boolean;
 
+  saveFormState: boolean;
+  saveSubject: boolean;
+  saveName: boolean;
+
   float: boolean;
   floatPosition: { x: number, y: number };
 
@@ -66,6 +70,10 @@ const defaultSettings: Settings = {
     showMarkup: true,
     showMarkupMobile: false,
     insertTagsInPairs: true,
+
+    saveFormState: false,
+    saveSubject: false,
+    saveName: true,
 
     float: false,
     floatPosition: { x: 100, y: 100 },

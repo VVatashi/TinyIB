@@ -1,6 +1,9 @@
 {% macro style(title, filename, relation) %}
-  <link rel="{{ relation|default('alternate stylesheet') }}" type="text/css" title="{{ title }}"
-    href="{{ base_url }}/css/{{ filename }}.css?mtime={{ mtime('css/' ~ filename ~ '.css') }}" />
+  {% set is_selected = style == title %}
+  <link rel="{{ relation|default(is_selected ? 'stylesheet' : 'alternate stylesheet') }}"
+    type="text/css" title="{{ title }}"
+    href="{{ base_url }}/css/{{ filename }}.css?mtime={{ mtime('css/' ~ filename ~ '.css') }}"
+    {{ is_selected ? 'data-selected="true"' : '' }} />
 {% endmacro %}
 
 {% macro script(filename) %}
@@ -26,7 +29,7 @@
 {{ self.style('Futaba',    'futaba') }}
 {{ self.style('Lime',      'lime') }}
 {{ self.style('Nocturnal', 'nocturnal') }}
-{{ self.style('Quartz',    'quartz', 'stylesheet') }}
+{{ self.style('Quartz',    'quartz') }}
 {{ self.style('Synthwave', 'synthwave') }}
 
 {% if constant('TINYIB_GTM') %}
