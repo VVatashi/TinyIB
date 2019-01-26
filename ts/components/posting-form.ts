@@ -89,11 +89,15 @@ export class PostingForm {
 
     <div class="posting-form__main">
       <div class="posting-form__row">
-        <input type="text" class="input posting-form__subject"
-          v-model="fields.subject" v-bind:disabled="disabled" placeholder="Subject" />
+        <input type="text" class="input posting-form__subject" placeholder="Subject"
+          v-model="fields.subject"
+          v-bind:disabled="disabled"
+          v-on:change="onSubjectChange()" />
 
         <input type="text" class="input posting-form__name" placeholder="Name"
-          v-model="fields.name" v-bind:disabled="disabled" v-on:change="onNameChange()" />
+          v-model="fields.name"
+          v-bind:disabled="disabled"
+          v-on:change="onNameChange()" />
 
         <label class="posting-form__attachment" v-show="mode == 'mobile'">
           <input type="file" class="posting-form__attachment-input"
@@ -131,17 +135,17 @@ export class PostingForm {
 
         <button type="button" class="button posting-form__markup-button"
           v-on:click.prevent="insertMarkup('sub')">
-          <sub>s</sub>
+          <sub>sub</sub>
         </button>
 
         <button type="button" class="button posting-form__markup-button"
           v-on:click.prevent="insertMarkup('sup')">
-          <sup>s</sup>
+          <sup>sup</sup>
         </button>
 
         <button type="button" class="button posting-form__markup-button"
           v-on:click.prevent="insertMarkup('code')">
-          <code>c</code>
+          <code>code</code>
         </button>
 
         <button type="button" class="button posting-form__markup-button"
@@ -187,7 +191,9 @@ export class PostingForm {
           disabled: false,
           status: '',
           hidden: true,
-          position: component.settings.form.float ? 'float' : 'bottom',
+          position: component.settings.form.saveFormState
+            && component.settings.form.float
+            ? 'float' : 'bottom',
           mode: 'mobile',
         };
       },
@@ -200,10 +206,20 @@ export class PostingForm {
         },
       },
       created() {
-        // Load saved name.
-        const name = localStorage['posting-form.name'];
-        if (name) {
-          this.fields.name = name;
+        if (component.settings.form.saveSubject) {
+          // Load saved subject.
+          const subject = localStorage['posting-form.subject'];
+          if (subject) {
+            this.fields.subject = subject;
+          }
+        }
+
+        if (component.settings.form.saveName) {
+          // Load saved name.
+          const name = localStorage['posting-form.name'];
+          if (name) {
+            this.fields.name = name;
+          }
         }
 
         this.updateMode();
@@ -259,7 +275,14 @@ export class PostingForm {
           this.setPosition(this.checkBounds(this.getPosition()));
         },
         resetFields() {
-          this.fields.subject = '';
+          if (!component.settings.form.saveSubject) {
+            this.fields.subject = '';
+          }
+
+          if (!component.settings.form.saveName) {
+            this.fields.name = '';
+          }
+
           this.fields.message = '';
           this.fields.file = '';
           this.file = null;
@@ -284,6 +307,10 @@ export class PostingForm {
         onCloseClick() {
           component.hide();
           component.updateReplyButton();
+        },
+        onSubjectChange() {
+          // Save subject.
+          localStorage['posting-form.subject'] = this.fields.subject;
         },
         onNameChange() {
           // Save name.
@@ -509,21 +536,6 @@ export class PostingForm {
         e.preventDefault();
 
         const vm = this.viewModel;
-        if (this.isInThread) {
-          if (vm.position !== 'float') {
-            // Move form to the post.
-            const post = target.closest('.post') as HTMLElement;
-            if (post) {
-              this.moveToPost(post);
-            } else {
-              this.moveToBottom();
-            }
-          } else {
-            this.show();
-          }
-        }
-
-        // Insert reply markup.
         const messageEl = vm.$refs.message as HTMLTextAreaElement;
         const selection = {
           begin: messageEl.selectionStart,
@@ -538,11 +550,13 @@ export class PostingForm {
         const newLineAfter = !after.length || !after.startsWith('\n') ? '\n' : '';
         const id = target.getAttribute('data-reflink');
         const quoteText = window.getSelection().toString();
-        let quote = '';
-        // If quoting the same post again, not insert id.
         const lastQuoteIndex = message.lastIndexOf('>>', selection.begin);
-        if (lastQuoteIndex !== -1
-          && message.lastIndexOf(`>>${id}`, selection.begin) >= lastQuoteIndex) {
+        const quoteSamePost = lastQuoteIndex !== -1
+          && message.lastIndexOf(`>>${id}`, selection.begin) >= lastQuoteIndex;
+
+        // If quoting the same post again, not insert id.
+        let quote = '';
+        if (quoteSamePost) {
           quote = quoteText
             ? `${newLineBefore}> ${quoteText}${newLineAfter}`
             : '';
@@ -552,11 +566,30 @@ export class PostingForm {
             : `${newLineBefore}>>${id}${newLineAfter}`;
         }
 
+        // Insert reply markup.
         vm.fields.message = [
           before,
           quote,
           after,
         ].join('');
+
+        if (this.isInThread) {
+          if (quoteSamePost && !quoteText && !vm.hidden && vm.position !== 'bottom') {
+            this.hide();
+          } else {
+            if (vm.position !== 'float') {
+              // Move form to the post.
+              const post = target.closest('.post') as HTMLElement;
+              if (post) {
+                this.moveToPost(post);
+              } else {
+                this.moveToBottom();
+              }
+            } else {
+              this.show();
+            }
+          }
+        }
 
         vm.$nextTick(() => {
           messageEl.focus();
@@ -568,21 +601,28 @@ export class PostingForm {
   }
 
   protected onPostsInserted(posts: HTMLElement[]) {
-    if (!this.settings.common.scrollToNewPosts) {
-      return;
+    if (this.settings.common.scrollToNewPosts) {
+      const scrollingEl = document.scrollingElement || document.body;
+
+      // If in the bottom area.
+      const bottomOffset = scrollingEl.scrollHeight - scrollingEl.scrollTop;
+      const bottomArea = 1.5 * window.innerHeight;
+      if (bottomOffset < bottomArea) {
+        // Scroll to the bottom.
+        setTimeout(() => {
+          scrollingEl.scrollTop = scrollingEl.scrollHeight;
+        }, 300);
+      }
     }
 
-    const scrollingEl = document.scrollingElement || document.body;
-
-    // If in the bottom area.
-    const bottomOffset = scrollingEl.scrollHeight - scrollingEl.scrollTop;
-    const bottomArea = 1.5 * window.innerHeight;
-    if (bottomOffset < bottomArea) {
-      // Scroll to the bottom.
-      setTimeout(() => {
-        scrollingEl.scrollTop = scrollingEl.scrollHeight;
-      }, 300);
-    }
+    posts.forEach(post => {
+      // Move reply icon after DE hide icon.
+      const replyIcon = DOM.qs('.post-header__reflink-wrapper > .post-header__reflink-icon', post);
+      const deHide = DOM.qs('.de-btn-hide', post);
+      if (replyIcon && deHide) {
+        deHide.parentElement.insertBefore(replyIcon, deHide.nextSibling);
+      }
+    });
   }
 
   protected updateReplyButton() {

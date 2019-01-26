@@ -130,6 +130,24 @@ export class Settings {
 
   <div class="settings-form__tab-content"
     v-show="tab === 'form'">
+    <h3 class="settings-form__option-title">Form Behaviour</h3>
+
+    <x-checkbox v-model="settings.form.scrollBottom">
+      Scroll to the bottom after posting
+    </x-checkbox>
+
+    <x-checkbox v-model="settings.form.saveSubject">
+      Save subject after posting
+    </x-checkbox>
+
+    <x-checkbox v-model="settings.form.saveName">
+      Save name after posting
+    </x-checkbox>
+
+    <x-checkbox v-model="settings.form.saveFormState">
+      Save form floating state on page reload
+    </x-checkbox>
+
     <h3 class="settings-form__option-title">Form Alignment</h3>
 
     <x-radio-button v-model="settings.form.align" :value="'left'">
@@ -149,12 +167,6 @@ export class Settings {
     <x-radio-button v-model="settings.form.previewAlign" :value="'right'">
       On the right
     </x-radio-button>
-
-    <h3 class="settings-form__option-title">Posting</h3>
-
-    <x-checkbox v-model="settings.form.scrollBottom">
-      Scroll to the bottom after posting
-    </x-checkbox>
 
     <h3 class="settings-form__option-title">Markup</h3>
 
