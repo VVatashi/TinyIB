@@ -4,6 +4,7 @@ import {
   CorrectTime,
   DeleteForm,
   NewPostsDetector,
+  Post,
   PostingForm,
   PostReferenceMap,
   Settings,
@@ -21,11 +22,12 @@ declare global {
 new Captcha();
 new CorrectTime();
 new DeleteForm();
+new NewPostsDetector();
+new Post();
 new PostingForm();
 new PostReferenceMap();
 new Settings();
 new StyleSwitch();
-new NewPostsDetector();
 
 document.addEventListener('DOMContentLoaded', e => {
   eventBus.$emit(Events.Ready);

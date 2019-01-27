@@ -1,6 +1,14 @@
 .thumbnail {
+  box-sizing: border-box;
+
+  &--video {
+    border: $input-border;
+    border-style: dashed;
+  }
+
   &__content {
     max-width: 100%;
+    max-height: 250px;
     height: auto;
   }
 }
