@@ -1,6 +1,3 @@
-@import '../utils/index';
-@import 'vars';
-
 .content {
   &__oppost,
   &__post {
@@ -9,11 +6,31 @@
     margin: $post-margin;
   }
 
+  &__posting-form-wrapper {
+    &--center {
+      text-align: center;
+    }
+  }
+
   &__posting-form {
-    max-width: 560px;
+    display: inline-block;
+
     margin: $post-margin;
-    margin-left: auto;
-    margin-right: auto;
+
+    width: 100%;
+    max-width: 100%;
+  }
+
+  @include breakpoint($xs-up) {
+    &__posting-form {
+      width: unset;
+    }
+  }
+
+  &__reply-button {
+    min-width: 80px;
+    height: 31px;
+    margin: 0 1em;
   }
 
   &__userdelete {
@@ -26,5 +43,10 @@
 
   &__footer {
     margin: 0;
+  }
+
+  &__settings-form {
+    max-width: 600px;
+    margin: 0 auto;
   }
 }

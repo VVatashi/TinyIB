@@ -1,8 +1,11 @@
+@import 'vars';
 @import 'base';
 
 @import 'auth-form';
 @import 'button';
 @import 'content';
+@import 'file-preview';
+@import 'file';
 @import 'footer';
 @import 'header';
 @import 'input';
@@ -14,3 +17,5 @@
 @import 'post-header';
 @import 'post';
 @import 'posting-form';
+@import 'settings-form';
+@import 'thumbnail';

@@ -1,0 +1,79 @@
+.settings-form {
+  &__tabs {
+    padding: 0 2px;
+  }
+
+  &__tab {
+    @extend .button;
+
+    border: $form-border;
+    border-bottom: 0;
+
+    border-radius: $form-border-radius;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+
+    padding: 0.5em 1em;
+
+    &--active {
+      @extend .button:active;
+    }
+  }
+
+  &__tab-content {
+    background: $form-background;
+
+    border: $form-border;
+    border-bottom: 0;
+
+    border-radius: $form-border-radius;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+
+    padding: $form-content-padding;
+  }
+
+  &__option-title {
+    margin: 1em 1em 0.5em;
+  }
+
+  &__checkbox,
+  &__radio {
+    vertical-align: middle;
+  }
+
+  &__list {
+    flex-flow: column;
+  }
+
+  &__list-item:not(:last-child) {
+    margin-bottom: 0.5em;
+  }
+
+  &__footer {
+    background: $form-background;
+
+    border: $form-border;
+    border-top: 0;
+
+    border-radius: $form-border-radius;
+    border-top-right-radius: 0;
+    border-top-left-radius: 0;
+
+    padding: $form-content-padding;
+  }
+
+  &__buttons {
+    padding: 0.5em 1em;
+  }
+
+  &__status {
+    float: right;
+    margin: 0;
+  }
+
+  &__save {
+    min-width: 80px;
+    min-height: 2em;
+  }
+}

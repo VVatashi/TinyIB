@@ -1,11 +1,12 @@
-@import '../utils/index';
-@import 'vars';
-
 body, html {
   background: $background;
   color: $color;
   font: $font;
   line-height: 1.4;
+}
+
+.smooth-scroll {
+  scroll-behavior: smooth;
 }
 
 a {
@@ -31,36 +32,14 @@ ul, ol {
   list-style: none;
 }
 
-input, textarea, select, .input {
-  box-sizing: border-box;
-  color: $input-color;
-  background: $input-background;
-  border: $input-border;
-  border-radius: $input-border-radius;
-  font: $input-font;
-  padding: $input-padding;
-  margin: 0;
+.hidden {
+  display: none;
+  visibility: hidden;
 }
 
-input[type=submit], button, .button {
-  box-sizing: border-box;
-  color: $btn-color;
-  background: $btn-background;
-  border: $btn-border;
-  border-radius: $btn-border-radius;
-  padding: $btn-padding;
-  margin: 0;
-  cursor: pointer;
-  text-decoration: none;
-
-  &:hover {
-    background: $btn-hover-background;
-    text-decoration: none;
-  }
-
-  &:active {
-    transform: translateY(1px);
-  }
+@include placeholder {
+  color: $input-color;
+  opacity: 0.5;
 }
 
 // DE fixes.

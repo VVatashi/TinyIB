@@ -1,5 +1,3 @@
-@import 'vars';
-
 .button {
   @extend %clickable;
 
@@ -13,5 +11,9 @@
 
   &:hover {
     background: $btn-hover-background;
+  }
+
+  &:active {
+    background: $btn-active-background;
   }
 }

@@ -1,29 +1,26 @@
-import ModuleManager from './ModuleManager';
-
-import PostCorrectTime from './modules/mobile/PostCorrectTime';
-import PostForm from './modules/mobile/PostForm';
-import PostImagePopup from './modules/mobile/PostImagePopup';
-import PostQuote from './modules/mobile/PostQuote';
-import PostReferenceMap from './modules/mobile/PostReferenceMap';
-import ThreadUpdater from './modules/mobile/ThreadUpdater';
+import { eventBus, Events } from '.';
+import {
+  PostCorrectTime,
+  PostForm,
+  PostImagePopup,
+  PostQuote,
+  PostReferenceMap,
+  ThreadUpdater,
+} from './components/mobile';
 
 declare global {
   interface Window {
     baseUrl: string;
-    tinyib?: {
-      moduleManager?: ModuleManager,
-    },
-    Vue: any,
   }
 }
 
-const moduleManager = new ModuleManager();
-moduleManager.addModule('PostCorrectTime', new PostCorrectTime(moduleManager));
-moduleManager.addModule('PostForm', new PostForm(moduleManager));
-moduleManager.addModule('PostImagePopup', new PostImagePopup(moduleManager));
-moduleManager.addModule('PostQuote', new PostQuote(moduleManager));
-moduleManager.addModule('PostReferenceMap', new PostReferenceMap(moduleManager));
-moduleManager.addModule('ThreadUpdater', new ThreadUpdater(moduleManager));
+new PostCorrectTime();
+new PostForm();
+new PostImagePopup();
+new PostQuote();
+new PostReferenceMap();
+new ThreadUpdater();
 
-window.tinyib = {};
-window.tinyib.moduleManager = moduleManager;
+document.addEventListener('DOMContentLoaded', e => {
+  eventBus.$emit(Events.Ready);
+});

@@ -6,6 +6,7 @@
         "node_modules/**/*"
     ],
     "compilerOptions": {
+        "esModuleInterop": true,
         "noImplicitAny": true,
         "target": "es6",
         "module": "commonjs",

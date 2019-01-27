@@ -1,3 +1,8 @@
+$xs-up: 600px !default;
+$sm-up: 900px !default;
+$md-up: 1200px !default;
+$lg-up: 1800px !default;
+
 $background: #e5e5e5 !default;
 $color:      #333333 !default;
 $font:       14px Roboto, Helvetica, Arial, sans-serif !default;
@@ -25,6 +30,7 @@ $btn-border-radius: $input-border-radius !default;
 $btn-padding:       $input-padding !default;
 
 $btn-hover-background: #e5e5e5 !default;
+$btn-active-background: $btn-hover-background !default;
 
 $block-background:      #ffffff !default;
 $block-header-color:    $color !default;
@@ -47,9 +53,11 @@ $post-file-margin:     0 0.5em 0 0 !default;
 $post-margin:          0 0 10px !default;
 $post-align-left:      true !default;
 
-$form-background:    $block-background !default;
-$form-border:        $block-border !default;
-$form-border-radius: $block-border-radius !default;
+$form-background:      $block-background !default;
+$form-border:          $block-border !default;
+$form-border-radius:   $block-border-radius !default;
+$form-header-padding:  $post-header-padding !default;
+$form-content-padding: $post-content-padding !default;
 
 $submit-background: $color !default;
 $submit-color:      $background !default;

@@ -1,107 +1,242 @@
-@import '../utils/index';
-@import 'vars';
-
 .posting-form {
   $submit-width: 120px;
   $submit-height: 36px;
 
-  position: relative;
-
   background: $form-background;
-  padding: $padding;
+  text-align: left;
 
-  &__preview {
+  &--floating {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    z-index: 1;
+  }
+
+  &--floating &__header {
+    cursor: pointer;
+  }
+
+  &__header {
+    border-bottom: $post-header-border;
+    padding: $form-header-padding;
+    text-align: center;
+
+    @include clearfix;
+  }
+
+  &__header-buttons {
     float: right;
   }
 
-  &__subject {
-    margin: 0 9px 9px 0;
-
-    width: calc(50% - 9px - 17px);
-    height: 31px;
+  &__float,
+  &__restore,
+  &__reset {
+    margin-right: 0.5em;
   }
 
-  &__name {
-    margin: 0 17px 9px 0;
+  &__close,
+  &__float,
+  &__restore,
+  &__reset {
+    @extend %clickable;
+    padding: 0.1em;
+    font-size: 1.5em;
+    vertical-align: middle;
+  }
 
-    width: calc(50% - 9px - 17px);
+  &__close {
+    @extend %icon-close;
+  }
+
+  &__float {
+    @extend %icon-float;
+  }
+
+  &__restore {
+    @extend %icon-down;
+  }
+
+  &__reset {
+    @extend %icon-clear;
+  }
+
+  &__content {
+    position: relative;
+    padding: $form-content-padding;
+  }
+
+  &__row,
+  &__markup-row {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: stretch;
+
+    &:not(:last-child) {
+      margin-bottom: 9px;
+    }
+  }
+
+  &__markup-row {
+    justify-content: space-between;
+  }
+
+  &__subject,
+  &__name {
+    min-width: 80px;
+    width: 80px;
     height: 31px;
+    flex: 50%;
+    margin: 0 9px 0 0;
   }
 
   &__attachment {
-    @extend %clickable;
     @extend %icon-attachment;
-
-    display: inline-block;
-
-    width: 16px;
-    height: 16px;
-
-    vertical-align: middle;
+    @extend %clickable;
+    padding: 0.1em;
+    font-size: 1.5em;
   }
 
   &__attachment-input {
     display: none;
   }
 
+  &__markup-button {
+    flex-grow: 1;
+    padding: 4px 1px;
+
+    &:not(:last-child) {
+      margin-right: 4px;
+    }
+  }
+
   &__message {
-    margin: 0 0 $padding 0;
+    margin: 0 0 4px 0;
+
+    min-width: 100%;
+    min-height: 100px;
 
     width: 100%;
-    min-height: 100px;
 
     resize: vertical;
   }
 
   &__status {
     float: right;
+    margin: 0 0 9px 9px;
+    white-space: pre-line;
   }
 
   &__submit {
-    @extend %clickable;
+    min-width: 80px;
+    height: 31px;
 
-    background: $submit-background;
-    border: 0;
-    border-radius: $submit-height / 2;
-    color: $submit-color;
-    font-weight: bold;
+    &--mobile {
+      @extend %clickable;
 
-    min-width: $submit-width;
-    height: $submit-height;
-  }
+      background: $submit-background;
+      border: 0;
+      border-radius: $submit-height / 2;
+      color: $submit-color;
+      font-weight: bold;
 
-  &__close {
-    position: absolute;
-    top: -0.5em;
-    right: -0.5em;
-    z-index: 1;
+      min-width: $submit-width;
+      height: $submit-height;
+      margin: 0 0 9px 0;
+    }
   }
 
   &__preview {
-    position: absolute;
-    top: -105px;
-    right: 0;
-    width: 100px;
-    height: 100px;
-    background: $form-background;
-    border: $form-border;
-    border-radius: $form-border-radius;
-    overflow: hidden;
-  }
+    @extend %clickable;
 
-  &__preview-image {
-    width: 100%;
+    position: relative;
+    box-sizing: border-box;
+
+    margin: 0 9px 0 0;
+
+    width: 140px;
+    height: 140px;
+
+    flex-shrink: 0;
+
+    &--mobile {
+      position: absolute;
+      top: -179px;
+      right: 0;
+    }
+
+    &--right {
+      order: 1;
+      margin: 0 0 0 9px;
+    }
   }
 
   &__preview-remove {
+    @extend %icon-close-solid;
+    @extend %clickable;
     position: absolute;
+    padding: 0.1em;
     top: 0;
     right: 0;
     z-index: 1;
+    font-size: 1.5em;
   }
 
   @include breakpoint($xs-up) {
     border: $form-border;
     border-radius: $form-border-radius;
+
+    &__content {
+      display: flex;
+    }
+
+    &__main {
+      max-width: 1000px
+    }
+
+    &__row,
+    &__markup-row {
+      &:not(:last-child) {
+        margin-bottom: 6px;
+      }
+    }
+
+    &__subject,
+    &__name {
+      margin: 0 4px 0 0;
+      height: unset;
+    }
+
+    &__submit {
+      height: unset;
+    }
+
+    &__message {
+      min-width: 350px;
+      resize: both;
+    }
+
+    &__preview {
+      margin: 0 6px 0 0;
+
+      &--right {
+        margin: 0 0 0 6px;
+      }
+    }
+
+    &__status {
+      float: unset;
+      margin: 0;
+    }
+
+    &__close,
+    &__float,
+    &__restore,
+    &__reset,
+    &__attachment,
+    &__preview-remove {
+        font-size: 1em;
+    }
   }
 }

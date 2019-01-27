@@ -1,7 +1,9 @@
-@import '../utils/index';
-@import 'vars';
-
 .layout {
+  &--center {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
   &__header {
     padding: $padding;
   }

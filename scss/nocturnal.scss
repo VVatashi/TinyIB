@@ -14,9 +14,10 @@ $line-border: 0;
 
 $input-background:    transparent;
 $input-color:         #cccccc;
-$input-border:        default;
+$input-border:        2px solid #cccccc;
+$input-border-alt:    #888888;
 $input-border-radius: 0;
-$input-padding:       0.5em 0.5em;
+$input-padding:       0.25em 0.25em;
 
 $btn-hover-background: $input-background;
 
@@ -32,9 +33,12 @@ $post-file-margin:     0 5px 5px;
 $post-margin:          0 0 10px 0;
 $post-align-left:      false;
 
+$form-header-padding: 2px 10px;
+
 $post-subject-color:  #cc1105;
 $post-name-color:     #117743;
 $post-tripcode-color: #228854;
 
+@import 'utils/index';
 @import 'base_quartz/index';
 @import 'nocturnal/index';

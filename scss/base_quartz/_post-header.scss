@@ -1,13 +1,9 @@
-@import '../utils/index';
-@import 'vars';
-
 .post-header {
-  @extend %xs-hidden;
+  @include breakpoint-max($xs-up) {
+    display: none;
+  }
 
   &__delete {
-    /*display: inline;
-    margin: 0 0.25em 0 0;*/
-
     display: none;
   }
 
@@ -33,5 +29,29 @@
 
   &__reflink {
     color: inherit;
+  }
+
+  &__reflink-icon {
+    @extend %icon-reply;
+    @extend %clickable;
+    font-size: 1.25em;
+    padding: 0 0.1em;
+    vertical-align: baseline;
+
+    &,
+    &:hover {
+      color: inherit;
+      text-decoration: none;
+    }
+  }
+
+  @at-root .layout--hide-post-header-reflink-icon &__reflink-icon {
+    display: none;
+  }
+
+  @include breakpoint($xs-up) {
+    &__reflink-icon {
+      font-size: 1em;
+    }
   }
 }

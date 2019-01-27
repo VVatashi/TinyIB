@@ -26,6 +26,10 @@
         {{- post.id -}}
       </a>
 
+      {% if res != constant('TINYIB_INDEXPAGE') %}
+        <a class="post-header__reflink-icon" href="{{ reflink }}" title="Quick reply" data-reflink="{{ post.id }}"></a>
+      {% endif %}
+
       {% if post.isStickied %}
         <img src="{{ base_url }}/images/sticky.png" alt="Stickied" title="Stickied" width="16" height="16" />
       {% endif %}

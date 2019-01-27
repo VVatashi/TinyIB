@@ -13,7 +13,9 @@ $file-preview-size: 150px;
   }
 
   &__file-column {
-    @extend %xs-hidden;
+    @include breakpoint-max($xs-up) {
+      display: none;
+    }
 
     display: flex;
     margin-right: 0.5rem;
@@ -118,12 +120,18 @@ $file-preview-size: 150px;
 
   &__submit {
     @extend .form__field;
-    @extend %xs-hidden;
+
+    @include breakpoint-max($xs-up) {
+      display: none;
+    }
   }
 
   &__file-mobile,
   &__submit-mobile {
     @extend .form__row;
-    @extend %xs-only;
+
+    @include breakpoint($xs-up) {
+      display: none;
+    }
   }
 }

@@ -1,12 +1,11 @@
-@import 'vars';
-
 .markup {
   &__spoiler,
   &__rp {
     background-color: $spoiler-background;
     color: $spoiler-background;
 
-    &:hover {
+    &:hover,
+    &--visible {
       color: $spoiler-color;
     }
   }
