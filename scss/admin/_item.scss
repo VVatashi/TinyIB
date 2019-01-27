@@ -1,13 +1,5 @@
-.list {
+.item {
   @include block;
-
-  &__top-pager {
-    margin-bottom: 0.5em;
-  }
-
-  &__bottom-pager {
-    margin-top: 0.5em;
-  }
 
   &__table {
     width: 100%;
@@ -22,14 +14,15 @@
 
   &__cell {
     padding: 0.25em 0.5em;
+    text-align: left;
 
     &--nostretch {
       width: 1px;
       white-space: nowrap;
     }
 
-    &--center {
-      text-align: center;
+    &--multiline {
+      white-space: pre-line;
     }
   }
 }

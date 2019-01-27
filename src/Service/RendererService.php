@@ -30,7 +30,7 @@ class RendererService implements RendererServiceInterface
         $this->twig->addGlobal('base_url', TINYIB_BASE_URL . TINYIB_BOARD);
         $this->twig->addGlobal('uploads', $tinyib_uploads);
 
-        $mtime = new Twig_SimpleFunction('mtime', function ($path) {
+        $this->twig->addFunction(new Twig_SimpleFunction('mtime', function ($path) {
             $filename = basename($path);
             $path = realpath(dirname(__DIR__ . '/../../webroot/' . $path)) . DIRECTORY_SEPARATOR . $filename;
 
@@ -40,8 +40,15 @@ class RendererService implements RendererServiceInterface
             catch(Exception $e) {
                 return 0;
             }
-        });
-        $this->twig->addFunction($mtime);
+        }));
+
+        $this->twig->addFilter(new \Twig_Filter('truncate', function ($str, $length) {
+            if (mb_strlen($str) < $length) {
+                return $str;
+            }
+
+            return mb_substr($str, 0, $length - 1) . '…';
+        }));
     }
 
     /**

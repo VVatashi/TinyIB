@@ -2,22 +2,27 @@
 
 namespace TinyIB\Service;
 
-use FastRoute\Dispatcher;
-use FastRoute\RouteCollector;
+use FastRoute\{Dispatcher, RouteCollector};
+
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 use Psr\Http\Server\RequestHandlerInterface;
-use TinyIB\Controller\Admin\BansControllerInterface;
-use TinyIB\Controller\Admin\DashboardControllerInterface;
-use TinyIB\Controller\Admin\ModLogControllerInterface;
-use TinyIB\Controller\Admin\UserCrudControllerInterface;
+
+use TinyIB\Controller\{
+    AuthControllerInterface,
+    CaptchaControllerInterface,
+    PostControllerInterface,
+    SettingsControllerInterface
+};
+use TinyIB\Controller\Admin\{
+    BansControllerInterface,
+    DashboardControllerInterface,
+    ModLogControllerInterface,
+    PostsControllerInterface,
+    UserCrudControllerInterface
+};
 use TinyIB\Controller\Amp\AmpPostControllerInterface;
-use TinyIB\Controller\AuthControllerInterface;
-use TinyIB\Controller\CaptchaControllerInterface;
 use TinyIB\Controller\Mobile\MobilePostControllerInterface;
-use TinyIB\Controller\PostControllerInterface;
-use TinyIB\Controller\SettingsControllerInterface;
 use TinyIB\NotFoundException;
 
 class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
@@ -57,6 +62,12 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
 
                 $routes->addGroup('/modlog', function (RouteCollector $routes) {
                     $routes->addRoute('GET',  '', [ModLogControllerInterface::class, 'list']);
+                });
+
+                $routes->addGroup('/posts', function (RouteCollector $routes) {
+                    $routes->addRoute('GET',   '',                 [PostsControllerInterface::class, 'list']);
+                    $routes->addRoute('GET',   '/{id:\d+}',        [PostsControllerInterface::class, 'show']);
+                    $routes->addRoute('POST',  '/{id:\d+}/delete', [PostsControllerInterface::class, 'delete']);
                 });
 
                 $routes->addGroup('/user', function (RouteCollector $routes) {

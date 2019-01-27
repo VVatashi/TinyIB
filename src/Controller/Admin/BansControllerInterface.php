@@ -2,17 +2,16 @@
 
 namespace TinyIB\Controller\Admin;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 
 interface BansControllerInterface
 {
     /**
      * Returns the list of bans.
      *
-     * @param \Psr\Http\Message\ResponseInterface $request
+     * @param \Psr\Http\Message\ServerRequestInterface $request
      *
-     * @return \Psr\Http\Message\ServerRequestInterface $response
+     * @return \Psr\Http\Message\ResponseInterface $response
      *
      * @throws \TinyIB\AccessDeniedException
      *   If current user is not an admin.

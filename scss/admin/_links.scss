@@ -4,4 +4,8 @@
   &__content {
     font-size: 1.5em;
   }
+
+  &__list {
+    flex-flow: column;
+  }
 }

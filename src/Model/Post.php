@@ -447,6 +447,16 @@ class Post extends Model
     }
 
     /**
+     * Deletes a post.
+     *
+     * @param Post $post
+     */
+    public static function deletePost(Post $post)
+    {
+        static::deletePostByID($post->id);
+    }
+
+    /**
      * Deletes a post by ID.
      *
      * @param int $id

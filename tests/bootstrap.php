@@ -19,6 +19,49 @@ $capsule->setAsGlobal();
 $capsule->bootEloquent();
 $container->registerInstance(Capsule::class, $capsule);
 
+$pdo = $capsule->getConnection()->getReadPdo();
+$container->registerInstance(\PDO::class, $pdo);
+
+function glob_recursive($pattern, $flags = 0)
+{
+    $files = glob($pattern, $flags);
+    foreach (glob(dirname($pattern) . '/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir) {
+        $files = array_merge($files, glob_recursive($dir . '/' . basename($pattern), $flags));
+    }
+
+    return $files;
+}
+
+// Discovery classes to register in the DIC.
+$directories = [
+    'Commands' => ['#$#', ''],
+    'Controller' => ['#Interface$#', ''],
+    'Model' => ['#Interface$#', ''],
+    'Queries' => ['#$#', ''],
+    'Service' => ['#Interface$#', ''],
+];
+foreach ($directories as $directory => $regex) {
+    $base_dir = realpath(__DIR__ . '/../');
+    $files = glob_recursive($base_dir . "/src/$directory/*.php");
+    $files = array_map(function ($file) use ($base_dir) {
+        $file = str_replace($base_dir, '', $file);
+        $file = preg_replace('#^/src(.+)\\.php$#', 'TinyIB$1', $file);
+        $file = str_replace('/', '\\', $file);
+        return $file;
+    }, $files);
+
+    $interfaces = array_filter($files, function ($file) use ($regex) {
+        return preg_match($regex[0], $file);
+    });
+
+    foreach ($interfaces as $interface) {
+        $class = preg_replace($regex[0], $regex[1], $interface);
+        if (in_array($class, $files)) {
+            $container->registerType($interface, $class);
+        }
+    }
+}
+
 if (!Capsule::schema()->hasTable(TINYIB_DBBANS)) {
     Capsule::schema()->create(TINYIB_DBBANS, function (Blueprint $table) {
         $table->increments('id');

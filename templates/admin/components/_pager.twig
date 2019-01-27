@@ -1,0 +1,48 @@
+<div class="{{ class ? class ~ ' ' }} pager">
+  {% set start = max(current_page - 10, 0) %}
+  {% set end = min(current_page + 10, total_pages) %}
+
+  <ul class="pager__list">
+    {% if start > 0 %}
+      <li class="pager__item">
+        <a href="?page={{ 0 }}">First</a>
+      </li>
+    {% endif %}
+
+    {% if current_page > 0 %}
+      <li class="pager__item">
+        <a href="?page={{ current_page - 1 }}">Previous</a>
+      </li>
+    {% endif %}
+
+    {% if start > 0 %}
+      <li class="pager__item">…</li>
+    {% endif %}
+
+    {% for page in range(start, end) %}
+      <li class="pager__item">
+        {% if page != current_page %}
+          <a href="?page={{ page }}">{{ page + 1 }}</a>
+        {% else %}
+          <strong>{{ page + 1 }}</strong>
+        {% endif %}
+      </li>
+    {% endfor %}
+
+    {% if end < total_pages %}
+      <li class="pager__item">…</li>
+    {% endif %}
+
+    {% if current_page < total_pages %}
+      <li class="pager__item">
+        <a href="?page={{ current_page + 1 }}">Next</a>
+      </li>
+    {% endif %}
+
+    {% if end < total_pages %}
+      <li class="pager__item">
+        <a href="?page={{ total_pages }}">Last</a>
+      </li>
+    {% endif %}
+  </ul>
+</div>

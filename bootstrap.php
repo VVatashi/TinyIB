@@ -1,7 +1,6 @@
 <?php
 
-use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\ServerRequest;
+use GuzzleHttp\Psr7\{Response, ServerRequest};
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
@@ -9,16 +8,10 @@ use Monolog\Logger;
 use Monolog\Processor\PsrLogMessageProcessor;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
-use TinyIB\Cache\CacheInterface;
-use TinyIB\Cache\NoCache;
-use TinyIB\Cache\RedisCache;
+use TinyIB\Cache\{CacheInterface, NoCache, RedisCache};
 use TinyIB\Functions;
-use TinyIB\Middleware\AuthMiddleware;
-use TinyIB\Middleware\CorsMiddleware;
-use TinyIB\Middleware\ExceptionMiddleware;
-use TinyIB\Middleware\RequestHandler;
-use TinyIB\Service\RendererServiceInterface;
-use TinyIB\Service\RoutingServiceInterface;
+use TinyIB\Middleware\{AuthMiddleware, CorsMiddleware, ExceptionMiddleware, RequestHandler};
+use TinyIB\Service\{RendererServiceInterface, RoutingServiceInterface};
 use VVatashi\DI\Container;
 
 require_once __DIR__ . '/vendor/autoload.php';
@@ -161,6 +154,9 @@ $capsule->setAsGlobal();
 $capsule->bootEloquent();
 $container->registerInstance(Capsule::class, $capsule);
 
+$pdo = $capsule->getConnection()->getReadPdo();
+$container->registerInstance(\PDO::class, $pdo);
+
 function glob_recursive($pattern, $flags = 0)
 {
     $files = glob($pattern, $flags);
@@ -173,8 +169,10 @@ function glob_recursive($pattern, $flags = 0)
 
 // Discovery classes to register in the DIC.
 $directories = [
+    'Commands' => ['#$#', ''],
     'Controller' => ['#Interface$#', ''],
     'Model' => ['#Interface$#', ''],
+    'Queries' => ['#$#', ''],
     'Service' => ['#Interface$#', ''],
 ];
 foreach ($directories as $directory => $regex) {
@@ -186,8 +184,8 @@ foreach ($directories as $directory => $regex) {
         return $file;
     }, $files);
 
-    $interfaces = array_filter($files, function ($file) {
-        return preg_match('#Interface$#', $file);
+    $interfaces = array_filter($files, function ($file) use ($regex) {
+        return preg_match($regex[0], $file);
     });
 
     foreach ($interfaces as $interface) {
