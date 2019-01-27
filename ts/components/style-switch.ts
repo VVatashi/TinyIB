@@ -57,16 +57,12 @@ export class StyleSwitch {
   protected setStyle(style: string) {
     const head = DOM.qs('head');
 
-    console.log(head);
-
     // If no <head> element, do nothing
     if (!head) {
       return;
     }
 
     const selected_style = DOM.qs('link[data-selected]') as HTMLElement;
-
-    console.log(selected_style);
 
     if (selected_style) {
       // If style already selected, do nothing
@@ -77,8 +73,6 @@ export class StyleSwitch {
       // Remove previously selected style from <head>
       selected_style.remove();
     }
-
-    console.log(style);
 
     // Add currently selected style to <head>
     const url = this.styles[style];

@@ -4,6 +4,7 @@ export { DeleteForm } from './delete-form';
 export { draggable } from './draggable';
 export { FilePreview } from './file-preview';
 export { NewPostsDetector } from './new-posts-detector';
+export { Post } from './post';
 export { PostingForm } from './posting-form';
 export { PostReferenceMap } from './post-reference-map';
 export { Settings } from './settings';

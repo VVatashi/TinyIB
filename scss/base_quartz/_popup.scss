@@ -1,0 +1,48 @@
+.popup {
+  background: $form-background;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  display: inline-block;
+
+  z-index: 1;
+
+  &__header {
+    border-bottom: $post-header-border;
+    padding: $post-header-padding;
+    text-align: center;
+
+    @include clearfix;
+  }
+
+  &__header-buttons {
+    float: right;
+  }
+
+  &__close {
+    @extend %clickable;
+    padding: 0.1em;
+    font-size: 1.5em;
+    vertical-align: middle;
+  }
+
+  &__close {
+    @extend %icon-close;
+  }
+
+  &__body {
+    position: relative;
+    padding: $post-content-padding;
+  }
+
+  @include breakpoint($xs-up) {
+    border: $post-border;
+    border-radius: $post-border-radius;
+
+    &__close {
+        font-size: 1em;
+    }
+  }
+}
