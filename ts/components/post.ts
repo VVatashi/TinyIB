@@ -97,44 +97,73 @@ export class Post {
       .map(url => url.match('^https?:\/\/(?:www\.)?coub\.com\/view\/([0-9a-z]+)$'))
       .filter(matches => matches && matches.length >= 1)
       .forEach(async matches => {
-        const coubUrl = 'https://coub.com/api/v2/coubs/' + matches[1];
-        const url = window.baseUrl + '/api/embed?url=' + encodeURI(coubUrl);
-        const response = await fetch(url, {
-          credentials: 'same-origin',
-        });
-        const coub = await response.json() as Coub;
-        const thumbnailUrl = coub.image_versions.template.replace('%{version}', 'small');
-        const thumbnail = document.createElement('div');
-        thumbnail.classList.add('post__file', 'file');
-        thumbnail.innerHTML = `
+        const coubUrl = `https://coub.com/api/v2/coubs/${matches[1]}`;
+        const url = `${window.baseUrl}/api/embed?url=${encodeURIComponent(coubUrl)}`;
+
+        try {
+          const response = await fetch(url, {
+            credentials: 'same-origin',
+          });
+
+          if (response.status !== 200) {
+            console.warn(`Can\'t load coub '${matches[0]}':`, response.status, response.statusText);
+            return;
+          }
+
+          const coub = await response.json() as Coub;
+          const thumbnailUrl = coub.image_versions.template.replace('%{version}', 'small');
+          const thumbnail = document.createElement('div');
+          thumbnail.classList.add('post__file', 'file');
+          thumbnail.innerHTML = `
+<div class="post__file-info file-info filesize">
+  <a class="file-info__link" href="https://coub.com/view/${coub.permalink}" target="_blank">Coub</a>
+  <span class="file-info__size"></span>
+</div>
+
 <a class="file__thumbnail thumbnail thumbnail--video" href="https://coub.com/view/${coub.permalink}" target="_blank">
   <img class="thumbnail__content thumbnail__content_image" src="${thumbnailUrl}" />
 </a>`;
-        thumbnail.style.maxHeight = '250px';
-        thumbnail.style.maxWidth = '250px';
-        postContent.insertBefore(thumbnail, postMessage);
+          thumbnail.style.maxHeight = '250px';
+          thumbnail.style.maxWidth = '250px';
+          postContent.insertBefore(thumbnail, postMessage);
 
-        const link = DOM.qs('.thumbnail', thumbnail);
-        link.addEventListener('click', e => {
-          e.preventDefault();
-          this.openCoubInPopup(coub);
-        });
+          const link = DOM.qs('.thumbnail', thumbnail);
+          link.addEventListener('click', e => {
+            e.preventDefault();
+            this.openCoubInPopup(coub);
+          });
+        } catch(e) {
+          console.warn(`Can\'t load coub '${matches[0]}':`, e);
+        }
       });
   }
 
   protected async openCoubInPopup(coub: Coub) {
-    const coubUrl = 'http://coub.com/view/' + coub.permalink;
-    const oEmbedUrl = 'https://coub.com/api/oembed.json?url=' + encodeURI(coubUrl);
-    const url = window.baseUrl + '/api/embed?url=' + encodeURI(oEmbedUrl);
-    const response = await fetch(url);
-    const json = await response.json();
-    this.popupViewModel.title = 'Coub — ' + coub.title;
-    this.popupViewModel.content = json.html;
-    (this.popupViewModel as any).setPosition({
-      x: window.innerWidth / 2 - json.width / 2,
-      y: window.innerHeight / 2 - json.height / 2,
-    });
-    this.popupViewModel.hidden = false;
+    const coubUrl = `https://coub.com/view/${coub.permalink}`;
+    const oEmbedUrl = `https://coub.com/api/oembed.json?url=${encodeURIComponent(coubUrl)}&autoplay=true`;
+    const url = `${window.baseUrl}/api/embed?url=${encodeURIComponent(oEmbedUrl)}`;
+
+    try {
+      const response = await fetch(url, {
+        credentials: 'same-origin',
+      });
+
+      if (response.status !== 200) {
+        console.warn(`Can\'t load coub 'https://coub.com/view/${coub.permalink}':`, response.status, response.statusText);
+        return;
+      }
+
+      const json = await response.json();
+      this.popupViewModel.title = 'Coub — ' + coub.title;
+      this.popupViewModel.content = json.html;
+      (this.popupViewModel as any).setPosition({
+        x: Math.max(0, window.innerWidth / 2 - json.width / 2),
+        y: Math.max(0, window.innerHeight / 2 - json.height / 2),
+      });
+      this.popupViewModel.hidden = false;
+    } catch (e) {
+      console.warn(`Can\'t load coub 'https://coub.com/view/${coub.permalink}':`, e);
+    }
   }
 
   protected closePopup() {

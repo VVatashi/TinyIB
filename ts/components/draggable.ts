@@ -86,7 +86,7 @@ export const draggable = {
 
       return {
         x: Math.min(Math.max(minX, x), maxX),
-        y: Math.min(Math.max(minY, y), maxY),
+        y: Math.max(Math.min(maxY, y), minY),
       };
     },
     onDraggableResize() {
