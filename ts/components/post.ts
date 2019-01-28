@@ -97,8 +97,8 @@ export class Post {
       .map(url => url.match('^https?:\/\/(?:www\.)?coub\.com\/view\/([0-9a-z]+)$'))
       .filter(matches => matches && matches.length >= 1)
       .forEach(async matches => {
-        const coubUrl = 'https://coub.com/api/v2/coubs/' + matches[1];
-        const url = window.baseUrl + '/api/embed?url=' + encodeURI(coubUrl);
+        const coubUrl = `https://coub.com/api/v2/coubs/${matches[1]}`;
+        const url = `${window.baseUrl}/api/embed?url=${encodeURIComponent(coubUrl)}`;
         const response = await fetch(url, {
           credentials: 'same-origin',
         });
@@ -123,9 +123,9 @@ export class Post {
   }
 
   protected async openCoubInPopup(coub: Coub) {
-    const coubUrl = 'http://coub.com/view/' + coub.permalink;
-    const oEmbedUrl = 'https://coub.com/api/oembed.json?url=' + encodeURI(coubUrl);
-    const url = window.baseUrl + '/api/embed?url=' + encodeURI(oEmbedUrl);
+    const coubUrl = `https://coub.com/view/${coub.permalink}`;
+    const oEmbedUrl = `https://coub.com/api/oembed.json?url=${encodeURIComponent(coubUrl)}&autoplay=true`;
+    const url = `${window.baseUrl}/api/embed?url=${encodeURIComponent(oEmbedUrl)}`;
     const response = await fetch(url);
     const json = await response.json();
     this.popupViewModel.title = 'Coub — ' + coub.title;
