@@ -514,14 +514,15 @@ export class PostingForm {
     const showButton = DOM.qid('posting-form-show');
     if (showButton) {
       showButton.addEventListener('click', () => {
-        const vm = this.viewModel;
+        /*const vm = this.viewModel;
         if (vm.position === 'post'
           || !vm.hidden && vm.position === 'float') {
           this.moveToBottom();
         } else {
           this.show();
           this.updateReplyButton();
-        }
+        }*/
+        this.moveToBottom();
       });
     }
 
