@@ -237,7 +237,7 @@ class ManageController implements ManageControllerInterface
 
         if ($post->isReply()) {
             $parent = $post->parent_id;
-            $this->cache->delete(TINYIB_BOARD . ":thread:$parent");
+            $this->cache->deletePattern(TINYIB_BOARD . ":thread:$parent:*");
         }
 
         $id = $post->id;
@@ -291,7 +291,7 @@ class ManageController implements ManageControllerInterface
             }
         }
 
-        $this->cache->delete(TINYIB_BOARD . ":thread:$thread_id");
+        $this->cache->deletePattern(TINYIB_BOARD . ":thread:$thread_id:*");
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
         $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
         $this->cache->deletePattern(TINYIB_BOARD . ':amp:page:*');
@@ -335,7 +335,7 @@ class ManageController implements ManageControllerInterface
         $post->stickied = $sticky;
         $post->save();
 
-        $this->cache->delete(TINYIB_BOARD . ':thread:' . $id);
+        $this->cache->deletePattern(TINYIB_BOARD . ":thread:$id:*");
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
         $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
         $this->cache->deletePattern(TINYIB_BOARD . ':amp:page:*');
