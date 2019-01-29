@@ -541,7 +541,6 @@ class PostService implements PostServiceInterface
                 $parent = $post->parent_id;
                 $this->cache->deletePattern(TINYIB_BOARD . ":thread:$parent:*");
                 $this->cache->deletePattern(TINYIB_BOARD . ":mobile:thread:$parent:page:*");
-                $this->cache->deletePattern(TINYIB_BOARD . ":amp:thread:$parent:page:*");
 
                 if (strtolower($post->email) !== 'sage') {
                     if (TINYIB_MAXREPLIES == 0
@@ -557,12 +556,10 @@ class PostService implements PostServiceInterface
                 $id = $post->id;
                 $this->cache->deletePattern(TINYIB_BOARD . ":thread:$id:*");
                 $this->cache->deletePattern(TINYIB_BOARD . ":mobile:thread:$id:page:*");
-                $this->cache->deletePattern(TINYIB_BOARD . ":amp:thread:$id:page:*");
             }
 
             $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
             $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
-            $this->cache->deletePattern(TINYIB_BOARD . ':amp:page:*');
         }
 
         return $post;
@@ -590,6 +587,5 @@ class PostService implements PostServiceInterface
         $this->cache->deletePattern(TINYIB_BOARD . ":thread:$thread_id:*");
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
         $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
-        $this->cache->deletePattern(TINYIB_BOARD . ':amp:page:*');
     }
 }

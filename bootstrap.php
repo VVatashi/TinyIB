@@ -212,8 +212,6 @@ $handler = new RequestHandler(new CorsMiddleware('*', [
     'POST',
 ], [
 ], [
-    'AMP-Access-Control-Allow-Source-Origin',
-    'AMP-Redirect-To',
 ]), $handler);
 
 // Add exception handler.
