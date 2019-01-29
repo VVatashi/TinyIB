@@ -60,10 +60,6 @@ define('TINYIB_MAXH', 250);
 
 define('TINYIB_TRIPSEED', '');
 
-define('TINYIB_RECAPTCHA_SITE', '');
-define('TINYIB_RECAPTCHA_SECRET', '');
-define('TINYIB_RECAPTCHA_THRESHOLD', 0.5);
-
 define('TINYIB_DBMIGRATE', false);
 define('TINYIB_DBBANS', 'bans');
 define('TINYIB_DBPOSTS', TINYIB_BOARD . '_posts');

@@ -103,12 +103,6 @@ if (TINYIB_TRIPSEED == '' || TINYIB_ADMINPASS == '') {
     throw new Exception($message);
 }
 
-if (TINYIB_CAPTCHA === 'recaptcha'
-    && (TINYIB_RECAPTCHA_SITE == '' || TINYIB_RECAPTCHA_SECRET == '')) {
-    $message = 'TINYIB_RECAPTCHA_SITE and TINYIB_RECAPTCHA_SECRET must be configured.';
-    throw new Exception($message);
-}
-
 // Check directories are writable by the script.
 $writedirs = ['storage', 'webroot/src', 'webroot/thumb'];
 

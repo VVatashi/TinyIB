@@ -64,9 +64,6 @@ class PostController implements PostControllerInterface
             case 'simple':
                 return $this->captcha_service->checkCaptcha($captcha);
 
-            case 'recaptcha':
-                return $this->captcha_service->checkRecaptcha($captcha);
-
             default:
                 return true;
         }
