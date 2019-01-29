@@ -310,43 +310,6 @@ class Functions
     }
 
     /**
-     * Adds overlay to a video.
-     *
-     * @param string $thumb_location
-     */
-    public static function addVideoOverlay($thumb_location)
-    {
-        $overlay = 'images/video_overlay.png';
-        if (file_exists($overlay)) {
-            if (substr($thumb_location, -4) == ".jpg") {
-                $thumbnail = imagecreatefromjpeg($thumb_location);
-            } else {
-                $thumbnail = imagecreatefrompng($thumb_location);
-            }
-            list($width, $height, $type, $attr) = getimagesize($thumb_location);
-
-            $overlay_play = imagecreatefrompng($overlay);
-            imagealphablending($overlay_play, false);
-            imagesavealpha($overlay_play, true);
-            list($overlay_width, $overlay_height, $overlay_type, $overlay_attr) = getimagesize($overlay);
-
-            if (substr($thumb_location, -4) == ".png") {
-                imagecolortransparent($thumbnail, imagecolorallocatealpha($thumbnail, 0, 0, 0, 127));
-                imagealphablending($thumbnail, true);
-                imagesavealpha($thumbnail, true);
-            }
-
-            imagecopy($thumbnail, $overlay_play, ($width / 2) - ($overlay_width / 2), ($height / 2) - ($overlay_height / 2), 0, 0, $overlay_width, $overlay_height);
-
-            if (substr($thumb_location, -4) == ".jpg") {
-                imagejpeg($thumbnail, $thumb_location);
-            } else {
-                imagepng($thumbnail, $thumb_location);
-            }
-        }
-    }
-
-    /**
      * Finds all positions of a substring in the string.
      *
      * @param string $haystack

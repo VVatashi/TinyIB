@@ -115,6 +115,10 @@ export class Settings {
       Show reply icon in the post header
     </x-checkbox>
 
+    <x-checkbox v-model="settings.common.movePostHeaderReflinkIconToDE">
+      Move reply icon to DE buttons
+    </x-checkbox>
+
     <x-checkbox v-model="settings.common.showPostReflinkIcon">
       Show reply icon in the bottom right corner of post message
     </x-checkbox>

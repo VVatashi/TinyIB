@@ -449,8 +449,6 @@ class PostService implements PostServiceInterface
                         unlink("thumb/$thumb");
                         throw new ValidationException('Sorry, your video appears to be corrupt.');
                     }
-
-                    Functions::addVideoOverlay("thumb/$thumb");
                 }
             } elseif (in_array($file_mime, [
                 'image/jpeg',
@@ -488,10 +486,6 @@ class PostService implements PostServiceInterface
                 if (!copy($tinyib_uploads[$file_mime][1], "thumb/$thumb")) {
                     unlink($file_location);
                     throw new \Exception('Could not create thumbnail.');
-                }
-
-                if ($file_mime === 'application/x-shockwave-flash') {
-                    Functions::addVideoOverlay("thumb/$thumb");
                 }
             } elseif (in_array($file_mime, [
                 'image/jpeg',
