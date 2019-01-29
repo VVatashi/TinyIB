@@ -2,6 +2,7 @@ export interface CommonSettings {
   layout: 'center' | 'left';
 
   showPostHeaderReflinkIcon: boolean;
+  movePostHeaderReflinkIconToDE: boolean;
   showPostReflinkIcon: boolean;
 
   scrollToNewPosts: boolean;
@@ -56,6 +57,7 @@ const defaultSettings: Settings = {
     layout: 'left',
 
     showPostHeaderReflinkIcon: true,
+    movePostHeaderReflinkIconToDE: false,
     showPostReflinkIcon: false,
 
     scrollToNewPosts: true,

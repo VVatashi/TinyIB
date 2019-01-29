@@ -70,8 +70,6 @@ class CorsMiddleware implements MiddlewareInterface
         $query = $request->getQueryParams();
         if ($request->hasHeader('Origin')) {
             $origin = $request->getHeaderLine('Origin');
-        } elseif (isset($query['__amp_source_origin'])) {
-            $origin = $query['__amp_source_origin'];
         }
 
         if (empty($origin)) {

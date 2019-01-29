@@ -24,37 +24,20 @@
     <label class="{{ label_class }}"
       {% if id is defined %} for="{{ id }}" {% endif %}
     >
-      {% if constant('TINYIB_CAPTCHA') == 'recaptcha' %}
-        <script>
-          grecaptcha.ready(() => {
-            const captcha_input = document.getElementById('captcha');
-            if (captcha_input !== null) {
-              grecaptcha.execute('{{ constant('TINYIB_RECAPTCHA_SITE') }}', {
-                action: '{{ action }}',
-              }).then(token => captcha_input.value = token);
-            }
-          });
-        </script>
-      {% else %}
-        <img id="captchaimage" src="{{ base_url }}/captcha" alt="CAPTCHA" />
-      {% endif %}
+      <img id="captchaimage" src="{{ base_url }}/captcha" alt="CAPTCHA" />
     </label>
   {% endspaceless %}
 {% endblock %}
 
 {% block input %}
   {% spaceless %}
-    {% if constant('TINYIB_CAPTCHA') == 'recaptcha' %}
-      <input type="hidden" id="captcha" name="captcha" value="" readonly />
-    {% else %}
-      <input type="{{ type }}"
-        class="{{ input_class }}"
-        {% if id is defined %} id="{{ id }}" {% endif %}
-        {% if name is defined %} name="{{ name }}" {% endif %}
-        {% if required %} required {% endif %}
-        value="{{ value }}"
-        placeholder="{{ placeholder }}"
-      />
-    {% endif %}
+    <input type="{{ type }}"
+      class="{{ input_class }}"
+      {% if id is defined %} id="{{ id }}" {% endif %}
+      {% if name is defined %} name="{{ name }}" {% endif %}
+      {% if required %} required {% endif %}
+      value="{{ value }}"
+      placeholder="{{ placeholder }}"
+    />
   {% endspaceless %}
 {% endblock %}

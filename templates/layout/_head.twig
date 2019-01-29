@@ -51,22 +51,3 @@
 <script>window.baseUrl = '{{ base_url|raw }}';</script>
 
 {{ self.script('index') }}
-
-{% if constant('TINYIB_CAPTCHA') == 'recaptcha' %}
-  <script src="https://www.google.com/recaptcha/api.js?render={{ constant('TINYIB_RECAPTCHA_SITE') }}"></script>
-  <script>
-    grecaptcha.ready(() => {
-      const container = document.querySelector('footer');
-      container.style.minHeight = '45px';
-
-      const captcha = document.querySelector('.grecaptcha-badge');
-      captcha.style.position = 'absolute';
-      captcha.style.top = 0;
-      captcha.style.bottom = 'unset';
-      captcha.style.left = 'unset';
-      captcha.style.right = 0;
-      captcha.style.transform = 'scale(0.75)';
-      container.appendChild(captcha);
-    });
-  </script>
-{% endif %}

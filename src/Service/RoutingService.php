@@ -10,7 +10,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use TinyIB\Controller\Admin\ModLogControllerInterface;
 use TinyIB\Controller\Admin\UserCrudControllerInterface;
-use TinyIB\Controller\Amp\AmpPostControllerInterface;
 use TinyIB\Controller\Mobile\MobilePostControllerInterface;
 use TinyIB\Controller\ApiControllerInterface;
 use TinyIB\Controller\AuthControllerInterface;
@@ -89,11 +88,6 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
                 });
 
                 $routes->addRoute('POST', '/post/create',  [PostControllerInterface::class, 'ajaxCreatePost']);
-            });
-
-            $routes->addGroup('/amp', function (RouteCollector $routes) {
-                $routes->addRoute('GET', '',                 [AmpPostControllerInterface::class, 'index']);
-                $routes->addRoute('GET', '/thread/{id:\d+}', [AmpPostControllerInterface::class, 'thread']);
             });
 
             $routes->addGroup('/mobile', function (RouteCollector $routes) {
