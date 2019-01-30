@@ -116,7 +116,7 @@ export class Settings {
     </x-checkbox>
 
     <x-checkbox v-model="settings.common.movePostHeaderReflinkIconToDE">
-      Move reply icon to DE buttons
+      Move DE hide button before reply icon
     </x-checkbox>
 
     <x-checkbox v-model="settings.common.showPostReflinkIcon">
