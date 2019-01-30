@@ -625,7 +625,7 @@ export class PostingForm {
         const replyIcon = DOM.qs('.post-header__reflink-wrapper > .post-header__reflink-icon', post);
         const deHide = DOM.qs('.de-btn-hide', post);
         if (replyIcon && deHide) {
-          deHide.parentElement.insertBefore(replyIcon, deHide.nextSibling);
+          replyIcon.parentElement.insertBefore(deHide, replyIcon);
         }
       });
     }
