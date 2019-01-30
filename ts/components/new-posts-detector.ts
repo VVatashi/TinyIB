@@ -30,7 +30,7 @@ export class NewPostsDetector {
           total.concat(current), []);
 
       if (posts.length > 0) {
-        eventBus.$emit(Events.PostsInserted, posts);
+        eventBus.$emit(Events.PostsInserted, posts, false);
       }
     });
 
@@ -43,7 +43,7 @@ export class NewPostsDetector {
 
       const posts = DOM.qsa('.post');
       if (posts.length > 0) {
-        eventBus.$emit(Events.PostsInserted, posts);
+        eventBus.$emit(Events.PostsInserted, posts, true);
       }
     });
   }
