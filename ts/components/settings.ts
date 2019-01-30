@@ -130,6 +130,10 @@ export class Settings {
     <x-checkbox v-model="settings.common.smoothScroll">
       Smooth scrolling
     </x-checkbox>
+
+    <x-checkbox v-model="settings.common.showVideoOverlay">
+      Show video overlay
+    </x-checkbox>
   </div>
 
   <div class="settings-form__tab-content"

@@ -4,9 +4,9 @@ export interface CommonSettings {
   showPostHeaderReflinkIcon: boolean;
   movePostHeaderReflinkIconToDE: boolean;
   showPostReflinkIcon: boolean;
-
   scrollToNewPosts: boolean;
   smoothScroll: boolean;
+  showVideoOverlay: boolean;
 }
 
 export interface Replace {
@@ -59,9 +59,9 @@ const defaultSettings: Settings = {
     showPostHeaderReflinkIcon: true,
     movePostHeaderReflinkIconToDE: false,
     showPostReflinkIcon: false,
-
     scrollToNewPosts: true,
     smoothScroll: true,
+    showVideoOverlay: false,
   },
   form: {
     align: 'center',

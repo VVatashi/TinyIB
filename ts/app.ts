@@ -48,6 +48,10 @@ document.addEventListener('DOMContentLoaded', e => {
     if (!settings.common.showPostReflinkIcon) {
       layout.classList.add('layout--hide-post-reflink-icon');
     }
+
+    if (settings.common.showVideoOverlay) {
+      layout.classList.add('layout--show-thumb-overlay');
+    }
   }
 
   const formWrapper = DOM.qs('.content__posting-form-wrapper');
