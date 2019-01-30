@@ -233,11 +233,10 @@ class ManageController implements ManageControllerInterface
         Post::deletePostByID($id);
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
         $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
-        $this->cache->deletePattern(TINYIB_BOARD . ':amp:page:*');
 
         if ($post->isReply()) {
             $parent = $post->parent_id;
-            $this->cache->delete(TINYIB_BOARD . ":thread:$parent");
+            $this->cache->deletePattern(TINYIB_BOARD . ":thread:$parent:*");
         }
 
         $id = $post->id;
@@ -291,10 +290,9 @@ class ManageController implements ManageControllerInterface
             }
         }
 
-        $this->cache->delete(TINYIB_BOARD . ":thread:$thread_id");
+        $this->cache->deletePattern(TINYIB_BOARD . ":thread:$thread_id:*");
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
         $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
-        $this->cache->deletePattern(TINYIB_BOARD . ':amp:page:*');
 
         $data['text'] = "Post No.$id approved.";
         return new Response(200, [], $this->renderer->render('manage_info.twig', $data));
@@ -335,10 +333,9 @@ class ManageController implements ManageControllerInterface
         $post->stickied = $sticky;
         $post->save();
 
-        $this->cache->delete(TINYIB_BOARD . ':thread:' . $id);
+        $this->cache->deletePattern(TINYIB_BOARD . ":thread:$id:*");
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
         $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
-        $this->cache->deletePattern(TINYIB_BOARD . ':amp:page:*');
 
         $id = $post->id;
         $action = $sticky ? 'stickied' : 'un-stickied';

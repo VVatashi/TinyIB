@@ -1,0 +1,52 @@
+.popup {
+  background: $form-background;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  max-width: 100vw;
+  max-height: 100vh;
+
+  display: inline-block;
+
+  z-index: 1;
+
+  &__header {
+    border-bottom: $post-header-border;
+    padding: $post-header-padding;
+    text-align: center;
+
+    @include clearfix;
+  }
+
+  &__header-buttons {
+    float: right;
+  }
+
+  &__close {
+    @extend %clickable;
+    @extend %icon-close;
+    padding: 0.1em;
+    font-size: 1.5em;
+    vertical-align: middle;
+  }
+
+  &__body {
+    position: relative;
+    padding: $post-content-padding;
+
+    & > iframe {
+      max-width: 100%;
+    }
+  }
+
+  @include breakpoint($xs-up) {
+    border: $post-border;
+    border-radius: $post-border-radius;
+
+    &__close {
+        font-size: 1em;
+    }
+  }
+}

@@ -15,7 +15,7 @@ define('TINYIB_BASE_URL', 'https://localhost/');
 define('TINYIB_BOARD', 'b');          // Unique identifier for this board using only letters and numbers
 define('TINYIB_BOARDDESC', 'TinyIB'); // Displayed at the top of every page
 define('TINYIB_ALWAYSNOKO', false);   // Redirect to thread after posting
-define('TINYIB_CAPTCHA', '');         // Reduce spam by requiring users to pass a CAPTCHA when posting: simple / recaptcha  (click Rebuild All in the management panel after enabling)  ['' to disable]
+define('TINYIB_CAPTCHA', '');         // Reduce spam by requiring users to pass a CAPTCHA when posting: simple  (click Rebuild All in the management panel after enabling)  ['' to disable]
 define('TINYIB_REQMOD', '');          // Require moderation before displaying posts: files / all  (see README for instructions, only MySQL is supported)  ['' to disable]
 
 // Board appearance
@@ -81,13 +81,6 @@ define('TINYIB_MAXH', 250);           // Height
 // Tripcode seed - Must not change once set!
 define('TINYIB_TRIPSEED', '');        // Enter some random text  (used when generating secure tripcodes)
 
-// CAPTCHA
-//   The following only apply when TINYIB_CAPTCHA is set to recaptcha
-//   For API keys visit https://www.google.com/recaptcha
-define('TINYIB_RECAPTCHA_SITE', '');  // Site key
-define('TINYIB_RECAPTCHA_SECRET', '');// Secret key
-define('TINYIB_RECAPTCHA_THRESHOLD', 0.5);
-
 // Database
 define('TINYIB_DBMIGRATE', false);    // Enable database migration tool  (see README for instructions)
 define('TINYIB_DBBANS', 'bans');      // Bans table name (use the same bans table across boards for global bans)
@@ -114,6 +107,4 @@ define('TINYIB_CACHE', '');
 define('TINYIB_CACHE_REDIS_HOST', 'unix:/var/run/redis/redis.sock');
 
 // Google Tag Manager
-
 define('TINYIB_GTM', '');
-define('TINYIB_GTM_AMP', '');

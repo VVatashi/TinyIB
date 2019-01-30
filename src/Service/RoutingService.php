@@ -10,8 +10,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use TinyIB\Controller\Admin\ModLogControllerInterface;
 use TinyIB\Controller\Admin\UserCrudControllerInterface;
-use TinyIB\Controller\Amp\AmpPostControllerInterface;
 use TinyIB\Controller\Mobile\MobilePostControllerInterface;
+use TinyIB\Controller\ApiControllerInterface;
 use TinyIB\Controller\AuthControllerInterface;
 use TinyIB\Controller\CaptchaControllerInterface;
 use TinyIB\Controller\ManageControllerInterface;
@@ -36,6 +36,10 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
         $this->container = $container;
 
         $this->dispatcher = \FastRoute\simpleDispatcher(function (RouteCollector $routes) {
+            $routes->addGroup('/api', function (RouteCollector $routes) {
+                $routes->addRoute('GET', '/embed', [ApiControllerInterface::class, 'embed']);
+            });
+
             $routes->addGroup('/auth', function (RouteCollector $routes) {
                 $routes->addRoute('GET',  '/register', [AuthControllerInterface::class, 'registerForm']);
                 $routes->addRoute('POST', '/register', [AuthControllerInterface::class, 'register']);
@@ -84,11 +88,6 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
                 });
 
                 $routes->addRoute('POST', '/post/create',  [PostControllerInterface::class, 'ajaxCreatePost']);
-            });
-
-            $routes->addGroup('/amp', function (RouteCollector $routes) {
-                $routes->addRoute('GET', '',                 [AmpPostControllerInterface::class, 'index']);
-                $routes->addRoute('GET', '/thread/{id:\d+}', [AmpPostControllerInterface::class, 'thread']);
             });
 
             $routes->addGroup('/mobile', function (RouteCollector $routes) {

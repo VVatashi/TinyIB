@@ -64,9 +64,6 @@ class PostController implements PostControllerInterface
             case 'simple':
                 return $this->captcha_service->checkCaptcha($captcha);
 
-            case 'recaptcha':
-                return $this->captcha_service->checkRecaptcha($captcha);
-
             default:
                 return true;
         }
@@ -265,7 +262,8 @@ class PostController implements PostControllerInterface
     {
         $args = explode('/', $request->getUri()->getPath());
         $page = count($args) > 1 ? (int)$args[1] : 0;
-        $key = TINYIB_BOARD . ':page:' . $page;
+        $user = $request->getAttribute('user');
+        $key = TINYIB_BOARD . ':page:' . $page . ':user:' . $user->id;
         $headers = [];
         $data = $this->cache->get($key);
         if (isset($data)) {
@@ -286,7 +284,8 @@ class PostController implements PostControllerInterface
     {
         $args = explode('/', $request->getUri()->getPath());
         $id = (int)$args[2];
-        $key = TINYIB_BOARD . ':thread:' . $id;
+        $user = $request->getAttribute('user');
+        $key = TINYIB_BOARD . ':thread:' . $id . ':user:' . $user->id;
         $headers = [];
         $data = $this->cache->get($key);
         if (isset($data)) {

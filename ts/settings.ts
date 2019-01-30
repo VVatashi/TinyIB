@@ -2,10 +2,11 @@ export interface CommonSettings {
   layout: 'center' | 'left';
 
   showPostHeaderReflinkIcon: boolean;
+  movePostHeaderReflinkIconToDE: boolean;
   showPostReflinkIcon: boolean;
-
   scrollToNewPosts: boolean;
   smoothScroll: boolean;
+  showVideoOverlay: boolean;
 }
 
 export interface Replace {
@@ -22,6 +23,10 @@ export interface FormSettings {
   showMarkup: boolean;
   showMarkupMobile: boolean;
   insertTagsInPairs: boolean;
+
+  saveFormState: boolean;
+  saveSubject: boolean;
+  saveName: boolean;
 
   float: boolean;
   floatPosition: { x: number, y: number };
@@ -52,10 +57,11 @@ const defaultSettings: Settings = {
     layout: 'left',
 
     showPostHeaderReflinkIcon: true,
+    movePostHeaderReflinkIconToDE: false,
     showPostReflinkIcon: false,
-
     scrollToNewPosts: true,
     smoothScroll: true,
+    showVideoOverlay: false,
   },
   form: {
     align: 'center',
@@ -66,6 +72,10 @@ const defaultSettings: Settings = {
     showMarkup: true,
     showMarkupMobile: false,
     insertTagsInPairs: true,
+
+    saveFormState: false,
+    saveSubject: false,
+    saveName: true,
 
     float: false,
     floatPosition: { x: 100, y: 100 },

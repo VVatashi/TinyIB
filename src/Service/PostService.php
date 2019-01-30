@@ -449,8 +449,6 @@ class PostService implements PostServiceInterface
                         unlink("thumb/$thumb");
                         throw new ValidationException('Sorry, your video appears to be corrupt.');
                     }
-
-                    Functions::addVideoOverlay("thumb/$thumb");
                 }
             } elseif (in_array($file_mime, [
                 'image/jpeg',
@@ -488,10 +486,6 @@ class PostService implements PostServiceInterface
                 if (!copy($tinyib_uploads[$file_mime][1], "thumb/$thumb")) {
                     unlink($file_location);
                     throw new \Exception('Could not create thumbnail.');
-                }
-
-                if ($file_mime === 'application/x-shockwave-flash') {
-                    Functions::addVideoOverlay("thumb/$thumb");
                 }
             } elseif (in_array($file_mime, [
                 'image/jpeg',
@@ -545,9 +539,8 @@ class PostService implements PostServiceInterface
 
             if ($post->isReply()) {
                 $parent = $post->parent_id;
-                $this->cache->delete(TINYIB_BOARD . ":thread:$parent");
+                $this->cache->deletePattern(TINYIB_BOARD . ":thread:$parent:*");
                 $this->cache->deletePattern(TINYIB_BOARD . ":mobile:thread:$parent:page:*");
-                $this->cache->deletePattern(TINYIB_BOARD . ":amp:thread:$parent:page:*");
 
                 if (strtolower($post->email) !== 'sage') {
                     if (TINYIB_MAXREPLIES == 0
@@ -561,14 +554,12 @@ class PostService implements PostServiceInterface
                 }
             } else {
                 $id = $post->id;
-                $this->cache->delete(TINYIB_BOARD . ":thread:$id");
+                $this->cache->deletePattern(TINYIB_BOARD . ":thread:$id:*");
                 $this->cache->deletePattern(TINYIB_BOARD . ":mobile:thread:$id:page:*");
-                $this->cache->deletePattern(TINYIB_BOARD . ":amp:thread:$id:page:*");
             }
 
             $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
             $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
-            $this->cache->deletePattern(TINYIB_BOARD . ':amp:page:*');
         }
 
         return $post;
@@ -593,9 +584,8 @@ class PostService implements PostServiceInterface
         Post::deletePostByID($id);
 
         $thread_id = $post->isThread() ? $id : $post->parent_id;
-        $this->cache->delete(TINYIB_BOARD . ':thread:' . $thread_id);
+        $this->cache->deletePattern(TINYIB_BOARD . ":thread:$thread_id:*");
         $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
         $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
-        $this->cache->deletePattern(TINYIB_BOARD . ':amp:page:*');
     }
 }
