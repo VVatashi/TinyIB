@@ -595,8 +595,8 @@ export class PostingForm {
     }
   }
 
-  protected onPostsInserted(posts: HTMLElement[]) {
-    if (this.settings.common.scrollToNewPosts) {
+  protected onPostsInserted(posts: HTMLElement[], initial: boolean) {
+    if (!initial && this.settings.common.scrollToNewPosts) {
       const scrollingEl = document.scrollingElement || document.body;
       const postsHeight = posts.reduce((total, post) => {
         const style = document.defaultView.getComputedStyle(post, '');
@@ -607,7 +607,7 @@ export class PostingForm {
 
       // If in the bottom area.
       const bottomOffset = scrollingEl.scrollHeight - scrollingEl.scrollTop;
-      const bottomArea = postsHeight + 1.5 * window.innerHeight;
+      const bottomArea = postsHeight + 1.25 * window.innerHeight;
       if (bottomOffset < bottomArea) {
         // Scroll to the last post.
         setTimeout(() => {
