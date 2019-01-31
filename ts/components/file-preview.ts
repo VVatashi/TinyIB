@@ -3,22 +3,22 @@ import Vue from 'vue';
 export const FilePreview = Vue.extend({
   template: `
 <div class="file-preview"
-  v-on:click="onClick($event)"
-  v-on:dragenter.stop.prevent
-  v-on:dragleave.stop.prevent
-  v-on:dragover.stop.prevent
-  v-on:drop.stop.prevent="onDrop($event)">
+  :title="info"
+  @click="onClick($event)"
+  @dragenter.stop.prevent
+  @dragleave.stop.prevent
+  @dragover.stop.prevent
+  @drop.stop.prevent="onDrop($event)">
   <span class="file-preview__info"
     v-if="type">{{ info }}</span>
 
   <img class="file-preview__content"
-    v-bind:src="src"
-    v-bind:title="info"
-    v-if="type === 'image' && src" />
+    v-if="type === 'image' && src"
+    :src="src" />
   <video class="file-preview__content" autoplay loop muted
-    v-bind:src="src"
-    v-bind:title="info"
-    v-else-if="type === 'video' && src"></video>
+    v-else-if="type === 'video' && src"
+    :src="src"
+    :title="info"></video>
   <span class="file-preview__label"
     v-else>Upload file</span>
 

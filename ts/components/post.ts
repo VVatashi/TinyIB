@@ -155,7 +155,7 @@ export class Post {
 
       const json = await response.json();
       this.popupViewModel.title = 'Coub — ' + coub.title;
-      this.popupViewModel.content = json.html;
+      this.popupViewModel.content = json.html.replace('muted=true', 'muted=false');
       (this.popupViewModel as any).setPosition({
         x: Math.max(0, window.innerWidth / 2 - json.width / 2),
         y: Math.max(0, window.innerHeight / 2 - json.height / 2),
