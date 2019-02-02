@@ -5,6 +5,7 @@ import { Api } from '../api';
 import { Coords } from './draggable';
 import { Settings } from '../settings';
 import { DOM } from '../utils';
+import { HSVColorPicker } from '@vvatashi/color-picker';
 
 interface ViewModel {
   fields: {
@@ -19,6 +20,7 @@ interface ViewModel {
   hidden: boolean;
   position: 'bottom' | 'post' | 'float';
   mode: 'mobile' | 'default';
+  colorPopupVisible: boolean;
 }
 
 export class PostingForm {
@@ -144,6 +146,25 @@ export class PostingForm {
         </button>
 
         <button type="button" class="button posting-form__markup-button"
+          @click.prevent="toggleColorPopup">
+          color
+        </button>
+
+        <div class="color-picker-popup" v-if="colorPopupVisible">
+          <x-color-picker ref="color-picker" class="color-picker-popup__picker"
+            :width="128" :height="128" :showLabels="false">
+          </x-color-picker>
+
+          <div class="color-picker-popup__buttons">
+            <button type="button" class="button"
+              @click.prevent="onColorPopupOk">Ok</button>
+
+            <button type="button" class="button"
+              @click.prevent="onColorPopupCancel">Cancel</button>
+          </div>
+        </div>
+
+        <button type="button" class="button posting-form__markup-button"
           v-on:click.prevent="insertMarkup('code')">
           <code>code</code>
         </button>
@@ -151,11 +172,6 @@ export class PostingForm {
         <button type="button" class="button posting-form__markup-button"
           v-on:click.prevent="insertMarkup('spoiler')">
           <span class="markup__spoiler markup__spoiler--visible">sp</span>
-        </button>
-
-        <button type="button" class="button posting-form__markup-button"
-          v-on:click.prevent="insertMarkup('rp')">
-          <span class="markup__rp markup__rp--visible">rp</span>
         </button>
 
         <button type="button" class="button posting-form__markup-button"
@@ -195,6 +211,7 @@ export class PostingForm {
             && component.settings.form.float
             ? 'float' : 'bottom',
           mode: 'mobile',
+          colorPopupVisible: false,
         };
       },
       computed: {
@@ -240,6 +257,7 @@ export class PostingForm {
       },
       components: {
         'x-file-preview': FilePreview,
+        'x-color-picker': HSVColorPicker,
       },
       mixins: [
         draggable,
@@ -264,7 +282,9 @@ export class PostingForm {
           draggable.style.left = `${coords.x}px`;
           draggable.style.top = `${coords.y}px`;
 
-          component.settings.form.floatPosition = coords;
+          const settings = SettingsManager.load();
+          settings.form.floatPosition = coords;
+          component.settings = settings;
           SettingsManager.save(component.settings);
         },
         onDraggableResize() {
@@ -367,7 +387,17 @@ export class PostingForm {
             this.file = item.getAsFile();
           }
         },
-        insertMarkup(tag: string) {
+        toggleColorPopup() {
+          this.colorPopupVisible = !this.colorPopupVisible;
+        },
+        onColorPopupOk() {
+          this.colorPopupVisible = false;
+          this.insertMarkup('color', this.$refs['color-picker'].hex);
+        },
+        onColorPopupCancel() {
+          this.colorPopupVisible = false;
+        },
+        insertMarkup(tag: string, attribute: string = null) {
           const messageEl = this.$refs.message as HTMLTextAreaElement;
           const selection = {
             begin: messageEl.selectionStart,
@@ -375,7 +405,7 @@ export class PostingForm {
             length: messageEl.selectionEnd - messageEl.selectionStart,
           };
           const message = this.fields.message as string;
-          const openingTag = `[${tag}]`;
+          const openingTag = `[${tag}${attribute ? '=' + attribute : ''}]`;
           const closingTag = `[/${tag}]`;
 
           if (selection.length || component.settings.form.insertTagsInPairs) {
@@ -658,7 +688,9 @@ export class PostingForm {
     const vm = this.viewModel as any;
     vm.position = 'float';
 
-    this.settings.form.float = true;
+    const settings = SettingsManager.load();
+    settings.form.float = true;
+    this.settings = settings;
     SettingsManager.save(this.settings);
 
     const position = this.settings.form.floatPosition;
@@ -678,7 +710,9 @@ export class PostingForm {
     const vm = this.viewModel;
     vm.position = 'post';
 
-    this.settings.form.float = false;
+    const settings = SettingsManager.load();
+    settings.form.float = false;
+    this.settings = settings;
     SettingsManager.save(this.settings);
 
     const showButton = DOM.qid('posting-form-show');
@@ -710,7 +744,9 @@ export class PostingForm {
     const vm = this.viewModel;
     vm.position = 'bottom';
 
-    this.settings.form.float = false;
+    const settings = SettingsManager.load();
+    settings.form.float = false;
+    this.settings = settings;
     SettingsManager.save(this.settings);
 
     this.updateReplyButton();

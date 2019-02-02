@@ -1,5 +1,5 @@
 const path = require('path');
-const VueLoaderPlugin = require('vue-loader').VueLoaderPlugin;
+const { VueLoaderPlugin } = require('vue-loader');
 
 module.exports = {
   entry: './ts/app.ts',
@@ -11,6 +11,14 @@ module.exports = {
         test: /\.ts$/,
         use: 'ts-loader',
         exclude: /node_modules/,
+      },
+      {
+        test: /\.scss$/,
+        use: [
+          'vue-style-loader',
+          'css-loader',
+          'sass-loader',
+        ],
       },
       {
         test: /\.vue$/,
@@ -27,7 +35,7 @@ module.exports = {
     'vue': 'Vue',
   },
   resolve: {
-    extensions: ['.js', '.ts'],
+    extensions: ['.js', '.ts', '.vue'],
   },
   output: {
     filename: './index.js',
