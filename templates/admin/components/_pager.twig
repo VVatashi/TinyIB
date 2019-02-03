@@ -1,6 +1,6 @@
 <div class="{{ class ? class ~ ' ' }} pager">
   {% set start = max(current_page - 10, 0) %}
-  {% set end = min(current_page + 10, total_pages) %}
+  {% set end = min(current_page + 10, total_pages - 1) %}
 
   <ul class="pager__list">
     {% if start > 0 %}
@@ -29,19 +29,19 @@
       </li>
     {% endfor %}
 
-    {% if end < total_pages %}
+    {% if end < total_pages - 1 %}
       <li class="pager__item">…</li>
     {% endif %}
 
-    {% if current_page < total_pages %}
+    {% if current_page < total_pages - 1 %}
       <li class="pager__item">
         <a href="?page={{ current_page + 1 }}">Next</a>
       </li>
     {% endif %}
 
-    {% if end < total_pages %}
+    {% if end < total_pages - 1 %}
       <li class="pager__item">
-        <a href="?page={{ total_pages }}">Last</a>
+        <a href="?page={{ total_pages - 1 }}">Last</a>
       </li>
     {% endif %}
   </ul>

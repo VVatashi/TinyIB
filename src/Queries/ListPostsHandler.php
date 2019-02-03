@@ -2,22 +2,12 @@
 
 namespace TinyIB\Queries;
 
-class ListPostsHandler implements QueryHandlerInterface
+class ListPostsHandler extends ListHandler
 {
-    /** @var \PDO $pdo */
-    protected $pdo;
-
-    public function __construct(\PDO $pdo)
-    {
-        $this->pdo = $pdo;
-    }
-
     /**
-     * @param ListPosts $query
-     *
-     * @return int
+     * {@inheritDoc}
      */
-    public function count($query) : int
+    protected function countSql(): string
     {
         $posts_table = TINYIB_DBPOSTS;
         $sql = <<<EOF
@@ -25,17 +15,13 @@ SELECT count(*)
 FROM $posts_table AS p
 WHERE p.deleted_at IS NULL
 EOF;
-        $statement = $this->pdo->prepare($sql);
-        $statement->execute();
-        return (int)$statement->fetchColumn();
+        return $sql;
     }
 
     /**
-     * @param ListPosts $query
-     *
-     * @return array
+     * {@inheritDoc}
      */
-    public function handle($query)
+    protected function sql(): string
     {
         $posts_table = TINYIB_DBPOSTS;
         $sql = <<<EOF
@@ -48,11 +34,6 @@ WHERE p.deleted_at IS NULL
 ORDER BY p.id DESC
 LIMIT :take OFFSET :skip
 EOF;
-        $statement = $this->pdo->prepare($sql);
-        $statement->execute([
-            'take' => $query->take,
-            'skip' => $query->skip,
-        ]);
-        return $statement->fetchAll();
+        return $sql;
     }
 }

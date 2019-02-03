@@ -2,24 +2,12 @@
 
 namespace TinyIB\Queries;
 
-use TinyIB\NotFoundException;
-
-class ShowPostHandler implements QueryHandlerInterface
+class ShowPostHandler extends ShowHandler
 {
-    /** @var \PDO $pdo */
-    protected $pdo;
-
-    public function __construct(\PDO $pdo)
-    {
-        $this->pdo = $pdo;
-    }
-
     /**
-     * @param ShowPost $query
-     *
-     * @return array
+     * {@inheritDoc}
      */
-    public function handle($query)
+    public function sql() : string
     {
         $posts_table = TINYIB_DBPOSTS;
         $sql = <<<EOF
@@ -33,15 +21,6 @@ WHERE p.id = :id AND p.deleted_at IS NULL
 ORDER BY p.id DESC
 LIMIT 1
 EOF;
-        $statement = $this->pdo->prepare($sql);
-        $statement->execute([
-            'id' => $query->id,
-        ]);
-        $item = $statement->fetch();
-        if (empty($item)) {
-            throw new NotFoundException();
-        }
-
-        return $item;
+        return $sql;
     }
 }

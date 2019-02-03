@@ -15,6 +15,12 @@
 
     <div class="list__content">
       {% if items|length %}
+        {% if pager.total_pages > 1 %}
+          {% include 'admin/components/_pager.twig' with pager + {
+            'class': 'list__top-pager',
+          } %}
+        {% endif %}
+
         <table class="list__table list__table--striped">
           <thead>
             <tr class="list__table-header">
@@ -30,7 +36,7 @@
                 <th class="list__cell list__cell--nostretch" scope="row">{{ item.id }}</th>
 
                 <td class="list__cell list__cell--nostretch">
-                  {{ item.createdTimestamp|date() }}
+                  {{ item.created_at|date('j.m.Y H:i:s') }}
                 </td>
 
                 <td class="list__cell">{{ item.message|raw }}</td>
@@ -38,6 +44,12 @@
             {% endfor %}
           </tbody>
         </table>
+
+        {% if pager.total_pages > 1 %}
+          {% include 'admin/components/_pager.twig' with pager + {
+            'class': 'list__bottom-pager',
+          } %}
+        {% endif %}
       {% endif %}
     </div>
   </div>

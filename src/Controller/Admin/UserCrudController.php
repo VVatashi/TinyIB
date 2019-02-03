@@ -38,11 +38,7 @@ class UserCrudController implements UserCrudControllerInterface
     {
         $id = $user->id;
         $email = htmlentities($user->email, ENT_QUOTES);
-
-        $id_link = "<a href=\"/" . TINYIB_BOARD . "/admin/user/$id\">#$id</a>";
-        $email_link = "<a href=\"mailto:$email\">$email</a>";
-
-        return "$id_link ($email_link)";
+        return "<a href=\"/" . TINYIB_BOARD . "/admin/user/$id\">$email</a>";
     }
 
     /**

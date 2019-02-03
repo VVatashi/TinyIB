@@ -12,17 +12,6 @@ use TinyIB\Service\RendererServiceInterface;
 class BansController extends CrudController implements BansControllerInterface
 {
     /**
-     * Creates a new BansController instance.
-     *
-     * @param RendererServiceInterface $renderer
-     */
-    public function __construct(
-        RendererServiceInterface $renderer
-    ) {
-        parent::__construct($renderer);
-    }
-
-    /**
      * {@inheritDoc}
      */
     public function list(ServerRequestInterface $request) : ResponseInterface

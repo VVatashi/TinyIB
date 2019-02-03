@@ -15,9 +15,11 @@
 
     <div class="list__content">
       {% if items|length %}
-        {% include 'admin/components/_pager.twig' with pager + {
-          'class': 'list__top-pager',
-        } %}
+        {% if pager.total_pages > 1 %}
+          {% include 'admin/components/_pager.twig' with pager + {
+            'class': 'list__top-pager',
+          } %}
+        {% endif %}
 
         <table class="list__table list__table--striped">
           <thead>
@@ -74,9 +76,11 @@
           </tbody>
         </table>
 
-        {% include 'admin/components/_pager.twig' with pager + {
-          'class': 'list__bottom-pager',
-        } %}
+        {% if pager.total_pages > 1 %}
+          {% include 'admin/components/_pager.twig' with pager + {
+            'class': 'list__bottom-pager',
+          } %}
+        {% endif %}
       {% endif %}
     </div>
   </div>
