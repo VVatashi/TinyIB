@@ -76,13 +76,6 @@ define('TINYIB_MAXH', 250);           // Height
 // Tripcode seed - Must not change once set!
 define('TINYIB_TRIPSEED', '');        // Enter some random text  (used when generating secure tripcodes)
 
-// CAPTCHA
-//   The following only apply when TINYIB_CAPTCHA is set to recaptcha
-//   For API keys visit https://www.google.com/recaptcha
-define('TINYIB_RECAPTCHA_SITE', '');  // Site key
-define('TINYIB_RECAPTCHA_SECRET', '');// Secret key
-define('TINYIB_RECAPTCHA_THRESHOLD', 0.5);
-
 // Database
 define('TINYIB_DBMIGRATE', false);    // Enable database migration tool  (see README for instructions)
 define('TINYIB_DBBANS', 'bans');      // Bans table name (use the same bans table across boards for global bans)
@@ -109,6 +102,4 @@ define('TINYIB_CACHE', '');
 define('TINYIB_CACHE_REDIS_HOST', 'unix:/var/run/redis/redis.sock');
 
 // Google Tag Manager
-
 define('TINYIB_GTM', '');
-define('TINYIB_GTM_AMP', '');

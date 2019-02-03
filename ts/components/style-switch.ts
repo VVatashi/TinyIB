@@ -13,7 +13,9 @@ export class StyleSwitch {
 
       this.styles[title] = url;
 
-      style.remove();
+      if (!style.hasAttribute('data-selected')) {
+        style.remove();
+      }
     });
 
     // Get selected style

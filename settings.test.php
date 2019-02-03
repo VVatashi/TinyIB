@@ -56,10 +56,6 @@ define('TINYIB_MAXH', 250);
 
 define('TINYIB_TRIPSEED', '');
 
-define('TINYIB_RECAPTCHA_SITE', '');
-define('TINYIB_RECAPTCHA_SECRET', '');
-define('TINYIB_RECAPTCHA_THRESHOLD', 0.5);
-
 define('TINYIB_DBMIGRATE', false);
 define('TINYIB_DBBANS', 'bans');
 define('TINYIB_DBPOSTS', TINYIB_BOARD . '_posts');
@@ -76,4 +72,3 @@ define('TINYIB_CACHE', '');
 define('TINYIB_CACHE_REDIS_HOST', 'unix:/var/run/redis/redis.sock');
 
 define('TINYIB_GTM', '');
-define('TINYIB_GTM_AMP', '');

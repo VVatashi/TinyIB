@@ -1,6 +1,9 @@
 {% macro style(title, filename, relation) %}
-  <link rel="{{ relation|default('alternate stylesheet') }}" type="text/css" title="{{ title }}"
-    href="{{ base_url }}/css/{{ filename }}.css?mtime={{ mtime('css/' ~ filename ~ '.css') }}" />
+  {% set is_selected = style == title %}
+  <link rel="{{ relation|default(is_selected ? 'stylesheet' : 'alternate stylesheet') }}"
+    type="text/css" title="{{ title }}"
+    href="{{ base_url }}/css/{{ filename }}.css?mtime={{ mtime('css/' ~ filename ~ '.css') }}"
+    {{ is_selected ? 'data-selected="true"' : '' }} />
 {% endmacro %}
 
 {% macro script(filename) %}
@@ -26,7 +29,7 @@
 {{ self.style('Futaba',    'futaba') }}
 {{ self.style('Lime',      'lime') }}
 {{ self.style('Nocturnal', 'nocturnal') }}
-{{ self.style('Quartz',    'quartz', 'stylesheet') }}
+{{ self.style('Quartz',    'quartz') }}
 {{ self.style('Synthwave', 'synthwave') }}
 
 {% if constant('TINYIB_GTM') %}
@@ -48,22 +51,3 @@
 <script>window.baseUrl = '{{ base_url|raw }}';</script>
 
 {{ self.script('index') }}
-
-{% if constant('TINYIB_CAPTCHA') == 'recaptcha' %}
-  <script src="https://www.google.com/recaptcha/api.js?render={{ constant('TINYIB_RECAPTCHA_SITE') }}"></script>
-  <script>
-    grecaptcha.ready(() => {
-      const container = document.querySelector('footer');
-      container.style.minHeight = '45px';
-
-      const captcha = document.querySelector('.grecaptcha-badge');
-      captcha.style.position = 'absolute';
-      captcha.style.top = 0;
-      captcha.style.bottom = 'unset';
-      captcha.style.left = 'unset';
-      captcha.style.right = 0;
-      captcha.style.transform = 'scale(0.75)';
-      container.appendChild(captcha);
-    });
-  </script>
-{% endif %}

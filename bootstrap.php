@@ -95,9 +95,8 @@ if (!file_exists(__DIR__ . '/settings.php')) {
 require_once __DIR__ . '/settings.php';
 
 // Check settings.
-if (TINYIB_CAPTCHA === 'recaptcha'
-    && (TINYIB_RECAPTCHA_SITE == '' || TINYIB_RECAPTCHA_SECRET == '')) {
-    $message = 'TINYIB_RECAPTCHA_SITE and TINYIB_RECAPTCHA_SECRET must be configured.';
+if (TINYIB_TRIPSEED == '' || TINYIB_ADMINPASS == '') {
+    $message = 'TINYIB_TRIPSEED and TINYIB_ADMINPASS must be configured.';
     throw new Exception($message);
 }
 
@@ -212,8 +211,6 @@ $handler = new RequestHandler(new CorsMiddleware('*', [
     'POST',
 ], [
 ], [
-    'AMP-Access-Control-Allow-Source-Origin',
-    'AMP-Redirect-To',
 ]), $handler);
 
 // Add exception handler.

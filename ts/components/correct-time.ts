@@ -7,23 +7,16 @@ export class CorrectTime {
 
   constructor() {
     this.settings = SettingsManager.load();
-    eventBus.$on(Events.Ready, this.onReady.bind(this));
-    eventBus.$on(Events.PostsInserted, (posts: Element[]) =>
-      posts.forEach(this.onPostInsert.bind(this)));
+    eventBus.$on(Events.PostsInserted, this.onPostsInserted.bind(this));
   }
 
-  onReady() {
-    const elements = DOM.qsa('.post-header__datetime');
-    elements.forEach(element => this.correctTime(element));
+  protected onPostsInserted(posts: Element[]) {
+    posts.forEach(this.onPostInserted.bind(this));
   }
 
-  onPostInsert(post: Element) {
-    const time_el = DOM.qs('.post-header__datetime', post);
-    if (!time_el) {
-      return;
-    }
-
-    this.correctTime(time_el);
+  protected onPostInserted(post: Element) {
+    const timeElements = DOM.qsa('.post time', post);
+    timeElements.forEach(this.correctTime.bind(this));
   }
 
   protected correctTime(el: Element) {
