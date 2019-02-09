@@ -513,11 +513,7 @@ export class PostingForm {
             }
 
             if (isInThread) {
-              // Trigger DE thread update.
-              const updater = DOM.qs('.de-thr-updater-link') as HTMLAnchorElement;
-              if (updater) {
-                updater.click();
-              }
+              eventBus.$emit(Events.PostCreated);
             } else {
               // Redirect to thread.
               if (location) {

@@ -3,12 +3,12 @@ import {
   Captcha,
   CorrectTime,
   DeleteForm,
-  NewPostsDetector,
   Post,
   PostingForm,
   PostReferenceMap,
   Settings,
   StyleSwitch,
+  ThreadUpdater,
 } from './components';
 import { SettingsManager } from './settings';
 import { DOM } from './utils';
@@ -22,15 +22,18 @@ declare global {
 new Captcha();
 new CorrectTime();
 new DeleteForm();
-new NewPostsDetector();
 new Post();
 new PostingForm();
 new PostReferenceMap();
 new Settings();
 new StyleSwitch();
+new ThreadUpdater();
 
 document.addEventListener('DOMContentLoaded', e => {
   eventBus.$emit(Events.Ready);
+
+  const posts = DOM.qsa('.post');
+  eventBus.$emit(Events.PostsInserted, posts, true);
 
   const settings = SettingsManager.load();
   if (settings.common.smoothScroll) {

@@ -87,7 +87,8 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
                     $routes->addRoute('POST', '/post/create',     [MobilePostControllerInterface::class, 'ajaxCreatePost']);
                 });
 
-                $routes->addRoute('POST', '/post/create',  [PostControllerInterface::class, 'ajaxCreatePost']);
+                $routes->addRoute('GET',  '/thread/{id:\d+}', [PostControllerInterface::class, 'ajaxThread']);
+                $routes->addRoute('POST', '/post/create',     [PostControllerInterface::class, 'ajaxCreatePost']);
             });
 
             $routes->addGroup('/mobile', function (RouteCollector $routes) {
