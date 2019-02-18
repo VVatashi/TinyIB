@@ -150,7 +150,13 @@ export class PostingForm {
           color
         </button>
 
-        <div class="color-picker-popup" v-if="colorPopupVisible">
+        <div class="color-picker-overlay"
+          v-if="colorPopupVisible"
+          @click="onColorPopupCancel">
+        </div>
+
+        <div class="color-picker-popup"
+          v-if="colorPopupVisible">
           <x-color-picker ref="color-picker" class="color-picker-popup__picker"
             :width="128" :height="128" :showLabels="false">
           </x-color-picker>
@@ -404,13 +410,15 @@ export class PostingForm {
             end: messageEl.selectionEnd,
             length: messageEl.selectionEnd - messageEl.selectionStart,
           };
-          const message = this.fields.message as string;
+
           const openingTag = `[${tag}${attribute ? '=' + attribute : ''}]`;
           const closingTag = `[/${tag}]`;
 
+          let message = this.fields.message as string;
+
           if (selection.length || component.settings.form.insertTagsInPairs) {
             // If text is selected, wrap it in a tag pair.
-            this.fields.message = [
+            message = [
               message.substring(0, selection.begin),
               openingTag,
               message.substring(selection.begin, selection.end),
@@ -418,41 +426,39 @@ export class PostingForm {
               message.substring(selection.end),
             ].join('');
 
-            // Restore selection.
-            this.$nextTick(() => {
-              messageEl.focus();
-              messageEl.selectionStart = selection.begin + openingTag.length;
-              messageEl.selectionEnd = selection.end + openingTag.length;
-            });
+            selection.begin += openingTag.length;
+            selection.end += openingTag.length;
+          } else if (message.lastIndexOf(openingTag, selection.begin)
+            > message.lastIndexOf(closingTag, selection.begin)) {
+            message = [
+              message.substring(0, selection.begin),
+              closingTag,
+              message.substring(selection.end),
+            ].join('');
+
+            selection.begin += closingTag.length;
+            selection.end += closingTag.length;
           } else {
-            if (message.lastIndexOf(openingTag, selection.begin) > message.lastIndexOf(closingTag, selection.begin)) {
-              this.fields.message = [
-                message.substring(0, selection.begin),
-                closingTag,
-                message.substring(selection.end),
-              ].join('');
+            message = [
+              message.substring(0, selection.begin),
+              openingTag,
+              message.substring(selection.end),
+            ].join('');
 
-              // Restore selection.
-              this.$nextTick(() => {
-                messageEl.focus();
-                messageEl.selectionStart = selection.begin + closingTag.length;
-                messageEl.selectionEnd = selection.end + closingTag.length;
-              });
-            } else {
-              this.fields.message = [
-                message.substring(0, selection.begin),
-                openingTag,
-                message.substring(selection.end),
-              ].join('');
-
-              // Restore selection.
-              this.$nextTick(() => {
-                messageEl.focus();
-                messageEl.selectionStart = selection.begin + openingTag.length;
-                messageEl.selectionEnd = selection.end + openingTag.length;
-              });
-            }
+            selection.begin += openingTag.length;
+            selection.end += openingTag.length;
           }
+
+          const scroll = messageEl.scrollTop;
+          this.fields.message = message;
+          this.$nextTick(() => {
+            messageEl.focus();
+            // Restore selection.
+            messageEl.selectionStart = selection.begin;
+            messageEl.selectionEnd = selection.end;
+            // Restore scroll position in the Chrome.
+            messageEl.scrollTop = scroll;
+          });
         },
         insertQuote() {
           const messageEl = this.$refs.message as HTMLTextAreaElement;
@@ -465,11 +471,12 @@ export class PostingForm {
           const message = this.fields.message as string;
           const before = message.substring(0, selection.begin);
           const after = message.substring(selection.end);
-          const newLineBefore = before.length && !before.endsWith('\n') ? '\n' : '';
-          const newLineAfter = !after.length || !after.startsWith('\n') ? '\n' : '';
           const quoteText = window.getSelection().toString();
+          const newLineBefore = before.length && !before.endsWith('\n') ? '\n' : '';
+          const newLineAfter = (!after.length || !after.startsWith('\n')) && quoteText.length ? '\n' : '';
           const quote = `${newLineBefore}> ${quoteText}${newLineAfter}`;
 
+          const scroll = messageEl.scrollTop;
           this.fields.message = [
             before,
             quote,
@@ -480,6 +487,8 @@ export class PostingForm {
             messageEl.focus();
             messageEl.selectionStart = selection.begin + quote.length;
             messageEl.selectionEnd = selection.begin + quote.length;
+            // Restore scroll position in the Chrome.
+            messageEl.scrollTop = scroll;
           });
         },
         async onSubmit() {

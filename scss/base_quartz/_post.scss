@@ -124,7 +124,7 @@
       display: inline-block;
     }
 
-    &_reply &__inner {
+    &__inner {
       min-width: 560px;
       border: $post-border;
       border-radius: $post-border-radius;
