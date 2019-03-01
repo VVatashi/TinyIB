@@ -1,5 +1,5 @@
 {
-    "name": "vvatashi/tinyib",
+    "name": "vvatashi/imageboard",
     "type": "project",
     "require": {
         "monolog/monolog": "^1.23",
@@ -17,12 +17,12 @@
     },
     "autoload": {
         "psr-4": {
-            "TinyIB\\": "src"
+            "Imageboard\\": "app"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "TinyIB\\Tests\\": "tests"
+            "Imageboard\\Tests\\": "app/Tests"
         }
     }
 }
