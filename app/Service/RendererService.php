@@ -19,7 +19,7 @@ class RendererService implements RendererServiceInterface
     public function __construct() {
         global $tinyib_uploads;
 
-        $loader = new Twig_Loader_Filesystem(__DIR__ . '/../../templates');
+        $loader = new Twig_Loader_Filesystem(__DIR__ . '/../../resources/views');
 
         $this->twig = new Twig_Environment($loader, [
             'autoescape' => false,

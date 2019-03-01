@@ -1,1 +1,2 @@
+composer.lock -diff
 package-lock.json -diff
