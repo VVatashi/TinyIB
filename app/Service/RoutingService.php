@@ -120,7 +120,7 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
         $path = $uri->getPath();
 
         // Remove board prefix.
-        $prefix = '/' . TINYIB_BOARD . '/';
+        $prefix = '/' . TINYIB_BOARD;
         $prefix_length = strlen($prefix);
         if (strncmp($path, $prefix, $prefix_length) === 0) {
             $path = substr($path, $prefix_length);
@@ -137,6 +137,11 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
         // Remove trailing slash.
         if (substr($path, -1) === '/') {
             $path = substr($path, 0, -1);
+        }
+
+        // Remove first slash.
+        if (substr($path, 0, 1) === '/') {
+            $path = substr($path, 1);
         }
 
         $path = '/' . $path;
