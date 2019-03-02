@@ -2,6 +2,4 @@
 
 namespace Imageboard\Command;
 
-interface CommandInterface
-{
-}
+interface CommandInterface { }

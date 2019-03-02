@@ -18,6 +18,10 @@
     &:nth-child(2n+1) {
       background: $background;
     }
+
+    &:hover {
+      outline: 1px dotted #333;
+    }
   }
 
   &__cell {

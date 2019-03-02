@@ -10,7 +10,7 @@ class NoCache implements CacheInterface
   /**
    * {@inheritDoc}
    */
-  public function exists(string $key): bool
+  function exists(string $key): bool
   {
     return false;
   }
@@ -18,7 +18,7 @@ class NoCache implements CacheInterface
   /**
    * {@inheritDoc}
    */
-  public function get(string $key)
+  function get(string $key)
   {
     return null;
   }
@@ -26,7 +26,7 @@ class NoCache implements CacheInterface
   /**
    * {@inheritDoc}
    */
-  public function set(string $key, string $value, $expire = null): string
+  function set(string $key, string $value, $expire = null): string
   {
     return $value;
   }
@@ -34,7 +34,7 @@ class NoCache implements CacheInterface
   /**
    * {@inheritDoc}
    */
-  public function delete(string $key)
+  function delete(string $key)
   {
     return null;
   }
@@ -42,7 +42,7 @@ class NoCache implements CacheInterface
   /**
    * {@inheritDoc}
    */
-  public function deletePattern(string $pattern): int
+  function deletePattern(string $pattern): int
   {
     return 0;
   }

@@ -4,5 +4,12 @@ namespace Imageboard\Query;
 
 interface QueryHandlerInterface
 {
-    public function handle($query);
+  /**
+   * Executes query.
+   *
+   * @param QueryInterface $query
+   *
+   * @return array
+   */
+  function handle($query);
 }

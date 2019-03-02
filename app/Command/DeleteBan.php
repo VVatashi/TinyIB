@@ -5,7 +5,7 @@ namespace Imageboard\Command;
 /**
  * @property-read int $id
  */
-class DeletePost extends Command
+class DeleteBan extends Command
 {
   /** @var int */
   protected $id;

@@ -5,19 +5,19 @@ namespace Imageboard\Service;
 use FastRoute\{Dispatcher, RouteCollector};
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Controller\Admin\{
-    BanControllerInterface,
-    DashboardControllerInterface,
-    ModLogControllerInterface,
-    PostControllerInterface as AdminPostControllerInterface,
-    UserCrudControllerInterface
+    BanControllerInterface as AdminBans,
+    DashboardControllerInterface as AdminDashboard,
+    ModLogControllerInterface as AdminModLog,
+    PostControllerInterface as AdminPosts,
+    UserCrudControllerInterface as AdminUsers
 };
-use Imageboard\Controller\Mobile\MobilePostControllerInterface;
+use Imageboard\Controller\Mobile\MobilePostControllerInterface as MobilePosts;
 use Imageboard\Controller\{
-    ApiControllerInterface,
-    AuthControllerInterface,
-    CaptchaControllerInterface,
-    PostControllerInterface,
-    SettingsControllerInterface
+    ApiControllerInterface as Api,
+    AuthControllerInterface as Auth,
+    CaptchaControllerInterface as Captcha,
+    PostControllerInterface as Posts,
+    SettingsControllerInterface as Settings
 };
 use Imageboard\Exception\{HttpException, NotFoundException};
 use Psr\Container\ContainerInterface;
@@ -42,72 +42,72 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
 
         $this->dispatcher = \FastRoute\simpleDispatcher(function (RouteCollector $routes) {
             $routes->addGroup('/api', function (RouteCollector $routes) {
-                $routes->addRoute('GET', '/embed', [ApiControllerInterface::class, 'embed']);
+                $routes->addRoute('GET', '/embed', [Api::class, 'embed']);
             });
 
             $routes->addGroup('/auth', function (RouteCollector $routes) {
-                $routes->addRoute('GET',  '/register', [AuthControllerInterface::class, 'registerForm']);
-                $routes->addRoute('POST', '/register', [AuthControllerInterface::class, 'register']);
-                $routes->addRoute('GET',  '/login',    [AuthControllerInterface::class, 'loginForm']);
-                $routes->addRoute('POST', '/login',    [AuthControllerInterface::class, 'login']);
-                $routes->addRoute('GET',  '/logout',   [AuthControllerInterface::class, 'logout']);
+                $routes->addRoute('GET',  '/register', [Auth::class, 'registerForm']);
+                $routes->addRoute('POST', '/register', [Auth::class, 'register']);
+                $routes->addRoute('GET',  '/login',    [Auth::class, 'loginForm']);
+                $routes->addRoute('POST', '/login',    [Auth::class, 'login']);
+                $routes->addRoute('GET',  '/logout',   [Auth::class, 'logout']);
             });
 
             $routes->addGroup('/admin', function (RouteCollector $routes) {
-                $routes->addRoute('GET',  '', [DashboardControllerInterface::class, 'index']);
+                $routes->addRoute('GET',  '', [AdminDashboard::class, 'index']);
 
                 $routes->addGroup('/bans', function (RouteCollector $routes) {
-                    $routes->addRoute('GET',  '',        [BanControllerInterface::class, 'list']);
-                    $routes->addRoute('GET',  '/create', [BanControllerInterface::class, 'createForm']);
-                    $routes->addRoute('POST', '/create', [BanControllerInterface::class, 'create']);
-                    $routes->addRoute('POST', '/delete', [BanControllerInterface::class, 'delete']);
+                    $routes->addRoute('GET',  '',                 [AdminBans::class, 'list']);
+                    $routes->addRoute('GET',  '/create',          [AdminBans::class, 'createForm']);
+                    $routes->addRoute('POST', '/create',          [AdminBans::class, 'create']);
+                    $routes->addRoute('POST', '/{id:\d+}/delete', [AdminBans::class, 'delete']);
                 });
 
                 $routes->addGroup('/modlog', function (RouteCollector $routes) {
-                    $routes->addRoute('GET',  '', [ModLogControllerInterface::class, 'list']);
+                    $routes->addRoute('GET',  '', [AdminModLog::class, 'list']);
                 });
 
                 $routes->addGroup('/posts', function (RouteCollector $routes) {
-                    $routes->addRoute('GET',   '',                 [AdminPostControllerInterface::class, 'list']);
-                    $routes->addRoute('GET',   '/{id:\d+}',        [AdminPostControllerInterface::class, 'show']);
-                    $routes->addRoute('POST',  '/{id:\d+}/delete', [AdminPostControllerInterface::class, 'delete']);
+                    $routes->addRoute('GET',   '',                 [AdminPosts::class, 'list']);
+                    $routes->addRoute('GET',   '/{id:\d+}',        [AdminPosts::class, 'show']);
+                    $routes->addRoute('POST',  '/{id:\d+}/delete', [AdminPosts::class, 'delete']);
                 });
 
                 $routes->addGroup('/user', function (RouteCollector $routes) {
-                    $routes->addRoute('GET',  '',                        [UserCrudControllerInterface::class, 'list']);
-                    $routes->addRoute('GET',  '/create',                 [UserCrudControllerInterface::class, 'createForm']);
-                    $routes->addRoute('POST', '/create/submit',          [UserCrudControllerInterface::class, 'create']);
-                    $routes->addRoute('GET',  '/{id:\d+}',               [UserCrudControllerInterface::class, 'show']);
-                    $routes->addRoute('GET',  '/{id:\d+}/edit',          [UserCrudControllerInterface::class, 'editForm']);
-                    $routes->addRoute('POST', '/{id:\d+}/edit/submit',   [UserCrudControllerInterface::class, 'edit']);
-                    $routes->addRoute('GET',  '/{id:\d+}/delete',        [UserCrudControllerInterface::class, 'deleteConfirm']);
-                    $routes->addRoute('POST', '/{id:\d+}/delete/submit', [UserCrudControllerInterface::class, 'delete']);
+                    $routes->addRoute('GET',  '',                        [AdminUsers::class, 'list']);
+                    $routes->addRoute('GET',  '/create',                 [AdminUsers::class, 'createForm']);
+                    $routes->addRoute('POST', '/create/submit',          [AdminUsers::class, 'create']);
+                    $routes->addRoute('GET',  '/{id:\d+}',               [AdminUsers::class, 'show']);
+                    $routes->addRoute('GET',  '/{id:\d+}/edit',          [AdminUsers::class, 'editForm']);
+                    $routes->addRoute('POST', '/{id:\d+}/edit/submit',   [AdminUsers::class, 'edit']);
+                    $routes->addRoute('GET',  '/{id:\d+}/delete',        [AdminUsers::class, 'deleteConfirm']);
+                    $routes->addRoute('POST', '/{id:\d+}/delete/submit', [AdminUsers::class, 'delete']);
                 });
             });
 
             $routes->addGroup('/ajax', function (RouteCollector $routes) {
                 $routes->addGroup('/mobile', function (RouteCollector $routes) {
-                    $routes->addRoute('GET',  '/thread/{id:\d+}', [MobilePostControllerInterface::class, 'ajaxThread']);
-                    $routes->addRoute('POST', '/post/create',     [MobilePostControllerInterface::class, 'ajaxCreatePost']);
+                    $routes->addRoute('GET',  '/thread/{id:\d+}', [MobilePosts::class, 'ajaxThread']);
+                    $routes->addRoute('POST', '/post/create',     [MobilePosts::class, 'ajaxCreatePost']);
                 });
 
-                $routes->addRoute('POST', '/post/create',  [PostControllerInterface::class, 'ajaxCreatePost']);
+                $routes->addRoute('POST', '/post/create',  [Posts::class, 'ajaxCreatePost']);
             });
 
             $routes->addGroup('/mobile', function (RouteCollector $routes) {
-                $routes->addRoute('GET',  '',                 [MobilePostControllerInterface::class, 'index']);
-                $routes->addRoute('GET',  '/thread/{id:\d+}', [MobilePostControllerInterface::class, 'thread']);
-                $routes->addRoute('POST', '/post/create',     [MobilePostControllerInterface::class, 'createPost']);
+                $routes->addRoute('GET',  '',                 [MobilePosts::class, 'index']);
+                $routes->addRoute('GET',  '/thread/{id:\d+}', [MobilePosts::class, 'thread']);
+                $routes->addRoute('POST', '/post/create',     [MobilePosts::class, 'createPost']);
             });
 
-            $routes->addRoute('GET', '/captcha',  [CaptchaControllerInterface::class,  'captcha']);
-            $routes->addRoute('GET', '/settings', [SettingsControllerInterface::class, 'settings']);
+            $routes->addRoute('GET', '/captcha',  [Captcha::class,  'captcha']);
+            $routes->addRoute('GET', '/settings', [Settings::class, 'settings']);
 
-            $routes->addRoute('GET',  '/',             [PostControllerInterface::class, 'board']);
-            $routes->addRoute('GET',  '/{page:\d+}',   [PostControllerInterface::class, 'board']);
-            $routes->addRoute('GET',  '/res/{id:\d+}', [PostControllerInterface::class, 'thread']);
-            $routes->addRoute('POST', '/post/create',  [PostControllerInterface::class, 'create']);
-            $routes->addRoute('POST', '/post/delete',  [PostControllerInterface::class, 'delete']);
+            $routes->addRoute('GET',  '/',             [Posts::class, 'board']);
+            $routes->addRoute('GET',  '/{page:\d+}',   [Posts::class, 'board']);
+            $routes->addRoute('GET',  '/res/{id:\d+}', [Posts::class, 'thread']);
+            $routes->addRoute('POST', '/post/create',  [Posts::class, 'create']);
+            $routes->addRoute('POST', '/post/delete',  [Posts::class, 'delete']);
         });
     }
 

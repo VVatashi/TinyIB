@@ -7,18 +7,19 @@ namespace Imageboard\Query;
  */
 class ShowQuery extends Query
 {
-    protected $id;
+  /** @var int */
+  protected $id;
 
-    public function __construct(int $id)
-    {
-        $this->id = $id;
-    }
+  function __construct(int $id)
+  {
+    $this->id = $id;
+  }
 
-    /**
-     * {@inheritDoc}
-     */
-    protected function getProperties() : array
-    {
-        return ['id'];
-    }
+  /**
+   * {@inheritDoc}
+   */
+  protected function getProperties() : array
+  {
+    return ['id'];
+  }
 }

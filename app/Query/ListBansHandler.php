@@ -2,16 +2,18 @@
 
 namespace Imageboard\Query;
 
-class ListModLogHandler extends ListHandler
+class ListBansHandler extends ListHandler
 {
   /**
    * {@inheritDoc}
    */
   protected function countSql(): string
   {
+    $bans_table = TINYIB_DBBANS;
     $sql = <<<EOF
 SELECT count(*)
-FROM mod_log
+FROM $bans_table AS b
+WHERE b.deleted_at IS NULL
 EOF;
     return $sql;
   }
@@ -21,12 +23,12 @@ EOF;
    */
   protected function sql(): string
   {
+    $bans_table = TINYIB_DBBANS;
     $sql = <<<EOF
-SELECT l.id, l.message, l.created_at, l.user_id,
-  u.email, u.role
-FROM mod_log AS l
-  LEFT JOIN users AS u ON u.id = l.user_id
-ORDER BY l.id DESC
+SELECT b.id, b.ip, b.reason, b.created_at, b.updated_at, b.expires_at
+FROM $bans_table AS b
+WHERE b.deleted_at IS NULL
+ORDER BY b.id DESC
 LIMIT :take OFFSET :skip
 EOF;
     return $sql;

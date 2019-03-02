@@ -51,7 +51,7 @@ class RedisCache implements CacheInterface
   /**
    * Creates the new RedisCache instance.
    */
-  public function __construct($host)
+  function __construct($host)
   {
     $this->host = $host;
   }
@@ -59,7 +59,7 @@ class RedisCache implements CacheInterface
   /**
    * {@inheritDoc}
    */
-  public function exists(string $key): bool
+  function exists(string $key): bool
   {
     return $this->getClient()->exists($key) != false;
   }
@@ -67,7 +67,7 @@ class RedisCache implements CacheInterface
   /**
    * {@inheritDoc}
    */
-  public function get(string $key)
+  function get(string $key)
   {
     $client = $this->getClient();
     $value = $client->exists($key) != false ? $client->get($key) : null;
@@ -77,7 +77,7 @@ class RedisCache implements CacheInterface
   /**
    * {@inheritDoc}
    */
-  public function set(string $key, string $value, $expire = null): string
+  function set(string $key, string $value, $expire = null): string
   {
     $pipeline = $this->getPipeline();
     $pipeline->set($key, $value);
@@ -92,7 +92,7 @@ class RedisCache implements CacheInterface
   /**
    * {@inheritDoc}
    */
-  public function delete(string $key)
+  function delete(string $key)
   {
     $value = $this->get($key);
     $this->getPipeline()->del($key);
@@ -102,7 +102,7 @@ class RedisCache implements CacheInterface
   /**
    * {@inheritDoc}
    */
-  public function deletePattern(string $pattern): int
+  function deletePattern(string $pattern): int
   {
     $client = $this->getClient();
     $keys = [];

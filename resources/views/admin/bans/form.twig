@@ -15,38 +15,44 @@
     </div>
 
     <div class="form__content">
-      {% if messages|length %}
-        <div class="messages list__messages">
-          <ul class="messages__list">
-            {% for message in messages %}
-              <li class="messages__list-item messages__list-item--{{ message.type }}">
-                <span>{{ message.text }}</span>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
+      {% if error %}
+      <div class="messages list__messages">
+        <ul class="messages__list">
+          <li class="messages__list-item messages__list-item--error">
+            <span>{{ error }}</span>
+          </li>
+        </ul>
+      </div>
       {% endif %}
 
       <form method="post" action="{{ base_url }}/admin/bans/create">
         <div class="form__row">
           <label class="form__label" for="ip">IP:</label>
-          <input type="text" class="input form__input" id="ip" name="ip" value="{{ fields.ip }}" />
+          <input type="text" class="input form__input" id="ip" name="ip" value="{{ item.ip }}" required />
         </div>
 
         <div class="form__row">
           <label class="form__label" for="expires_in">Expires in:</label>
-          <select class="input form__input" id="expires_in" name="expires_in" value="{{ fields.expires_in }}">
-            <option value="{{ 60 * 60 }}">1 hour</option>
-            <option value="{{ 60 * 60 * 24 }}">1 day</option>
-            <option value="{{ 60 * 60 * 24 * 7 }}">1 week</option>
-            <option value="{{ 60 * 60 * 24 * 31 }}">1 month</option>
-            <option value="0">Permanent</option>
+          {% set options = [
+            { title: '1 hour',    value: 60 * 60 },
+            { title: '1 day',     value: 60 * 60 * 24 },
+            { title: '1 week',    value: 60 * 60 * 24 * 7 },
+            { title: '1 month',   value: 60 * 60 * 24 * 31 },
+            { title: '1 year',    value: 60 * 60 * 24 * 365 },
+            { title: 'Permanent', value: 0 },
+          ] %}
+          <select class="input form__input" id="expires_in" name="expires_in">
+            {% for option in options %}
+            <option value="{{ option.value }}" {{ item.expires_in == option.value ? 'selected' : '' }}>
+              {{ option.title }}
+            </option>
+            {% endfor %}
           </select>
         </div>
 
         <div class="form__row">
           <label class="form__label" for="reason">Reason:</label>
-          <input type="text" class="input form__input" id="reason" name="reason" value="{{ fields.reason }}" />
+          <input type="text" class="input form__input" id="reason" name="reason" value="{{ item.reason }}" />
         </div>
 
         <div class="form__row form__row--centered">

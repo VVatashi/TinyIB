@@ -8,20 +8,23 @@ namespace Imageboard\Query;
  */
 class ListQuery extends Query
 {
-    protected $skip;
-    protected $take;
+  /** @var int */
+  protected $skip;
 
-    public function __construct(int $skip, int $take)
-    {
-        $this->skip = $skip;
-        $this->take = $take;
-    }
+  /** @var int */
+  protected $take;
 
-    /**
-     * {@inheritDoc}
-     */
-    protected function getProperties() : array
-    {
-        return ['skip', 'take'];
-    }
+  function __construct(int $skip, int $take)
+  {
+    $this->skip = $skip;
+    $this->take = $take;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  protected function getProperties() : array
+  {
+    return ['skip', 'take'];
+  }
 }

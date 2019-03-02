@@ -64,7 +64,7 @@
 
                 <td class="list__cell list__cell--nostretch">{{ item.ip }}</td>
 
-                <td class="list__cell list__cell--center">
+                <td class="list__cell list__cell--nostretch list__cell--center">
                   {% set back = base_url ~ '/admin/posts' %}
                   {% set url = base_url ~ '/admin/posts/' ~ item.id ~ '/delete?back=' ~ back|e('url') %}
                   <form method="post" action="{{ url }}">

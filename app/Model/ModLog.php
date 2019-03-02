@@ -13,47 +13,47 @@ use Illuminate\Database\Eloquent\Model;
  */
 class ModLog extends Model
 {
-    protected $table = 'mod_log';
+  protected $table = 'mod_log';
 
-    protected $fillable = [
-        'message',
-        'user_id',
-    ];
+  protected $fillable = [
+    'message',
+    'user_id',
+  ];
 
-    protected $dates = [
-        'created_at',
-        'updated_at',
-    ];
+  protected $dates = [
+    'created_at',
+    'updated_at',
+  ];
 
-    protected $dateFormat = 'U';
+  protected $dateFormat = 'U';
 
-    /**
-     * Returns created timestamp of the log entry.
-     *
-     * @return int
-     *   Log entry created timestamp.
-     */
-    public function getCreatedTimestamp() : int
-    {
-        return $this->created_at->getTimestamp();
-    }
+  /**
+   * Returns created timestamp of the log entry.
+   *
+   * @return int
+   *   Log entry created timestamp.
+   */
+  function getCreatedTimestamp() : int
+  {
+    return $this->created_at->getTimestamp();
+  }
 
-    /**
-     * Returns updated timestamp of the log entry.
-     *
-     * @return int
-     *   Log entry updated timestamp.
-     */
-    public function getUpdatedTimestamp() : int
-    {
-        return $this->updated_at->getTimestamp();
-    }
+  /**
+   * Returns updated timestamp of the log entry.
+   *
+   * @return int
+   *   Log entry updated timestamp.
+   */
+  function getUpdatedTimestamp() : int
+  {
+    return $this->updated_at->getTimestamp();
+  }
 
-    /**
-     * Returns related user.
-     */
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+  /**
+   * Returns related user.
+   */
+  function user()
+  {
+    return $this->belongsTo(User::class);
+  }
 }
