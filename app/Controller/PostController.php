@@ -258,10 +258,9 @@ class PostController implements PostControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function board(ServerRequestInterface $request) : ResponseInterface
+    public function board(ServerRequestInterface $request, array $args) : ResponseInterface
     {
-        $args = explode('/', $request->getUri()->getPath());
-        $page = count($args) > 1 ? (int)$args[1] : 0;
+        $page = (int)($args['page'] ?? 0);
         $user = $request->getAttribute('user');
         $key = TINYIB_BOARD . ':page:' . $page . ':user:' . $user->id;
         $headers = [];
@@ -280,10 +279,9 @@ class PostController implements PostControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function thread(ServerRequestInterface $request) : ResponseInterface
+    public function thread(ServerRequestInterface $request, array $args) : ResponseInterface
     {
-        $args = explode('/', $request->getUri()->getPath());
-        $id = (int)$args[2];
+        $id = (int)$args['id'];
         $user = $request->getAttribute('user');
         $key = TINYIB_BOARD . ':thread:' . $id . ':user:' . $user->id;
         $headers = [];

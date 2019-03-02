@@ -22,6 +22,7 @@ interface UserCrudControllerInterface
      * Returns users.
      *
      * @param ServerRequestInterface $request
+     * @param array Path arguments.
      *
      * @return string Response HTML.
      *
@@ -30,7 +31,7 @@ interface UserCrudControllerInterface
      * @throws NotFoundException
      *   If user with the specified ID is not found.
      */
-    public function show(ServerRequestInterface $request) : string;
+    public function show(ServerRequestInterface $request, array $args) : string;
 
     /**
      * Returns user create form.
@@ -60,6 +61,7 @@ interface UserCrudControllerInterface
      * Returns user edit form.
      *
      * @param ServerRequestInterface $request
+     * @param array Path arguments.
      *
      * @return string Response HTML.
      *
@@ -68,12 +70,13 @@ interface UserCrudControllerInterface
      * @throws NotFoundException
      *   If user with the specified ID is not found.
      */
-    public function editForm(ServerRequestInterface $request) : string;
+    public function editForm(ServerRequestInterface $request, array $args) : string;
 
     /**
      * Updates user.
      *
      * @param ServerRequestInterface $request
+     * @param array Path arguments.
      *
      * @return ResponseInterface Response.
      *
@@ -82,12 +85,13 @@ interface UserCrudControllerInterface
      * @throws NotFoundException
      *   If user with the specified ID is not found.
      */
-    public function edit(ServerRequestInterface $request) : ResponseInterface;
+    public function edit(ServerRequestInterface $request, array $args) : ResponseInterface;
 
     /**
      * Return confirmation for user delete.
      *
      * @param ServerRequestInterface $request
+     * @param array Path arguments.
      *
      * @return string Response HTML.
      *
@@ -96,7 +100,7 @@ interface UserCrudControllerInterface
      * @throws NotFoundException
      *   If user with the specified ID is not found.
      */
-    public function deleteConfirm(ServerRequestInterface $request) : string;
+    public function deleteConfirm(ServerRequestInterface $request, array $args) : string;
 
     /**
      * Deletes user.
@@ -104,11 +108,12 @@ interface UserCrudControllerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface Response.
+     * @param array Path arguments.
      *
      * @throws AccessDeniedException
      *   If current user is not an admin.
      * @throws NotFoundException
      *   If user with the specified ID is not found.
      */
-    public function delete(ServerRequestInterface $request) : ResponseInterface;
+    public function delete(ServerRequestInterface $request, array $args) : ResponseInterface;
 }

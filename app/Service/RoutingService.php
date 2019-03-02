@@ -18,7 +18,7 @@ use Imageboard\Controller\{
     PostControllerInterface,
     SettingsControllerInterface
 };
-use Imageboard\Exception\NotFoundException;
+use Imageboard\Exception\{HttpException, NotFoundException};
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Http\Server\RequestHandlerInterface;
@@ -154,12 +154,17 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
         switch ($result[0]) {
             default:
             case Dispatcher::NOT_FOUND:
-            case Dispatcher::METHOD_NOT_ALLOWED:
                 throw new NotFoundException();
+
+            case Dispatcher::METHOD_NOT_ALLOWED:
+                throw new HttpException(405, 'Method not allowed');
 
             case Dispatcher::FOUND:
                 $handler = $result[1];
                 $args = $result[2];
+
+                // Pass path args as array to controllers.
+                $this->container->registerInstance('array', $args);
 
                 [$controller_id, $action] = $handler;
 

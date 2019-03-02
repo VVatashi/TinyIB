@@ -62,7 +62,7 @@ class UserCrudController implements UserCrudControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function show(ServerRequestInterface $request) : string
+    public function show(ServerRequestInterface $request, array $args) : string
     {
         /** @var User */
         $current_user = $request->getAttribute('user');
@@ -70,7 +70,7 @@ class UserCrudController implements UserCrudControllerInterface
             throw new AccessDeniedException('You are not allowed to access this page');
         }
 
-        $id = (int)explode('/', $request->getUri()->getPath())[3];
+        $id = (int)$args['id'];
         $user = User::find($id);
         if (!isset($user)) {
             throw new NotFoundException("User #$id not found.");
@@ -183,7 +183,7 @@ class UserCrudController implements UserCrudControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function editForm(ServerRequestInterface $request) : string
+    public function editForm(ServerRequestInterface $request, array $args) : string
     {
         /** @var User */
         $current_user = $request->getAttribute('user');
@@ -191,7 +191,7 @@ class UserCrudController implements UserCrudControllerInterface
             throw new AccessDeniedException('You are not allowed to access this page');
         }
 
-        $id = (int)explode('/', $request->getUri()->getPath())[3];
+        $id = (int)$args['id'];
         $user = User::find($id);
         if (!isset($user)) {
             throw new NotFoundException("User #$id not found.");
@@ -211,7 +211,7 @@ class UserCrudController implements UserCrudControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function edit(ServerRequestInterface $request) : ResponseInterface
+    public function edit(ServerRequestInterface $request, array $args) : ResponseInterface
     {
         /** @var User */
         $current_user = $request->getAttribute('user');
@@ -219,7 +219,7 @@ class UserCrudController implements UserCrudControllerInterface
             throw new AccessDeniedException('You are not allowed to access this page');
         }
 
-        $id = (int)explode('/', $request->getUri()->getPath())[3];
+        $id = (int)$args['id'];
         $user = User::find($id);
         if (!isset($user)) {
             throw new NotFoundException("User #$id not found.");
@@ -263,7 +263,7 @@ class UserCrudController implements UserCrudControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function deleteConfirm(ServerRequestInterface $request) : string
+    public function deleteConfirm(ServerRequestInterface $request, array $args) : string
     {
         /** @var User */
         $current_user = $request->getAttribute('user');
@@ -271,8 +271,7 @@ class UserCrudController implements UserCrudControllerInterface
             throw new AccessDeniedException('You are not allowed to access this page');
         }
 
-        $id = (int)explode('/', $request->getUri()->getPath())[3];
-
+        $id = (int)$args['id'];
         $user = User::find($id);
         if (!isset($user)) {
             throw new NotFoundException("User #$id not found.");
@@ -291,7 +290,7 @@ class UserCrudController implements UserCrudControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function delete(ServerRequestInterface $request) : ResponseInterface
+    public function delete(ServerRequestInterface $request, array $args) : ResponseInterface
     {
         /** @var User */
         $current_user = $request->getAttribute('user');
@@ -299,8 +298,7 @@ class UserCrudController implements UserCrudControllerInterface
             throw new AccessDeniedException('You are not allowed to access this page');
         }
 
-        $id = (int)explode('/', $request->getUri()->getPath())[3];
-
+        $id = (int)$args['id'];
         $user = User::find($id);
         if (!isset($user)) {
             throw new NotFoundException("User #$id not found.");

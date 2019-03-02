@@ -94,7 +94,7 @@ final class UserCrudControllerTest extends TestCase
         $request = $request->withAttribute('user', $user);
 
         // Check response.
-        $response = $this->controller->show($request);
+        $response = $this->controller->show($request, ['id' => $target_id]);
         $this->assertIsString($response);
     }
 
@@ -106,7 +106,7 @@ final class UserCrudControllerTest extends TestCase
         $request = $request->withAttribute('user', $user);
 
         $this->expectException(AccessDeniedException::class);
-        $this->controller->show($request);
+        $this->controller->show($request, ['id' => $target_id]);
     }
 
     public function test_show_nonExistingUser_shouldThrowNotFoundException() : void
@@ -117,7 +117,7 @@ final class UserCrudControllerTest extends TestCase
         $request = $request->withAttribute('user', $user);
 
         $this->expectException(NotFoundException::class);
-        $this->controller->show($request);
+        $this->controller->show($request, ['id' => $target_id]);
     }
 
     public function test_createForm_asAdmin_shouldReturnContent() : void
@@ -236,7 +236,7 @@ final class UserCrudControllerTest extends TestCase
         $request = $request->withAttribute('user', $user);
 
         // Check response.
-        $response = $this->controller->editForm($request);
+        $response = $this->controller->editForm($request, ['id' => $target_id]);
         $this->assertIsString($response);
     }
 
@@ -248,7 +248,7 @@ final class UserCrudControllerTest extends TestCase
         $request = $request->withAttribute('user', $user);
 
         $this->expectException(AccessDeniedException::class);
-        $this->controller->editForm($request);
+        $this->controller->editForm($request, ['id' => $target_id]);
     }
 
     public function test_editForm_nonExistingUser_shouldThrowNotFoundException() : void
@@ -259,7 +259,7 @@ final class UserCrudControllerTest extends TestCase
         $request = $request->withAttribute('user', $user);
 
         $this->expectException(NotFoundException::class);
-        $this->controller->editForm($request);
+        $this->controller->editForm($request, ['id' => $target_id]);
     }
 
     public function test_edit_asAdmin_shouldRedirect() : void
@@ -275,7 +275,7 @@ final class UserCrudControllerTest extends TestCase
         ]);
 
         // Check response.
-        $response = $this->controller->edit($request);
+        $response = $this->controller->edit($request, ['id' => $target_id]);
         $this->assertNotNull($response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
@@ -300,7 +300,7 @@ final class UserCrudControllerTest extends TestCase
         ]);
 
         // Check response.
-        $response = $this->controller->edit($request);
+        $response = $this->controller->edit($request, ['id' => $target_id]);
         $this->assertNotNull($response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
@@ -325,7 +325,7 @@ final class UserCrudControllerTest extends TestCase
         ]);
 
         $this->expectException(AccessDeniedException::class);
-        $this->controller->edit($request);
+        $this->controller->edit($request, ['id' => $target_id]);
     }
 
     public function test_edit_nonExistingUser_shouldThrowNotFoundException() : void
@@ -341,7 +341,7 @@ final class UserCrudControllerTest extends TestCase
         ]);
 
         $this->expectException(NotFoundException::class);
-        $this->controller->edit($request);
+        $this->controller->edit($request, ['id' => $target_id]);
     }
 
     public function test_deleteConfirm_asAdmin_shouldReturnContent() : void
@@ -352,7 +352,7 @@ final class UserCrudControllerTest extends TestCase
         $request = $request->withAttribute('user', $user);
 
         // Check response.
-        $response = $this->controller->deleteConfirm($request);
+        $response = $this->controller->deleteConfirm($request, ['id' => $target_id]);
         $this->assertIsString($response);
     }
 
@@ -364,7 +364,7 @@ final class UserCrudControllerTest extends TestCase
         $request = $request->withAttribute('user', $user);
 
         $this->expectException(AccessDeniedException::class);
-        $this->controller->deleteConfirm($request);
+        $this->controller->deleteConfirm($request, ['id' => $target_id]);
     }
 
     public function test_deleteConfirm_nonExistingUser_shouldThrowNotFoundException() : void
@@ -375,7 +375,7 @@ final class UserCrudControllerTest extends TestCase
         $request = $request->withAttribute('user', $user);
 
         $this->expectException(NotFoundException::class);
-        $this->controller->deleteConfirm($request);
+        $this->controller->deleteConfirm($request, ['id' => $target_id]);
     }
 
     public function test_delete_asAdmin_shouldRedirect() : void
@@ -386,7 +386,7 @@ final class UserCrudControllerTest extends TestCase
         $request = $request->withAttribute('user', $user);
 
         // Check response.
-        $response = $this->controller->delete($request);
+        $response = $this->controller->delete($request, ['id' => $target_id]);
         $this->assertNotNull($response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
@@ -403,7 +403,7 @@ final class UserCrudControllerTest extends TestCase
         $request = $request->withAttribute('user', $user);
 
         $this->expectException(AccessDeniedException::class);
-        $this->controller->delete($request);
+        $this->controller->delete($request, ['id' => $target_id]);
     }
 
     public function testSubmitDeleteForNotExistsUserShouldThrow() : void
@@ -414,6 +414,6 @@ final class UserCrudControllerTest extends TestCase
         $request = $request->withAttribute('user', $user);
 
         $this->expectException(NotFoundException::class);
-        $this->controller->delete($request);
+        $this->controller->delete($request, ['id' => $target_id]);
     }
 }

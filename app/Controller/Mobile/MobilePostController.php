@@ -61,7 +61,7 @@ class MobilePostController implements MobilePostControllerInterface
     public function index(ServerRequestInterface $request) : ResponseInterface
     {
         $query = $request->getQueryParams();
-        $page = isset($query['page']) ? (int)$query['page'] : 0;
+        $page = (int)($query['page'] ?? 0);
 
         $cache_key = TINYIB_BOARD . ':mobile:page:' . $page;
         $headers = [];
@@ -96,11 +96,9 @@ class MobilePostController implements MobilePostControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function thread(ServerRequestInterface $request) : ResponseInterface
+    public function thread(ServerRequestInterface $request, array $args) : ResponseInterface
     {
-        $args = explode('/', $request->getUri()->getPath());
-        $thread_id = (int)$args[3];
-
+        $thread_id = (int)$args['id'];
         $query = $request->getQueryParams();
         $page = isset($query['page']) ? (int)$query['page'] : 0;
 
@@ -179,11 +177,9 @@ class MobilePostController implements MobilePostControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function ajaxThread(ServerRequestInterface $request) : string
+    public function ajaxThread(ServerRequestInterface $request, array $args) : string
     {
-        $args = explode('/', $request->getUri()->getPath());
-        $thread_id = (int)$args[4];
-
+        $thread_id = (int)$args['id'];
         $query = $request->getQueryParams();
         $after = isset($query['after']) ? (int)$query['after'] : 0;
 

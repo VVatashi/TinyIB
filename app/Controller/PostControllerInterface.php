@@ -9,7 +9,7 @@ interface PostControllerInterface
     /**
      * Create post.
      *
-     * @param ServerRequestInterface
+     * @param ServerRequestInterface $request
      *
      * @return ResponseInterface Response.
      */
@@ -27,18 +27,20 @@ interface PostControllerInterface
     /**
      * Returns page for a board.
      *
-     * @param ServerRequestInterface
+     * @param ServerRequestInterface $request
+     * @param array $args Path arguments.
      *
      * @return ResponseInterface Response.
      */
-    public function board(ServerRequestInterface $request) : ResponseInterface;
+    public function board(ServerRequestInterface $request, array $args) : ResponseInterface;
 
     /**
      * Returns page for a thread.
      *
-     * @param ServerRequestInterface
+     * @param ServerRequestInterface $request
+     * @param array $args Path arguments.
      *
      * @return ResponseInterface Response.
      */
-    public function thread(ServerRequestInterface $request) : ResponseInterface;
+    public function thread(ServerRequestInterface $request, array $args) : ResponseInterface;
 }

@@ -133,7 +133,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function liftBan(ServerRequestInterface $request) : string
+    public function liftBan(ServerRequestInterface $request, array $args) : string
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -150,7 +150,7 @@ class ManageController implements ManageControllerInterface
         Ban::removeExpired();
 
         $query = $request->getQueryParams();
-        $id = (int)explode('/', $request->getUri()->getPath())[3];
+        $id = (int)$args['id'];
         $ban = Ban::find($id);
         if (!isset($ban)) {
             $message = "Ban No.$id not found.";
@@ -168,7 +168,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function moderate(ServerRequestInterface $request) : string
+    public function moderate(array $args) : string
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -182,9 +182,7 @@ class ManageController implements ManageControllerInterface
             return $this->renderer->render('manage_login_form.twig', $data);
         }
 
-        $path = $request->getUri()->getPath();
-        $path_parts = explode('/', $path);
-        $id = count($path_parts) > 3 ? (int)$path_parts[3] : 0;
+        $id = (int)($args['id'] ?? 0);
         if ($id <= 0) {
             return $this->renderer->render('manage_moderate_form.twig', $data);
         }
@@ -207,7 +205,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function delete(ServerRequestInterface $request) : string
+    public function delete(array $args) : string
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -221,7 +219,7 @@ class ManageController implements ManageControllerInterface
             return $this->renderer->render('manage_login_form.twig', $data);
         }
 
-        $id = (int)explode('/', $request->getUri()->getPath())[3];
+        $id = (int)$args['id'];
         /** @var Post */
         $post = Post::find($id);
         if ($post === null) {
@@ -246,7 +244,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function approve(ServerRequestInterface $request) : string
+    public function approve(array $args) : string
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -260,8 +258,7 @@ class ManageController implements ManageControllerInterface
             return $this->renderer->render('manage_login_form.twig', $data);
         }
 
-        $id = (int)explode('/', $request->getUri()->getPath())[3];
-
+        $id = (int)$args['id'];
         if ($id <= 0) {
             $message = 'Form data was lost. Please go back and try again.';
             throw new ValidationException($message);
@@ -300,7 +297,7 @@ class ManageController implements ManageControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function setSticky(ServerRequestInterface $request) : string
+    public function setSticky(ServerRequestInterface $request, array $args) : string
     {
         list($logged_in, $is_admin) = Functions::manageCheckLogIn();
 
@@ -314,7 +311,7 @@ class ManageController implements ManageControllerInterface
             return $this->renderer->render('manage_login_form.twig', $data);
         }
 
-        $id = (int)explode('/', $request->getUri()->getPath())[3];
+        $id = (int)$args['id'];
         if ($id <= 0) {
             $message = 'Form data was lost. Please go back and try again.';
             throw new ValidationException($message);

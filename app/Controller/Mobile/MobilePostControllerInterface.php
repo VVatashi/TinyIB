@@ -9,7 +9,7 @@ interface MobilePostControllerInterface
     /**
      * Returns an index page.
      *
-     * @param ServerRequestInterface
+     * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
      */
@@ -18,16 +18,17 @@ interface MobilePostControllerInterface
     /**
      * Returns a thread page.
      *
-     * @param ServerRequestInterface
+     * @param ServerRequestInterface $request
+     * @param array $args Path arguments.
      *
      * @return ResponseInterface
      */
-    public function thread(ServerRequestInterface $request) : ResponseInterface;
+    public function thread(ServerRequestInterface $request, array $args) : ResponseInterface;
 
     /**
      * Creates a post.
      *
-     * @param ServerRequestInterface
+     * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
      */
@@ -36,16 +37,17 @@ interface MobilePostControllerInterface
     /**
      * Returns a thread HTML.
      *
-     * @param ServerRequestInterface
+     * @param ServerRequestInterface $request
+     * @param array $args Path arguments.
      *
      * @return string
      */
-    public function ajaxThread(ServerRequestInterface $request) : string;
+    public function ajaxThread(ServerRequestInterface $request, array $args) : string;
 
     /**
      * Creates a post.
      *
-     * @param ServerRequestInterface
+     * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
      */

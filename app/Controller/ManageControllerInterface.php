@@ -16,7 +16,7 @@ interface ManageControllerInterface
     /**
      * List bans.
      *
-     * @param ServerRequestInterface
+     * @param ServerRequestInterface $request
      *
      * @return string Response HTML.
      */
@@ -25,7 +25,7 @@ interface ManageControllerInterface
     /**
      * Add ban by IP.
      *
-     * @param ServerRequestInterface
+     * @param ServerRequestInterface $request
      *
      * @return string Response HTML.
      */
@@ -34,47 +34,48 @@ interface ManageControllerInterface
     /**
      * Lift ban by ID.
      *
-     * @param ServerRequestInterface
+     * @param ServerRequestInterface $request
+     * @param array $args Path arguments.
      *
      * @return string Response HTML.
      */
-    public function liftBan(ServerRequestInterface $request) : string;
+    public function liftBan(ServerRequestInterface $request, array $args) : string;
 
     /**
      * Moderate post by ID.
      *
-     * @param ServerRequestInterface
+     * @param array $args Path arguments.
      *
      * @return string Response HTML.
      */
-    public function moderate(ServerRequestInterface $request) : string;
+    public function moderate(array $args) : string;
 
     /**
      * Delete post by ID.
      *
-     * @param ServerRequestInterface
+     * @param array $args Path arguments.
      *
      * @return string Response HTML.
      */
-    public function delete(ServerRequestInterface $request) : string;
+    public function delete(array $args) : string;
 
     /**
      * Approve post by ID.
      *
-     * @param ServerRequestInterface
+     * @param array $args Path arguments.
      *
      * @return string Response HTML.
      */
-    public function approve(ServerRequestInterface $request) : string;
+    public function approve(array $args) : string;
 
     /**
      * Set post stacky status by ID.
      *
-     * @param ServerRequestInterface
+     * @param array $args Path arguments.
      *
      * @return string Response HTML.
      */
-    public function setSticky(ServerRequestInterface $request) : string;
+    public function setSticky(ServerRequestInterface $request, array $args) : string;
 
     /**
      * Show raw post form.
