@@ -1,10 +1,10 @@
 {
-  "name": "@vvatashi/tinyib",
+  "name": "@vvatashi/imageboard",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "gulp",
-    "watch": "gulp watch"
+    "build": "node-sass resources/scss -o webroot/css && webpack --progress --hide-modules --config resources/build/app.dev.js && webpack --progress --hide-modules --config resources/build/mobile.dev.js",
+    "build-prod": "node-sass --output-style compressed resources/scss -o webroot/css && webpack --progress --hide-modules --config resources/build/app.prod.js && webpack --progress --hide-modules --config resources/build/mobile.prod.js"
   },
   "repository": {
     "type": "git",
@@ -15,23 +15,19 @@
     "@types/axios": "^0.14.0",
     "@types/luxon": "^0.5.3",
     "@vvatashi/color-picker": "^1.1.0",
-    "css-loader": "^2.1.0",
-    "gulp": "^3.9.1",
-    "gulp-autoprefixer": "^5.0.0",
-    "gulp-sass": "^4.0.2",
-    "gulp-util": "^3.0.8",
     "node-sass": "^4.11.0",
-    "sass-loader": "^7.1.0",
     "ts-loader": "^5.3.3",
-    "typescript": "^3.3.1",
-    "vue-loader": "^15.6.2",
+    "typescript": "^3.3.3333",
+    "vue-loader": "^15.7.0",
     "vue-style-loader": "^4.1.2",
-    "vue-template-compiler": "^2.5.22",
-    "webpack": "^4.29.0"
+    "vue-template-compiler": "^2.6.8",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.2.3",
+    "webpack-merge": "^4.2.1"
   },
   "dependencies": {
     "axios": "^0.18.0",
-    "luxon": "^1.10.0",
-    "vue": "^2.5.22"
+    "luxon": "^1.11.3",
+    "vue": "^2.6.8"
   }
 }

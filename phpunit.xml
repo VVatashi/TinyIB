@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit stopOnFailure="false" bootstrap="tests/bootstrap.php">
+<phpunit stopOnFailure="false" bootstrap="app/Tests/bootstrap.php">
   <testsuites>
     <testsuite name="Tests">
-      <directory>tests</directory>
+      <directory>app/Tests</directory>
     </testsuite>
   </testsuites>
   <filter>
     <whitelist processUncoveredFilesFromWhitelist="true">
-      <directory>src</directory>
+      <directory>app</directory>
       <exclude>
-        <directory>tests</directory>
+        <directory>app/Tests</directory>
         <directory>vendor</directory>
       </exclude>
     </whitelist>
