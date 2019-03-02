@@ -1,6 +1,6 @@
 <?php
 
-namespace Imageboard\Queries;
+namespace Imageboard\Query;
 
 use Imageboard\Exception\NotFoundException;
 

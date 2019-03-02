@@ -1,12 +1,12 @@
 <?php
 
-namespace Imageboard\Queries;
+namespace Imageboard\Command;
 
 use Psr\Container\ContainerInterface;
 
-class QueryDispatcher
+class CommandDispatcher
 {
-    /** @var ContainerInterface $container */
+    /** @var ContainerInterface */
     protected $container;
 
     public function __construct(ContainerInterface $container)
@@ -15,9 +15,9 @@ class QueryDispatcher
     }
 
     /**
-     * @param QueryInterface $query
+     * @param CommandInterface $query
      *
-     * @return QueryHandlerInterface
+     * @return CommandHandlerInterface
      */
     public function getHandler($query)
     {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Imageboard\Commands;
+namespace Imageboard\Command;
 
 use Imageboard\Exception\NotFoundException;
 use Imageboard\Model\Post;

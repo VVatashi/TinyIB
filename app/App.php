@@ -146,11 +146,11 @@ EOF;
 
     // Register services in the IoC-container by conventions.
     $directories = [
-      'Commands' => ['#$#', ''],
+      'Command' => ['#$#', ''],
       'Controller' => ['#Interface$#', ''],
       'Model' => ['#Interface$#', ''],
       'Service' => ['#Interface$#', ''],
-      'Queries' => ['#$#', ''],
+      'Query' => ['#$#', ''],
     ];
 
     foreach ($directories as $directory => $regex) {

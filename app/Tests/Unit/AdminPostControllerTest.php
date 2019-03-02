@@ -3,20 +3,20 @@
 namespace Imageboard\Tests\Unit;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Commands\CommandDispatcher;
-use Imageboard\Controller\Admin\PostsController;
+use Imageboard\Command\CommandDispatcher;
+use Imageboard\Controller\Admin\PostController;
 use Imageboard\Exception\{AccessDeniedException, NotFoundException};
 use Imageboard\Model\{Post, User};
-use Imageboard\Queries\QueryDispatcher;
+use Imageboard\Query\QueryDispatcher;
 use Imageboard\Tests\Mock\RendererServiceMock;
 use PHPUnit\Framework\TestCase;
 
-final class AdminPostsControllerTest extends TestCase
+final class AdminPostControllerTest extends TestCase
 {
     const USER_ROLE = 1;
     const ADMIN_ROLE = 3;
 
-    /** @var PostsControllerInterface */
+    /** @var PostControllerInterface */
     protected $controller;
 
     public function setUp() : void
@@ -28,7 +28,7 @@ final class AdminPostsControllerTest extends TestCase
         $command_dispatcher = new CommandDispatcher($container);
         $query_dispatcher = new QueryDispatcher($container);
         $renderer = new RendererServiceMock();
-        $this->controller = new PostsController(
+        $this->controller = new PostController(
             $command_dispatcher,
             $query_dispatcher,
             $renderer

@@ -3,9 +3,9 @@
 namespace Imageboard\Controller\Admin;
 
 use GuzzleHttp\Psr7\Response;
-use Imageboard\Commands\CommandDispatcher;
+use Imageboard\Command\CommandDispatcher;
 use Imageboard\Exception\AccessDeniedException;
-use Imageboard\Queries\QueryDispatcher;
+use Imageboard\Query\QueryDispatcher;
 use Imageboard\Service\RendererServiceInterface;
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 

@@ -4,7 +4,7 @@ namespace Imageboard\Tests\Unit;
 
 use Imageboard\Model\Post;
 use Imageboard\Exception\NotFoundException;
-use Imageboard\Queries\{ShowPost, ShowPostHandler};
+use Imageboard\Query\{ShowPost, ShowPostHandler};
 use PHPUnit\Framework\TestCase;
 
 final class ShowPostHandlerTest extends TestCase

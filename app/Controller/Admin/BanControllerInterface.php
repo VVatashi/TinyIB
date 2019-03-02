@@ -2,9 +2,9 @@
 
 namespace Imageboard\Controller\Admin;
 
-use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
+use Psr\Http\Message\ServerRequestInterface;
 
-interface BansControllerInterface
+interface BanControllerInterface
 {
     /**
      * Returns the list of bans.

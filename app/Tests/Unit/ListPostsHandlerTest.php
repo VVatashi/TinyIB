@@ -3,7 +3,7 @@
 namespace Imageboard\Tests\Unit;
 
 use Imageboard\Model\Post;
-use Imageboard\Queries\{ListPosts, ListPostsHandler};
+use Imageboard\Query\{ListPosts, ListPostsHandler};
 use PHPUnit\Framework\TestCase;
 
 final class ListPostsHandlerTest extends TestCase

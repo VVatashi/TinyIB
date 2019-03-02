@@ -7,7 +7,7 @@ use Imageboard\Exception\AccessDeniedException;
 use Imageboard\Model\Ban;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
-class BansController extends CrudController implements BansControllerInterface
+class BanController extends CrudController implements BanControllerInterface
 {
     /**
      * {@inheritDoc}

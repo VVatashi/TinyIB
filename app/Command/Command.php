@@ -1,6 +1,6 @@
 <?php
 
-namespace Imageboard\Commands;
+namespace Imageboard\Command;
 
 class Command implements CommandInterface
 {

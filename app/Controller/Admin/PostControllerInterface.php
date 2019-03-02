@@ -4,7 +4,7 @@ namespace Imageboard\Controller\Admin;
 
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
-interface PostsControllerInterface
+interface PostControllerInterface
 {
     /**
      * Returns the list of posts.

@@ -1,6 +1,6 @@
 <?php
 
-namespace Imageboard\Queries;
+namespace Imageboard\Query;
 
 abstract class Query implements QueryInterface
 {

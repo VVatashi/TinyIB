@@ -5,10 +5,10 @@ namespace Imageboard\Service;
 use FastRoute\{Dispatcher, RouteCollector};
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Controller\Admin\{
-    BansControllerInterface,
+    BanControllerInterface,
     DashboardControllerInterface,
     ModLogControllerInterface,
-    PostsControllerInterface,
+    PostControllerInterface as AdminPostControllerInterface,
     UserCrudControllerInterface
 };
 use Imageboard\Controller\Mobile\MobilePostControllerInterface;
@@ -57,10 +57,10 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
                 $routes->addRoute('GET',  '', [DashboardControllerInterface::class, 'index']);
 
                 $routes->addGroup('/bans', function (RouteCollector $routes) {
-                    $routes->addRoute('GET',  '',        [BansControllerInterface::class, 'list']);
-                    $routes->addRoute('GET',  '/create', [BansControllerInterface::class, 'createForm']);
-                    $routes->addRoute('POST', '/create', [BansControllerInterface::class, 'create']);
-                    $routes->addRoute('POST', '/delete', [BansControllerInterface::class, 'delete']);
+                    $routes->addRoute('GET',  '',        [BanControllerInterface::class, 'list']);
+                    $routes->addRoute('GET',  '/create', [BanControllerInterface::class, 'createForm']);
+                    $routes->addRoute('POST', '/create', [BanControllerInterface::class, 'create']);
+                    $routes->addRoute('POST', '/delete', [BanControllerInterface::class, 'delete']);
                 });
 
                 $routes->addGroup('/modlog', function (RouteCollector $routes) {
@@ -68,9 +68,9 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
                 });
 
                 $routes->addGroup('/posts', function (RouteCollector $routes) {
-                    $routes->addRoute('GET',   '',                 [PostsControllerInterface::class, 'list']);
-                    $routes->addRoute('GET',   '/{id:\d+}',        [PostsControllerInterface::class, 'show']);
-                    $routes->addRoute('POST',  '/{id:\d+}/delete', [PostsControllerInterface::class, 'delete']);
+                    $routes->addRoute('GET',   '',                 [AdminPostControllerInterface::class, 'list']);
+                    $routes->addRoute('GET',   '/{id:\d+}',        [AdminPostControllerInterface::class, 'show']);
+                    $routes->addRoute('POST',  '/{id:\d+}/delete', [AdminPostControllerInterface::class, 'delete']);
                 });
 
                 $routes->addGroup('/user', function (RouteCollector $routes) {

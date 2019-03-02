@@ -2,10 +2,10 @@
 
 namespace Imageboard\Controller\Admin;
 
-use Imageboard\Commands\DeletePost;
-use Imageboard\Queries\{ListPosts, ShowPost};
+use Imageboard\Command\DeletePost;
+use Imageboard\Query\{ListPosts, ShowPost};
 
-class PostsController extends CrudController implements PostsControllerInterface
+class PostController extends CrudController implements PostControllerInterface
 {
     protected $list_url = TINYIB_BASE_URL . TINYIB_BOARD . '/admin/posts';
     protected $list_query_type = ListPosts::class;
