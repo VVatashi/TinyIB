@@ -2,19 +2,19 @@
 
 namespace Imageboard\Controller\Admin;
 
-use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
+use Psr\Http\Message\ServerRequestInterface;
 
 interface ModLogControllerInterface
 {
     /**
      * Returns log entry list.
      *
-     * @param ResponseInterface $request
+     * @param ServerRequestInterface $request
      *
-     * @return ServerRequestInterface $response
+     * @return string Response HTML.
      *
      * @throws AccessDeniedException
      *   If current user is not an admin.
      */
-    public function list(ServerRequestInterface $request) : ResponseInterface;
+    public function list(ServerRequestInterface $request) : string;
 }

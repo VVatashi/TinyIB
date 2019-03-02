@@ -4,6 +4,7 @@ namespace Imageboard\Service;
 
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
+use GuzzleHttp\Psr7\Response;
 use Imageboard\Controller\Admin\{
     ModLogControllerInterface,
     UserCrudControllerInterface
@@ -17,7 +18,7 @@ use Imageboard\Controller\{
     PostControllerInterface,
     SettingsControllerInterface
 };
-use Imageboard\NotFoundException;
+use Imageboard\Exception\NotFoundException;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Http\Server\RequestHandlerInterface;
@@ -164,7 +165,12 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
 
                 $controller = $this->container->get($controller_id);
                 $args = $this->container->getParameters([$controller, $action]);
-                return $controller->$action(...$args);
+                $result = $controller->$action(...$args);
+                if (is_string($result)) {
+                    $result = new Response(200, [], $result);
+                }
+
+                return $result;
         }
     }
 }

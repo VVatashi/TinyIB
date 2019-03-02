@@ -2,105 +2,105 @@
 
 namespace Imageboard\Controller;
 
-use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
+use Psr\Http\Message\ServerRequestInterface;
 
 interface ManageControllerInterface
 {
     /**
      * Show status page.
      *
-     * @return ResponseInterface
+     * @return string Response HTML.
      */
-    public function status() : ResponseInterface;
+    public function status() : string;
 
     /**
      * List bans.
      *
      * @param ServerRequestInterface
      *
-     * @return ResponseInterface
+     * @return string Response HTML.
      */
-    public function listBans(ServerRequestInterface $request) : ResponseInterface;
+    public function listBans(ServerRequestInterface $request) : string;
 
     /**
      * Add ban by IP.
      *
      * @param ServerRequestInterface
      *
-     * @return ResponseInterface
+     * @return string Response HTML.
      */
-    public function addBan(ServerRequestInterface $request) : ResponseInterface;
+    public function addBan(ServerRequestInterface $request) : string;
 
     /**
      * Lift ban by ID.
      *
      * @param ServerRequestInterface
      *
-     * @return ResponseInterface
+     * @return string Response HTML.
      */
-    public function liftBan(ServerRequestInterface $request) : ResponseInterface;
+    public function liftBan(ServerRequestInterface $request) : string;
 
     /**
      * Moderate post by ID.
      *
      * @param ServerRequestInterface
      *
-     * @return ResponseInterface
+     * @return string Response HTML.
      */
-    public function moderate(ServerRequestInterface $request) : ResponseInterface;
+    public function moderate(ServerRequestInterface $request) : string;
 
     /**
      * Delete post by ID.
      *
      * @param ServerRequestInterface
      *
-     * @return ResponseInterface
+     * @return string Response HTML.
      */
-    public function delete(ServerRequestInterface $request) : ResponseInterface;
+    public function delete(ServerRequestInterface $request) : string;
 
     /**
      * Approve post by ID.
      *
      * @param ServerRequestInterface
      *
-     * @return ResponseInterface
+     * @return string Response HTML.
      */
-    public function approve(ServerRequestInterface $request) : ResponseInterface;
+    public function approve(ServerRequestInterface $request) : string;
 
     /**
      * Set post stacky status by ID.
      *
      * @param ServerRequestInterface
      *
-     * @return ResponseInterface
+     * @return string Response HTML.
      */
-    public function setSticky(ServerRequestInterface $request) : ResponseInterface;
+    public function setSticky(ServerRequestInterface $request) : string;
 
     /**
      * Show raw post form.
      *
-     * @return ResponseInterface
+     * @return string Response HTML.
      */
-    public function rawPost() : ResponseInterface;
+    public function rawPost() : string;
 
     /**
      * Rebuild all pages.
      *
-     * @return ResponseInterface
+     * @return string Response HTML.
      */
-    public function rebuildAll() : ResponseInterface;
+    public function rebuildAll() : string;
 
     /**
      * Update.
      *
-     * @return ResponseInterface
+     * @return string Response HTML.
      */
-    public function update() : ResponseInterface;
+    public function update() : string;
 
     /**
      * Logout.
      *
-     * @return ResponseInterface
+     * @return string|ResponseInterface Response.
      */
-    public function logout() : ResponseInterface;
+    public function logout();
 }

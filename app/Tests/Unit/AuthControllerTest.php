@@ -64,7 +64,7 @@ final class AuthControllerTest extends TestCase
         $this->assertEquals(302, $status);
     }
 
-    public function test_loginForm_shouldReturnStatus200() : void
+    public function test_loginForm_shouldReturnContent() : void
     {
         $user = User::anonymous();
         $request = new ServerRequest('GET', '/auth/login');
@@ -72,12 +72,7 @@ final class AuthControllerTest extends TestCase
 
         // Check response.
         $response = $this->controller->loginForm($request);
-        $this->assertNotNull($response);
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-
-        // Check status code.
-        $status = $response->getStatusCode();
-        $this->assertEquals(200, $status);
+        $this->assertIsString($response);
     }
 
     public function test_submitLoginForm_shouldLoginAndRedirect() : void
@@ -132,7 +127,7 @@ final class AuthControllerTest extends TestCase
         $this->assertEquals(302, $status);
     }
 
-    public function test_registerForm_shouldReturnStatus200() : void
+    public function test_registerForm_shouldReturnContent() : void
     {
         $user = User::anonymous();
         $request = new ServerRequest('GET', '/auth/register');
@@ -140,12 +135,7 @@ final class AuthControllerTest extends TestCase
 
         // Check response.
         $response = $this->controller->registerForm($request);
-        $this->assertNotNull($response);
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-
-        // Check status code.
-        $status = $response->getStatusCode();
-        $this->assertEquals(200, $status);
+        $this->assertIsString($response);
     }
 
     public function test_submitRegisterForm_shouldRegisterAndRedirect() : void

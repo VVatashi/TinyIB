@@ -33,7 +33,7 @@ class AuthController implements AuthControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function registerForm(ServerRequestInterface $request) : ResponseInterface
+    public function registerForm(ServerRequestInterface $request)
     {
         /** @var User */
         $user = $request->getAttribute('user');
@@ -51,12 +51,10 @@ class AuthController implements AuthControllerInterface
         unset($_SESSION['error']);
         unset($_SESSION['email']);
 
-        $content = $this->renderer->render('auth/register.twig', [
+        return $this->renderer->render('auth/register.twig', [
             'error' => $error,
             'email' => $email,
         ]);
-
-        return new Response(200, [], $content);
     }
 
     /**
@@ -103,7 +101,7 @@ class AuthController implements AuthControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function loginForm(ServerRequestInterface $request) : ResponseInterface
+    public function loginForm(ServerRequestInterface $request)
     {
         /** @var User */
         $user = $request->getAttribute('user');
@@ -121,12 +119,10 @@ class AuthController implements AuthControllerInterface
         unset($_SESSION['error']);
         unset($_SESSION['email']);
 
-        $content = $this->renderer->render('auth/login.twig', [
+        return $this->renderer->render('auth/login.twig', [
             'error' => $error,
             'email' => $email,
         ]);
-
-        return new Response(200, [], $content);
     }
 
     /**

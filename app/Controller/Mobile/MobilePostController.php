@@ -179,7 +179,7 @@ class MobilePostController implements MobilePostControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function ajaxThread(ServerRequestInterface $request) : ResponseInterface
+    public function ajaxThread(ServerRequestInterface $request) : string
     {
         $args = explode('/', $request->getUri()->getPath());
         $thread_id = (int)$args[4];
@@ -204,11 +204,9 @@ class MobilePostController implements MobilePostControllerInterface
             return $post;
         });
 
-        $content = $this->renderer->render('mobile/ajax/thread.twig', [
+        return $this->renderer->render('mobile/ajax/thread.twig', [
             'posts' => $posts,
         ]);
-
-        return new Response(200, [], $content);
     }
 
     /**

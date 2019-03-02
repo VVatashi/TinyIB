@@ -169,7 +169,7 @@ class PostController implements PostControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function delete(ServerRequestInterface $request) : ResponseInterface
+    public function delete(ServerRequestInterface $request)
     {
         if (TINYIB_DBMIGRATE) {
             $message = "Post deletion is currently disabled.\nPlease try again in a few moments.";
@@ -180,7 +180,7 @@ class PostController implements PostControllerInterface
         $id = isset($data['delete']) ? $data['delete'] : 0;
         $password = isset($data['password']) ? $data['password'] : '';
         $this->post_service->delete($id, $password);
-        return new Response(200, [], 'Post deleted.');
+        return 'Post deleted.';
     }
 
     /**

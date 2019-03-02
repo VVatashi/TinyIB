@@ -2,10 +2,8 @@
 
 namespace Imageboard\Controller;
 
-use GuzzleHttp\Psr7\Response;
 use Imageboard\Cache\CacheInterface;
 use Imageboard\Service\RendererServiceInterface;
-use Psr\Http\Message\ResponseInterface;
 
 class SettingsController implements SettingsControllerInterface
 {
@@ -21,8 +19,10 @@ class SettingsController implements SettingsControllerInterface
      * @param CacheInterface $cache
      * @param RendererServiceInterface $renderer
      */
-    public function __construct(CacheInterface $cache, RendererServiceInterface $renderer)
-    {
+    public function __construct(
+        CacheInterface $cache,
+        RendererServiceInterface $renderer
+    ) {
         $this->cache = $cache;
         $this->renderer = $renderer;
     }
@@ -30,8 +30,8 @@ class SettingsController implements SettingsControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function settings() : ResponseInterface
+    public function settings() : string
     {
-        return new Response(200, [], $this->renderer->render('settings.twig'));
+        return $this->renderer->render('settings.twig');
     }
 }

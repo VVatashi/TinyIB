@@ -9,43 +9,43 @@ interface AuthControllerInterface
     /**
      * Returns register form.
      *
-     * @param ResponseInterface $request
+     * @param ServerRequestInterface $request
      *
-     * @return ServerRequestInterface $response
+     * @return string|ResponseInterface Response.
      */
-    public function registerForm(ServerRequestInterface $request) : ResponseInterface;
+    public function registerForm(ServerRequestInterface $request);
 
     /**
      * Registers user.
      *
-     * @param ResponseInterface $request
+     * @param ServerRequestInterface $request
      *
-     * @return ServerRequestInterface $response
+     * @return ResponseInterface Response.
      */
     public function register(ServerRequestInterface $request) : ResponseInterface;
 
     /**
      * Returns login form.
      *
-     * @param ResponseInterface $request
+     * @param ServerRequestInterface $request
      *
-     * @return ServerRequestInterface $response
+     * @return string|ResponseInterface Response.
      */
-    public function loginForm(ServerRequestInterface $request) : ResponseInterface;
+    public function loginForm(ServerRequestInterface $request);
 
     /**
      * Logs in user.
      *
-     * @param ResponseInterface $request
+     * @param ServerRequestInterface $request
      *
-     * @return ServerRequestInterface $response
+     * @return ResponseInterface Response.
      */
     public function login(ServerRequestInterface $request) : ResponseInterface;
 
     /**
      * Returns logs out user.
      *
-     * @return ServerRequestInterface $response
+     * @return ResponseInterface Response.
      */
     public function logout() : ResponseInterface;
 }

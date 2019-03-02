@@ -11,7 +11,7 @@ interface PostControllerInterface
      *
      * @param ServerRequestInterface
      *
-     * @return ResponseInterface
+     * @return ResponseInterface Response.
      */
     public function create(ServerRequestInterface $request) : ResponseInterface;
 
@@ -20,16 +20,16 @@ interface PostControllerInterface
      *
      * @param ServerRequestInterface
      *
-     * @return ResponseInterface
+     * @return string|ResponseInterface Response.
      */
-    public function delete(ServerRequestInterface $request) : ResponseInterface;
+    public function delete(ServerRequestInterface $request);
 
     /**
      * Returns page for a board.
      *
      * @param ServerRequestInterface
      *
-     * @return ResponseInterface
+     * @return ResponseInterface Response.
      */
     public function board(ServerRequestInterface $request) : ResponseInterface;
 
@@ -38,7 +38,7 @@ interface PostControllerInterface
      *
      * @param ServerRequestInterface
      *
-     * @return ResponseInterface
+     * @return ResponseInterface Response.
      */
     public function thread(ServerRequestInterface $request) : ResponseInterface;
 }

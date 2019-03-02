@@ -11,7 +11,7 @@ class ApiController implements ApiControllerInterface
 {
     const CACHE_TTL = 4 * 60 * 60;
 
-    /** @var CacheInterface $cache */
+    /** @var CacheInterface */
     protected $cache;
 
     public function __construct(CacheInterface $cache)

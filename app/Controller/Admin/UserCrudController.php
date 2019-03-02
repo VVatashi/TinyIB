@@ -45,7 +45,7 @@ class UserCrudController implements UserCrudControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function list(ServerRequestInterface $request) : ResponseInterface
+    public function list(ServerRequestInterface $request) : string
     {
         /** @var User */
         $current_user = $request->getAttribute('user');
@@ -54,17 +54,15 @@ class UserCrudController implements UserCrudControllerInterface
         }
 
         $users = User::orderBy('id', 'desc')->get();
-        $content = $this->renderer->render('admin/user/list.twig', [
+        return $this->renderer->render('admin/user/list.twig', [
             'users' => $users,
         ]);
-
-        return new Response(200, [], $content);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function show(ServerRequestInterface $request) : ResponseInterface
+    public function show(ServerRequestInterface $request) : string
     {
         /** @var User */
         $current_user = $request->getAttribute('user');
@@ -78,17 +76,15 @@ class UserCrudController implements UserCrudControllerInterface
             throw new NotFoundException("User #$id not found.");
         }
 
-        $content = $this->renderer->render('admin/user/show.twig', [
+        return $this->renderer->render('admin/user/show.twig', [
             'user' => $user,
         ]);
-
-        return new Response(200, [], $content);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function createForm(ServerRequestInterface $request) : ResponseInterface
+    public function createForm(ServerRequestInterface $request) : string
     {
         /** @var User */
         $current_user = $request->getAttribute('user');
@@ -107,14 +103,12 @@ class UserCrudController implements UserCrudControllerInterface
         unset($_SESSION['password']);
         unset($_SESSION['role']);
 
-        $content = $this->renderer->render('admin/user/create.twig', [
+        return $this->renderer->render('admin/user/create.twig', [
             'error' => $error,
             'email' => $email,
             'password' => $password,
             'role' => $role,
         ]);
-
-        return new Response(200, [], $content);
     }
 
     /**
@@ -189,7 +183,7 @@ class UserCrudController implements UserCrudControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function editForm(ServerRequestInterface $request) : ResponseInterface
+    public function editForm(ServerRequestInterface $request) : string
     {
         /** @var User */
         $current_user = $request->getAttribute('user');
@@ -208,12 +202,10 @@ class UserCrudController implements UserCrudControllerInterface
 
         unset($_SESSION['error']);
 
-        $content = $this->renderer->render('admin/user/edit.twig', [
+        return $this->renderer->render('admin/user/edit.twig', [
             'error' => $error,
             'user' => $user,
         ]);
-
-        return new Response(200, [], $content);
     }
 
     /**
@@ -271,7 +263,7 @@ class UserCrudController implements UserCrudControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function deleteConfirm(ServerRequestInterface $request) : ResponseInterface
+    public function deleteConfirm(ServerRequestInterface $request) : string
     {
         /** @var User */
         $current_user = $request->getAttribute('user');
@@ -286,7 +278,7 @@ class UserCrudController implements UserCrudControllerInterface
             throw new NotFoundException("User #$id not found.");
         }
 
-        $content = $this->renderer->render('confirm.twig', [
+        return $this->renderer->render('confirm.twig', [
             'message' => 'Are you sure you want to delete the user <em><a href="mailto:' . $user->email . '">' . $user->email . '</a></em>?',
             'submit' => 'Yes',
             'cancel' => 'No',
@@ -294,8 +286,6 @@ class UserCrudController implements UserCrudControllerInterface
             'cancel_url' => 'admin/user',
             'method' => 'POST',
         ]);
-
-        return new Response(200, [], $content);
     }
 
     /**

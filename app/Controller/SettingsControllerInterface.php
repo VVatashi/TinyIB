@@ -2,14 +2,12 @@
 
 namespace Imageboard\Controller;
 
-use Psr\Http\Message\ResponseInterface;
-
 interface SettingsControllerInterface
 {
     /**
      * Shows settings form.
      *
-     * @return ResponseInterface
+     * @return string Response HTML.
      */
-    public function settings() : ResponseInterface;
+    public function settings() : string;
 }

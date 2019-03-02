@@ -9,47 +9,47 @@ interface UserCrudControllerInterface
     /**
      * Returns users list.
      *
-     * @param ResponseInterface $request
+     * @param ServerRequestInterface $request
      *
-     * @return ServerRequestInterface $response
+     * @return string Response HTML.
      *
      * @throws AccessDeniedException
      *   If current user is not an admin.
      */
-    public function list(ServerRequestInterface $request) : ResponseInterface;
+    public function list(ServerRequestInterface $request) : string;
 
     /**
      * Returns users.
      *
-     * @param ResponseInterface $request
+     * @param ServerRequestInterface $request
      *
-     * @return ServerRequestInterface $response
+     * @return string Response HTML.
      *
      * @throws AccessDeniedException
      *   If current user is not an admin.
      * @throws NotFoundException
      *   If user with the specified ID is not found.
      */
-    public function show(ServerRequestInterface $request) : ResponseInterface;
+    public function show(ServerRequestInterface $request) : string;
 
     /**
      * Returns user create form.
      *
-     * @param ResponseInterface $request
+     * @param ServerRequestInterface $request
      *
-     * @return ServerRequestInterface $response
+     * @return string Response HTML.
      *
      * @throws AccessDeniedException
      *   If current user is not an admin.
      */
-    public function createForm(ServerRequestInterface $request) : ResponseInterface;
+    public function createForm(ServerRequestInterface $request) : string;
 
     /**
      * Creates user.
      *
-     * @param ResponseInterface $request
+     * @param ServerRequestInterface $request
      *
-     * @return ServerRequestInterface $response
+     * @return ResponseInterface Response.
      *
      * @throws AccessDeniedException
      *   If current user is not an admin.
@@ -59,23 +59,23 @@ interface UserCrudControllerInterface
     /**
      * Returns user edit form.
      *
-     * @param ResponseInterface $request
+     * @param ServerRequestInterface $request
      *
-     * @return ServerRequestInterface $response
+     * @return string Response HTML.
      *
      * @throws AccessDeniedException
      *   If current user is not an admin.
      * @throws NotFoundException
      *   If user with the specified ID is not found.
      */
-    public function editForm(ServerRequestInterface $request) : ResponseInterface;
+    public function editForm(ServerRequestInterface $request) : string;
 
     /**
      * Updates user.
      *
-     * @param ResponseInterface $request
+     * @param ServerRequestInterface $request
      *
-     * @return ServerRequestInterface $response
+     * @return ResponseInterface Response.
      *
      * @throws AccessDeniedException
      *   If current user is not an admin.
@@ -87,23 +87,23 @@ interface UserCrudControllerInterface
     /**
      * Return confirmation for user delete.
      *
-     * @param ResponseInterface $request
+     * @param ServerRequestInterface $request
      *
-     * @return ServerRequestInterface $response
+     * @return string Response HTML.
      *
      * @throws AccessDeniedException
      *   If current user is not an admin.
      * @throws NotFoundException
      *   If user with the specified ID is not found.
      */
-    public function deleteConfirm(ServerRequestInterface $request) : ResponseInterface;
+    public function deleteConfirm(ServerRequestInterface $request) : string;
 
     /**
      * Deletes user.
      *
-     * @param ResponseInterface $request
+     * @param ServerRequestInterface $request
      *
-     * @return ServerRequestInterface $response
+     * @return ResponseInterface Response.
      *
      * @throws AccessDeniedException
      *   If current user is not an admin.

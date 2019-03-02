@@ -38,9 +38,9 @@ interface MobilePostControllerInterface
      *
      * @param ServerRequestInterface
      *
-     * @return ResponseInterface
+     * @return string
      */
-    public function ajaxThread(ServerRequestInterface $request) : ResponseInterface;
+    public function ajaxThread(ServerRequestInterface $request) : string;
 
     /**
      * Creates a post.

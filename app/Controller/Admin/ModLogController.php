@@ -2,11 +2,10 @@
 
 namespace Imageboard\Controller\Admin;
 
-use GuzzleHttp\Psr7\Response;
 use Imageboard\Exception\AccessDeniedException;
 use Imageboard\Model\ModLog;
 use Imageboard\Service\RendererServiceInterface;
-use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
+use Psr\Http\Message\ServerRequestInterface;
 
 class ModLogController implements ModLogControllerInterface
 {
@@ -27,7 +26,7 @@ class ModLogController implements ModLogControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function list(ServerRequestInterface $request) : ResponseInterface
+    public function list(ServerRequestInterface $request) : string
     {
         /** @var User */
         $current_user = $request->getAttribute('user');
@@ -36,10 +35,8 @@ class ModLogController implements ModLogControllerInterface
         }
 
         $modlog = ModLog::with('user')->orderBy('id', 'desc')->get();
-        $content = $this->renderer->render('admin/modlog/list.twig', [
+        return $this->renderer->render('admin/modlog/list.twig', [
             'modlog' => $modlog,
         ]);
-
-        return new Response(200, [], $content);
     }
 }
