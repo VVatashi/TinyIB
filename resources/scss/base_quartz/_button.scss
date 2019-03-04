@@ -2,18 +2,22 @@
   @extend %clickable;
 
   box-sizing: border-box;
+  display: inline-block;
   color: $btn-color;
   background: $btn-background;
   border: $btn-border;
   border-radius: $btn-border-radius;
   padding: $btn-padding;
   margin: 0;
+  line-height: 1em;
 
   &:hover {
     background: $btn-hover-background;
+    text-decoration: none;
   }
 
   &:active {
     background: $btn-active-background;
+    text-decoration: none;
   }
 }

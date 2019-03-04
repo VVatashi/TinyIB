@@ -30,7 +30,13 @@ abstract class CrudController implements CrudControllerInterface
   protected $create_url = '';
 
   /** @var string */
+  protected $edit_url = '';
+
+  /** @var string */
   protected $create_command_type = '';
+
+  /** @var string */
+  protected $edit_command_type = '';
 
   /** @var array */
   protected $new_item = [];
@@ -79,6 +85,18 @@ abstract class CrudController implements CrudControllerInterface
     /** @var User */
     $current_user = $request->getAttribute('user');
     return $current_user->isMod();
+  }
+
+  /**
+   * Loads item DTO by ID.
+   *
+   * @param int $id
+   *
+   * @return array DTO.
+   */
+  protected function loadItem(int $id): array
+  {
+    return [];
   }
 
   /**
@@ -176,6 +194,70 @@ abstract class CrudController implements CrudControllerInterface
 
       return new Response(302, [
         'Location' => $this->create_url,
+      ]);
+    }
+
+    $query = $request->getQueryParams();
+    $back = $query['back'] ?? $this->list_url;
+
+    return new Response(302, [
+      'Location' => $back,
+    ]);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  function editForm(ServerRequestInterface $request, array $args): string
+  {
+    if (!$this->checkAccess($request)) {
+      throw new AccessDeniedException('You are not allowed to access this page');
+    }
+
+    // Restore form data from a session.
+    $id = (int)($args['id'] ?? 0);
+    $key = $this->edit_url . ':item';
+    $item = $_SESSION[$key] ?? $this->loadItem($id);
+    unset($_SESSION[$key]);
+
+    // Show error message from a session.
+    $key = $this->edit_url . ':error';
+    $error = $_SESSION[$key] ?? null;
+    unset($_SESSION[$key]);
+
+    return $this->renderer->render($this->form_template, [
+      'error' => $error,
+      'item' => $item,
+    ]);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  function edit(ServerRequestInterface $request, array $args): ResponseInterface
+  {
+    if (!$this->checkAccess($request)) {
+      throw new AccessDeniedException('You are not allowed to access this page');
+    }
+
+    $data = $request->getParsedBody();
+    $command = new $this->edit_command_type($data);
+    $handler = $this->command_dispatcher->getHandler($command);
+
+    try {
+      $handler->handle($command);
+    } catch (\Exception $exception) {
+      // Store form data in a session.
+      $key = $this->edit_url . ':item';
+      $_SESSION[$key] = $data;
+
+      // Store error message in a session.
+      $key = $this->edit_url . ':error';
+      $_SESSION[$key] = $exception->getMessage();
+
+      $id = (int)($args['id'] ?? 0);
+      return new Response(302, [
+        'Location' => str_replace(':id', $id, $this->edit_url),
       ]);
     }
 

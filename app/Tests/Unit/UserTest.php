@@ -38,16 +38,16 @@ final class UserTest extends TestCase
         $this->assertTrue($user->isAdmin());
     }
 
-    public function test_register_emptyEmail_shouldThrowValidationException() : void
+    public function test_createUser_emptyEmail_shouldThrowValidationException() : void
     {
         $this->expectException(ValidationException::class);
-        User::register('', 'test');
+        User::createUser('', 'test');
     }
 
-    public function test_register_emptyPassword_shouldThrowValidationException() : void
+    public function test_createUser_emptyPassword_shouldThrowValidationException() : void
     {
         $this->expectException(ValidationException::class);
-        User::register('test@example.com', '');
+        User::createUser('test@example.com', '');
     }
 
     public function test_login_emptyEmail_shouldThrowValidationException() : void

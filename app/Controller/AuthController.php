@@ -86,7 +86,7 @@ class AuthController implements AuthControllerInterface
         }
 
         try {
-            User::register($email, $password);
+            User::createUser($email, $password);
             User::login($email, $password);
         }
         catch(ValidationException $e) {

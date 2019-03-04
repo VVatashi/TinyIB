@@ -9,7 +9,7 @@ use Imageboard\Controller\Admin\{
     DashboardControllerInterface as AdminDashboard,
     ModLogControllerInterface as AdminModLog,
     PostControllerInterface as AdminPosts,
-    UserCrudControllerInterface as AdminUsers
+    UserControllerInterface as AdminUsers
 };
 use Imageboard\Controller\Mobile\MobilePostControllerInterface as MobilePosts;
 use Imageboard\Controller\{
@@ -73,15 +73,13 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
                     $routes->addRoute('POST',  '/{id:\d+}/delete', [AdminPosts::class, 'delete']);
                 });
 
-                $routes->addGroup('/user', function (RouteCollector $routes) {
-                    $routes->addRoute('GET',  '',                        [AdminUsers::class, 'list']);
-                    $routes->addRoute('GET',  '/create',                 [AdminUsers::class, 'createForm']);
-                    $routes->addRoute('POST', '/create/submit',          [AdminUsers::class, 'create']);
-                    $routes->addRoute('GET',  '/{id:\d+}',               [AdminUsers::class, 'show']);
-                    $routes->addRoute('GET',  '/{id:\d+}/edit',          [AdminUsers::class, 'editForm']);
-                    $routes->addRoute('POST', '/{id:\d+}/edit/submit',   [AdminUsers::class, 'edit']);
-                    $routes->addRoute('GET',  '/{id:\d+}/delete',        [AdminUsers::class, 'deleteConfirm']);
-                    $routes->addRoute('POST', '/{id:\d+}/delete/submit', [AdminUsers::class, 'delete']);
+                $routes->addGroup('/users', function (RouteCollector $routes) {
+                    $routes->addRoute('GET',  '',                 [AdminUsers::class, 'list']);
+                    $routes->addRoute('GET',  '/create',          [AdminUsers::class, 'createForm']);
+                    $routes->addRoute('POST', '/create',          [AdminUsers::class, 'create']);
+                    $routes->addRoute('GET',  '/{id:\d+}/edit',   [AdminUsers::class, 'editForm']);
+                    $routes->addRoute('POST', '/{id:\d+}/edit',   [AdminUsers::class, 'edit']);
+                    $routes->addRoute('POST', '/{id:\d+}/delete', [AdminUsers::class, 'delete']);
                 });
             });
 

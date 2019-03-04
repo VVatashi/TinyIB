@@ -27,6 +27,8 @@ interface CrudControllerInterface
    *
    * @throws AccessDeniedException
    *   If current user is not an admin.
+   * @throws NotFoundException
+   *   If item with the specified ID is not found.
    */
   function show(ServerRequestInterface $request, array $args) : string;
 
@@ -53,6 +55,36 @@ interface CrudControllerInterface
    *   If current user is not an admin.
    */
   function create(ServerRequestInterface $request): ResponseInterface;
+
+  /**
+   * Returns item edit form.
+   *
+   * @param ServerRequestInterface $request
+   * @param array Path arguments.
+   *
+   * @return string Response HTML.
+   *
+   * @throws AccessDeniedException
+   *   If current user is not an admin.
+   * @throws NotFoundException
+   *   If item with the specified ID is not found.
+   */
+  function editForm(ServerRequestInterface $request, array $args) : string;
+
+  /**
+   * Updates item.
+   *
+   * @param ServerRequestInterface $request
+   * @param array Path arguments.
+   *
+   * @return ResponseInterface Response.
+   *
+   * @throws AccessDeniedException
+   *   If current user is not an admin.
+   * @throws NotFoundException
+   *   If item with the specified ID is not found.
+   */
+  function edit(ServerRequestInterface $request, array $args) : ResponseInterface;
 
   /**
    * Deletes item by id.

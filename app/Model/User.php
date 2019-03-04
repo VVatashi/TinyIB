@@ -111,7 +111,7 @@ class User extends Model
   }
 
   /**
-   * Registers user.
+   * Creates new user.
    *
    * @param string $email
    *   User email.
@@ -119,13 +119,16 @@ class User extends Model
    * @param string $password
    *   User password.
    *
+   * @param int $role
+   *   User role ID.
+   *
    * @return User
    *   User object instance.
    *
    * @throws ValidationException
    *   On validation errors.
    */
-  static function register(string $email, string $password): User
+  static function createUser(string $email, string $password, int $role = 0): User
   {
     if (empty($email)) {
       throw new ValidationException('Email should not be empty');
@@ -144,7 +147,7 @@ class User extends Model
 
     $user = new User([
       'email' => $email,
-      'role' => 0,
+      'role' => $role,
     ]);
     $user->setPassword($password);
     $user->save();

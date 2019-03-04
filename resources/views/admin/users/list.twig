@@ -1,0 +1,106 @@
+{% set title = 'User List' %}
+
+{% set breadcrumb = [
+  { url: base_url, title: constant('TINYIB_BOARDDESC') },
+  { url: base_url ~ '/admin', title: 'Admin Dashboard' },
+] %}
+
+{% extends 'admin/layout/_html.twig' %}
+
+{% block content %}
+  <div class="list content__list">
+    <div class="list__header">
+      <h1 class="list__title">{{ title }}</h1>
+    </div>
+
+    <div class="list__content">
+      <div class="list__actions">
+        <ul class="list__actions-list">
+          <li class="list__actions-list-item">
+            <a class="button" href="{{ base_url }}/admin/users/create">Create user</a>
+          </li>
+        </ul>
+      </div>
+
+      {% if items|length %}
+        {% if pager.total_pages > 1 %}
+          {% include 'admin/components/_pager.twig' with pager + {
+            'class': 'list__top-pager',
+          } %}
+        {% endif %}
+
+        <table class="list__table list__table--striped">
+          <thead>
+            <tr class="list__table-header">
+              <th class="list__cell">ID</th>
+              <th class="list__cell">Email</th>
+              <th class="list__cell">Status</th>
+              <th class="list__cell">Created</th>
+              <th class="list__cell">Updated</th>
+              <th class="list__cell">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for item in items %}
+              <tr class="list__row">
+                <th class="list__cell list__cell--nostretch" scope="row">{{ item.id }}</th>
+                <td class="list__cell"><a href="mailto:{{ item.email|e('html_attr') }}">{{ item.email|e }}</a></td>
+
+                <td class="list__cell list__cell--nostretch">
+                {% if item.role == 0 %}
+                  Blocked
+                {% elseif item.role == 1 %}
+                  User
+                {% elseif item.role == 2 %}
+                  Moderator
+                {% elseif item.role == 3 %}
+                  Administrator
+                {% else %}
+                  {{ item.role }}
+                {% endif %}
+                </td>
+
+                <td class="list__cell list__cell--nostretch">
+                {% if item.created_at %}
+                  <time>{{ item.created_at|date('j.m.Y H:i:s') }}</time>
+                {% endif %}
+                </td>
+
+                <td class="list__cell list__cell--nostretch">
+                {% if item.updated_at %}
+                  <time>{{ item.updated_at|date('j.m.Y H:i:s') }}</time>
+                {% endif %}
+                </td>
+
+                <td class="list__cell list__cell--nostretch list__cell--center">
+                  <ul class="list__table-actions">
+                    <li class="list__table-action">
+                      {% set url = base_url ~ '/admin/users/' ~ item.id ~ '/edit' %}
+                      <a class="button" href="{{ url }}">Edit</a>
+                    </li>
+
+                    <li class="list__table-action">
+                      {% set back = base_url ~ '/admin/users' %}
+                      {% set url = base_url ~ '/admin/users/' ~ item.id ~ '/delete?back=' ~ back|e('url') %}
+                      <form method="post" action="{{ url }}">
+                        <button class="button button--delete">Delete</button>
+                      </form>
+                    </li>
+                  </ul>
+
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        {% if pager.total_pages > 1 %}
+          {% include 'admin/components/_pager.twig' with pager + {
+            'class': 'list__bottom-pager',
+          } %}
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
