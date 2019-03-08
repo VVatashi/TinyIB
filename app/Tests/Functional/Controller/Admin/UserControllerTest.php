@@ -118,7 +118,7 @@ final class UserControllerTest extends TestCase
     $data = [
       'email' => 'test@example.com',
       'password' => 'test@example.com',
-      'role' => 0,
+      'role' => User::ROLE_USER,
     ];
     $request = (new ServerRequest('POST', '/admin/users/create'))
       ->withAttribute('user', $user)
@@ -135,7 +135,7 @@ final class UserControllerTest extends TestCase
     $data = [
       'email' => 'test@example.com',
       'password' => 'test@example.com',
-      'role' => 0,
+      'role' => User::ROLE_USER,
     ];
     $request = (new ServerRequest('POST', '/admin/users/create'))
       ->withAttribute('user', $user)
@@ -152,7 +152,7 @@ final class UserControllerTest extends TestCase
     $data = [
       'email' => 'test@example.com',
       'password' => 'test@example.com',
-      'role' => 0,
+      'role' => User::ROLE_USER,
     ];
     $request = (new ServerRequest('POST', '/admin/users/create'))
       ->withAttribute('user', $user)
@@ -210,9 +210,9 @@ final class UserControllerTest extends TestCase
     $user = User::anonymous();
     $data = [
       'id' => $item->id,
-      'email' => 'test@example.com',
-      'password' => 'test@example.com',
-      'role' => 0,
+      'email' => 'new@example.com',
+      'password' => '123456',
+      'role' => User::ROLE_USER,
     ];
     $request = (new ServerRequest('POST', "/admin/users/{$item->id}/edit"))
       ->withAttribute('user', $user)
@@ -229,9 +229,9 @@ final class UserControllerTest extends TestCase
     $user = $this->createUser();
     $data = [
       'id' => $item->id,
-      'email' => 'test@example.com',
-      'password' => 'test@example.com',
-      'role' => 0,
+      'email' => 'new@example.com',
+      'password' => '123456',
+      'role' => User::ROLE_USER,
     ];
     $request = (new ServerRequest('POST', "/admin/users/{$item->id}/edit"))
       ->withAttribute('user', $user)
@@ -248,9 +248,9 @@ final class UserControllerTest extends TestCase
     $user = $this->createAdmin();
     $data = [
       'id' => $item->id,
-      'email' => 'test@example.com',
-      'password' => 'test@example.com',
-      'role' => 0,
+      'email' => 'new@example.com',
+      'password' => 'new@example.com',
+      'role' => User::ROLE_USER,
     ];
     $request = (new ServerRequest('POST', "/admin/users/{$item->id}/edit"))
       ->withAttribute('user', $user)
@@ -258,7 +258,7 @@ final class UserControllerTest extends TestCase
 
     $response = $this->controller->edit($request, ['id' => $item->id]);
 
-    $item = User::where('id', $item->id)->first();
+    $item = User::where('email', $data['email'])->first();
     $this->assertNotNull($item);
 
     $status = $response->getStatusCode();

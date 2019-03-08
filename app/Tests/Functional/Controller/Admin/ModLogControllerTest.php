@@ -44,7 +44,7 @@ final class ModLogControllerTest extends TestCase
     return User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
   }
 
-  function test_list_asAnonнmous_shouldThrow() : void
+  function test_list_asAnonymous_shouldThrow() : void
   {
     $user = User::anonymous();
     $request = (new ServerRequest('GET', '/admin/modlog'))
