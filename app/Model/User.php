@@ -18,6 +18,11 @@ class User extends Model
 {
   use SoftDeletes;
 
+  const ROLE_ANONYMOUS = 0;
+  const ROLE_USER = 1;
+  const ROLE_MODERATOR = 2;
+  const ROLE_ADMINISTRATOR = 3;
+
   protected $table = 'users';
 
   protected $fillable = [
@@ -73,7 +78,7 @@ class User extends Model
   function isMod(): bool
   {
     /** @todo Role system. */
-    return $this->role > 1;
+    return $this->role >= static::ROLE_MODERATOR;
   }
 
   /**
@@ -84,7 +89,7 @@ class User extends Model
   function isAdmin(): bool
   {
     /** @todo Role system. */
-    return $this->role > 2;
+    return $this->role >= static::ROLE_ADMINISTRATOR;
   }
 
   /**
@@ -106,7 +111,7 @@ class User extends Model
     $user->id = 0;
     $user->email = '';
     $user->password_hash = '';
-    $user->role = 0;
+    $user->role = static::ROLE_ANONYMOUS;
     return $user;
   }
 

@@ -22,7 +22,7 @@ class RendererService implements RendererServiceInterface
 
         $this->twig = new Twig_Environment($loader, [
             'autoescape' => false,
-            'cache' => __DIR__ . '/../../storage/twig-cache',
+            'cache' => TINYIB_TWIG_CACHE,
             'debug' => true,
         ]);
 

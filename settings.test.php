@@ -72,3 +72,5 @@ define('TINYIB_CACHE', '');
 define('TINYIB_CACHE_REDIS_HOST', 'unix:/var/run/redis/redis.sock');
 
 define('TINYIB_GTM', '');
+
+define('TINYIB_TWIG_CACHE', false);

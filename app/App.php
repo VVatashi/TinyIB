@@ -45,6 +45,7 @@ class App
     defined('TINYIB_NEWTHREAD') || define('TINYIB_NEWTHREAD', 0);
     defined('TINYIB_INDEXPAGE') || define('TINYIB_INDEXPAGE', false);
     defined('TINYIB_RESPAGE') || define('TINYIB_RESPAGE', true);
+    defined('TINYIB_TWIG_CACHE') || define('TINYIB_TWIG_CACHE', __DIR__ . '/../storage/twig-cache');
 
     // Start session.
     session_start();

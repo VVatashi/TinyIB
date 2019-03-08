@@ -17,6 +17,7 @@ $container = $app->getContainer();
 if (!Capsule::schema()->hasTable(TINYIB_DBBANS)) {
     Capsule::schema()->create(TINYIB_DBBANS, function (Blueprint $table) {
         $table->increments('id');
+        $table->string('ip');
         $table->string('reason')->nullable();
         $table->integer('expires_at')->default(0);
         $table->integer('created_at')->default(0);
