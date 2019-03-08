@@ -2,6 +2,9 @@
 
 namespace Imageboard\Controller\Admin;
 
+use DateInterval;
+use DateTime;
+use DateTimeZone;
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Command\CommandDispatcher;
 use Imageboard\Exception\AccessDeniedException;
@@ -112,12 +115,33 @@ abstract class CrudController implements CrudControllerInterface
     $page = (int)($params['page'] ?? 0);
     $per_page = 100;
 
-    $query = new $this->list_query_type($page * $per_page, $per_page);
+    if (!empty($params['date_from'])) {
+      $date_from = DateTime::createFromFormat('Y-m-d', $params['date_from'], new DateTimeZone('UTC'));
+    }
+
+    if (!isset($date_from) || $date_from === false) {
+      $date_from = (new DateTime())->setTimestamp(0);
+    }
+
+    if (!empty($params['date_to'])) {
+      $date_to = DateTime::createFromFormat('Y-m-d', $params['date_to'], new DateTimeZone('UTC'))
+        ->add(new DateInterval('P1D'));
+    }
+
+    if (!isset($date_to) || $date_to === false) {
+      $date_to = new DateTime();
+    }
+
+    $query = new $this->list_query_type($page * $per_page, $per_page, $date_from, $date_to);
     $handler = $this->query_dispatcher->getHandler($query);
     $total_count = $handler->count($query);
     $items = $handler->handle($query);
     return $this->renderer->render($this->list_template, [
       'items' => $items,
+      'filter' => [
+        'date_from' => $params['date_from'] ?? '',
+        'date_to' => $params['date_to'] ?? '',
+      ],
       'pager' => [
         'current_page' => $page,
         'total_pages' => ceil($total_count / $per_page),

@@ -14,6 +14,8 @@ class ListBansHandler extends ListHandler
 SELECT count(*)
 FROM $bans_table AS b
 WHERE b.deleted_at IS NULL
+  AND b.created_at >= :date_from
+  AND b.created_at < :date_to
 EOF;
     return $sql;
   }
@@ -28,6 +30,8 @@ EOF;
 SELECT b.id, b.ip, b.reason, b.created_at, b.updated_at, b.expires_at
 FROM $bans_table AS b
 WHERE b.deleted_at IS NULL
+  AND b.created_at >= :date_from
+  AND b.created_at < :date_to
 ORDER BY b.id DESC
 LIMIT :take OFFSET :skip
 EOF;

@@ -1,6 +1,10 @@
 .list {
   @include block;
 
+  &__filters {
+    margin: 0 0 1em;
+  }
+
   &__top-pager {
     margin-bottom: 0.5em;
   }

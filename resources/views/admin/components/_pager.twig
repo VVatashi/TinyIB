@@ -1,3 +1,7 @@
+{% if not query is defined %}
+  {% set query = {} %}
+{% endif %}
+
 <div class="{{ class ? class ~ ' ' }} pager">
   {% set start = max(current_page - 10, 0) %}
   {% set end = min(current_page + 10, total_pages - 1) %}
@@ -5,13 +9,13 @@
   <ul class="pager__list">
     {% if start > 0 %}
       <li class="pager__item">
-        <a href="?page={{ 0 }}">First</a>
+        <a href="?{{ (query + { page: 0 })|url_encode }}">First</a>
       </li>
     {% endif %}
 
     {% if current_page > 0 %}
       <li class="pager__item">
-        <a href="?page={{ current_page - 1 }}">Previous</a>
+        <a href="?{{ (query + { page: current_page - 1 })|url_encode }}">Previous</a>
       </li>
     {% endif %}
 
@@ -22,7 +26,7 @@
     {% for page in range(start, end) %}
       <li class="pager__item">
         {% if page != current_page %}
-          <a href="?page={{ page }}">{{ page + 1 }}</a>
+          <a href="?{{ (query + { page: page })|url_encode }}">{{ page + 1 }}</a>
         {% else %}
           <strong>{{ page + 1 }}</strong>
         {% endif %}
@@ -35,13 +39,13 @@
 
     {% if current_page < total_pages - 1 %}
       <li class="pager__item">
-        <a href="?page={{ current_page + 1 }}">Next</a>
+        <a href="?{{ (query + { page: current_page + 1 })|url_encode }}">Next</a>
       </li>
     {% endif %}
 
     {% if end < total_pages - 1 %}
       <li class="pager__item">
-        <a href="?page={{ total_pages - 1 }}">Last</a>
+        <a href="?{{ (query + { page: total_pages - 1 })|url_encode }}">Last</a>
       </li>
     {% endif %}
   </ul>

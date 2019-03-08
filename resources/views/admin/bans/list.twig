@@ -5,6 +5,11 @@
   { url: base_url ~ '/admin', title: 'Admin Dashboard' },
 ] %}
 
+{% set query = {
+  date_from: filter.date_from,
+  date_to: filter.date_to,
+} %}
+
 {% extends 'admin/layout/_html.twig' %}
 
 {% block content %}
@@ -21,6 +26,23 @@
           </li>
         </ul>
       </div>
+
+      {% set url = base_url ~ '/admin/bans' %}
+      <form class="list__filters filter" method="get" action="{{ url }}">
+        <h3 class="filter__title">Filter by date</h3>
+
+        <div class="filter__row">
+          <label for="date_from" class="filter__label">From</label>
+          <input type="date" class="filter__input input"
+            id="date_from" name="date_from" value="{{ filter['date_from'] }}" />
+
+          <label for="date_to" class="filter__label">to</label>
+          <input type="date" class="filter__input input"
+            id="date_to" name="date_to" value="{{ filter['date_to'] }}" />
+        </div>
+
+        <button type="submit" class="filter__apply button">Apply</button>
+      </form>
 
       {% if items|length %}
         {% if pager.total_pages > 1 %}
@@ -62,7 +84,7 @@
                 <td class="list__cell">{{ item.reason|e }}</td>
 
                 <td class="list__cell list__cell--nostretch list__cell--center">
-                  {% set back = base_url ~ '/admin/bans' %}
+                  {% set back = base_url ~ '/admin/bans?' ~ (query + { page: pager.current_page })|url_encode %}
                   {% set url = base_url ~ '/admin/bans/' ~ item.id ~ '/delete?back=' ~ back|e('url') %}
                   <form method="post" action="{{ url }}">
                     <button class="button button--delete">Lift</button>

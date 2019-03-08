@@ -14,6 +14,8 @@ class ListPostsHandler extends ListHandler
 SELECT count(*)
 FROM $posts_table AS p
 WHERE p.deleted_at IS NULL
+  AND p.created_at >= :date_from
+  AND p.created_at < :date_to
 EOF;
     return $sql;
   }
@@ -31,6 +33,8 @@ SELECT p.id, p.parent_id,
 FROM $posts_table AS p
   LEFT JOIN users AS u ON u.id = p.user_id
 WHERE p.deleted_at IS NULL
+  AND p.created_at >= :date_from
+  AND p.created_at < :date_to
 ORDER BY p.id DESC
 LIMIT :take OFFSET :skip
 EOF;
