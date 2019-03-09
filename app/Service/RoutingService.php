@@ -64,7 +64,7 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
                 });
 
                 $routes->addGroup('/modlog', function (RouteCollector $routes) {
-                    $routes->addRoute('GET',  '', [AdminModLog::class, 'list']);
+                    $routes->addRoute('GET', '', [AdminModLog::class, 'list']);
                 });
 
                 $routes->addGroup('/posts', function (RouteCollector $routes) {
@@ -84,6 +84,24 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
             });
 
             $routes->addGroup('/ajax', function (RouteCollector $routes) {
+                $routes->addGroup('/admin', function (RouteCollector $routes) {
+                    $routes->addGroup('/bans', function (RouteCollector $routes) {
+                        $routes->addRoute('GET', '', [AdminBans::class, 'ajaxList']);
+                    });
+
+                    $routes->addGroup('/modlog', function (RouteCollector $routes) {
+                        $routes->addRoute('GET', '', [AdminModLog::class, 'ajaxList']);
+                    });
+
+                    $routes->addGroup('/posts', function (RouteCollector $routes) {
+                        $routes->addRoute('GET', '', [AdminPosts::class, 'ajaxList']);
+                    });
+
+                    $routes->addGroup('/users', function (RouteCollector $routes) {
+                        $routes->addRoute('GET', '', [AdminUsers::class, 'ajaxList']);
+                    });
+                });
+
                 $routes->addGroup('/mobile', function (RouteCollector $routes) {
                     $routes->addRoute('GET',  '/thread/{id:\d+}', [MobilePosts::class, 'ajaxThread']);
                     $routes->addRoute('POST', '/post/create',     [MobilePosts::class, 'ajaxCreatePost']);

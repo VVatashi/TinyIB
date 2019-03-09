@@ -24,6 +24,9 @@ abstract class CrudController implements CrudControllerInterface
   protected $list_template = '';
 
   /** @var string */
+  protected $ajax_list_template = '';
+
+  /** @var string */
   protected $show_query_type = '';
 
   /** @var string */
@@ -58,6 +61,9 @@ abstract class CrudController implements CrudControllerInterface
 
   /** @var RendererServiceInterface */
   protected $renderer;
+
+  /** @var int */
+  protected $items_per_page = 100;
 
   /**
    * Creates a new CRUD controller instance.
@@ -113,7 +119,7 @@ abstract class CrudController implements CrudControllerInterface
 
     $params = $request->getQueryParams();
     $page = (int)($params['page'] ?? 0);
-    $per_page = 100;
+    $per_page = $this->items_per_page;
 
     if (!empty($params['date_from'])) {
       $date_from = DateTime::createFromFormat('Y-m-d', $params['date_from'], new DateTimeZone('UTC'));
@@ -137,6 +143,53 @@ abstract class CrudController implements CrudControllerInterface
     $total_count = $handler->count($query);
     $items = $handler->handle($query);
     return $this->renderer->render($this->list_template, [
+      'items' => $items,
+      'filter' => [
+        'date_from' => $params['date_from'] ?? '',
+        'date_to' => $params['date_to'] ?? '',
+      ],
+      'pager' => [
+        'current_page' => $page,
+        'total_pages' => ceil($total_count / $per_page),
+      ],
+    ]);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  function ajaxList(ServerRequestInterface $request): string
+  {
+    if (!$this->checkAccess($request)) {
+      throw new AccessDeniedException('You are not allowed to access this page');
+    }
+
+    $params = $request->getQueryParams();
+    $page = (int)($params['page'] ?? 0);
+    $per_page = $this->items_per_page;
+
+    if (!empty($params['date_from'])) {
+      $date_from = DateTime::createFromFormat('Y-m-d', $params['date_from'], new DateTimeZone('UTC'));
+    }
+
+    if (!isset($date_from) || $date_from === false) {
+      $date_from = (new DateTime())->setTimestamp(0);
+    }
+
+    if (!empty($params['date_to'])) {
+      $date_to = DateTime::createFromFormat('Y-m-d', $params['date_to'], new DateTimeZone('UTC'))
+        ->add(new DateInterval('P1D'));
+    }
+
+    if (!isset($date_to) || $date_to === false) {
+      $date_to = new DateTime();
+    }
+
+    $query = new $this->list_query_type($page * $per_page, $per_page, $date_from, $date_to);
+    $handler = $this->query_dispatcher->getHandler($query);
+    $total_count = $handler->count($query);
+    $items = $handler->handle($query);
+    return $this->renderer->render($this->ajax_list_template, [
       'items' => $items,
       'filter' => [
         'date_from' => $params['date_from'] ?? '',

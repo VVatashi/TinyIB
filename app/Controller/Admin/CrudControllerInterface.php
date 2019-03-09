@@ -19,6 +19,18 @@ interface CrudControllerInterface
   function list(ServerRequestInterface $request) : string;
 
   /**
+   * Returns partial HTML of the item list.
+   *
+   * @param ServerRequestInterface $request
+   *
+   * @return string Response HTML.
+   *
+   * @throws AccessDeniedException
+   *   If current user is not an admin.
+   */
+  function ajaxList(ServerRequestInterface $request) : string;
+
+  /**
    * Returns details page for a single item by id.
    *
    * @param ServerRequestInterface $request

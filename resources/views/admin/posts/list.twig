@@ -5,11 +5,6 @@
   { url: base_url ~ '/admin', title: 'Admin Dashboard' },
 ] %}
 
-{% set query = {
-  date_from: filter.date_from,
-  date_to: filter.date_to,
-} %}
-
 {% extends 'admin/layout/_html.twig' %}
 
 {% block content %}
@@ -19,91 +14,14 @@
     </div>
 
     <div class="list__content">
-      {% set url = base_url ~ '/admin/posts' %}
-      <form class="list__filters filter" method="get" action="{{ url }}">
-        <h3 class="filter__title">Filter by date</h3>
+      {% include 'admin/components/_filters.twig' with filter + {
+        'list_url': base_url ~ '/admin/posts',
+        'class': 'list__filters',
+      } %}
 
-        <div class="filter__row">
-          <label for="date_from" class="filter__label">From</label>
-          <input type="date" class="filter__input input"
-            id="date_from" name="date_from" value="{{ filter['date_from'] }}" />
-
-          <label for="date_to" class="filter__label">to</label>
-          <input type="date" class="filter__input input"
-            id="date_to" name="date_to" value="{{ filter['date_to'] }}" />
-        </div>
-
-        <button type="submit" class="filter__apply button">Apply</button>
-      </form>
-
-      {% if items|length %}
-        {% if pager.total_pages > 1 %}
-          {% include 'admin/components/_pager.twig' with pager + {
-            'class': 'list__top-pager',
-          } %}
-        {% endif %}
-
-        <table class="list__table list__table--striped">
-          <thead>
-            <tr class="list__table-header">
-              <th class="list__cell">ID</th>
-              <th class="list__cell">Thread</th>
-              <th class="list__cell">Date</th>
-              <th class="list__cell">Name</th>
-              <th class="list__cell">Message</th>
-              <th class="list__cell">User</th>
-              <th class="list__cell">IP</th>
-              <th class="list__cell">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {% for item in items %}
-              {% set name = (item.name ~ (item.tripcode ? '!' ~ item.tripcode : ''))|truncate(20) %}
-              {% set message = item.message|striptags|truncate(40) %}
-              {% set user = item.user_email ? item.user_email|truncate(20) : item.user_id %}
-
-              <tr class="list__row">
-                <th class="list__cell list__cell--nostretch" scope="row">
-                  <a href="{{ base_url }}/admin/posts/{{ item.id }}">{{ item.id }}</a>
-                </th>
-
-                <td class="list__cell list__cell--nostretch">
-                  {% if item.parent_id %}
-                    <a href="{{ base_url }}/admin/posts/{{ item.parent_id }}">{{ item.parent_id }}</a>
-                  {% endif %}
-                </td>
-
-                <td class="list__cell list__cell--nostretch">{{ item.created_at|date('j.m.Y H:i:s') }}</td>
-                <td class="list__cell list__cell--nostretch">{{ name|e }}</td>
-                <td class="list__cell list__cell">{{ message }}</td>
-
-                <td class="list__cell list__cell--nostretch">
-                  {% if item.user_id %}
-                    <a href="{{ base_url }}/admin/users/{{ item.user_id }}">{{ user|e }}</a>
-                  {% endif %}
-                </td>
-
-                <td class="list__cell list__cell--nostretch">{{ item.ip }}</td>
-
-                <td class="list__cell list__cell--nostretch list__cell--center">
-                  {% set back = base_url ~ '/admin/posts?' ~ (query + { page: pager.current_page })|url_encode %}
-                  {% set url = base_url ~ '/admin/posts/' ~ item.id ~ '/delete?back=' ~ back|e('url') %}
-                  <form method="post" action="{{ url }}">
-                    <button type="submit" class="button">Delete</button>
-                  </form>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-
-        {% if pager.total_pages > 1 %}
-          {% include 'admin/components/_pager.twig' with pager + {
-            'class': 'list__bottom-pager',
-          } %}
-        {% endif %}
-      {% endif %}
+      <div id="list" data-url="{{ base_url }}/ajax/admin/posts">
+      {% include 'admin/posts/_list.twig' %}
+      </div>
     </div>
   </div>
 {% endblock %}

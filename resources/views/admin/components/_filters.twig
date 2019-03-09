@@ -1,0 +1,15 @@
+<form class="{{ class ? class ~ ' ' }}filter" method="get" action="{{ list_url }}">
+  <h3 class="filter__title">Filter by date</h3>
+
+  <div class="filter__row">
+    <label for="date_from" class="filter__label">From</label>
+    <input type="date" class="filter__input input"
+      id="date_from" name="date_from" value="{{ date_from }}" />
+
+    <label for="date_to" class="filter__label">to</label>
+    <input type="date" class="filter__input input"
+      id="date_to" name="date_to" value="{{ date_to }}" />
+  </div>
+
+  <button type="submit" class="filter__apply button">Apply</button>
+</form>
