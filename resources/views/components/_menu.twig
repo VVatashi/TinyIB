@@ -1,0 +1,27 @@
+{% macro link(title, url) %}
+  {% spaceless %}
+  <li class="menu__list-item">
+    {% set url = base_url ~ '/' ~ url %}
+    <a class="menu__link" href="{{ url }}">{{ title }}</a>
+  </li>
+  {% endspaceless %}
+{% endmacro %}
+
+{% import _self as self %}
+
+<div class="{{ class is defined ? class ~ ' ' }}menu">
+  <ul class="menu__list">
+    {% if user.isMod() or user.isAdmin() %}
+      {{ self.link('Manage', 'admin') }}
+    {% endif %}
+
+    {{ self.link('Settings', 'settings') }}
+
+    {% if user.isAnonymous() %}
+      {{ self.link('Log In', 'auth/login') }}
+      {{ self.link('Register', 'auth/register') }}
+    {% else %}
+      {{ self.link('Log Out', 'auth/logout') }}
+    {% endif %}
+  </ul>
+</div>

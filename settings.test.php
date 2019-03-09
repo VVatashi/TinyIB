@@ -1,14 +1,10 @@
 <?php
 
-define('TINYIB_ADMINPASS', '12345');
-define('TINYIB_MODPASS', '12345');
-
 define('TINYIB_BASE_URL', 'http://localhost/');
 define('TINYIB_BOARD', 'test');
 define('TINYIB_BOARDDESC', 'Test');
 define('TINYIB_ALWAYSNOKO', true);
 define('TINYIB_CAPTCHA', '');
-define('TINYIB_REQMOD', '');
 
 define('TINYIB_LOGO', '');
 define('TINYIB_THREADSPERPAGE', 10);
@@ -76,3 +72,5 @@ define('TINYIB_CACHE', '');
 define('TINYIB_CACHE_REDIS_HOST', 'unix:/var/run/redis/redis.sock');
 
 define('TINYIB_GTM', '');
+
+define('TINYIB_TWIG_CACHE', false);
