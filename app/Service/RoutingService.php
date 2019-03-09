@@ -9,6 +9,7 @@ use Imageboard\Controller\Admin\{
     DashboardControllerInterface as AdminDashboard,
     ModLogControllerInterface as AdminModLog,
     PostControllerInterface as AdminPosts,
+    SystemControllerInterface as AdminSystem,
     UserControllerInterface as AdminUsers
 };
 use Imageboard\Controller\Mobile\MobilePostControllerInterface as MobilePosts;
@@ -54,7 +55,9 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
             });
 
             $routes->addGroup('/admin', function (RouteCollector $routes) {
-                $routes->addRoute('GET',  '', [AdminDashboard::class, 'index']);
+                $routes->addRoute('GET',  '',                    [AdminDashboard::class, 'index']);
+                $routes->addRoute('GET',  '/system',             [AdminSystem::class, 'index']);
+                $routes->addRoute('POST', '/system/clear-cache', [AdminSystem::class, 'clearCache']);
 
                 $routes->addGroup('/bans', function (RouteCollector $routes) {
                     $routes->addRoute('GET',  '',                 [AdminBans::class, 'list']);

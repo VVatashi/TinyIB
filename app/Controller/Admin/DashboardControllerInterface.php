@@ -2,14 +2,14 @@
 
 namespace Imageboard\Controller\Admin;
 
-use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
+use Psr\Http\Message\ServerRequestInterface;
 
 interface DashboardControllerInterface
 {
   /**
    * Returns the admin dashboard.
    *
-   * @param ResponseInterface $request
+   * @param ServerRequestInterface $request
    *
    * @return string Response HTML.
    *
