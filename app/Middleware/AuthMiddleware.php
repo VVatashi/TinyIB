@@ -2,10 +2,11 @@
 
 namespace Imageboard\Middleware;
 
-use Imageboard\Model\User;
+use Imageboard\Model\{CurrentUserInterface, User};
 use Imageboard\Service\RendererServiceInterface;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
+use VVatashi\DI\Container;
 
 /**
  * Auth middleware.
@@ -15,10 +16,16 @@ use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
 class AuthMiddleware implements MiddlewareInterface
 {
   /** @var RendererServiceInterface */
+  protected $container;
+
+  /** @var RendererServiceInterface */
   protected $renderer;
 
-  public function __construct(RendererServiceInterface $renderer)
-  {
+  public function __construct(
+    Container $container,
+    RendererServiceInterface $renderer
+  ) {
+    $this->container = $container;
     $this->renderer = $renderer;
   }
 
@@ -42,6 +49,9 @@ class AuthMiddleware implements MiddlewareInterface
 
     // Store current user to a Twig global variable.
     $this->renderer->registerGlobal('user', $user);
+
+    // Store current user to a container.
+    $this->container->registerInstance(CurrentUserInterface::class, $user);
 
     // Store current user to the request object.
     $request = $request->withAttribute('user', $user);

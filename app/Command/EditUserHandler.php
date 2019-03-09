@@ -3,10 +3,18 @@
 namespace Imageboard\Command;
 
 use Imageboard\Exception\NotFoundException;
-use Imageboard\Model\User;
+use Imageboard\Model\{ModLog, CurrentUserInterface, User};
 
 class EditUserHandler implements CommandHandlerInterface
 {
+  /** @var CurrentUserInterface */
+  protected $user;
+
+  function __construct(CurrentUserInterface $user)
+  {
+    $this->user = $user;
+  }
+
   /**
    * @param EditUser $command
    */
@@ -18,6 +26,8 @@ class EditUserHandler implements CommandHandlerInterface
       throw new NotFoundException();
     }
 
+    $old_email = $user->email;
+
     $user->email = $command->email;
     $user->role = $command->role;
 
@@ -26,5 +36,13 @@ class EditUserHandler implements CommandHandlerInterface
     }
 
     $user->save();
+
+    // Add entry to the modlog.
+    $id = $this->user->id;
+    $email = $this->user->email;
+    ModLog::create([
+      'message' => "User $email has edited user $old_email.",
+      'user_id' => $id,
+    ]);
   }
 }

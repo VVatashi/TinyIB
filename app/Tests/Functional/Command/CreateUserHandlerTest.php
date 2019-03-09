@@ -15,7 +15,8 @@ final class CreateUserHandlerTest extends TestCase
   {
     User::truncate();
 
-    $this->handler = new CreateUserHandler();
+    $user = User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
+    $this->handler = new CreateUserHandler($user);
   }
 
   function test_handle_shouldCreate(): void

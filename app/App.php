@@ -192,7 +192,8 @@ EOF;
     $logger = $this->container->get(LoggerInterface::class);
 
     // Use auth middleware.
-    $handler = new RequestHandler(new AuthMiddleware($renderer), $handler);
+    $auth_middleware = new AuthMiddleware($this->container, $renderer);
+    $handler = new RequestHandler($auth_middleware, $handler);
 
     // Use CORS handler.
     $allowed_methods = ['OPTIONS', 'GET', 'POST'];

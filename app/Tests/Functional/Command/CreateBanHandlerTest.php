@@ -3,7 +3,7 @@
 namespace Imageboard\Tests\Functional\Command;
 
 use Imageboard\Command\{CreateBan, CreateBanHandler};
-use Imageboard\Model\Ban;
+use Imageboard\Model\{Ban, User};
 use PHPUnit\Framework\TestCase;
 
 final class CreateBanHandlerTest extends TestCase
@@ -14,8 +14,10 @@ final class CreateBanHandlerTest extends TestCase
   function setUp(): void
   {
     Ban::truncate();
+    User::truncate();
 
-    $this->handler = new CreateBanHandler();
+    $user = User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
+    $this->handler = new CreateBanHandler($user);
   }
 
   function test_handle_shouldCreate(): void

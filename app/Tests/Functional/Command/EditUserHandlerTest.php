@@ -15,7 +15,8 @@ final class EditUserHandlerTest extends TestCase
   {
     User::truncate();
 
-    $this->handler = new EditUserHandler();
+    $user = User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
+    $this->handler = new EditUserHandler($user);
   }
 
   protected function createItem(): User {

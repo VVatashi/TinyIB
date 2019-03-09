@@ -14,7 +14,7 @@ use Imageboard\Exception\{NotFoundException, ValidationException};
  * @property int $updated_at
  * @property int $deleted_at
  */
-class User extends Model
+class User extends Model implements CurrentUserInterface
 {
   use SoftDeletes;
 

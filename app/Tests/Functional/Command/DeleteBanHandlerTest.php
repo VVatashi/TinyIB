@@ -4,7 +4,7 @@ namespace Imageboard\Tests\Functional\Command;
 
 use Imageboard\Command\{DeleteBan, DeleteBanHandler};
 use Imageboard\Exception\NotFoundException;
-use Imageboard\Model\Ban;
+use Imageboard\Model\{Ban, User};
 use PHPUnit\Framework\TestCase;
 
 final class DeleteBanHandlerTest extends TestCase
@@ -15,8 +15,10 @@ final class DeleteBanHandlerTest extends TestCase
   function setUp(): void
   {
     Ban::truncate();
+    User::truncate();
 
-    $this->handler = new DeleteBanHandler();
+    $user = User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
+    $this->handler = new DeleteBanHandler($user);
   }
 
   protected function createItem(): Ban {

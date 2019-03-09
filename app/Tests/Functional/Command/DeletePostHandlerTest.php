@@ -4,7 +4,7 @@ namespace Imageboard\Tests\Unit\Command;
 
 use Imageboard\Command\{DeletePost, DeletePostHandler};
 use Imageboard\Exception\NotFoundException;
-use Imageboard\Model\Post;
+use Imageboard\Model\{Post, User};
 use PHPUnit\Framework\TestCase;
 
 final class DeletePostHandlerTest extends TestCase
@@ -15,8 +15,10 @@ final class DeletePostHandlerTest extends TestCase
   function setUp(): void
   {
     Post::truncate();
+    User::truncate();
 
-    $this->handler = new DeletePostHandler();
+    $user = User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
+    $this->handler = new DeletePostHandler($user);
   }
 
   protected function createItem(): Post {

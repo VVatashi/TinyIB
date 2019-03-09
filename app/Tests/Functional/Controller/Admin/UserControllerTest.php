@@ -32,12 +32,34 @@ final class UserControllerTest extends TestCase
     );
   }
 
-  protected function createUser(): User {
-    return User::createUser('user@example.com', 'user@example.com', User::ROLE_USER);
+  protected function createAnonymous(): User
+  {
+    global $container;
+
+    $user = User::anonymous();
+    $container->registerInstance(CurrentUserInterface::class, $user);
+
+    return $user;
   }
 
-  protected function createAdmin(): User {
-    return User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
+  protected function createUser(): User
+  {
+    global $container;
+
+    $user = User::createUser('user@example.com', 'user@example.com', User::ROLE_USER);
+    $container->registerInstance(CurrentUserInterface::class, $user);
+
+    return $user;
+  }
+
+  protected function createAdmin(): User
+  {
+    global $container;
+
+    $user = User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
+    $container->registerInstance(CurrentUserInterface::class, $user);
+
+    return $user;
   }
 
   protected function createItem(): User {
@@ -80,7 +102,7 @@ final class UserControllerTest extends TestCase
 
   function test_createForm_asAnonymous_shouldThrow(): void
   {
-    $user = User::anonymous();
+    $user = $this->createAnonymous();
     $request = (new ServerRequest('GET', '/admin/users/create'))
       ->withAttribute('user', $user);
 
@@ -114,7 +136,7 @@ final class UserControllerTest extends TestCase
 
   function test_create_asAnonymous_shouldThrow(): void
   {
-    $user = User::anonymous();
+    $user = $this->createAnonymous();
     $data = [
       'email' => 'test@example.com',
       'password' => 'test@example.com',
@@ -170,7 +192,7 @@ final class UserControllerTest extends TestCase
   function test_editForm_asAnonymous_shouldThrow(): void
   {
     $item = $this->createItem();
-    $user = User::anonymous();
+    $user = $this->createAnonymous();
     $request = (new ServerRequest('GET', "/admin/users/{$item->id}/edit"))
       ->withAttribute('user', $user);
 
@@ -207,7 +229,7 @@ final class UserControllerTest extends TestCase
   function test_edit_asAnonymous_shouldThrow(): void
   {
     $item = $this->createItem();
-    $user = User::anonymous();
+    $user = $this->createAnonymous();
     $data = [
       'id' => $item->id,
       'email' => 'new@example.com',
@@ -268,7 +290,7 @@ final class UserControllerTest extends TestCase
   function test_delete_asAnonymous_shouldThrow(): void
   {
     $item = $this->createItem();
-    $user = User::anonymous();
+    $user = $this->createAnonymous();
     $request = (new ServerRequest('POST', "/admin/users/{$item->id}/delete"))
       ->withAttribute('user', $user);
 

@@ -29,17 +29,39 @@ final class SystemControllerTest extends TestCase
     $this->controller = new SystemController($command_dispatcher, $renderer);
   }
 
-  protected function createUser(): User {
-    return User::createUser('user@example.com', 'user@example.com', User::ROLE_USER);
+  protected function createAnonymous(): User
+  {
+    global $container;
+
+    $user = User::anonymous();
+    $container->registerInstance(CurrentUserInterface::class, $user);
+
+    return $user;
   }
 
-  protected function createAdmin(): User {
-    return User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
+  protected function createUser(): User
+  {
+    global $container;
+
+    $user = User::createUser('user@example.com', 'user@example.com', User::ROLE_USER);
+    $container->registerInstance(CurrentUserInterface::class, $user);
+
+    return $user;
+  }
+
+  protected function createAdmin(): User
+  {
+    global $container;
+
+    $user = User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
+    $container->registerInstance(CurrentUserInterface::class, $user);
+
+    return $user;
   }
 
   function test_index_asAnonymous_shouldThrow() : void
   {
-    $user = User::anonymous();
+    $user = $this->createAnonymous();
     $request = (new ServerRequest('GET', '/admin/system'))
       ->withAttribute('user', $user);
 
@@ -73,7 +95,7 @@ final class SystemControllerTest extends TestCase
 
   function test_clearCache_asAnonymous_shouldThrow() : void
   {
-    $user = User::anonymous();
+    $user = $this->createAnonymous();
     $request = (new ServerRequest('POST', '/admin/system/clear-cache'))
       ->withAttribute('user', $user);
 

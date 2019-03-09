@@ -6,7 +6,7 @@ use GuzzleHttp\Psr7\ServerRequest;
 use Imageboard\Command\CommandDispatcher;
 use Imageboard\Controller\Admin\BanController;
 use Imageboard\Exception\{AccessDeniedException, NotFoundException};
-use Imageboard\Model\{Ban, User};
+use Imageboard\Model\{Ban, CurrentUserInterface, User};
 use Imageboard\Query\QueryDispatcher;
 use Imageboard\Service\RendererService;
 use PHPUnit\Framework\TestCase;
@@ -33,21 +33,44 @@ final class BanControllerTest extends TestCase
     );
   }
 
-  protected function createUser(): User {
-    return User::createUser('user@example.com', 'user@example.com', User::ROLE_USER);
+  protected function createAnonymous(): User
+  {
+    global $container;
+
+    $user = User::anonymous();
+    $container->registerInstance(CurrentUserInterface::class, $user);
+
+    return $user;
   }
 
-  protected function createAdmin(): User {
-    return User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
+  protected function createUser(): User
+  {
+    global $container;
+
+    $user = User::createUser('user@example.com', 'user@example.com', User::ROLE_USER);
+    $container->registerInstance(CurrentUserInterface::class, $user);
+
+    return $user;
   }
 
-  protected function createBan(): Ban {
+  protected function createAdmin(): User
+  {
+    global $container;
+
+    $user = User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
+    $container->registerInstance(CurrentUserInterface::class, $user);
+
+    return $user;
+  }
+
+  protected function createBan(): Ban
+  {
     return Ban::createBan('123.0.0.1', 60 * 60, 'Test');
   }
 
   function test_list_asAnonymous_shouldThrow(): void
   {
-    $user = User::anonymous();
+    $user = $this->createAnonymous();
     $request = (new ServerRequest('GET', '/admin/bans'))
       ->withAttribute('user', $user);
 
@@ -81,7 +104,7 @@ final class BanControllerTest extends TestCase
 
   function test_createForm_asAnonymous_shouldThrow(): void
   {
-    $user = User::anonymous();
+    $user = $this->createAnonymous();
     $request = (new ServerRequest('GET', '/admin/bans/create'))
       ->withAttribute('user', $user);
 
@@ -115,7 +138,7 @@ final class BanControllerTest extends TestCase
 
   function test_create_asAnonymous_shouldThrow(): void
   {
-    $user = User::anonymous();
+    $user = $this->createAnonymous();
     $data = [
       'ip' => '123.0.0.1',
       'expires_in' => 60 * 60,
@@ -171,7 +194,7 @@ final class BanControllerTest extends TestCase
   function test_delete_asAnonymous_shouldThrow(): void
   {
     $item = $this->createBan();
-    $user = User::anonymous();
+    $user = $this->createAnonymous();
     $request = (new ServerRequest('POST', "/admin/bans/{$item->id}/delete"))
       ->withAttribute('user', $user);
 

@@ -16,7 +16,8 @@ final class DeleteUserHandlerTest extends TestCase
   {
     User::truncate();
 
-    $this->handler = new DeleteUserHandler();
+    $user = User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
+    $this->handler = new DeleteUserHandler($user);
   }
 
   protected function createItem(): User {
@@ -25,7 +26,7 @@ final class DeleteUserHandlerTest extends TestCase
 
   function test_handle_whenNotFound_shouldThrow(): void
   {
-    $item_id = 1;
+    $item_id = 1000;
     $command = new DeleteUser($item_id);
 
     $this->expectException(NotFoundException::class);

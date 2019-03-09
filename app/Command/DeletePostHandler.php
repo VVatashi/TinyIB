@@ -3,10 +3,18 @@
 namespace Imageboard\Command;
 
 use Imageboard\Exception\NotFoundException;
-use Imageboard\Model\Post;
+use Imageboard\Model\{CurrentUserInterface, ModLog, Post};
 
 class DeletePostHandler implements CommandHandlerInterface
 {
+  /** @var CurrentUserInterface */
+  protected $user;
+
+  function __construct(CurrentUserInterface $user)
+  {
+    $this->user = $user;
+  }
+
   /**
    * @param DeletePost $command
    */
@@ -19,5 +27,13 @@ class DeletePostHandler implements CommandHandlerInterface
     }
 
     Post::deletePost($post);
+
+    // Add entry to the modlog.
+    $id = $this->user->id;
+    $email = $this->user->email;
+    ModLog::create([
+      'message' => "User $email has deleted post {$command->id}.",
+      'user_id' => $id,
+    ]);
   }
 }
