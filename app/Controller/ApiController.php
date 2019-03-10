@@ -3,7 +3,7 @@
 namespace Imageboard\Controller;
 
 use GuzzleHttp\Psr7\Response;
-use Imageboard\Command\{CommandDispatcher, CreatePost};
+use Imageboard\Command\{CommandDispatcher, CreatePost, CreateToken};
 use Imageboard\Exception\{AccessDeniedException, NotFoundException};
 use Imageboard\Cache\CacheInterface;
 use Imageboard\Query\{QueryDispatcher, Board, Thread};
@@ -101,6 +101,29 @@ class ApiController implements ApiControllerInterface
 
     $headers['Content-Type'] = $content_type;
     return new Response(200, $headers, $data);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  function createToken(ServerRequestInterface $request) : ResponseInterface
+  {
+    $data = $request->getParsedBody();
+    $command = new CreateToken($data);
+    $handler = $this->command_dispatcher->getHandler($command);
+
+    try {
+      $token = $handler->handle($command);
+    } catch (\Exception $exception) {
+      return new Response(400, [], json_encode([
+        'error' => $exception->getMessage(),
+      ]));
+    }
+
+    return new Response(201, [], json_encode([
+      'token' => $token->token,
+      'user_id' => $token->user_id,
+    ]));
   }
 
   /**
