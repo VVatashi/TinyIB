@@ -1,3 +1,11 @@
+$dice-color: #228854 !default;
+$dice-font:  600 0.8em monospace !default;
+
+$spoiler-background: #000000 !default;
+$spoiler-color:      #ffffff !default;
+
+$quote-color: #1de9b6 !default;
+
 .markup {
   &__spoiler,
   &__rp {
@@ -30,4 +38,22 @@ code {
 .dice {
   color: $dice-color;
   font: $dice-font;
+}
+
+.spoiler,
+.rp {
+  background-color: $spoiler-background;
+  color: $spoiler-background;
+
+  &:hover {
+    color: $spoiler-color;
+  }
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.unkfunc {
+  color: $quote-color;
 }

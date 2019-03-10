@@ -20,26 +20,6 @@ ul {
   list-style: none;
 }
 
-.spoiler,
-.rp {
-  background: #000;
-  color: #000;
-
-  &:hover {
-    color: inherit;
-  }
-}
-
-.unkfunc {
-  color: #64ffda;
-}
-
-.dice {
-  color: #228854;
-  font-size: .8em;
-  font-weight: 600;
-}
-
 button,
 input,
 textarea,
