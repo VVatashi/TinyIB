@@ -502,7 +502,10 @@ export class PostingForm {
           }, this.fields.message as string);
 
           try {
-            const location = await Api.createPost({
+            const {
+              post,
+              location,
+            } = await Api.createPost({
               parent: threadId,
               subject: this.fields.subject,
               name: this.fields.name,
@@ -512,6 +515,9 @@ export class PostingForm {
               const progressPercent = Math.ceil(e.loaded / e.total * 100);
               this.status = `Uploading... ${progressPercent}%`;
             });
+
+            localStorage.setItem('user.name', post.name);
+            localStorage.setItem('user.tripcode', post.tripcode);
 
             this.resetFields();
             this.status = '';

@@ -1,3 +1,5 @@
+import { PostData } from './model';
+
 export interface CreatePostRequest {
   parent: number;
   subject: string;
@@ -6,12 +8,17 @@ export interface CreatePostRequest {
   file: File;
 }
 
+export interface CreatePostResponse {
+  post: PostData,
+  location: string;
+}
+
 export class Api {
   static async createPost(
     request: CreatePostRequest,
     onProgress?: (e: ProgressEvent) => any,
   ) {
-    return new Promise<string>((resolve, reject) => {
+    return new Promise<CreatePostResponse>((resolve, reject) => {
       const url = `${window.baseUrl}/ajax/post/create`;
       const data = new FormData();
       data.append('parent', request.parent.toString());
@@ -35,7 +42,10 @@ export class Api {
         }
 
         if (xhr.status === 201) {
-          resolve(xhr.getResponseHeader('Location'));
+          resolve({
+            post: JSON.parse(xhr.responseText),
+            location: xhr.getResponseHeader('Location'),
+          });
         } else {
           const data = JSON.parse(xhr.responseText);
           if (data && data.error) {

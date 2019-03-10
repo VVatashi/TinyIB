@@ -21,6 +21,8 @@ interface PopupData {
 
 type PopupViewModel = Vue & PopupData;
 
+const ownPostIds: number[] = [];
+
 export class Post {
   protected popupViewModel: PopupViewModel;
 
@@ -78,7 +80,41 @@ export class Post {
   }
 
   protected onPostsInserted(posts: HTMLElement[]) {
-    posts.forEach(this.processOEmbedLinks.bind(this));
+    posts.forEach(post => {
+      this.processReplies(post);
+      this.processOEmbedLinks(post);
+    });
+  }
+
+  protected processReplies(post: HTMLElement) {
+    const name = (localStorage.getItem('user.name') || '')
+      + (localStorage.getItem('user.tripcode') || '');
+
+    const postNameEl = DOM.qs('.post-header__name', post);
+    const postTripcodeEl = DOM.qs('.post-header__tripcode', post);
+    const postName = (postNameEl ? postNameEl.textContent : '')
+      + (postTripcodeEl ? postTripcodeEl.textContent : '');
+
+    if (name.length && postName.indexOf(name) !== -1) {
+      const postId = +post.getAttribute('data-post-id');
+      ownPostIds.push(postId);
+
+      post.classList.add('post--own');
+    }
+
+    const links = DOM.qsa('.post__reference-link', post);
+    links.forEach(link => {
+      const targetId = +link.getAttribute('data-target-post-id');
+      if (ownPostIds.indexOf(targetId) !== -1) {
+        const youEl = document.createElement('span');
+        youEl.classList.add('post__reference-link-author');
+        youEl.innerHTML = '(You)';
+        link.parentElement.insertBefore(youEl, link.nextSibling);
+
+        post.classList.add('post--reply');
+        link.classList.add('post__reference-link--reply');
+      }
+    });
   }
 
   protected async processOEmbedLinks(post: HTMLElement) {
@@ -88,7 +124,7 @@ export class Post {
     }
 
     const postMessage = DOM.qs('.post__message', post);
-    const links = DOM.qsa('a[href]', post);
+    const links = DOM.qsa('a[href]', postMessage);
     links.filter(link => !link.hasAttribute('data-processed'))
       .map(link => {
         link.setAttribute('data-processed', 'true');
