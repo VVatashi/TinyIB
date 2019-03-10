@@ -2,7 +2,7 @@
 
 namespace Imageboard\Tests\Functional\Command;
 
-use Imageboard\Command\{CreateUser, CreateUserHandler};
+use Imageboard\Command\Admin\{CreateUser, CreateUserHandler};
 use Imageboard\Model\User;
 use PHPUnit\Framework\TestCase;
 

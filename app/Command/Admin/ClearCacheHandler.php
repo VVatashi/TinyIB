@@ -1,8 +1,9 @@
 <?php
 
-namespace Imageboard\Command;
+namespace Imageboard\Command\Admin;
 
 use Imageboard\Cache\CacheInterface;
+use Imageboard\Command\CommandHandlerInterface;
 use Imageboard\Model\{CurrentUserInterface, ModLog};
 
 class ClearCacheHandler implements CommandHandlerInterface

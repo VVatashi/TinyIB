@@ -3,7 +3,8 @@
 namespace Imageboard\Controller\Admin;
 
 use GuzzleHttp\Psr7\Response;
-use Imageboard\Command\{CommandDispatcher, ClearCache};
+use Imageboard\Command\CommandDispatcher;
+use Imageboard\Command\Admin\ClearCache;
 use Imageboard\Exception\AccessDeniedException;
 use Imageboard\Service\RendererServiceInterface;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};

@@ -1,7 +1,8 @@
 <?php
 
-namespace Imageboard\Command;
+namespace Imageboard\Command\Admin;
 
+use Imageboard\Command\CommandHandlerInterface;
 use Imageboard\Model\{ModLog, CurrentUserInterface, User};
 
 class CreateUserHandler implements CommandHandlerInterface

@@ -1,6 +1,8 @@
 <?php
 
-namespace Imageboard\Command;
+namespace Imageboard\Command\Admin;
+
+use Imageboard\Command\Command;
 
 /**
  * @property-read string $ip

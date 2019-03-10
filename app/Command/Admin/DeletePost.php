@@ -1,11 +1,13 @@
 <?php
 
-namespace Imageboard\Command;
+namespace Imageboard\Command\Admin;
+
+use Imageboard\Command\Command;
 
 /**
  * @property-read int $id
  */
-class DeleteUser extends Command
+class DeletePost extends Command
 {
   /** @var int */
   protected $id;

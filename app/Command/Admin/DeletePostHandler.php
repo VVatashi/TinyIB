@@ -1,7 +1,8 @@
 <?php
 
-namespace Imageboard\Command;
+namespace Imageboard\Command\Admin;
 
+use Imageboard\Command\CommandHandlerInterface;
 use Imageboard\Exception\NotFoundException;
 use Imageboard\Model\{CurrentUserInterface, ModLog, Post};
 

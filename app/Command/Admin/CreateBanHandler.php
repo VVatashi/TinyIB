@@ -1,11 +1,11 @@
 <?php
 
-namespace Imageboard\Command;
+namespace Imageboard\Command\Admin;
 
-use Imageboard\Exception\NotFoundException;
+use Imageboard\Command\CommandHandlerInterface;
 use Imageboard\Model\{CurrentUserInterface, Ban, ModLog};
 
-class DeleteBanHandler implements CommandHandlerInterface
+class CreateBanHandler implements CommandHandlerInterface
 {
   /** @var CurrentUserInterface */
   protected $user;
@@ -16,25 +16,17 @@ class DeleteBanHandler implements CommandHandlerInterface
   }
 
   /**
-   * @param DeleteBan $command
+   * @param CreateBan $command
    */
   function handle($command)
   {
-    /** @var Ban */
-    $ban = Ban::find($command->id);
-    if (!isset($ban)) {
-      throw new NotFoundException();
-    }
-
-    $ip = $ban->ip;
-
-    $ban->delete();
+    Ban::createBan($command->ip, $command->expires_in, $command->reason);
 
     // Add entry to the modlog.
     $id = $this->user->id;
     $email = $this->user->email;
     ModLog::create([
-      'message' => "User $email has lifted ban for $ip.",
+      'message' => "User $email has banned {$command->ip}.",
       'user_id' => $id,
     ]);
   }
