@@ -67,7 +67,7 @@ class AuthMiddleware implements MiddlewareInterface
     // Disallow anonymous user acceess.
     if ($user->role === 0) {
       $path = $request->getUri()->getPath();
-      if (!preg_match('#^/' . TINYIB_BOARD . '/(auth|captcha)#', $path)) {
+      if (!preg_match('#^/' . TINYIB_BOARD . '/(auth|captcha|api/auth)#', $path)) {
         return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/auth/login']);
       }
     }
