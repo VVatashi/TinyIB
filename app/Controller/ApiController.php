@@ -5,17 +5,24 @@ namespace Imageboard\Controller;
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Exception\{AccessDeniedException, NotFoundException};
 use Imageboard\Cache\CacheInterface;
+use Imageboard\Query\{QueryDispatcher, Board, Thread};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
 class ApiController implements ApiControllerInterface
 {
   const CACHE_TTL = 4 * 60 * 60;
 
+  /** @var QueryDispatcher */
+  protected $query_dispatcher;
+
   /** @var CacheInterface */
   protected $cache;
 
-  function __construct(CacheInterface $cache)
-  {
+  function __construct(
+    QueryDispatcher $query_dispatcher,
+    CacheInterface $cache
+  ) {
+    $this->query_dispatcher = $query_dispatcher;
     $this->cache = $cache;
   }
 
@@ -88,5 +95,28 @@ class ApiController implements ApiControllerInterface
 
     $headers['Content-Type'] = $content_type;
     return new Response(200, $headers, $data);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  function threads(ServerRequestInterface $request) : array
+  {
+    $query = new Board();
+    $handler = $this->query_dispatcher->getHandler($query);
+
+    return $handler->handle($query);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  function threadPosts(ServerRequestInterface $request, array $args) : array
+  {
+    $id = (int)$args['id'];
+    $query = new Thread($id);
+    $handler = $this->query_dispatcher->getHandler($query);
+
+    return $handler->handle($query);
   }
 }
