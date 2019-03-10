@@ -3,6 +3,7 @@
 namespace Imageboard\Controller;
 
 use GuzzleHttp\Psr7\Response;
+use Imageboard\Command\{CommandDispatcher, CreatePost};
 use Imageboard\Exception\{AccessDeniedException, NotFoundException};
 use Imageboard\Cache\CacheInterface;
 use Imageboard\Query\{QueryDispatcher, Board, Thread};
@@ -12,6 +13,9 @@ class ApiController implements ApiControllerInterface
 {
   const CACHE_TTL = 4 * 60 * 60;
 
+  /** @var CommandDispatcher */
+  protected $command_dispatcher;
+
   /** @var QueryDispatcher */
   protected $query_dispatcher;
 
@@ -19,9 +23,11 @@ class ApiController implements ApiControllerInterface
   protected $cache;
 
   function __construct(
+    CommandDispatcher $command_dispatcher,
     QueryDispatcher $query_dispatcher,
     CacheInterface $cache
   ) {
+    $this->command_dispatcher = $command_dispatcher;
     $this->query_dispatcher = $query_dispatcher;
     $this->cache = $cache;
   }
@@ -118,5 +124,27 @@ class ApiController implements ApiControllerInterface
     $handler = $this->query_dispatcher->getHandler($query);
 
     return $handler->handle($query);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  function createPost(ServerRequestInterface $request) : ResponseInterface
+  {
+    $data = $request->getParsedBody();
+    $command = new CreatePost($data);
+    $handler = $this->command_dispatcher->getHandler($command);
+
+    try {
+      $post = $handler->handle($command);
+    } catch (\Exception $exception) {
+      return new Response(400, [], json_encode([
+        'error' => $exception->getMessage(),
+      ]));
+    }
+
+    return new Response(201, [], json_encode([
+      'id' => $post->id,
+    ]));
   }
 }

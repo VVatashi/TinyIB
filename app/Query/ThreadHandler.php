@@ -18,7 +18,7 @@ SELECT p.id, p.created_at,
   p.file, p.image_width, p.image_height, p.file_size
 FROM $posts_table AS p
 WHERE p.deleted_at IS NULL
-  AND p.parent_id = :thread_id
+  AND (p.id = :thread_id OR p.parent_id = :thread_id)
 ORDER BY p.id
 EOF;
     return $sql;
