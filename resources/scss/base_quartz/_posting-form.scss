@@ -166,7 +166,6 @@
 
   &__preview-remove {
     @extend %icon-close-solid;
-    @extend %clickable;
     position: absolute;
     padding: 0.1em;
     top: 0;

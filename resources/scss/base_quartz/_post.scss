@@ -124,10 +124,13 @@
       display: inline-block;
     }
 
-    &__inner {
-      min-width: 560px;
+    &_reply &__inner {
       border: $post-border;
       border-radius: $post-border-radius;
+    }
+
+    &__inner {
+      min-width: 560px;
     }
 
     &__reflink-icon {
