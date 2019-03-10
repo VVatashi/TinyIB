@@ -98,6 +98,14 @@
     }
   }
 
+  &--own &__inner {
+    box-shadow: 6px 0 2px -2px rgba(#808080, 0.6), -6px 0 2px -2px rgba(#808080, 0.6);
+  }
+
+  &--reply &__inner {
+    box-shadow: 6px 0 2px -2px rgba(#1ab38d, 0.6), -6px 0 2px -2px rgba(#1ab38d, 0.6);
+  }
+
   @at-root .layout--hide-post-reflink-icon &__reflink-icon {
     display: none;
   }
@@ -124,10 +132,13 @@
       display: inline-block;
     }
 
-    &__inner {
-      min-width: 560px;
+    &_reply &__inner {
       border: $post-border;
       border-radius: $post-border-radius;
+    }
+
+    &__inner {
+      min-width: 560px;
     }
 
     &__reflink-icon {
