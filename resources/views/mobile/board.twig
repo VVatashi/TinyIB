@@ -21,36 +21,34 @@
 {% endblock %}
 
 {% block content %}
-  {% spaceless %}
-    <article class="board">
-      {% if page == 0 %}
-        <div class="board__form">
-          <h2 class="board__form-title">Create thread</h2>
-          {% include 'mobile/components/_form.twig' %}
-        </div>
-      {% endif %}
-
-      {% if page > 0 %}
-        <div class="board__pagination">
-          <a href="?page={{ page - 1 }}">Show newer threads</a>
-        </div>
-      {% endif %}
-
-      <div class="board__posts">
-        {% for post in threads %}
-          <section class="board__post">
-            {% include 'mobile/components/_thread.twig' %}
-          </section>
-        {% endfor %}
+  <article class="board">
+    {% if page == 0 %}
+      <div class="board__form">
+        <h2 class="board__form-title">Create thread</h2>
+        {% include 'mobile/components/_form.twig' %}
       </div>
+    {% endif %}
 
-      {% if threads|length == limit %}
-        <div class="board__pagination">
-          <a href="?page={{ page + 1 }}">Show older threads</a>
-        </div>
-      {% endif %}
-    </article>
-  {% endspaceless %}
+    {% if page > 0 %}
+      <div class="board__pagination">
+        <a href="?page={{ page - 1 }}">Show newer threads</a>
+      </div>
+    {% endif %}
+
+    <div class="board__posts">
+      {% for post in threads %}
+        <section class="board__post">
+          {% include 'mobile/components/_thread.twig' %}
+        </section>
+      {% endfor %}
+    </div>
+
+    {% if threads|length == limit %}
+      <div class="board__pagination">
+        <a href="?page={{ page + 1 }}">Show older threads</a>
+      </div>
+    {% endif %}
+  </article>
 {% endblock %}
 
 {% block footer_links %}

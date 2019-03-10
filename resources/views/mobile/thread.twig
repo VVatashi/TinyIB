@@ -27,40 +27,38 @@
 {% endblock %}
 
 {% block content %}
-  {% spaceless %}
-    <article class="thread" data-thread-id="{{ thread.id }}" data-thread-page="{{ page }}">
-      {% if posts|length == limit %}
-        <div class="thread__pagination">
-          <a href="?page={{ page + 1 }}#footer">Show older posts</a>
-        </div>
-      {% endif %}
-
-      <div class="thread__posts">
-        {% for post in posts %}
-          <section class="thread__post">
-            {% include 'mobile/components/_post.twig' %}
-          </section>
-        {% endfor %}
+  <article class="thread" data-thread-id="{{ thread.id }}" data-thread-page="{{ page }}">
+    {% if posts|length == limit %}
+      <div class="thread__pagination">
+        <a href="?page={{ page + 1 }}#footer">Show older posts</a>
       </div>
+    {% endif %}
 
-      {% if page > 0 %}
-        <div class="thread__pagination">
-          <a href="?page={{ page - 1 }}">Show newer posts</a>
-        </div>
-      {% endif %}
+    <div class="thread__posts">
+      {% for post in posts %}
+        <section class="thread__post">
+          {% include 'mobile/components/_post.twig' %}
+        </section>
+      {% endfor %}
+    </div>
 
-      {% if page == 0 %}
-        <div id="thread-updater"></div>
+    {% if page > 0 %}
+      <div class="thread__pagination">
+        <a href="?page={{ page - 1 }}">Show newer posts</a>
+      </div>
+    {% endif %}
 
-        <div class="thread__form">
-          <h2 class="thread__form-title">Reply to thread</h2>
-          {% include 'mobile/components/_form.twig' with {
-            parent: thread.id,
-          } %}
-        </div>
-      {% endif %}
-    </article>
-  {% endspaceless %}
+    {% if page == 0 %}
+      <div id="thread-updater"></div>
+
+      <div class="thread__form">
+        <h2 class="thread__form-title">Reply to thread</h2>
+        {% include 'mobile/components/_form.twig' with {
+          parent: thread.id,
+        } %}
+      </div>
+    {% endif %}
+  </article>
 {% endblock %}
 
 {% block footer_links %}

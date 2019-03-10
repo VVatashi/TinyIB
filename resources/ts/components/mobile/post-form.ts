@@ -75,7 +75,6 @@ export class PostForm {
         'postform-markup-sup': e => this.insertBBCode(message, 'sup'),
         'postform-markup-sub': e => this.insertBBCode(message, 'sub'),
         'postform-markup-spoiler': e => this.insertBBCode(message, 'spoiler'),
-        'postform-markup-rp': e => this.insertBBCode(message, 'rp'),
         'postform-markup-code': e => this.insertBBCode(message, 'code'),
         'postform-markup-quote': e => this.insertMarkup(message, '>', '', true),
       };
