@@ -1,8 +1,9 @@
 <?php
 
-namespace Imageboard\Query;
+namespace Imageboard\Query\Admin;
 
 use DateTime;
+use Imageboard\Query\Query;
 
 /**
  * @property-read int $skip

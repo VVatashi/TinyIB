@@ -5,7 +5,7 @@ namespace Imageboard\Controller\Admin;
 use Imageboard\Command\{CreateUser, EditUser, DeleteUser};
 use Imageboard\Exception\NotFoundException;
 use Imageboard\Model\User;
-use Imageboard\Query\ListUsers;
+use Imageboard\Query\Admin\ListUsers;
 
 class UserController extends CrudController implements UserControllerInterface
 {

@@ -1,37 +1,29 @@
 <?php
 
-namespace Imageboard\Tests\Functional\Query;
+namespace Imageboard\Tests\Functional\Query\Admin;
 
-use Imageboard\Model\Post;
-use Imageboard\Query\{ListPosts, ListPostsHandler};
+use Imageboard\Model\Ban;
+use Imageboard\Query\Admin\{ListBans, ListBansHandler};
 use PHPUnit\Framework\TestCase;
 
-final class ListPostsHandlerTest extends TestCase
+final class ListBansHandlerTest extends TestCase
 {
-  /** @var ListPostsHandler */
+  /** @var ListBansHandler */
   protected $handler;
 
   function setUp(): void
   {
     global $container;
 
-    Post::truncate();
+    Ban::truncate();
 
     $pdo = $container->get(\PDO::class);
-    $this->handler = new ListPostsHandler($pdo);
+    $this->handler = new ListBansHandler($pdo);
   }
 
-  protected function createItem(): Post
+  protected function createItem(): Ban
   {
-    return Post::create([
-      'ip' => '',
-      'name' => '',
-      'tripcode' => '',
-      'email' => '',
-      'subject' => '',
-      'message' => '',
-      'password' => '',
-    ]);
+    return Ban::createBan('123.0.0.1', 60 * 60, 'Test');
   }
 
   function test_count_shouldReturnCount(): void
@@ -40,7 +32,7 @@ final class ListPostsHandlerTest extends TestCase
     for ($i = 0; $i < $count; ++$i) {
       $this->createItem();
     }
-    $command = new ListPosts(0, 50);
+    $command = new ListBans(0, 50);
 
     $result = $this->handler->count($command);
 
@@ -54,7 +46,7 @@ final class ListPostsHandlerTest extends TestCase
     for ($i = 0; $i < $count; ++$i) {
       $this->createItem();
     }
-    $command = new ListPosts(0, 50);
+    $command = new ListBans(0, 50);
 
     $items = $this->handler->handle($command);
 

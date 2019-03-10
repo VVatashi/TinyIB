@@ -2,7 +2,7 @@
 
 namespace Imageboard\Controller\Admin;
 
-use Imageboard\Query\ListModLog;
+use Imageboard\Query\Admin\ListModLog;
 
 class ModLogController extends CrudController implements ModLogControllerInterface
 {

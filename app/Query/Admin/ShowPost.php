@@ -1,6 +1,6 @@
 <?php
 
-namespace Imageboard\Query;
+namespace Imageboard\Query\Admin;
 
 /**
  * @property-read int $id

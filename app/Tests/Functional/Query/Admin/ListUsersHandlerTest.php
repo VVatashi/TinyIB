@@ -1,38 +1,38 @@
 <?php
 
-namespace Imageboard\Tests\Functional\Query;
+namespace Imageboard\Tests\Functional\Query\Admin;
 
-use Imageboard\Model\Ban;
-use Imageboard\Query\{ListBans, ListBansHandler};
+use Imageboard\Model\User;
+use Imageboard\Query\Admin\{ListUsers, ListUsersHandler};
 use PHPUnit\Framework\TestCase;
 
-final class ListBansHandlerTest extends TestCase
+final class ListUsersHandlerTest extends TestCase
 {
-  /** @var ListBansHandler */
+  /** @var ListUsersHandler */
   protected $handler;
 
   function setUp(): void
   {
     global $container;
 
-    Ban::truncate();
+    User::truncate();
 
     $pdo = $container->get(\PDO::class);
-    $this->handler = new ListBansHandler($pdo);
+    $this->handler = new ListUsersHandler($pdo);
   }
 
-  protected function createItem(): Ban
+  protected function createItem(int $id): User
   {
-    return Ban::createBan('123.0.0.1', 60 * 60, 'Test');
+    return User::createUser("test$id@example.com", "test$id@example.com", User::ROLE_USER);
   }
 
   function test_count_shouldReturnCount(): void
   {
     $count = 3;
     for ($i = 0; $i < $count; ++$i) {
-      $this->createItem();
+      $this->createItem($i);
     }
-    $command = new ListBans(0, 50);
+    $command = new ListUsers(0, 50);
 
     $result = $this->handler->count($command);
 
@@ -44,9 +44,9 @@ final class ListBansHandlerTest extends TestCase
   {
     $count = 5;
     for ($i = 0; $i < $count; ++$i) {
-      $this->createItem();
+      $this->createItem($i);
     }
-    $command = new ListBans(0, 50);
+    $command = new ListUsers(0, 50);
 
     $items = $this->handler->handle($command);
 

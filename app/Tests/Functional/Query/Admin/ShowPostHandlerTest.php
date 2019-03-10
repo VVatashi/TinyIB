@@ -1,10 +1,10 @@
 <?php
 
-namespace Imageboard\Tests\Functional\Query;
+namespace Imageboard\Tests\Functional\Query\Admin;
 
 use Imageboard\Model\Post;
 use Imageboard\Exception\NotFoundException;
-use Imageboard\Query\{ShowPost, ShowPostHandler};
+use Imageboard\Query\Admin\{ShowPost, ShowPostHandler};
 use PHPUnit\Framework\TestCase;
 
 final class ShowPostHandlerTest extends TestCase

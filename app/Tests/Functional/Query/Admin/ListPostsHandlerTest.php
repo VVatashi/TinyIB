@@ -1,38 +1,46 @@
 <?php
 
-namespace Imageboard\Tests\Functional\Query;
+namespace Imageboard\Tests\Functional\Query\Admin;
 
-use Imageboard\Model\User;
-use Imageboard\Query\{ListUsers, ListUsersHandler};
+use Imageboard\Model\Post;
+use Imageboard\Query\Admin\{ListPosts, ListPostsHandler};
 use PHPUnit\Framework\TestCase;
 
-final class ListUsersHandlerTest extends TestCase
+final class ListPostsHandlerTest extends TestCase
 {
-  /** @var ListUsersHandler */
+  /** @var ListPostsHandler */
   protected $handler;
 
   function setUp(): void
   {
     global $container;
 
-    User::truncate();
+    Post::truncate();
 
     $pdo = $container->get(\PDO::class);
-    $this->handler = new ListUsersHandler($pdo);
+    $this->handler = new ListPostsHandler($pdo);
   }
 
-  protected function createItem(int $id): User
+  protected function createItem(): Post
   {
-    return User::createUser("test$id@example.com", "test$id@example.com", User::ROLE_USER);
+    return Post::create([
+      'ip' => '',
+      'name' => '',
+      'tripcode' => '',
+      'email' => '',
+      'subject' => '',
+      'message' => '',
+      'password' => '',
+    ]);
   }
 
   function test_count_shouldReturnCount(): void
   {
     $count = 3;
     for ($i = 0; $i < $count; ++$i) {
-      $this->createItem($i);
+      $this->createItem();
     }
-    $command = new ListUsers(0, 50);
+    $command = new ListPosts(0, 50);
 
     $result = $this->handler->count($command);
 
@@ -44,9 +52,9 @@ final class ListUsersHandlerTest extends TestCase
   {
     $count = 5;
     for ($i = 0; $i < $count; ++$i) {
-      $this->createItem($i);
+      $this->createItem();
     }
-    $command = new ListUsers(0, 50);
+    $command = new ListPosts(0, 50);
 
     $items = $this->handler->handle($command);
 

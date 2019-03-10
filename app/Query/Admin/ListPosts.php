@@ -1,9 +1,9 @@
 <?php
 
-namespace Imageboard\Query;
+namespace Imageboard\Query\Admin;
 
 /**
  * @property-read int $skip
  * @property-read int $take
  */
-class ListUsers extends ListQuery { }
+class ListPosts extends ListQuery { }

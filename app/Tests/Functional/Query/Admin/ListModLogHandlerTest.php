@@ -1,9 +1,9 @@
 <?php
 
-namespace Imageboard\Tests\Functional\Query;
+namespace Imageboard\Tests\Functional\Query\Admin;
 
 use Imageboard\Model\ModLog;
-use Imageboard\Query\{ListModLog, ListModLogHandler};
+use Imageboard\Query\Admin\{ListModLog, ListModLogHandler};
 use PHPUnit\Framework\TestCase;
 
 final class ListModLogHandlerTest extends TestCase

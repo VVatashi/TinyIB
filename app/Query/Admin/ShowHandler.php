@@ -1,8 +1,9 @@
 <?php
 
-namespace Imageboard\Query;
+namespace Imageboard\Query\Admin;
 
 use Imageboard\Exception\NotFoundException;
+use Imageboard\Query\QueryHandler;
 
 abstract class ShowHandler extends QueryHandler
 {
