@@ -2,8 +2,8 @@
 
 namespace Imageboard\Controller\Admin;
 
-use Imageboard\Command\{CreateBan, DeleteBan};
-use Imageboard\Query\ListBans;
+use Imageboard\Command\Admin\{CreateBan, DeleteBan};
+use Imageboard\Query\Admin\ListBans;
 
 class BanController extends CrudController implements BanControllerInterface
 {

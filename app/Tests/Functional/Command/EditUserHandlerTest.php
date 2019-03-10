@@ -2,7 +2,7 @@
 
 namespace Imageboard\Tests\Functional\Command;
 
-use Imageboard\Command\{EditUser, EditUserHandler};
+use Imageboard\Command\Admin\{EditUser, EditUserHandler};
 use Imageboard\Model\User;
 use PHPUnit\Framework\TestCase;
 

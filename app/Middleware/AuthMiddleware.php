@@ -3,7 +3,7 @@
 namespace Imageboard\Middleware;
 
 use GuzzleHttp\Psr7\Response;
-use Imageboard\Model\{CurrentUserInterface, User};
+use Imageboard\Model\{Token, CurrentUserInterface, User};
 use Imageboard\Service\RendererServiceInterface;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
@@ -40,6 +40,13 @@ class AuthMiddleware implements MiddlewareInterface
     if (isset($_SESSION['user'])) {
       // Try to load user.
       $user = User::find($_SESSION['user']);
+    } elseif ($request->hasHeader('X-Token')) {
+      // Try to auth with a token.
+      $token = $request->getHeaderLine('X-Token');
+      $token = Token::checkToken($token);
+      if (isset($token)) {
+        $user = $token->user;
+      }
     }
 
     // If there is no user ID in the session,
@@ -65,6 +72,16 @@ class AuthMiddleware implements MiddlewareInterface
       }
     }
 
-    return $handler->handle($request);
+    $response = $handler->handle($request);
+
+    if (isset($token)) {
+      $timestamp = is_int($token->expires_at)
+        ? $token->expires_at
+        : $token->expires_at->timestamp;
+      $response = $response->withHeader('X-Token-Expires-At', $timestamp);
+      $response = $response->withHeader('X-Token-Expires-In', $timestamp - time());
+    }
+
+    return $response;
   }
 }

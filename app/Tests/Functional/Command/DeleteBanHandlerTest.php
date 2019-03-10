@@ -2,7 +2,7 @@
 
 namespace Imageboard\Tests\Functional\Command;
 
-use Imageboard\Command\{DeleteBan, DeleteBanHandler};
+use Imageboard\Command\Admin\{DeleteBan, DeleteBanHandler};
 use Imageboard\Exception\NotFoundException;
 use Imageboard\Model\{Ban, User};
 use PHPUnit\Framework\TestCase;

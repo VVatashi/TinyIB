@@ -2,8 +2,8 @@
 
 namespace Imageboard\Controller\Admin;
 
-use Imageboard\Command\DeletePost;
-use Imageboard\Query\{ListPosts, ShowPost};
+use Imageboard\Command\Admin\DeletePost;
+use Imageboard\Query\Admin\{ListPosts, ShowPost};
 
 class PostController extends CrudController implements PostControllerInterface
 {

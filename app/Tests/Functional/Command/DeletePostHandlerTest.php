@@ -2,7 +2,7 @@
 
 namespace Imageboard\Tests\Unit\Command;
 
-use Imageboard\Command\{DeletePost, DeletePostHandler};
+use Imageboard\Command\Admin\{DeletePost, DeletePostHandler};
 use Imageboard\Exception\NotFoundException;
 use Imageboard\Model\{Post, User};
 use PHPUnit\Framework\TestCase;

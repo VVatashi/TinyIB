@@ -46,6 +46,7 @@ class App
     defined('TINYIB_INDEXPAGE') || define('TINYIB_INDEXPAGE', false);
     defined('TINYIB_RESPAGE') || define('TINYIB_RESPAGE', true);
     defined('TINYIB_TWIG_CACHE') || define('TINYIB_TWIG_CACHE', __DIR__ . '/../storage/twig-cache');
+    defined('TINYIB_ERROR_LOG') || define('TINYIB_ERROR_LOG', true);
 
     // Start session.
     session_start();
@@ -105,16 +106,18 @@ EOF;
     // Register container itself.
     $this->container->registerInstance(ContainerInterface::class, $this->container);
 
-    // Lazy create logger.
-    $this->container->registerCallback(LoggerInterface::class, function ($container) {
-      $logger = new Logger('App');
-      $log_handler = new RotatingFileHandler(__DIR__ . '/../storage/logs/error');
-      $log_formatter = new LineFormatter(null, null, true, true);
-      $log_handler->setFormatter($log_formatter);
-      $logger->pushHandler($log_handler);
-      $logger->pushProcessor(new PsrLogMessageProcessor());
-      return $logger;
-    });
+    if (TINYIB_ERROR_LOG) {
+      // Lazy create logger.
+      $this->container->registerCallback(LoggerInterface::class, function ($container) {
+        $logger = new Logger('App');
+        $log_handler = new RotatingFileHandler(__DIR__ . '/../storage/logs/error');
+        $log_formatter = new LineFormatter(null, null, true, true);
+        $log_handler->setFormatter($log_formatter);
+        $logger->pushHandler($log_handler);
+        $logger->pushProcessor(new PsrLogMessageProcessor());
+        return $logger;
+      });
+    }
 
     if (TINYIB_CACHE === 'redis') {
       // Lazy create Redis cache.

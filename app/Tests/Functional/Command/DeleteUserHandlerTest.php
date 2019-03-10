@@ -2,7 +2,7 @@
 
 namespace Imageboard\Tests\Unit\Command;
 
-use Imageboard\Command\{DeleteUser, DeleteUserHandler};
+use Imageboard\Command\Admin\{DeleteUser, DeleteUserHandler};
 use Imageboard\Exception\NotFoundException;
 use Imageboard\Model\User;
 use PHPUnit\Framework\TestCase;

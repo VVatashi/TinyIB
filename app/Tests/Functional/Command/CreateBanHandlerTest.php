@@ -2,7 +2,7 @@
 
 namespace Imageboard\Tests\Functional\Command;
 
-use Imageboard\Command\{CreateBan, CreateBanHandler};
+use Imageboard\Command\Admin\{CreateBan, CreateBanHandler};
 use Imageboard\Model\{Ban, User};
 use PHPUnit\Framework\TestCase;
 
