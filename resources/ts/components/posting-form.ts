@@ -517,7 +517,7 @@ export class PostingForm {
             });
 
             localStorage.setItem('user.name', post.name);
-            localStorage.setItem('user.tripcode', '!' + post.tripcode);
+            localStorage.setItem('user.tripcode', post.tripcode.length ? '!' + post.tripcode : '');
 
             this.resetFields();
             this.status = '';
