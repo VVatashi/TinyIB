@@ -151,14 +151,17 @@ class PostController implements PostControllerInterface
         $thread_id = $post->isThread() ? $post->id : $post->parent_id;
         $destination = TINYIB_BASE_URL . TINYIB_BOARD . '/res/' . $thread_id . '#' . $post->id;
 
+        $name = !empty($post->name) || !empty($post->tripcode)
+            ? $post->name : 'Anonymous';
+
         return new Response(201, [
             'Content-type' => 'application/json',
             'Location' => $destination,
         ], json_encode([
             'id'         => $post->id,
             'parent_id'  => $post->parent_id,
-            'name'       => $post->name,
-            'tripcode'   => '!' . $post->tripcode,
+            'name'       => $name,
+            'tripcode'   => $post->tripcode,
             'email'      => $post->email,
             'subject'    => $post->subject,
             'file'       => $post->file,

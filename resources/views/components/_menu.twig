@@ -17,6 +17,8 @@
 
     {{ self.link('Settings', 'settings') }}
 
+    {{ self.link('Mobile', 'mobile') }}
+
     {% if user.isAnonymous() %}
       {{ self.link('Log In', 'auth/login') }}
       {{ self.link('Register', 'auth/register') }}
