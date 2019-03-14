@@ -35,7 +35,7 @@ class CreatePostHandler implements CommandHandlerInterface
       '',
       $_SERVER['REMOTE_ADDR'],
       $this->user->id,
-      $command->parent_id,
+      $command->parent_id
     );
   }
 }

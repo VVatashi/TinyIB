@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../settings.test.php';
 
 // Bootstrap application.
 $app = new App();
-$app->bootstrap();
+$app->bootstrap(false);
 
 // Make container available globally.
 $container = $app->getContainer();
