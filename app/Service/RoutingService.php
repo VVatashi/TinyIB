@@ -43,10 +43,12 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
 
         $this->dispatcher = \FastRoute\simpleDispatcher(function (RouteCollector $routes) {
             $routes->addGroup('/api', function (RouteCollector $routes) {
+                $routes->addRoute('GET',  '/auth',                   [Api::class, 'token']);
                 $routes->addRoute('POST', '/auth',                   [Api::class, 'createToken']);
                 $routes->addRoute('GET',  '/threads',                [Api::class, 'threads']);
+                $routes->addRoute('POST', '/threads',                [Api::class, 'createThread']);
                 $routes->addRoute('GET',  '/threads/{id:\d+}/posts', [Api::class, 'threadPosts']);
-                $routes->addRoute('POST', '/posts',                  [Api::class, 'createPost']);
+                $routes->addRoute('POST', '/threads/{id:\d+}/posts', [Api::class, 'createPost']);
                 $routes->addRoute('GET',  '/embed',                  [Api::class, 'embed']);
             });
 

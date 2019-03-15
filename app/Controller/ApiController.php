@@ -6,7 +6,7 @@ use GuzzleHttp\Psr7\Response;
 use Imageboard\Command\{CommandDispatcher, CreatePost, CreateToken};
 use Imageboard\Exception\{AccessDeniedException, NotFoundException};
 use Imageboard\Cache\CacheInterface;
-use Imageboard\Query\{QueryDispatcher, Board, Thread};
+use Imageboard\Query\{QueryDispatcher, BoardThreads, ThreadPosts, Token};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
 class ApiController implements ApiControllerInterface
@@ -108,7 +108,12 @@ class ApiController implements ApiControllerInterface
    */
   function createToken(ServerRequestInterface $request) : ResponseInterface
   {
-    $data = $request->getParsedBody();
+    if ($request->getHeaderLine('Content-Type') === 'application/json') {
+      $data = json_decode((string)$request->getBody(), true);
+    } else {
+      $data = $request->getParsedBody();
+    }
+
     $command = new CreateToken($data);
     $handler = $this->command_dispatcher->getHandler($command);
 
@@ -120,10 +125,27 @@ class ApiController implements ApiControllerInterface
       ]));
     }
 
+    $expires_at = $token->expires_at->timestamp;
     return new Response(201, [], json_encode([
       'token' => $token->token,
+      'created_at' => $token->created_at->timestamp,
+      'expires_at' => $expires_at,
+      'expires_in' => $expires_at - time(),
       'user_id' => $token->user_id,
+      'user_email' => $token->user->email,
+      'user_role' => $token->user->role,
     ]));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  function token(ServerRequestInterface $request) : array
+  {
+    $token = $request->getHeaderLine('X-Token');
+    $query = new Token($token);
+    $handler = $this->query_dispatcher->getHandler($query);
+    return $handler->handle($query);
   }
 
   /**
@@ -131,7 +153,7 @@ class ApiController implements ApiControllerInterface
    */
   function threads(ServerRequestInterface $request) : array
   {
-    $query = new Board();
+    $query = new BoardThreads();
     $handler = $this->query_dispatcher->getHandler($query);
 
     return $handler->handle($query);
@@ -143,7 +165,7 @@ class ApiController implements ApiControllerInterface
   function threadPosts(ServerRequestInterface $request, array $args) : array
   {
     $id = (int)$args['id'];
-    $query = new Thread($id);
+    $query = new ThreadPosts($id);
     $handler = $this->query_dispatcher->getHandler($query);
 
     return $handler->handle($query);
@@ -152,9 +174,42 @@ class ApiController implements ApiControllerInterface
   /**
    * {@inheritDoc}
    */
+  function createThread(ServerRequestInterface $request, array $args) : ResponseInterface
+  {
+    if ($request->getHeaderLine('Content-Type') === 'application/json') {
+      $data = json_decode((string)$request->getBody(), true);
+    } else {
+      $data = $request->getParsedBody();
+    }
+
+    $data['parent_id'] = (int)$args['id'];
+    $command = new CreatePost($data);
+    $handler = $this->command_dispatcher->getHandler($command);
+
+    try {
+      $post = $handler->handle($command);
+    } catch (\Exception $exception) {
+      return new Response(400, [], json_encode([
+        'error' => $exception->getMessage(),
+      ]));
+    }
+
+    return new Response(201, [], json_encode([
+      'id' => $post->id,
+    ]));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
   function createPost(ServerRequestInterface $request) : ResponseInterface
   {
-    $data = $request->getParsedBody();
+    if ($request->getHeaderLine('Content-Type') === 'application/json') {
+      $data = json_decode((string)$request->getBody(), true);
+    } else {
+      $data = $request->getParsedBody();
+    }
+
     $command = new CreatePost($data);
     $handler = $this->command_dispatcher->getHandler($command);
 

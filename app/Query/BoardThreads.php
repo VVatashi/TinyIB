@@ -2,7 +2,7 @@
 
 namespace Imageboard\Query;
 
-class Board extends Query
+class BoardThreads extends Query
 {
   /**
    * {@inheritDoc}
