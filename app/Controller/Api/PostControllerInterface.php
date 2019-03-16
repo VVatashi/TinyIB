@@ -28,8 +28,6 @@ interface PostControllerInterface
   /**
    * Returns threads.
    *
-   * @param ServerRequestInterface $request
-   *
    * @return array Array of thread view models.
    */
   function threads() : array;
@@ -42,5 +40,5 @@ interface PostControllerInterface
    *
    * @return array Array of post view models.
    */
-  function threadPosts(array $args) : array;
+  function threadPosts(ServerRequestInterface $request, array $args) : array;
 }
