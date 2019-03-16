@@ -37,7 +37,7 @@ class App
   /**
    * Setups error handling, session and DI.
    */
-  function bootstrap() : self
+  function bootstrap(bool $handleErrors = true) : self
   {
     $this->setupErrorHandling();
 
@@ -57,7 +57,7 @@ class App
     return $this;
   }
 
-  protected function setupErrorHandling()
+  function setupErrorHandling()
   {
     // Report all errors.
     error_reporting(E_ALL);

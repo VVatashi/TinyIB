@@ -1,0 +1,108 @@
+<?php
+
+namespace Imageboard\Tests\Functional\Controller\Api;
+
+use GuzzleHttp\Psr7\ServerRequest;
+use Imageboard\Command\CommandDispatcher;
+use Imageboard\Controller\Api\{PostControllerInterface, PostController};
+use Imageboard\Model\Post;
+use Imageboard\Query\QueryDispatcher;
+use PHPUnit\Framework\TestCase;
+
+final class PostControllerTest extends TestCase
+{
+  /** @var PostControllerInterface */
+  protected $controller;
+
+  function setUp(): void
+  {
+    global $container;
+
+    Post::truncate();
+
+    $command_dispatcher = new CommandDispatcher($container);
+    $query_dispatcher = new QueryDispatcher($container);
+    $this->controller = new PostController(
+      $command_dispatcher,
+      $query_dispatcher
+    );
+  }
+
+  protected function createPost(int $parent_id = 0): Post {
+    return Post::create([
+      'parent_id' => $parent_id,
+      'ip' => '',
+      'name' => '',
+      'tripcode' => '',
+      'email' => '',
+      'subject' => '',
+      'message' => '',
+      'password' => '',
+    ]);
+  }
+
+  function test_createThread_shouldCreateItem(): void
+  {
+    $data = [
+      'subject' => 'Subject',
+      'name' => 'Name',
+      'message' => 'Message',
+    ];
+    $request = (new ServerRequest('POST', '/api/threads'))
+      ->withParsedBody($data);
+
+    $response = $this->controller->createThread($request);
+
+    $status = $response->getStatusCode();
+    $this->assertEquals(201, $status);
+  }
+
+  function test_createPost_shouldCreateItem(): void
+  {
+    $thread = $this->createPost();
+    $id = $thread->id;
+
+    $data = [
+      'parent_id' => $id,
+      'subject' => 'Subject',
+      'name' => 'Name',
+      'message' => 'Message',
+    ];
+    $request = (new ServerRequest('POST', "/api/threads/$id/posts"))
+      ->withParsedBody($data);
+
+    $response = $this->controller->createPost($request, ['id' => $id]);
+
+    $status = $response->getStatusCode();
+    $this->assertEquals(201, $status);
+  }
+
+  function test_threads_shouldReturnItems(): void
+  {
+    $count = 5;
+    for ($i = 0; $i < $count; ++$i) {
+      $this->createPost();
+    }
+
+    $items = $this->controller->threads();
+
+    $this->assertIsArray($items);
+    $this->assertCount($count, $items);
+  }
+
+  function test_threadPosts_shouldReturnItems(): void
+  {
+    $thread = $this->createPost();
+    $id = $thread->id;
+
+    $count = 5;
+    for ($i = 0; $i < $count; ++$i) {
+      $this->createPost($id);
+    }
+
+    $items = $this->controller->threadPosts(['id' => $id]);
+
+    $this->assertIsArray($items);
+    $this->assertCount($count + 1, $items);
+  }
+}

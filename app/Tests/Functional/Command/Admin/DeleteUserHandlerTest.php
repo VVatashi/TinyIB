@@ -1,34 +1,33 @@
 <?php
 
-namespace Imageboard\Tests\Functional\Command;
+namespace Imageboard\Tests\Unit\Command\Admin;
 
-use Imageboard\Command\Admin\{DeleteBan, DeleteBanHandler};
+use Imageboard\Command\Admin\{DeleteUser, DeleteUserHandler};
 use Imageboard\Exception\NotFoundException;
-use Imageboard\Model\{Ban, User};
+use Imageboard\Model\User;
 use PHPUnit\Framework\TestCase;
 
-final class DeleteBanHandlerTest extends TestCase
+final class DeleteUserHandlerTest extends TestCase
 {
-  /** @var DeleteBanHandler */
+  /** @var DeleteUserHandler */
   protected $handler;
 
   function setUp(): void
   {
-    Ban::truncate();
     User::truncate();
 
     $user = User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
-    $this->handler = new DeleteBanHandler($user);
+    $this->handler = new DeleteUserHandler($user);
   }
 
-  protected function createItem(): Ban {
-    return Ban::createBan('123.0.0.1', 60 * 60, 'Test');
+  protected function createItem(): User {
+    return User::createUser('test@example.com', 'test@example.com', User::ROLE_USER);
   }
 
   function test_handle_whenNotFound_shouldThrow(): void
   {
-    $item_id = 1;
-    $command = new DeleteBan($item_id);
+    $item_id = 1000;
+    $command = new DeleteUser($item_id);
 
     $this->expectException(NotFoundException::class);
 
@@ -38,11 +37,11 @@ final class DeleteBanHandlerTest extends TestCase
   function test_handle_whenFound_shouldDelete(): void
   {
     $item = $this->createItem();
-    $command = new DeleteBan($item->id);
+    $command = new DeleteUser($item->id);
 
     $this->handler->handle($command);
 
-    $item = Ban::find($item->id);
+    $item = User::find($item->id);
     $this->assertNull($item);
   }
 }

@@ -12,7 +12,7 @@ define('TINYIB_PREVIEWREPLIES', 3);
 define('TINYIB_TRUNCATE', 15);
 define('TINYIB_TIMEZONE', 'UTC');
 
-define('TINYIB_DELAY', 1);
+define('TINYIB_DELAY', 0);
 define('TINYIB_MAXTHREADS', 50);
 define('TINYIB_MAXREPLIES', 500);
 
@@ -40,7 +40,7 @@ define('TINYIB_DICE_MAX_VALUE', 10000);
 define('TINYIB_MAXKB', 20480);
 define('TINYIB_MAXKBDESC', '20 MB');
 define('TINYIB_THUMBNAIL', 'imagemagick');
-define('TINYIB_NOFILEOK', false);
+define('TINYIB_NOFILEOK', true);
 define('TINYIB_FILE_ALLOW_DUPLICATE', true);
 define('TINYIB_FILE_ANIM_GIF_THUMB', false);
 define('TINYIB_FILE_SHOW_ORIG_NAME', false);

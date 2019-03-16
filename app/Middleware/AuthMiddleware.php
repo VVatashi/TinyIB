@@ -68,6 +68,11 @@ class AuthMiddleware implements MiddlewareInterface
     if ($user->role === 0) {
       $path = $request->getUri()->getPath();
       if (!preg_match('#^/' . TINYIB_BOARD . '/(auth|captcha|api/auth)#', $path)) {
+        if ($request->getHeaderLine('Accept') === 'application/json') {
+          $content = json_encode(['error' => 'Auth required']);
+          return new Response(403, ['Content-Type' => 'application/json'], $content);
+        }
+
         return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/auth/login']);
       }
     }

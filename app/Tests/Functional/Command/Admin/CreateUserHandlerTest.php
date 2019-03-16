@@ -1,14 +1,14 @@
 <?php
 
-namespace Imageboard\Tests\Functional\Command;
+namespace Imageboard\Tests\Functional\Command\Admin;
 
-use Imageboard\Command\Admin\{EditUser, EditUserHandler};
+use Imageboard\Command\Admin\{CreateUser, CreateUserHandler};
 use Imageboard\Model\User;
 use PHPUnit\Framework\TestCase;
 
-final class EditUserHandlerTest extends TestCase
+final class CreateUserHandlerTest extends TestCase
 {
-  /** @var EditUserHandler */
+  /** @var CreateUserHandler */
   protected $handler;
 
   function setUp(): void
@@ -16,23 +16,17 @@ final class EditUserHandlerTest extends TestCase
     User::truncate();
 
     $user = User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
-    $this->handler = new EditUserHandler($user);
-  }
-
-  protected function createItem(): User {
-    return User::createUser('test@example.com', 'test@example.com', User::ROLE_USER);
+    $this->handler = new CreateUserHandler($user);
   }
 
   function test_handle_shouldCreate(): void
   {
-    $item = $this->createItem();
     $data = [
-      'id' => $item->id,
-      'email' => 'new@example.com',
+      'email' => 'test@example.com',
       'password' => '123456',
       'role' => User::ROLE_USER,
     ];
-    $command = new EditUser($data);
+    $command = new CreateUser($data);
 
     $this->handler->handle($command);
 
