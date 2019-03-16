@@ -100,7 +100,8 @@ final class PostControllerTest extends TestCase
       $this->createPost($id);
     }
 
-    $items = $this->controller->threadPosts(['id' => $id]);
+    $request = (new ServerRequest('GET', "/api/threads/$id/posts"));
+    $items = $this->controller->threadPosts($request, ['id' => $id]);
 
     $this->assertIsArray($items);
     $this->assertCount($count + 1, $items);

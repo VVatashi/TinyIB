@@ -92,10 +92,12 @@ class PostController implements PostControllerInterface
   /**
    * {@inheritDoc}
    */
-  function threadPosts(array $args) : array
+  function threadPosts(ServerRequestInterface $request, array $args) : array
   {
     $id = (int)$args['id'];
-    $query = new ThreadPosts($id);
+    $params = $request->getQueryParams();
+    $after = (int)($params['after'] ?? 0);
+    $query = new ThreadPosts($id, $after);
     $handler = $this->query_dispatcher->getHandler($query);
 
     return $handler->handle($query);

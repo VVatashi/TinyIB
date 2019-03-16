@@ -15,7 +15,8 @@ class BoardThreadsHandler extends QueryHandler
     $sql = <<<EOF
 SELECT p.id, p.created_at, p.bumped_at,
   p.subject, p.name, p.tripcode, p.message,
-  p.file, p.image_width, p.image_height, p.file_size
+  p.file, p.image_width, p.image_height, p.file_size,
+  p.thumb, p.thumb_width, p.thumb_height
 FROM $posts_table AS p
 WHERE p.deleted_at IS NULL
   AND p.parent_id = 0
