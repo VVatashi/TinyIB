@@ -1,6 +1,6 @@
 <?php
 
-namespace Imageboard\Tests\Unit\Command;
+namespace Imageboard\Tests\Unit\Command\Admin;
 
 use Imageboard\Command\Admin\{DeletePost, DeletePostHandler};
 use Imageboard\Exception\NotFoundException;

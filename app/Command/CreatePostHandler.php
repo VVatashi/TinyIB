@@ -33,7 +33,7 @@ class CreatePostHandler implements CommandHandlerInterface
       $command->subject,
       $command->message,
       '',
-      $_SERVER['REMOTE_ADDR'],
+      $_SERVER['REMOTE_ADDR'] ?? '',
       $this->user->id,
       $command->parent_id
     );
