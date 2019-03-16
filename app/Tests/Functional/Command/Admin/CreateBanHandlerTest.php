@@ -1,6 +1,6 @@
 <?php
 
-namespace Imageboard\Tests\Functional\Command;
+namespace Imageboard\Tests\Functional\Command\Admin;
 
 use Imageboard\Command\Admin\{CreateBan, CreateBanHandler};
 use Imageboard\Model\{Ban, User};

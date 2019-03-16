@@ -1,34 +1,22 @@
 <?php
 
-namespace Imageboard\Controller;
+namespace Imageboard\Controller\Api;
 
 use GuzzleHttp\Psr7\Response;
-use Imageboard\Command\{CommandDispatcher, CreatePost, CreateToken};
 use Imageboard\Exception\{AccessDeniedException, NotFoundException};
 use Imageboard\Cache\CacheInterface;
-use Imageboard\Query\{QueryDispatcher, Board, Thread};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
-class ApiController implements ApiControllerInterface
+class EmbedController implements EmbedControllerInterface
 {
   const CACHE_TTL = 4 * 60 * 60;
-
-  /** @var CommandDispatcher */
-  protected $command_dispatcher;
-
-  /** @var QueryDispatcher */
-  protected $query_dispatcher;
 
   /** @var CacheInterface */
   protected $cache;
 
   function __construct(
-    CommandDispatcher $command_dispatcher,
-    QueryDispatcher $query_dispatcher,
     CacheInterface $cache
   ) {
-    $this->command_dispatcher = $command_dispatcher;
-    $this->query_dispatcher = $query_dispatcher;
     $this->cache = $cache;
   }
 
@@ -101,73 +89,5 @@ class ApiController implements ApiControllerInterface
 
     $headers['Content-Type'] = $content_type;
     return new Response(200, $headers, $data);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  function createToken(ServerRequestInterface $request) : ResponseInterface
-  {
-    $data = $request->getParsedBody();
-    $command = new CreateToken($data);
-    $handler = $this->command_dispatcher->getHandler($command);
-
-    try {
-      $token = $handler->handle($command);
-    } catch (\Exception $exception) {
-      return new Response(400, [], json_encode([
-        'error' => $exception->getMessage(),
-      ]));
-    }
-
-    return new Response(201, [], json_encode([
-      'token' => $token->token,
-      'user_id' => $token->user_id,
-    ]));
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  function threads(ServerRequestInterface $request) : array
-  {
-    $query = new Board();
-    $handler = $this->query_dispatcher->getHandler($query);
-
-    return $handler->handle($query);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  function threadPosts(ServerRequestInterface $request, array $args) : array
-  {
-    $id = (int)$args['id'];
-    $query = new Thread($id);
-    $handler = $this->query_dispatcher->getHandler($query);
-
-    return $handler->handle($query);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  function createPost(ServerRequestInterface $request) : ResponseInterface
-  {
-    $data = $request->getParsedBody();
-    $command = new CreatePost($data);
-    $handler = $this->command_dispatcher->getHandler($command);
-
-    try {
-      $post = $handler->handle($command);
-    } catch (\Exception $exception) {
-      return new Response(400, [], json_encode([
-        'error' => $exception->getMessage(),
-      ]));
-    }
-
-    return new Response(201, [], json_encode([
-      'id' => $post->id,
-    ]));
   }
 }

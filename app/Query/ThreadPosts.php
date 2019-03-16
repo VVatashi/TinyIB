@@ -5,7 +5,7 @@ namespace Imageboard\Query;
 /**
  * @property-read int $thread_id
  */
-class Thread extends Query
+class ThreadPosts extends Query
 {
   /** @var int */
   protected $thread_id;
