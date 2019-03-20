@@ -378,6 +378,21 @@ export class PostingForm {
           // Submit form on Ctrl+Enter in the message field.
           if ((e.keyCode == 10 || e.keyCode == 13) && e.ctrlKey) {
             this.onSubmit();
+          } else if (e.key === 'b' && e.altKey) {
+            e.preventDefault();
+            this.insertMarkup('b');
+          } else if (e.key === 'i' && e.altKey) {
+            e.preventDefault();
+            this.insertMarkup('i');
+          } else if (e.key === 't' && e.altKey) {
+            e.preventDefault();
+            this.insertMarkup('s');
+          } else if (e.key === 'p' && e.altKey) {
+            e.preventDefault();
+            this.insertMarkup('spoiler');
+          } else if (e.key === 'c' && e.altKey) {
+            e.preventDefault();
+            this.insertMarkup('code');
           }
         },
         onMessagePaste(e: ClipboardEvent) {
