@@ -76,21 +76,31 @@ export class Post {
 
         if (e.target.classList.contains('thumbnail__content--image')) {
           const $image = DOM.qs('#image-modal_content > img');
-          $image.setAttribute('src', link);
-
-          videoModal.hide();
-          imageModal.show(left, top, width, height, () => {
+          if (imageModal.isOpened && $image.getAttribute('src') === link) {
+            imageModal.hide();
+          } else {
             $image.setAttribute('src', '');
-          });
+            $image.setAttribute('src', link);
+
+            videoModal.hide();
+            imageModal.show(left, top, width, height, () => {
+              $image.setAttribute('src', '');
+            });
+          }
         } else if (e.target.classList.contains('thumbnail__content--video')) {
           const $video = DOM.qs('#video-modal_content > video');
-          $video.setAttribute('src', link);
-
-          imageModal.hide();
-          videoModal.show(left, top, width, height, () => {
-            ($video as HTMLVideoElement).pause();
+          if (videoModal.isOpened && $video.getAttribute('src') === link) {
+            videoModal.hide();
+          } else {
             $video.setAttribute('src', '');
-          });
+            $video.setAttribute('src', link);
+
+            imageModal.hide();
+            videoModal.show(left, top, width, height, () => {
+              ($video as HTMLVideoElement).pause();
+              $video.setAttribute('src', '');
+            });
+          }
         }
 
         return false;
