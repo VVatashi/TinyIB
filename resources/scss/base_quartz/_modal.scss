@@ -1,6 +1,21 @@
+.modal-wrapper {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
+
+  cursor: pointer;
+
+  &--hidden {
+    display: none;
+  }
+}
+
 .modal {
   position: fixed;
-  z-index: 1;
+  z-index: 10000;
 
   box-sizing: border-box;
   border: 1px solid #333;
@@ -14,7 +29,7 @@
   }
 
   &__header {
-    height: 2em;
+    height: 1em;
   }
 
   &__image,
