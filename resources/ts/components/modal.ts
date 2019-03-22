@@ -51,6 +51,12 @@ export class Modal {
 
   protected $content?: HTMLElement = null;
 
+  protected _isOpened: boolean = false;
+
+  get isOpened() {
+    return this._isOpened;
+  }
+
   constructor(
     readonly $modal: HTMLElement,
   ) {
@@ -146,8 +152,8 @@ export class Modal {
     $modal.addEventListener('wheel', e => {
       e.preventDefault();
 
-      const sensitivity = 0.05;
-      const scale = 1 - sensitivity * e.deltaY;
+      const sensitivity = 0.15;
+      const scale = 1 - sensitivity * Math.sign(e.deltaY);
       const newWidth = this.width * scale;
       const newHeight = this.height * scale;
 
@@ -188,6 +194,8 @@ export class Modal {
     this.$content.style.height = `${height}px`;
 
     this.$modal.classList.remove('modal--hidden');
+
+    this._isOpened = true;
   }
 
   hide() {
@@ -196,5 +204,7 @@ export class Modal {
     if (this.onClose) {
       this.onClose();
     }
+
+    this._isOpened = false;
   }
 }

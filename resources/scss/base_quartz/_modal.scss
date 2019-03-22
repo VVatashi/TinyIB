@@ -4,6 +4,7 @@
 
   box-sizing: border-box;
   border: 1px solid #333;
+  background: $block-background;
   overflow: hidden;
 
   cursor: pointer;
@@ -13,7 +14,6 @@
   }
 
   &__header {
-    background: $block-background;
     height: 2em;
   }
 
