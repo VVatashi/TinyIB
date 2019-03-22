@@ -2,6 +2,7 @@ import { eventBus, Events } from '..';
 import { DOM } from '../utils';
 import Vue from 'vue';
 import { draggable } from './draggable';
+import { Modal } from './modal';
 
 interface Coub {
   image_versions: {
@@ -36,6 +37,65 @@ export class Post {
     popup.id = 'popup';
     popup.classList.add('popup', 'hidden');
     document.body.insertBefore(popup, null);
+
+    const imageModal = new Modal(DOM.qid('image-modal'));
+    const videoModal = new Modal(DOM.qid('video-modal'));
+
+    document.addEventListener('click', e => {
+      if (e.button !== 0) {
+        return;
+      }
+
+      if (!(e.target instanceof HTMLElement)) {
+        return;
+      }
+
+      if (e.target.tagName !== 'IMG') {
+        return;
+      }
+
+      if (e.target.classList.contains('thumbnail__content')) {
+        e.preventDefault();
+
+        const $link = e.target.parentElement;
+        const link = $link.getAttribute('href');
+
+        const imageWidth = +$link.getAttribute('data-width');
+        const imageHeight = +$link.getAttribute('data-height');
+
+        const scale = Math.max(
+          imageWidth / window.innerWidth,
+          imageHeight / window.innerHeight
+        );
+
+        const width = scale <= 1 ? imageWidth : imageWidth / scale;
+        const height = scale <= 1 ? imageHeight : imageHeight / scale;
+
+        const left = Math.round(window.innerWidth / 2 - width / 2);
+        const top = Math.round(window.innerHeight / 2 - height / 2);
+
+        if (e.target.classList.contains('thumbnail__content--image')) {
+          const $image = DOM.qs('#image-modal_content > img');
+          $image.setAttribute('src', link);
+
+          videoModal.hide();
+          imageModal.show(left, top, width, height, () => {
+            $image.setAttribute('src', '');
+          });
+        } else if (e.target.classList.contains('thumbnail__content--video')) {
+          const $video = DOM.qs('#video-modal_content > video');
+          $video.setAttribute('src', link);
+
+          imageModal.hide();
+          videoModal.show(left, top, width, height, () => {
+            ($video as HTMLVideoElement).pause();
+            $video.setAttribute('src', '');
+          });
+        }
+
+        return false;
+      }
+    });
 
     const self = this;
 
@@ -149,7 +209,7 @@ export class Post {
           const coub = await response.json() as Coub;
           const thumbnailUrl = coub.image_versions.template.replace('%{version}', 'small');
           const thumbnail = document.createElement('div');
-          thumbnail.classList.add('post__file', 'file');
+          thumbnail.classList.add('post__file-preview', 'file');
           thumbnail.innerHTML = `
 <div class="post__file-info file-info filesize">
   <a class="file-info__link" href="https://coub.com/view/${coub.permalink}" target="_blank">Coub</a>
@@ -157,7 +217,7 @@ export class Post {
 </div>
 
 <a class="file__thumbnail thumbnail thumbnail--video" href="https://coub.com/view/${coub.permalink}" target="_blank">
-  <img class="thumbnail__content thumbnail__content_image" src="${thumbnailUrl}" />
+  <img class="thumbnail__content thumbnail__content--image" src="${thumbnailUrl}" />
 </a>`;
           thumbnail.style.maxHeight = '250px';
           thumbnail.style.maxWidth = '250px';
@@ -168,7 +228,7 @@ export class Post {
             e.preventDefault();
             this.openCoubInPopup(coub);
           });
-        } catch(e) {
+        } catch (e) {
           console.warn(`Can\'t load coub '${matches[0]}':`, e);
         }
       });

@@ -11,9 +11,9 @@
 
   {% if post.thumbWidth > 0 and post.thumbHeight > 0 %}
     <a class="file__thumbnail thumbnail thumbnail--{{ post.fileType }}" id="thumbnail_wrapper_{{ post.id }}"
-      href="{{ direct_link }}" target="_blank">
+      href="{{ direct_link }}" data-width="{{ post.imageWidth }}" data-height="{{ post.imageHeight }}" target="_blank">
       <img src="{{ base_url }}/thumb/{{ post.thumb }}" alt="{{ post.id }}"
-        class="thumbnail__content thumbnail__content_image" id="thumbnail_{{ post.id }}" />
+        class="thumbnail__content thumbnail__content--{{ post.fileType }}" id="thumbnail_{{ post.id }}" />
     </a>
   {% endif %}
 </div>
