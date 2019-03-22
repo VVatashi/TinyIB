@@ -59,6 +59,13 @@
         Show video overlay
       </x-checkbox>
     </div>
+
+    <div class="settings-form__row">
+      <x-checkbox v-model="settings.common.hidePopupOnOutsideClick"
+        label-class="settings-form__label" input-class="settings-form__checkbox">
+        Close image popup when clicking outside
+      </x-checkbox>
+    </div>
   </div>
 </template>
 

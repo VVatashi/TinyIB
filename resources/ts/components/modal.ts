@@ -111,6 +111,12 @@ export class Modal {
     };
 
     const onDown = (e: PointerEvent | TouchEvent) => {
+      if (e instanceof MouseEvent) {
+        if (e.button !== 0) {
+          return;
+        }
+      }
+
       e.preventDefault();
 
       const { x, y } = getEventCoords(e);
@@ -152,7 +158,7 @@ export class Modal {
     $modal.addEventListener('wheel', e => {
       e.preventDefault();
 
-      const sensitivity = 0.15;
+      const sensitivity = 0.20;
       const scale = 1 - sensitivity * Math.sign(e.deltaY);
       const newWidth = this.width * scale;
       const newHeight = this.height * scale;

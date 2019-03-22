@@ -7,6 +7,7 @@ export interface CommonSettings {
   scrollToNewPosts: boolean;
   smoothScroll: boolean;
   showVideoOverlay: boolean;
+  hidePopupOnOutsideClick: boolean;
 }
 
 export interface Replace {
@@ -62,6 +63,7 @@ const defaultSettings: Settings = {
     scrollToNewPosts: true,
     smoothScroll: true,
     showVideoOverlay: false,
+    hidePopupOnOutsideClick: false,
   },
   form: {
     align: 'center',

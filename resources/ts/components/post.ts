@@ -1,4 +1,4 @@
-import { eventBus, Events } from '..';
+import { eventBus, Events, SettingsManager } from '..';
 import { DOM } from '../utils';
 import Vue from 'vue';
 import { draggable } from './draggable';
@@ -33,11 +33,14 @@ export class Post {
   }
 
   protected onReady() {
+    const settings = SettingsManager.load();
+
     const popup = document.createElement('div');
     popup.id = 'popup';
     popup.classList.add('popup', 'hidden');
     document.body.insertBefore(popup, null);
 
+    const $modalWrapper = DOM.qid('modal-wrapper');
     const imageModal = new Modal(DOM.qid('image-modal'));
     const videoModal = new Modal(DOM.qid('video-modal'));
 
@@ -50,11 +53,7 @@ export class Post {
         return;
       }
 
-      if (e.target.tagName !== 'IMG') {
-        return;
-      }
-
-      if (e.target.classList.contains('thumbnail__content')) {
+      if (e.target.tagName === 'IMG' && e.target.classList.contains('thumbnail__content')) {
         e.preventDefault();
 
         const $link = e.target.parentElement;
@@ -83,9 +82,16 @@ export class Post {
             $image.setAttribute('src', link);
 
             videoModal.hide();
+
             imageModal.show(left, top, width, height, () => {
               $image.setAttribute('src', '');
+
+              $modalWrapper.classList.add('modal-wrapper--hidden');
             });
+
+            if (settings.common.hidePopupOnOutsideClick) {
+              $modalWrapper.classList.remove('modal-wrapper--hidden');
+            }
           }
         } else if (e.target.classList.contains('thumbnail__content--video')) {
           const $video = DOM.qs('#video-modal_content > video');
@@ -96,15 +102,27 @@ export class Post {
             $video.setAttribute('src', link);
 
             imageModal.hide();
+
             videoModal.show(left, top, width, height, () => {
               ($video as HTMLVideoElement).pause();
               $video.setAttribute('src', '');
+
+              $modalWrapper.classList.add('modal-wrapper--hidden');
             });
+
+            if (settings.common.hidePopupOnOutsideClick) {
+              $modalWrapper.classList.remove('modal-wrapper--hidden');
+            }
           }
         }
 
         return false;
       }
+    });
+
+    $modalWrapper.addEventListener('click', e => {
+      imageModal.hide();
+      videoModal.hide();
     });
 
     const self = this;
