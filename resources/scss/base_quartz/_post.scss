@@ -47,7 +47,7 @@
     }
   }
 
-  &__file {
+  &__file-preview {
     position: relative;
     margin: $post-file-margin;
   }
@@ -123,11 +123,11 @@
       border-bottom: $post-header-border;
     }
 
-    &__file {
+    &__file-preview {
       float: left;
     }
 
-    &__file:hover &__file-info {
+    &__file-preview:hover &__file-info {
       display: inline-block;
     }
 
