@@ -1,18 +1,3 @@
-.modal-wrapper {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 10000;
-
-  cursor: pointer;
-
-  &--hidden {
-    display: none;
-  }
-}
-
 .modal {
   position: fixed;
   z-index: 10000;

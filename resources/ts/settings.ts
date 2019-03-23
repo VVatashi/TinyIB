@@ -8,6 +8,7 @@ export interface CommonSettings {
   smoothScroll: boolean;
   showVideoOverlay: boolean;
   hidePopupOnOutsideClick: boolean;
+  nsfw: boolean;
 }
 
 export interface Replace {
@@ -64,6 +65,7 @@ const defaultSettings: Settings = {
     smoothScroll: true,
     showVideoOverlay: false,
     hidePopupOnOutsideClick: false,
+    nsfw: false,
   },
   form: {
     align: 'center',

@@ -52,6 +52,10 @@ document.addEventListener('DOMContentLoaded', e => {
     if (settings.common.showVideoOverlay) {
       layout.classList.add('layout--show-thumb-overlay');
     }
+
+    if (settings.common.nsfw) {
+      layout.classList.add('layout--nsfw');
+    }
   }
 
   const formWrapper = DOM.qs('.content__posting-form-wrapper');
