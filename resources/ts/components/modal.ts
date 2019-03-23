@@ -46,15 +46,23 @@ export class Modal {
   protected top: number = 0;
   protected width: number = 0;
   protected height: number = 0;
+  protected aspect: number = 1;
 
   protected onClose?: () => any = null;
 
   protected $content?: HTMLElement = null;
 
-  protected _isOpened: boolean = false;
+  protected _isOpen: boolean = false;
+  protected _isDragging: boolean = false;
 
-  get isOpened() {
-    return this._isOpened;
+  protected isDragged: boolean = false;
+
+  get isOpen() {
+    return this._isOpen;
+  }
+
+  get isDragging() {
+    return this._isDragging;
   }
 
   constructor(
@@ -74,6 +82,11 @@ export class Modal {
 
       this.$modal.style.left = `${this.left}px`;
       this.$modal.style.top = `${this.top}px`;
+
+      const threshold = 5;
+      if (Math.abs(dx) > threshold || Math.abs(dy) > threshold) {
+        this.isDragged = true;
+      }
 
       return false;
     };
@@ -96,16 +109,15 @@ export class Modal {
         }
       }
 
-      const { x, y } = getEventCoords(e);
-      const dx = x - this.dragStart.x;
-      const dy = y - this.dragStart.y;
-
-      const threshold = 5;
-      if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) {
+      if (!this.isDragged) {
         this.hide();
       }
 
       this.dragStart = null;
+
+      setTimeout(() => {
+        this._isDragging = false;
+      }, 100);
 
       return false;
     };
@@ -126,6 +138,9 @@ export class Modal {
         left: this.left,
         top: this.top,
       };
+
+      this._isDragging = true;
+      this.isDragged = false;
 
       if (pointerEvents) {
         window.addEventListener('pointermove', onMove);
@@ -160,8 +175,8 @@ export class Modal {
 
       const sensitivity = 0.20;
       const scale = 1 - sensitivity * Math.sign(e.deltaY);
-      const newWidth = this.width * scale;
-      const newHeight = this.height * scale;
+      const newWidth = Math.min(8192, Math.max(128, this.width * scale));
+      const newHeight = newWidth / this.aspect;
 
       const rx = (e.clientX - this.left) / this.width;
       const ry = (e.clientY - this.top) / this.height;
@@ -191,6 +206,7 @@ export class Modal {
     this.top = top;
     this.width = width;
     this.height = height;
+    this.aspect = this.height > 0 ? this.width / this.height : 1;
 
     this.onClose = onClose;
 
@@ -201,16 +217,20 @@ export class Modal {
 
     this.$modal.classList.remove('modal--hidden');
 
-    this._isOpened = true;
+    this._isOpen = true;
   }
 
   hide() {
+    if (!this.isOpen) {
+      return;
+    }
+
     this.$modal.classList.add('modal--hidden');
 
     if (this.onClose) {
       this.onClose();
     }
 
-    this._isOpened = false;
+    this._isOpen = false;
   }
 }

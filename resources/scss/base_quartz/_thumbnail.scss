@@ -21,6 +21,10 @@
     }
   }
 
+  @at-root .layout--nsfw .thumbnail:not(:hover) {
+    opacity: 0.07;
+  }
+
   &__content {
     max-width: 100%;
     max-height: 250px;

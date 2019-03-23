@@ -40,7 +40,6 @@ export class Post {
     popup.classList.add('popup', 'hidden');
     document.body.insertBefore(popup, null);
 
-    const $modalWrapper = DOM.qid('modal-wrapper');
     const imageModal = new Modal(DOM.qid('image-modal'));
     const videoModal = new Modal(DOM.qid('video-modal'));
 
@@ -75,7 +74,7 @@ export class Post {
 
         if (e.target.classList.contains('thumbnail__content--image')) {
           const $image = DOM.qs('#image-modal_content > img');
-          if (imageModal.isOpened && $image.getAttribute('src') === link) {
+          if (imageModal.isOpen && $image.getAttribute('src') === link) {
             imageModal.hide();
           } else {
             $image.setAttribute('src', '');
@@ -85,17 +84,11 @@ export class Post {
 
             imageModal.show(left, top, width, height, () => {
               $image.setAttribute('src', '');
-
-              $modalWrapper.classList.add('modal-wrapper--hidden');
             });
-
-            if (settings.common.hidePopupOnOutsideClick) {
-              $modalWrapper.classList.remove('modal-wrapper--hidden');
-            }
           }
         } else if (e.target.classList.contains('thumbnail__content--video')) {
           const $video = DOM.qs('#video-modal_content > video');
-          if (videoModal.isOpened && $video.getAttribute('src') === link) {
+          if (videoModal.isOpen && $video.getAttribute('src') === link) {
             videoModal.hide();
           } else {
             $video.setAttribute('src', '');
@@ -106,23 +99,23 @@ export class Post {
             videoModal.show(left, top, width, height, () => {
               ($video as HTMLVideoElement).pause();
               $video.setAttribute('src', '');
-
-              $modalWrapper.classList.add('modal-wrapper--hidden');
             });
-
-            if (settings.common.hidePopupOnOutsideClick) {
-              $modalWrapper.classList.remove('modal-wrapper--hidden');
-            }
           }
         }
 
         return false;
-      }
-    });
+      } else if (settings.common.hidePopupOnOutsideClick) {
+        const modals = [
+          imageModal,
+          videoModal,
+        ];
 
-    $modalWrapper.addEventListener('click', e => {
-      imageModal.hide();
-      videoModal.hide();
+        modals.forEach(modal => {
+          if (!modal.isDragging) {
+            modal.hide();
+          }
+        });
+      }
     });
 
     const self = this;
