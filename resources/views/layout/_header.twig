@@ -1,0 +1,12 @@
+<header class="{{ class is defined ? class ~ ' ' }}header">
+  {% include 'components/_style_switcher.twig' with {'class': 'header__style-switcher'} %}
+  {% include 'components/_menu.twig' with {'class': 'header__menu'} %}
+
+  <div class="header__logo">
+    {{ constant('TINYIB_LOGO') }}
+
+    <a class="header__title-link" href="/{{ constant('TINYIB_BOARD') }}">
+      <h1 class="header__title">{{ constant('TINYIB_BOARDDESC') }}</h1>
+    </a>
+  </div>
+</header>

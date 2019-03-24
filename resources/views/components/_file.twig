@@ -1,0 +1,19 @@
+{% if post.fileType %}
+  {% set direct_link = base_url ~ '/src/' ~ post.file %}
+{% endif %}
+
+<div class="{{ class is defined ? class ~ ' ' }}file"
+  {% if post.thumbHeight > 0 %}
+    style="min-height: {{ post.thumbHeight }}px;"
+  {% endif %}
+>
+  {% include 'components/_file_info.twig' with {'class': 'post__file-info filesize'} %}
+
+  {% if post.thumbWidth > 0 and post.thumbHeight > 0 %}
+    <a class="file__thumbnail thumbnail thumbnail--{{ post.fileType }}" id="thumbnail_wrapper_{{ post.id }}"
+      href="{{ direct_link }}" data-width="{{ post.imageWidth }}" data-height="{{ post.imageHeight }}" target="_blank">
+      <img src="{{ base_url }}/thumb/{{ post.thumb }}" alt="{{ post.id }}"
+        class="thumbnail__content thumbnail__content--{{ post.fileType }}" id="thumbnail_{{ post.id }}" />
+    </a>
+  {% endif %}
+</div>

@@ -1,0 +1,15 @@
+.header {
+  &__breadcrumb {
+    display: flex;
+    flex-flow: row wrap;
+    font-size: 2em;
+  }
+
+  &__breadcrumb-item {
+    & + &::before {
+      content: '/';
+      display: inline-block;
+      margin: 0 0.25em;
+    }
+  }
+}

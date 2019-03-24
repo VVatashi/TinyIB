@@ -1,0 +1,147 @@
+.post {
+  &__inner {
+    @include clearfix;
+
+    position: relative;
+  }
+
+  &__header-mobile,
+  &__header {
+    color: $post-header-color;
+    padding: $post-header-padding;
+  }
+
+  &__content {
+    color: $post-content-color;
+
+    padding: $post-content-padding;
+    overflow-y: auto;
+    max-height: 80vh;
+
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+
+  &__file-info {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    padding: 0.2em;
+
+    color: #ffffff;
+    font-size: 0.8em;
+    font-weight: bold;
+    text-shadow: 0.1em 0 #000000, 0 0.1em #000000, -0.1em 0 #000000, 0 -0.1em #000000;
+
+    pointer-events: none;
+
+    & > a {
+      color: inherit;
+      pointer-events: initial;
+    }
+
+    & > .de-btn-src {
+      pointer-events: initial;
+    }
+  }
+
+  &__file-preview {
+    position: relative;
+    margin: $post-file-margin;
+  }
+
+  &__reference-link-author {
+    font-size: 0.8em;
+    margin-left: 0.25em;
+    text-decoration: none;
+  }
+
+  &__reference-link-name {
+    @extend .post-header__name !optional;
+
+    text-shadow: none;
+  }
+
+  &__reference-link-tripcode {
+    @extend .post-header__tripcode !optional;
+
+    text-shadow: none;
+  }
+
+  &__omitted {
+    color: $post-omitted-color;
+  }
+
+  &_reply &__inner {
+    box-sizing: border-box;
+    background: $post-background;
+  }
+
+  &__reflink-icon {
+    @extend %icon-reply;
+
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    z-index: 1;
+
+    padding: 0 0.1em;
+    font-size: 1.25em;
+
+    &,
+    &:hover {
+      color: inherit;
+      text-decoration: none;
+    }
+  }
+
+  &--own &__inner {
+    box-shadow: 6px 0 2px -2px rgba(#808080, 0.75), -6px 0 2px -2px rgba(#808080, 0.75);
+  }
+
+  &--reply &__inner {
+    box-shadow: 6px 0 2px -2px rgba(#b31a8d, 0.75), -6px 0 2px -2px rgba(#b31a8d, 0.75);
+  }
+
+  @at-root .layout--hide-post-reflink-icon &__reflink-icon {
+    display: none;
+  }
+
+  @include breakpoint($xs-up) {
+    &__inner {
+      @if $post-align-left {
+        float: left;
+        clear: left;
+      }
+
+      max-width: 100%;
+    }
+
+    &__header {
+      border-bottom: $post-header-border;
+    }
+
+    &__file-preview {
+      float: left;
+    }
+
+    &__file-preview:hover &__file-info {
+      display: inline-block;
+    }
+
+    &_reply &__inner {
+      border: $post-border;
+      border-radius: $post-border-radius;
+    }
+
+    &__inner {
+      min-width: 560px;
+    }
+
+    &__reflink-icon {
+      font-size: 1em;
+    }
+  }
+}

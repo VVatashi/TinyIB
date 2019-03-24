@@ -1,0 +1,36 @@
+@import '../utils/index';
+
+.post {
+  &__inner {
+    box-sizing: border-box;
+    background: $post-background;
+    border: $post-border;
+    border-radius: $post-border-radius;
+  }
+
+  &__content {
+    // Overflow breaks header float.
+    max-height: unset;
+    overflow: unset;
+  }
+
+  &__reference-link {
+    &:hover {
+      color: #b294bb;
+    }
+  }
+
+  @include breakpoint($xs-up) {
+    &__header {
+      float: left;
+    }
+
+    &__message {
+      clear: left;
+    }
+
+    &__file-preview {
+      float: right;
+    }
+  }
+}

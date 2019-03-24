@@ -1,0 +1,28 @@
+<section id="reply_{{ post.id }}"
+  class="post {{ post.isThread() ? 'content__oppost post_oppost oppost' : 'content__post post_reply reply' }}"
+  data-post-id="{{ post.id }}">
+  <div class="post__inner">
+    {% include 'components/_post_header_mobile.twig' with {'class': 'post__header-mobile'} %}
+    {% include 'components/_post_header.twig' with {'class': 'post__header'} %}
+
+    <div class="post__content">
+      {% if post.fileType %}
+        {% include 'components/_file.twig' with {'class': 'post__file-preview'} %}
+      {% endif %}
+
+      <div class="post__message message markup">
+        {{ post.messageFormatted }}
+
+        {% if post.isThread() and post.omitted > 0 %}
+          <p class="post__omitted">
+            {{ post.omitted }} post{{ post.omitted > 1 ? 's' }} omitted. Click Reply to view.
+          </p>
+        {% endif %}
+      </div>
+
+      {% if res != constant('TINYIB_INDEXPAGE') %}
+        <a class="post__reflink-icon" href="{{ reflink }}" title="Quick reply" data-reflink="{{ post.id }}"></a>
+      {% endif %}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,35 @@
+{% extends 'layout/_html.twig' %}
+
+{% block head %}
+  {{ parent() }}
+
+  <link rel="canonical" href="{{ base_url }}/res/{{ parent }}" />
+{% endblock %}
+
+{% block content %}
+  <main class="{{class is defined ? class ~ ' '}}">
+    <div class="content__replymode replymode">Posting mode: Reply</div>
+
+    <form id="delform" action="{{ base_url }}/post/delete" method="post">
+      <input type="hidden" name="board" value="{{ constant('TINYIB_BOARD') }}" />
+
+      {% for post in posts %}
+        {% include 'components/_post.twig' %}
+      {% endfor %}
+
+      <hr />
+
+      {% include 'components/_userdelete.twig' with {'class': 'content__userdelete'} %}
+    </form>
+
+    <div id="thread-updater"></div>
+
+    {% include 'components/_posting_form.twig' with {'class': 'content__posting-form'} %}
+
+    {% include 'components/_image-modal.twig' %}
+    {% include 'components/_video-modal.twig' %}
+  </main>
+{% endblock %}
+
+{% block footer_links %}
+{% endblock %}

@@ -1,0 +1,9 @@
+.post {
+  @include breakpoint($xs-up) {
+    &__inner {
+      &#{&} {
+        border-bottom-width: 3px;
+      }
+    }
+  }
+}
