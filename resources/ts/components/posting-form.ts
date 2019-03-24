@@ -385,7 +385,7 @@ export class PostingForm {
           } else if ((e.key === 'b' || checkKeyCode(e, 66)) && e.altKey) {
             e.preventDefault();
             this.insertMarkup('b');
-          } else if ((e.key === 'i' ||checkKeyCode(e, 73)) && e.altKey) {
+          } else if ((e.key === 'i' || checkKeyCode(e, 73)) && e.altKey) {
             e.preventDefault();
             this.insertMarkup('i');
           } else if ((e.key === 't' || checkKeyCode(e, 84)) && e.altKey) {
@@ -547,7 +547,16 @@ export class PostingForm {
             }
 
             if (isInThread) {
-              eventBus.$emit(Events.PostCreated);
+              const settings = SettingsManager.load();
+              if (settings.common.threadAutoupdate) {
+                eventBus.$emit(Events.PostCreated);
+              } else {
+                // Trigger DE thread update.
+                const updater = DOM.qs('.de-thr-updater-link') as HTMLAnchorElement;
+                if (updater) {
+                  updater.click();
+                }
+              }
             } else {
               // Redirect to thread.
               if (location) {

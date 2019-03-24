@@ -3,6 +3,7 @@ import {
   Captcha,
   CorrectTime,
   DeleteForm,
+  NewPostsDetector,
   Post,
   PostingForm,
   PostReferenceMap,
@@ -27,7 +28,13 @@ new PostingForm();
 new PostReferenceMap();
 new Settings();
 new StyleSwitch();
-new ThreadUpdater();
+
+const settings = SettingsManager.load();
+if (settings.common.threadAutoupdate) {
+  new ThreadUpdater();
+} else {
+  new NewPostsDetector();
+}
 
 document.addEventListener('DOMContentLoaded', e => {
   eventBus.$emit(Events.Ready);
@@ -35,7 +42,6 @@ document.addEventListener('DOMContentLoaded', e => {
   const posts = DOM.qsa('.post');
   eventBus.$emit(Events.PostsInserted, posts, true);
 
-  const settings = SettingsManager.load();
   if (settings.common.smoothScroll) {
     document.body.classList.add('smooth-scroll');
   }
