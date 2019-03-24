@@ -180,9 +180,16 @@ export class Modal {
 
       const rx = (e.clientX - this.left) / this.width;
       const ry = (e.clientY - this.top) / this.height;
+      const dx = (newWidth - this.width) * rx;
+      const dy = (newHeight - this.height) * ry;
 
-      this.left -= (newWidth - this.width) * rx;
-      this.top -= (newHeight - this.height) * ry;
+      if (this.dragStart) {
+        this.dragStart.left -= dx;
+        this.dragStart.top -= dy;
+      }
+
+      this.left -= dx;
+      this.top -= dy;
       this.width = newWidth;
       this.height = newHeight;
 
