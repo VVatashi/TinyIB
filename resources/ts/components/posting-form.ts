@@ -23,6 +23,10 @@ interface ViewModel {
   colorPopupVisible: boolean;
 }
 
+function checkKeyCode(e: KeyboardEvent, code: number) {
+  return e.keyCode === code || e.which === code;
+}
+
 export class PostingForm {
   protected isInThread: boolean = false;
   protected viewModel: Vue & ViewModel;
@@ -189,8 +193,8 @@ export class PostingForm {
       <div class="posting-form__row">
         <textarea class="input posting-form__message" placeholder="Message"
           v-model="fields.message" v-bind:disabled="disabled"
-          v-on:keydown="onMessageKeyDown($event)"
-          v-on:paste="onMessagePaste($event)"
+          v-on:keydown="onMessageKeyDown"
+          v-on:paste="onMessagePaste"
           ref="message"></textarea>
       </div>
 
@@ -375,24 +379,22 @@ export class PostingForm {
           this.file = files.length ? files[0] : null;
         },
         onMessageKeyDown(e: KeyboardEvent) {
-          const keyChar = String.fromCharCode(e.keyCode).toLowerCase();
-
           // Submit form on Ctrl+Enter in the message field.
-          if ((e.keyCode === 10 || e.keyCode === 13) && e.ctrlKey) {
+          if ((e.key === 'Enter' || checkKeyCode(e, 10) || checkKeyCode(e, 13)) && e.ctrlKey) {
             this.onSubmit();
-          } else if (keyChar === 'b' && e.altKey) {
+          } else if ((e.key === 'b' || checkKeyCode(e, 66)) && e.altKey) {
             e.preventDefault();
             this.insertMarkup('b');
-          } else if (keyChar === 'i' && e.altKey) {
+          } else if ((e.key === 'i' ||checkKeyCode(e, 73)) && e.altKey) {
             e.preventDefault();
             this.insertMarkup('i');
-          } else if (keyChar === 't' && e.altKey) {
+          } else if ((e.key === 't' || checkKeyCode(e, 84)) && e.altKey) {
             e.preventDefault();
             this.insertMarkup('s');
-          } else if (keyChar === 'p' && e.altKey) {
+          } else if ((e.key === 'p' || checkKeyCode(e, 80)) && e.altKey) {
             e.preventDefault();
             this.insertMarkup('spoiler');
-          } else if (keyChar === 'c' && e.altKey) {
+          } else if ((e.key === 'c' || checkKeyCode(e, 67)) && e.altKey) {
             e.preventDefault();
             this.insertMarkup('code');
           }

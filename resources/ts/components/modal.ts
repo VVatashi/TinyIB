@@ -48,6 +48,9 @@ export class Modal {
   protected height: number = 0;
   protected aspect: number = 1;
 
+  protected onMove?: (left: number, top: number, width: number, heiht: number)
+    => { left: number, top: number } = null;
+
   protected onClose?: () => any = null;
 
   protected $content?: HTMLElement = null;
@@ -79,6 +82,12 @@ export class Modal {
 
       this.left = this.dragStart.left + dx;
       this.top = this.dragStart.top + dy;
+
+      if (this.onMove) {
+        const { left, top } = this.onMove(this.left, this.top, this.width, this.height);
+        this.left = left;
+        this.top = top;
+      }
 
       this.$modal.style.left = `${this.left}px`;
       this.$modal.style.top = `${this.top}px`;
@@ -175,7 +184,7 @@ export class Modal {
 
       const sensitivity = 0.20;
       const scale = 1 - sensitivity * Math.sign(e.deltaY);
-      const newWidth = Math.min(8192, Math.max(128, this.width * scale));
+      const newWidth = Math.max(128, Math.min(this.width * scale, 8192));
       const newHeight = newWidth / this.aspect;
 
       const rx = (e.clientX - this.left) / this.width;
@@ -193,6 +202,12 @@ export class Modal {
       this.width = newWidth;
       this.height = newHeight;
 
+      if (this.onMove) {
+        const { left, top } = this.onMove(this.left, this.top, this.width, this.height);
+        this.left = left;
+        this.top = top;
+      }
+
       this.$modal.style.left = `${this.left}px`;
       this.$modal.style.top = `${this.top}px`;
       this.$content.style.width = `${this.width}px`;
@@ -208,6 +223,8 @@ export class Modal {
     width: number,
     height: number,
     onClose?: () => any,
+    onMove?: (left: number, top: number, width: number, heiht: number)
+      => { left: number, top: number },
   ) {
     this.left = left;
     this.top = top;
@@ -216,6 +233,7 @@ export class Modal {
     this.aspect = this.height > 0 ? this.width / this.height : 1;
 
     this.onClose = onClose;
+    this.onMove = onMove;
 
     this.$modal.style.left = `${left}px`;
     this.$modal.style.top = `${top}px`;
