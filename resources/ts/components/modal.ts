@@ -1,17 +1,31 @@
-import { DOM } from "../utils";
+import { DOM } from '../utils';
 
 const pointerEvents = 'PointerEvent' in window;
 const touchEvents = 'ontouchstart' in window;
 
-function getEventCoords(e: PointerEvent | TouchEvent) {
-  if (e instanceof MouseEvent) {
-    return {
-      x: e.clientX,
-      y: e.clientY,
-    };
-  }
+const startEvents: string[] = [];
+const moveEvents: string[] = [];
+const endEvents: string[] = [];
 
-  if (pointerEvents && e instanceof PointerEvent) {
+if (pointerEvents) {
+  startEvents.push('pointerdown');
+  moveEvents.push('pointermove');
+  endEvents.push('pointerup', 'pointercancel');
+} else {
+  startEvents.push('mousedown');
+  moveEvents.push('mousemove');
+  endEvents.push('mouseup');
+
+  if (touchEvents) {
+    startEvents.push('touchstart');
+    moveEvents.push('touchmove');
+    endEvents.push('touchend', 'touchcancel');
+  }
+}
+
+function getEventCoords(e: PointerEvent | TouchEvent) {
+  if (e instanceof MouseEvent
+    || pointerEvents && e instanceof PointerEvent) {
     return {
       x: e.clientX,
       y: e.clientY,
@@ -103,20 +117,8 @@ export class Modal {
     const onUp = (e: PointerEvent | TouchEvent) => {
       e.preventDefault();
 
-      if (pointerEvents) {
-        window.removeEventListener('pointermove', onMove);
-        window.removeEventListener('pointerup', onUp);
-        window.removeEventListener('pointercancel', onUp);
-      } else {
-        window.removeEventListener('mousemove', onMove);
-        window.removeEventListener('mouseup', onUp);
-
-        if (touchEvents) {
-          window.removeEventListener('touchmove', onMove);
-          window.removeEventListener('touchend', onUp);
-          window.removeEventListener('touchcancel', onUp);
-        }
-      }
+      moveEvents.forEach(event => window.removeEventListener(event, onMove));
+      endEvents.forEach(event => window.removeEventListener(event, onUp));
 
       if (!this.isDragged) {
         this.hide();
@@ -151,33 +153,13 @@ export class Modal {
       this._isDragging = true;
       this.isDragged = false;
 
-      if (pointerEvents) {
-        window.addEventListener('pointermove', onMove);
-        window.addEventListener('pointerup', onUp);
-        window.addEventListener('pointercancel', onUp);
-      } else {
-        window.addEventListener('mousemove', onMove);
-        window.addEventListener('mouseup', onUp);
-
-        if (touchEvents) {
-          window.addEventListener('touchmove', onMove);
-          window.addEventListener('touchend', onUp);
-          window.addEventListener('touchcancel', onUp);
-        }
-      }
+      moveEvents.forEach(event => window.addEventListener(event, onMove));
+      endEvents.forEach(event => window.addEventListener(event, onUp));
 
       return false;
     };
 
-    if (pointerEvents) {
-      $modal.addEventListener('pointerdown', onDown);
-    } else {
-      $modal.addEventListener('mousedown', onDown);
-
-      if (touchEvents) {
-        $modal.addEventListener('touchstart', onDown);
-      }
-    }
+    startEvents.forEach(event => $modal.addEventListener(event, onDown));
 
     $modal.addEventListener('wheel', e => {
       e.preventDefault();
