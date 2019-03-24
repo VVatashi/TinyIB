@@ -187,42 +187,6 @@ class PostController implements PostControllerInterface
     }
 
     /**
-     * @return string
-     */
-    protected function supportedFileTypes() : string
-    {
-        global $tinyib_uploads;
-        if (empty($tinyib_uploads)) {
-            return '';
-        }
-
-        $types_allowed = array_map('strtoupper', array_unique(array_column($tinyib_uploads, 0)));
-        $types_last = array_pop($types_allowed);
-        $types_formatted = $types_allowed
-            ? implode(', ', $types_allowed) . ' and ' . $types_last
-            : $types_last;
-
-        return 'Supported file type' . (count($tinyib_uploads) != 1 ? 's are ' : ' is ') . $types_formatted . '.';
-    }
-
-    /**
-     * @param int $id
-     *
-     * @return string
-     */
-    protected function renderThreadPage(int $id) : string
-    {
-        $posts = Post::getPostsByThreadID($id);
-        return $this->renderer->render('thread.twig', [
-            'filetypes' => $this->supportedFileTypes(),
-            'posts' => $posts,
-            'parent' => $id,
-            'res' => TINYIB_RESPAGE,
-            'thumbnails' => true,
-        ]);
-    }
-
-    /**
      * @param int $page
      *
      * @return string
@@ -248,13 +212,11 @@ class PostController implements PostControllerInterface
         }
 
         return $this->renderer->render('board.twig', [
-            'filetypes' => $this->supportedFileTypes(),
             'posts' => $posts,
             'pages' => max($pages, 0),
             'this_page' => $page,
             'parent' => 0,
             'res' => TINYIB_INDEXPAGE,
-            'thumbnails' => true,
         ]);
     }
 
@@ -293,10 +255,51 @@ class PostController implements PostControllerInterface
             $headers['X-Cached'] = 'true';
         } else {
             $headers['X-Cached'] = 'false';
-            $data = $this->renderThreadPage($id);
+
+            $thread = Post::find($id);
+            if (!isset($thread)) {
+                throw new NotFoundException("Thread #$id not found.");
+            }
+
+            $posts = Post::getPostsByThreadID($id);
+            $data = $this->renderer->render('thread.twig', [
+                'posts' => $posts,
+                'parent' => $id,
+                'res' => TINYIB_RESPAGE,
+            ]);
             $this->cache->set($key, $data, 4 * 60 * 60);
         }
 
         return new Response(200, $headers, $data);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function ajaxThread(ServerRequestInterface $request) : ResponseInterface
+    {
+        $args = explode('/', $request->getUri()->getPath());
+        $id = (int)$args[3];
+
+        $thread = Post::find($id);
+        if (!isset($thread)) {
+            throw new NotFoundException("Thread #$id not found.");
+        }
+
+        $query = $request->getQueryParams();
+        $after = isset($query['after']) ? (int)$query['after'] : 0;
+
+        $posts = Post::where(function ($query) use ($id) {
+            $query->where('id', $id);
+            $query->orWhere('parent_id', $id);
+        })->where('id', '>', $after)->orderBy('id', 'asc')->get();
+
+        $data = $this->renderer->render('ajax/thread.twig', [
+            'posts' => $posts,
+            'parent' => $id,
+            'res' => TINYIB_RESPAGE,
+        ]);
+
+        return new Response(200, [], $data);
     }
 }
