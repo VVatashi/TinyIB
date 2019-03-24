@@ -40,11 +40,6 @@ export class NewPostsDetector {
         childList: true,
         subtree: true,
       });
-
-      const posts = DOM.qsa('.post');
-      if (posts.length > 0) {
-        eventBus.$emit(Events.PostsInserted, posts, true);
-      }
     });
   }
 }
