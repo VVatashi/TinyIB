@@ -27,6 +27,10 @@ interface PostData {
   file?: string;
 }
 
+function checkKeyCode(e: KeyboardEvent, code: number) {
+  return e.keyCode === code || e.which === code;
+}
+
 export class Post {
   protected popupViewModel: PopupViewModel;
   protected posts: PostData[] = [];
@@ -74,14 +78,13 @@ export class Post {
       });
     };
 
-    document.addEventListener('keydown', e => {
+    document.addEventListener('keydown', (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
         return;
       }
 
-      const keyChar = String.fromCharCode(e.keyCode).toLowerCase();
-      if (keyChar === 'b') {
+      if (e.key === 'b' || checkKeyCode(e, 66)) {
         e.preventDefault();
 
         const settings = SettingsManager.load();
@@ -96,14 +99,14 @@ export class Post {
         SettingsManager.save(settings);
 
         return false;
-      } else if (e.keyCode === 27) {
+      } else if (e.key === 'Escape' || checkKeyCode(e, 27)) {
         e.preventDefault();
         closeModals();
         return false;
       }
     });
 
-    document.addEventListener('click', e => {
+    document.addEventListener('click', (e: MouseEvent) => {
       if (e.button !== 0) {
         return;
       }
@@ -146,6 +149,12 @@ export class Post {
 
             imageModal.show(left, top, width, height, () => {
               $image.setAttribute('src', '');
+            }, (left, top, width, height) => {
+              const padding = 40;
+              return {
+                left: Math.max(padding - width, Math.min(left, window.innerWidth - padding)),
+                top: Math.max(padding - height, Math.min(top, window.innerHeight - padding)),
+              };
             });
           }
         } else if (e.target.classList.contains('thumbnail--video')
@@ -162,6 +171,12 @@ export class Post {
             videoModal.show(left, top, width, height, () => {
               ($video as HTMLVideoElement).pause();
               $video.setAttribute('src', '');
+            }, (left, top, width, height) => {
+              const padding = 40;
+              return {
+                left: Math.max(padding - width, Math.min(left, window.innerWidth - padding)),
+                top: Math.max(0, Math.min(top, window.innerHeight - padding)),
+              };
             });
           }
         }
