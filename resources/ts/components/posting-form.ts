@@ -375,22 +375,24 @@ export class PostingForm {
           this.file = files.length ? files[0] : null;
         },
         onMessageKeyDown(e: KeyboardEvent) {
+          const keyChar = String.fromCharCode(e.keyCode).toLowerCase();
+
           // Submit form on Ctrl+Enter in the message field.
-          if ((e.keyCode == 10 || e.keyCode == 13) && e.ctrlKey) {
+          if ((e.keyCode === 10 || e.keyCode === 13) && e.ctrlKey) {
             this.onSubmit();
-          } else if (e.key === 'b' && e.altKey) {
+          } else if (keyChar === 'b' && e.altKey) {
             e.preventDefault();
             this.insertMarkup('b');
-          } else if (e.key === 'i' && e.altKey) {
+          } else if (keyChar === 'i' && e.altKey) {
             e.preventDefault();
             this.insertMarkup('i');
-          } else if (e.key === 't' && e.altKey) {
+          } else if (keyChar === 't' && e.altKey) {
             e.preventDefault();
             this.insertMarkup('s');
-          } else if (e.key === 'p' && e.altKey) {
+          } else if (keyChar === 'p' && e.altKey) {
             e.preventDefault();
             this.insertMarkup('spoiler');
-          } else if (e.key === 'c' && e.altKey) {
+          } else if (keyChar === 'c' && e.altKey) {
             e.preventDefault();
             this.insertMarkup('code');
           }

@@ -22,10 +22,21 @@ interface PopupData {
 
 type PopupViewModel = Vue & PopupData;
 
-const ownPostIds: number[] = [];
+interface PostData {
+  el: HTMLElement;
+  file?: string;
+}
 
 export class Post {
   protected popupViewModel: PopupViewModel;
+  protected posts: PostData[] = [];
+  protected ownPostIds: number[] = [];
+
+  get files() {
+    return this.posts
+      .filter(post => post.file)
+      .map(post => post.file);
+  }
 
   constructor() {
     eventBus.$on(Events.Ready, this.onReady.bind(this));
@@ -40,8 +51,57 @@ export class Post {
     popup.classList.add('popup', 'hidden');
     document.body.insertBefore(popup, null);
 
-    const imageModal = new Modal(DOM.qid('image-modal'));
-    const videoModal = new Modal(DOM.qid('video-modal'));
+    const $layout = DOM.qs('.layout');
+    const $imageModal = DOM.qid('image-modal');
+    const $videoModal = DOM.qid('video-modal');
+    const $video = DOM.qs('video', $videoModal);
+
+    $video.addEventListener('mousedown', e => {
+      e.stopPropagation();
+    });
+
+    const imageModal = new Modal($imageModal);
+    const videoModal = new Modal($videoModal);
+
+    const closeModals = () => {
+      const modals = [
+        imageModal,
+        videoModal,
+      ];
+
+      modals.forEach(modal => {
+        modal.hide();
+      });
+    };
+
+    document.addEventListener('keydown', e => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        return;
+      }
+
+      const keyChar = String.fromCharCode(e.keyCode).toLowerCase();
+      if (keyChar === 'b') {
+        e.preventDefault();
+
+        const settings = SettingsManager.load();
+        if ($layout.classList.contains('layout--nsfw')) {
+          $layout.classList.remove('layout--nsfw');
+          settings.common.nsfw = false;
+        } else {
+          $layout.classList.add('layout--nsfw');
+          settings.common.nsfw = true;
+        }
+
+        SettingsManager.save(settings);
+
+        return false;
+      } else if (e.keyCode === 27) {
+        e.preventDefault();
+        closeModals();
+        return false;
+      }
+    });
 
     document.addEventListener('click', e => {
       if (e.button !== 0) {
@@ -52,10 +112,11 @@ export class Post {
         return;
       }
 
-      if (e.target.tagName === 'IMG' && e.target.classList.contains('thumbnail__content')) {
+      if (e.target.tagName === 'A' && e.target.classList.contains('thumbnail')
+        || e.target.tagName === 'IMG' && e.target.classList.contains('thumbnail__content')) {
         e.preventDefault();
 
-        const $link = e.target.parentElement;
+        const $link = e.target.tagName === 'A' ? e.target : e.target.parentElement;
         const link = $link.getAttribute('href');
 
         const imageWidth = +$link.getAttribute('data-width');
@@ -72,8 +133,9 @@ export class Post {
         const left = Math.round(window.innerWidth / 2 - width / 2);
         const top = Math.round(window.innerHeight / 2 - height / 2);
 
-        if (e.target.classList.contains('thumbnail__content--image')) {
-          const $image = DOM.qs('#image-modal_content > img');
+        if (e.target.classList.contains('thumbnail--image')
+          || e.target.classList.contains('thumbnail__content--image')) {
+          const $image = DOM.qs('img', $imageModal);
           if (imageModal.isOpen && $image.getAttribute('src') === link) {
             imageModal.hide();
           } else {
@@ -86,8 +148,9 @@ export class Post {
               $image.setAttribute('src', '');
             });
           }
-        } else if (e.target.classList.contains('thumbnail__content--video')) {
-          const $video = DOM.qs('#video-modal_content > video');
+        } else if (e.target.classList.contains('thumbnail--video')
+          || e.target.classList.contains('thumbnail__content--video')) {
+          const $video = DOM.qs('video', $videoModal);
           if (videoModal.isOpen && $video.getAttribute('src') === link) {
             videoModal.hide();
           } else {
@@ -162,6 +225,14 @@ export class Post {
 
   protected onPostsInserted(posts: HTMLElement[]) {
     posts.forEach(post => {
+      const $fileLink = DOM.qs('.thumbnail', post);
+      const file = $fileLink ? $fileLink.getAttribute('href') : null;
+
+      this.posts.push({
+        el: post,
+        file: file,
+      });
+
       this.processReplies(post);
       this.processOEmbedLinks(post);
     });
@@ -178,7 +249,7 @@ export class Post {
 
     if (name.length && postName.indexOf(name) !== -1) {
       const postId = +post.getAttribute('data-post-id');
-      ownPostIds.push(postId);
+      this.ownPostIds.push(postId);
 
       post.classList.add('post--own');
     }
@@ -186,7 +257,7 @@ export class Post {
     const links = DOM.qsa('.post__reference-link', post);
     links.forEach(link => {
       const targetId = +link.getAttribute('data-target-post-id');
-      if (ownPostIds.indexOf(targetId) !== -1) {
+      if (this.ownPostIds.indexOf(targetId) !== -1) {
         const youEl = document.createElement('span');
         youEl.classList.add('post__reference-link-author');
         youEl.innerHTML = '(You)';
