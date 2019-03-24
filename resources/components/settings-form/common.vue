@@ -73,6 +73,13 @@
         Enable NSFW mode
       </x-checkbox>
     </div>
+
+    <div class="settings-form__row">
+      <x-checkbox v-model="settings.common.threadAutoupdate"
+        label-class="settings-form__label" input-class="settings-form__checkbox">
+        Enable thread autoupdate
+      </x-checkbox>
+    </div>
   </div>
 </template>
 

@@ -3,6 +3,7 @@ import Vue from 'vue';
 import ThreadUpdaterComponent from '../../components/thread-updater.vue';
 
 import { eventBus, Events } from '..';
+import { SettingsManager } from '../settings';
 import { DOM } from '../utils';
 
 export class ThreadUpdater {
@@ -13,6 +14,11 @@ export class ThreadUpdater {
   }
 
   protected onReady() {
+    const settings = SettingsManager.load();
+    if (!settings.common.threadAutoupdate) {
+      return;
+    }
+
     const threadUpdater = DOM.qid('thread-updater');
     if (!threadUpdater) {
       return;

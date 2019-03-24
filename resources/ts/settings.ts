@@ -9,6 +9,7 @@ export interface CommonSettings {
   showVideoOverlay: boolean;
   hidePopupOnOutsideClick: boolean;
   nsfw: boolean;
+  threadAutoupdate: boolean;
 }
 
 export interface Replace {
@@ -66,6 +67,7 @@ const defaultSettings: Settings = {
     showVideoOverlay: false,
     hidePopupOnOutsideClick: false,
     nsfw: false,
+    threadAutoupdate: false,
   },
   form: {
     align: 'center',
