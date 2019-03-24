@@ -78,7 +78,7 @@ export class Post {
       });
     };
 
-    document.addEventListener('keydown', (e: KeyboardEvent) => {
+    const onKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
         return;
@@ -104,7 +104,9 @@ export class Post {
         closeModals();
         return false;
       }
-    });
+    };
+
+    document.addEventListener('keydown', onKeyDown, true);
 
     document.addEventListener('click', (e: MouseEvent) => {
       if (e.button !== 0) {
