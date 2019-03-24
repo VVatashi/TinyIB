@@ -3,6 +3,7 @@ import { DOM } from '../utils';
 import Vue from 'vue';
 import { draggable } from './draggable';
 import { Modal } from './modal';
+import { VideoPlayer } from './video-player';
 
 interface Coub {
   image_versions: {
@@ -58,12 +59,14 @@ export class Post {
     const $layout = DOM.qs('.layout');
     const $imageModal = DOM.qid('image-modal');
     const $videoModal = DOM.qid('video-modal');
+    const $player = DOM.qs('.player', $videoModal);
     const $video = DOM.qs('video', $videoModal);
 
     $video.addEventListener('mousedown', e => {
       e.stopPropagation();
     });
 
+    const player = new VideoPlayer($player);
     const imageModal = new Modal($imageModal);
     const videoModal = new Modal($videoModal);
 
@@ -78,7 +81,7 @@ export class Post {
       });
     };
 
-    document.addEventListener('keydown', (e: KeyboardEvent) => {
+    const onKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
         return;
@@ -104,7 +107,9 @@ export class Post {
         closeModals();
         return false;
       }
-    });
+    };
+
+    document.addEventListener('keydown', onKeyDown, true);
 
     document.addEventListener('click', (e: MouseEvent) => {
       if (e.button !== 0) {
@@ -163,8 +168,10 @@ export class Post {
           if (videoModal.isOpen && $video.getAttribute('src') === link) {
             videoModal.hide();
           } else {
+            ($video as HTMLVideoElement).pause();
             $video.setAttribute('src', '');
             $video.setAttribute('src', link);
+            ($video as HTMLVideoElement).load();
 
             imageModal.hide();
 
@@ -175,7 +182,7 @@ export class Post {
               const padding = 40;
               return {
                 left: Math.max(padding - width, Math.min(left, window.innerWidth - padding)),
-                top: Math.max(0, Math.min(top, window.innerHeight - padding)),
+                top: Math.max(padding - height, Math.min(top, window.innerHeight - padding)),
               };
             });
           }
