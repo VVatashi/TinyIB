@@ -33,6 +33,7 @@ $tinyib_uploads = [
     'image/pjpeg' => ['jpg'],
     'image/png' => ['png'],
     'image/gif' => ['gif'],
+    'image/webp' => ['webp'],
 
     'audio/mpeg' => ['mp3', 'images/audio_thumbnail.png'],
     'audio/mp3' => ['mp3', 'images/audio_thumbnail.png'],
