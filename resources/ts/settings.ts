@@ -10,6 +10,8 @@ export interface CommonSettings {
   hidePopupOnOutsideClick: boolean;
   nsfw: boolean;
   threadAutoupdate: boolean;
+  addNamesToLinks: boolean;
+  addYouToLinks: boolean;
 }
 
 export interface Replace {
@@ -68,6 +70,8 @@ const defaultSettings: Settings = {
     hidePopupOnOutsideClick: false,
     nsfw: false,
     threadAutoupdate: false,
+    addNamesToLinks: true,
+    addYouToLinks: true,
   },
   form: {
     align: 'center',

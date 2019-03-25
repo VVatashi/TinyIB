@@ -125,6 +125,7 @@ export class Modal {
       }
 
       this.dragStart = null;
+      this.$modal.classList.remove('modal--dragging');
 
       setTimeout(() => {
         this._isDragging = false;
@@ -152,6 +153,7 @@ export class Modal {
 
       this._isDragging = true;
       this.isDragged = false;
+      this.$modal.classList.add('modal--dragging');
 
       moveEvents.forEach(event => window.addEventListener(event, onMove));
       endEvents.forEach(event => window.addEventListener(event, onUp));
@@ -233,6 +235,7 @@ export class Modal {
     }
 
     this.$modal.classList.add('modal--hidden');
+    this.$modal.classList.remove('modal--dragging');
 
     if (this.onClose) {
       this.onClose();

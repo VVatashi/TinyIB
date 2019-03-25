@@ -131,7 +131,7 @@ export class VideoPlayer {
       return false;
     });
 
-    this.$volume.addEventListener('change', e => {
+    const volumeChange = (e: Event) => {
       if (+this.$volume.value === 0) {
         this.$mute.classList.add('hidden');
         this.$unmute.classList.remove('hidden');
@@ -141,7 +141,10 @@ export class VideoPlayer {
       }
 
       this.$video.volume = +this.$volume.value;
-    });
+    };
+
+    this.$volume.addEventListener('input', volumeChange);
+    this.$volume.addEventListener('change', volumeChange);
 
     this.$expand.addEventListener('click', e => {
       e.preventDefault();
