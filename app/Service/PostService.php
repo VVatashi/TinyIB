@@ -382,14 +382,9 @@ class PostService implements PostServiceInterface
             $file_mime_split = explode(' ', trim(mime_content_type($file['tmp_name'])));
             if (count($file_mime_split) > 0) {
                 $file_mime = strtolower(array_pop($file_mime_split));
-            } else {
-                if (!@getimagesize($file['tmp_name'])) {
-                    throw new ValidationException('Failed to read the MIME type and size of the uploaded file.'
-                        . ' Please retry the submission.');
-                }
-
-                $file_info = getimagesize($file['tmp_name']);
-                $file_mime = mime_content_type($file_location);
+            } elseif (!@getimagesize($file['tmp_name'])) {
+                throw new ValidationException('Failed to read the MIME type and size of the uploaded file.'
+                    . ' Please retry the submission.');
             }
 
             // If can't obtain the file mime, try get it from extension
@@ -399,6 +394,7 @@ class PostService implements PostServiceInterface
                     'jpeg' => 'image/jpeg',
                     'png' => 'image/png',
                     'gif' => 'image/gif',
+                    'webp' => 'image/webp',
                     'mp3' => 'audio/mpeg',
                     'mp4' => 'video/mp4',
                     'webm' => 'video/webm',
@@ -475,6 +471,7 @@ class PostService implements PostServiceInterface
                 'image/pjpeg',
                 'image/png',
                 'image/gif',
+                'image/webp',
                 'application/x-shockwave-flash',
             ])) {
                 // Determine the image size.
@@ -512,6 +509,7 @@ class PostService implements PostServiceInterface
                 'image/pjpeg',
                 'image/png',
                 'image/gif',
+                'image/webp',
             ])) {
                 // Create an image thumbnail.
                 $post->thumb = $file_name . 's.' . $tinyib_uploads[$file_mime][0];

@@ -221,6 +221,7 @@ class Post extends Model
       case 'jpg':
       case 'png':
       case 'gif':
+      case 'webp':
         return 'image';
 
       case 'mp3':
