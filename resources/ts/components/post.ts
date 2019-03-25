@@ -1,31 +1,16 @@
-import { eventBus, Events, SettingsManager } from '..';
-import { DOM } from '../utils';
-import Vue from 'vue';
-import { draggable } from './draggable';
+import { getCoubData, getCoubHtml, CoubData } from './coub';
 import { Modal } from './modal';
 import { VideoPlayer } from './video-player';
 
-interface Coub {
-  image_versions: {
-    template: string;
-  };
+import { eventBus, Events, SettingsManager } from '..';
+import { DOM } from '../utils';
 
-  permalink: string;
-  title: string;
-};
-
-interface PopupData {
-  hidden: boolean;
-  type: 'coub';
-  title: string;
-  content: string;
-}
-
-type PopupViewModel = Vue & PopupData;
-
-interface PostData {
-  el: HTMLElement;
-  file?: string;
+interface FileData {
+  postId: number;
+  type: 'image' | 'audio' | 'video' | 'coub';
+  url: string;
+  width: number;
+  height: number;
 }
 
 function checkKeyCode(e: KeyboardEvent, code: number) {
@@ -33,15 +18,22 @@ function checkKeyCode(e: KeyboardEvent, code: number) {
 }
 
 export class Post {
-  protected popupViewModel: PopupViewModel;
-  protected posts: PostData[] = [];
-  protected ownPostIds: number[] = [];
-  protected currentModalFile?: string = null;
+  protected $layout: HTMLElement;
+  protected $imageModal: HTMLElement;
+  protected $videoModal: HTMLElement;
+  protected $coubModal: HTMLElement;
+  protected $player: HTMLElement;
 
-  get postsWithFiles() {
-    return this.posts
-      .filter(post => post.file);
-  }
+  protected player: VideoPlayer;
+  protected imageModal: Modal;
+  protected videoModal: Modal;
+  protected coubModal: Modal;
+
+  protected readonly media: FileData[] = [];
+  protected readonly ownPostIds: number[] = [];
+  protected modals: Modal[];
+
+  protected modalFileIndex?: number = null;
 
   constructor() {
     eventBus.$on(Events.Ready, this.onReady.bind(this));
@@ -49,83 +41,22 @@ export class Post {
   }
 
   protected onReady() {
-    const settings = SettingsManager.load();
+    this.$layout = DOM.qs('.layout') as HTMLElement;
+    this.$imageModal = DOM.qid('image-modal') as HTMLElement;
+    this.$videoModal = DOM.qid('video-modal') as HTMLElement;
+    this.$coubModal = DOM.qid('coub-modal') as HTMLElement;
+    this.$player = DOM.qs('.player', this.$videoModal) as HTMLElement;
 
-    const popup = document.createElement('div');
-    popup.id = 'popup';
-    popup.classList.add('popup', 'hidden');
-    document.body.insertBefore(popup, null);
+    this.player = new VideoPlayer(this.$player);
+    this.imageModal = new Modal(this.$imageModal);
+    this.videoModal = new Modal(this.$videoModal);
+    this.coubModal = new Modal(this.$coubModal);
 
-    const $layout = DOM.qs('.layout');
-    const $imageModal = DOM.qid('image-modal');
-    const $videoModal = DOM.qid('video-modal');
-    const $player = DOM.qs('.player', $videoModal);
-
-    const player = new VideoPlayer($player);
-    const imageModal = new Modal($imageModal);
-    const videoModal = new Modal($videoModal);
-
-    const closeModals = () => {
-      const modals = [
-        imageModal,
-        videoModal,
-      ];
-
-      modals.forEach(modal => modal.hide());
-    };
-
-    const showFileModal = (post: PostData) => {
-      closeModals();
-
-      if (!post.file) {
-        return;
-      }
-
-      this.currentModalFile = post.file;
-
-      const $link = DOM.qs('.thumbnail', post.el);
-      const imageWidth = +$link.getAttribute('data-width');
-      const imageHeight = +$link.getAttribute('data-height');
-
-      const scale = Math.max(
-        imageWidth / window.innerWidth,
-        imageHeight / window.innerHeight
-      );
-
-      const width = scale <= 1 ? imageWidth : imageWidth / scale;
-      const height = scale <= 1 ? imageHeight : imageHeight / scale;
-
-      const left = Math.round(window.innerWidth / 2 - width / 2);
-      const top = Math.round(window.innerHeight / 2 - height / 2);
-
-      const onMove = (left: number, top: number, width: number, height: number) => {
-        const padding = 40;
-        return {
-          left: Math.max(padding - width, Math.min(left, window.innerWidth - padding)),
-          top: Math.max(padding - height, Math.min(top, window.innerHeight - padding)),
-        };
-      };
-
-      if (post.file.endsWith('.mp4') || post.file.endsWith('.webm')) {
-        const $video = DOM.qs('video', $videoModal);
-        $video.setAttribute('src', post.file);
-        ($video as HTMLVideoElement).load();
-
-        videoModal.show(left, top, width, height, () => {
-          ($video as HTMLVideoElement).pause();
-          $video.setAttribute('src', '');
-          this.currentModalFile = null;
-        }, onMove);
-      } else {
-        const $image = DOM.qs('img', $imageModal);
-        $image.setAttribute('src', post.file);
-
-        imageModal.show(left, top, width, height, () => {
-          $image.setAttribute('src', '');
-          this.currentModalFile = null;
-        }, onMove);
-      }
-    }
+    this.modals = [
+      this.imageModal,
+      this.videoModal,
+      this.coubModal,
+    ];
 
     const onKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -135,47 +66,38 @@ export class Post {
 
       if (e.key === 'b' || checkKeyCode(e, 66)) {
         e.preventDefault();
-
-        const settings = SettingsManager.load();
-        if ($layout.classList.contains('layout--nsfw')) {
-          $layout.classList.remove('layout--nsfw');
-          settings.common.nsfw = false;
-        } else {
-          $layout.classList.add('layout--nsfw');
-          settings.common.nsfw = true;
-        }
-
-        SettingsManager.save(settings);
+        this.toggleNsfw();
 
         return false;
       } else if (e.key === 'Escape' || checkKeyCode(e, 27)) {
         e.preventDefault();
-
-        closeModals();
-
-        return false;
-      } else if (this.currentModalFile && (e.key === 'ArrowLeft' || checkKeyCode(e, 37)) && e.ctrlKey) {
-        e.preventDefault();
-
-        const posts = this.postsWithFiles;
-        const index = posts.findIndex(post => post.file === this.currentModalFile);
-        const prevIndex = index > 0 ? index - 1 : posts.length - 1;
-        showFileModal(posts[prevIndex]);
+        this.closeModals();
 
         return false;
-      } else if (this.currentModalFile && (e.key === 'ArrowRight' || checkKeyCode(e, 39)) && e.ctrlKey) {
+      } else if (this.modalFileIndex !== null
+        && (e.key === 'ArrowLeft' || checkKeyCode(e, 37)) && e.ctrlKey) {
         e.preventDefault();
 
-        const posts = this.postsWithFiles;
-        const index = posts.findIndex(post => post.file === this.currentModalFile);
-        const nextIndex = index < posts.length - 1 ? index + 1 : 0;
-        showFileModal(posts[nextIndex]);
+        const prevIndex = this.modalFileIndex > 0
+          ? this.modalFileIndex - 1 : this.media.length - 1;
+        this.showMediaModal(prevIndex);
+
+        return false;
+      } else if (this.modalFileIndex !== null
+        && (e.key === 'ArrowRight' || checkKeyCode(e, 39)) && e.ctrlKey) {
+        e.preventDefault();
+
+        const nextIndex = this.modalFileIndex < this.media.length - 1
+          ? this.modalFileIndex + 1 : 0;
+        this.showMediaModal(nextIndex);
 
         return false;
       }
     };
 
     document.addEventListener('keydown', onKeyDown, true);
+
+    const settings = SettingsManager.load();
 
     document.addEventListener('click', (e: MouseEvent) => {
       if (e.button !== 0) {
@@ -192,81 +114,50 @@ export class Post {
 
         const $link = e.target.tagName === 'A' ? e.target : e.target.parentElement;
         const link = $link.getAttribute('href');
-        if (link === this.currentModalFile) {
-          closeModals();
+        if (this.modalFileIndex !== null && this.media[this.modalFileIndex].url === link) {
+          this.closeModals();
         } else {
-          const post = this.posts.find(post => post.file === link);
-          if (post) {
-            showFileModal(post);
+          const index = this.media.findIndex(file => file.url === link);
+          if (index !== -1) {
+            this.showMediaModal(index);
           }
         }
 
         return false;
       } else if (settings.common.hidePopupOnOutsideClick) {
-        const modals = [
-          imageModal,
-          videoModal,
-        ];
-
-        modals.filter(modal => !modal.isDragging)
+        this.modals.filter(modal => !modal.isDragging)
           .forEach(modal => modal.hide());
       }
-    });
-
-    const self = this;
-
-    this.popupViewModel = new Vue({
-      template: `
-<div class="popup" id="popup" v-show="!hidden" ref="popup">
-  <div class="popup__header" ref="header">
-    <span class="popup__title">{{ title }}</span>
-
-    <span class="popup__header-buttons">
-      <span class="popup__close"
-        v-on:click.stop="onCloseClick()"
-        title="Close popup"></span>
-    </span>
-  </div>
-
-  <div class="popup__body" v-html="content">
-  </div>
-</div>`,
-      mixins: [draggable],
-      el: '#popup',
-      data(): PopupData {
-        return {
-          hidden: true,
-          type: 'coub',
-          title: null,
-          content: null,
-        };
-      },
-      methods: {
-        getDragHandle(): HTMLElement {
-          return this.$refs.header;
-        },
-        getDraggable(): HTMLElement {
-          return this.$refs.popup;
-        },
-        onCloseClick() {
-          self.closePopup();
-        },
-      },
     });
   }
 
   protected onPostsInserted(posts: HTMLElement[]) {
-    posts.forEach(post => {
-      const $fileLink = DOM.qs('.thumbnail', post);
-      const file = $fileLink ? $fileLink.getAttribute('href') : null;
+    posts.forEach($post => {
+      const $fileLink = DOM.qs('.thumbnail', $post);
+      if ($fileLink) {
+        const url = $fileLink.getAttribute('href');
 
-      this.posts.push({
-        el: post,
-        file: file,
-      });
+        let type = 'image';
+        if (url.endsWith('.mp3')) {
+          type = 'audio';
+        } else if (url.endsWith('.mp4') || url.endsWith('.webm')) {
+          type = 'video';
+        }
 
-      this.processReplies(post);
-      this.processOEmbedLinks(post);
+        const postId = +$post.getAttribute('data-post-id');
+        if (!this.media.find(file => file.postId === postId && file.url === url)) {
+          this.media.push({
+            postId,
+            type,
+            url,
+            width: +$fileLink.getAttribute('data-width'),
+            height: +$fileLink.getAttribute('data-height'),
+          } as FileData);
+        }
+      }
+
+      this.processReplies($post);
+      this.processOEmbedLinks($post);
     });
   }
 
@@ -301,13 +192,13 @@ export class Post {
     });
   }
 
-  protected async processOEmbedLinks(post: HTMLElement) {
-    const postContent = DOM.qs('.post__content', post);
+  protected async processOEmbedLinks($post: HTMLElement) {
+    const postContent = DOM.qs('.post__content', $post);
     if (!postContent) {
       return;
     }
 
-    const postMessage = DOM.qs('.post__message', post);
+    const postMessage = DOM.qs('.post__message', $post);
     const links = DOM.qsa('a[href]', postMessage);
     links.filter(link => !link.hasAttribute('data-processed'))
       .map(link => {
@@ -317,20 +208,8 @@ export class Post {
       .map(url => url.match('^https?:\/\/(?:www\.)?coub\.com\/view\/([0-9a-z]+)$'))
       .filter(matches => matches && matches.length >= 1)
       .forEach(async matches => {
-        const coubUrl = `https://coub.com/api/v2/coubs/${matches[1]}`;
-        const url = `${window.baseUrl}/api/embed?url=${encodeURIComponent(coubUrl)}`;
-
         try {
-          const response = await fetch(url, {
-            credentials: 'same-origin',
-          });
-
-          if (response.status !== 200) {
-            console.warn(`Can\'t load coub '${matches[0]}':`, response.status, response.statusText);
-            return;
-          }
-
-          const coub = await response.json() as Coub;
+          const coub = await getCoubData(matches[1]);
           const thumbnailUrl = coub.image_versions.template.replace('%{version}', 'small');
           const thumbnail = document.createElement('div');
           thumbnail.classList.add('post__file-preview', 'file');
@@ -340,54 +219,102 @@ export class Post {
   <span class="file-info__size"></span>
 </div>
 
-<a class="file__thumbnail thumbnail thumbnail--video" href="https://coub.com/view/${coub.permalink}" target="_blank">
-  <img class="thumbnail__content thumbnail__content--image" src="${thumbnailUrl}" />
+<a class="file__thumbnail thumbnail thumbnail--coub" href="https://coub.com/view/${coub.permalink}" target="_blank">
+  <img class="thumbnail__content thumbnail__content--coub" src="${thumbnailUrl}" />
 </a>`;
           thumbnail.style.maxHeight = '250px';
           thumbnail.style.maxWidth = '250px';
           postContent.insertBefore(thumbnail, postMessage);
 
-          const link = DOM.qs('.thumbnail', thumbnail);
-          link.addEventListener('click', e => {
-            e.preventDefault();
-            this.openCoubInPopup(coub);
-          });
+          const postId = +$post.getAttribute('data-post-id');
+          const url = `https://coub.com/view/${coub.permalink}`;
+          if (!this.media.find(file => file.postId === postId && file.url === url)) {
+            this.media.push({
+              postId,
+              type: 'coub',
+              url,
+              width: coub.dimensions.big[0],
+              height: coub.dimensions.big[1],
+            });
+          }
+
+          this.media.sort((a, b) => a.postId - b.postId);
         } catch (e) {
           console.warn(`Can\'t load coub '${matches[0]}':`, e);
         }
       });
   }
 
-  protected async openCoubInPopup(coub: Coub) {
-    const coubUrl = `https://coub.com/view/${coub.permalink}`;
-    const oEmbedUrl = `https://coub.com/api/oembed.json?url=${encodeURIComponent(coubUrl)}&autoplay=true`;
-    const url = `${window.baseUrl}/api/embed?url=${encodeURIComponent(oEmbedUrl)}`;
+  protected toggleNsfw() {
+    const nsfwClass = 'layout--nsfw';
+    const settings = SettingsManager.load();
 
-    try {
-      const response = await fetch(url, {
-        credentials: 'same-origin',
-      });
+    settings.common.nsfw = !settings.common.nsfw;
+    if (settings.common.nsfw) {
+      this.$layout.classList.add(nsfwClass);
+    } else {
+      this.$layout.classList.remove(nsfwClass);
+    }
 
-      if (response.status !== 200) {
-        console.warn(`Can\'t load coub 'https://coub.com/view/${coub.permalink}':`, response.status, response.statusText);
-        return;
-      }
+    SettingsManager.save(settings);
+  }
 
-      const json = await response.json();
-      this.popupViewModel.title = 'Coub — ' + coub.title;
-      this.popupViewModel.content = json.html.replace('muted=true', 'muted=false');
-      (this.popupViewModel as any).setPosition({
-        x: Math.max(0, window.innerWidth / 2 - json.width / 2),
-        y: Math.max(0, window.innerHeight / 2 - json.height / 2),
-      });
-      this.popupViewModel.hidden = false;
-    } catch (e) {
-      console.warn(`Can\'t load coub 'https://coub.com/view/${coub.permalink}':`, e);
+  protected async showMediaModal(mediaIndex: number) {
+    this.closeModals();
+
+    this.modalFileIndex = mediaIndex;
+
+    const file = this.media[mediaIndex];
+
+    const scale = Math.max(
+      file.width / window.innerWidth,
+      file.height / window.innerHeight
+    );
+
+    const width = scale <= 1 ? file.width : file.width / scale;
+    const height = scale <= 1 ? file.height : file.height / scale;
+
+    const left = Math.round(window.innerWidth / 2 - width / 2);
+    const top = Math.round(window.innerHeight / 2 - height / 2);
+
+    const onMove = (left: number, top: number, width: number, height: number) => {
+      const padding = 40;
+      return {
+        left: Math.max(padding - width, Math.min(left, window.innerWidth - padding)),
+        top: Math.max(padding - height, Math.min(top, window.innerHeight - padding)),
+      };
+    };
+
+    if (file.type === 'image') {
+      const $image = DOM.qs('img', this.$imageModal);
+      $image.setAttribute('src', file.url);
+
+      this.imageModal.show(left, top, width, height, () => {
+        $image.setAttribute('src', '');
+        this.modalFileIndex = null;
+      }, onMove);
+    } else if (file.type === 'video') {
+      const $video = DOM.qs('video', this.$videoModal);
+      $video.setAttribute('src', file.url);
+      ($video as HTMLVideoElement).load();
+
+      this.videoModal.show(left, top, width, height, () => {
+        ($video as HTMLVideoElement).pause();
+        $video.setAttribute('src', '');
+        this.modalFileIndex = null;
+      }, onMove);
+    } else if (file.type === 'coub') {
+      const $content = DOM.qid('coub-modal_content');
+      $content.innerHTML = await getCoubHtml(file.url);
+
+      this.coubModal.show(left, top, width, height, () => {
+        $content.innerHTML = '';
+        this.modalFileIndex = null;
+      }, onMove);
     }
   }
 
-  protected closePopup() {
-    this.popupViewModel.hidden = true;
-    this.popupViewModel.content = null;
-  }
+  protected closeModals = () => {
+    this.modals.forEach(modal => modal.hide());
+  };
 }

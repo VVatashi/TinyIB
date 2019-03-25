@@ -27,7 +27,10 @@ export class NewPostsDetector {
         })
         // Flatten posts array.
         .reduce((total, current) =>
-          total.concat(current), []);
+          total.concat(current), [])
+        .filter(post => !post.hasAttribute('data-processed'));
+
+      posts.forEach(post => post.setAttribute('data-processed', 'true'));
 
       if (posts.length > 0) {
         eventBus.$emit(Events.PostsInserted, posts, false);
