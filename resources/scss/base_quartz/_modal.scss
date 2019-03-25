@@ -13,6 +13,10 @@
     display: none;
   }
 
+  &--dragging &__content {
+    pointer-events: none;
+  }
+
   &__header {
     height: 1.5em;
   }

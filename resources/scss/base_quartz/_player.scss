@@ -25,7 +25,8 @@
   &__video {
     display: block;
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: contain;
   }
 
   &__controls {
