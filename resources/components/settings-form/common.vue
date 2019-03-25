@@ -80,6 +80,20 @@
         Enable thread autoupdate
       </x-checkbox>
     </div>
+
+    <div class="settings-form__row">
+      <x-checkbox v-model="settings.common.addNamesToLinks"
+        label-class="settings-form__label" input-class="settings-form__checkbox">
+        Add names to the links
+      </x-checkbox>
+    </div>
+
+    <div class="settings-form__row">
+      <x-checkbox v-model="settings.common.addYouToLinks"
+        label-class="settings-form__label" input-class="settings-form__checkbox">
+        Add '(you)' to the links
+      </x-checkbox>
+    </div>
   </div>
 </template>
 

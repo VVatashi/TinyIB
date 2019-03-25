@@ -1,4 +1,4 @@
-import { getCoubData, getCoubHtml, CoubData } from './coub';
+import { getCoubData, getCoubHtml } from './coub';
 import { Modal } from './modal';
 import { VideoPlayer } from './video-player';
 
@@ -177,14 +177,17 @@ export class Post {
       post.classList.add('post--own');
     }
 
+    const settings = SettingsManager.load();
     const links = DOM.qsa('.post__reference-link', post);
     links.forEach(link => {
       const targetId = +link.getAttribute('data-target-post-id');
       if (this.ownPostIds.indexOf(targetId) !== -1) {
-        const youEl = document.createElement('span');
-        youEl.classList.add('post__reference-link-author');
-        youEl.innerHTML = '(You)';
-        link.parentElement.insertBefore(youEl, link.nextSibling);
+        if (settings.common.addYouToLinks) {
+          const youEl = document.createElement('span');
+          youEl.classList.add('post__reference-link-author');
+          youEl.innerHTML = '(You)';
+          link.parentElement.insertBefore(youEl, link.nextSibling);
+        }
 
         post.classList.add('post--reply');
         link.classList.add('post__reference-link--reply');
