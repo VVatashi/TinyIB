@@ -36,11 +36,11 @@ export class Post {
   protected popupViewModel: PopupViewModel;
   protected posts: PostData[] = [];
   protected ownPostIds: number[] = [];
+  protected currentModalFile?: string = null;
 
-  get files() {
+  get postsWithFiles() {
     return this.posts
-      .filter(post => post.file)
-      .map(post => post.file);
+      .filter(post => post.file);
   }
 
   constructor() {
@@ -60,11 +60,6 @@ export class Post {
     const $imageModal = DOM.qid('image-modal');
     const $videoModal = DOM.qid('video-modal');
     const $player = DOM.qs('.player', $videoModal);
-    const $video = DOM.qs('video', $videoModal);
-
-    $video.addEventListener('mousedown', e => {
-      e.stopPropagation();
-    });
 
     const player = new VideoPlayer($player);
     const imageModal = new Modal($imageModal);
@@ -76,10 +71,61 @@ export class Post {
         videoModal,
       ];
 
-      modals.forEach(modal => {
-        modal.hide();
-      });
+      modals.forEach(modal => modal.hide());
     };
+
+    const showFileModal = (post: PostData) => {
+      closeModals();
+
+      if (!post.file) {
+        return;
+      }
+
+      this.currentModalFile = post.file;
+
+      const $link = DOM.qs('.thumbnail', post.el);
+      const imageWidth = +$link.getAttribute('data-width');
+      const imageHeight = +$link.getAttribute('data-height');
+
+      const scale = Math.max(
+        imageWidth / window.innerWidth,
+        imageHeight / window.innerHeight
+      );
+
+      const width = scale <= 1 ? imageWidth : imageWidth / scale;
+      const height = scale <= 1 ? imageHeight : imageHeight / scale;
+
+      const left = Math.round(window.innerWidth / 2 - width / 2);
+      const top = Math.round(window.innerHeight / 2 - height / 2);
+
+      const onMove = (left: number, top: number, width: number, height: number) => {
+        const padding = 40;
+        return {
+          left: Math.max(padding - width, Math.min(left, window.innerWidth - padding)),
+          top: Math.max(padding - height, Math.min(top, window.innerHeight - padding)),
+        };
+      };
+
+      if (post.file.endsWith('.mp4') || post.file.endsWith('.webm')) {
+        const $video = DOM.qs('video', $videoModal);
+        $video.setAttribute('src', post.file);
+        ($video as HTMLVideoElement).load();
+
+        videoModal.show(left, top, width, height, () => {
+          ($video as HTMLVideoElement).pause();
+          $video.setAttribute('src', '');
+          this.currentModalFile = null;
+        }, onMove);
+      } else {
+        const $image = DOM.qs('img', $imageModal);
+        $image.setAttribute('src', post.file);
+
+        imageModal.show(left, top, width, height, () => {
+          $image.setAttribute('src', '');
+          this.currentModalFile = null;
+        }, onMove);
+      }
+    }
 
     const onKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -104,7 +150,27 @@ export class Post {
         return false;
       } else if (e.key === 'Escape' || checkKeyCode(e, 27)) {
         e.preventDefault();
+
         closeModals();
+
+        return false;
+      } else if (this.currentModalFile && (e.key === 'ArrowLeft' || checkKeyCode(e, 37)) && e.ctrlKey) {
+        e.preventDefault();
+
+        const posts = this.postsWithFiles;
+        const index = posts.findIndex(post => post.file === this.currentModalFile);
+        const prevIndex = index > 0 ? index - 1 : posts.length - 1;
+        showFileModal(posts[prevIndex]);
+
+        return false;
+      } else if (this.currentModalFile && (e.key === 'ArrowRight' || checkKeyCode(e, 39)) && e.ctrlKey) {
+        e.preventDefault();
+
+        const posts = this.postsWithFiles;
+        const index = posts.findIndex(post => post.file === this.currentModalFile);
+        const nextIndex = index < posts.length - 1 ? index + 1 : 0;
+        showFileModal(posts[nextIndex]);
+
         return false;
       }
     };
@@ -126,65 +192,12 @@ export class Post {
 
         const $link = e.target.tagName === 'A' ? e.target : e.target.parentElement;
         const link = $link.getAttribute('href');
-
-        const imageWidth = +$link.getAttribute('data-width');
-        const imageHeight = +$link.getAttribute('data-height');
-
-        const scale = Math.max(
-          imageWidth / window.innerWidth,
-          imageHeight / window.innerHeight
-        );
-
-        const width = scale <= 1 ? imageWidth : imageWidth / scale;
-        const height = scale <= 1 ? imageHeight : imageHeight / scale;
-
-        const left = Math.round(window.innerWidth / 2 - width / 2);
-        const top = Math.round(window.innerHeight / 2 - height / 2);
-
-        if (e.target.classList.contains('thumbnail--image')
-          || e.target.classList.contains('thumbnail__content--image')) {
-          const $image = DOM.qs('img', $imageModal);
-          if (imageModal.isOpen && $image.getAttribute('src') === link) {
-            imageModal.hide();
-          } else {
-            $image.setAttribute('src', '');
-            $image.setAttribute('src', link);
-
-            videoModal.hide();
-
-            imageModal.show(left, top, width, height, () => {
-              $image.setAttribute('src', '');
-            }, (left, top, width, height) => {
-              const padding = 40;
-              return {
-                left: Math.max(padding - width, Math.min(left, window.innerWidth - padding)),
-                top: Math.max(padding - height, Math.min(top, window.innerHeight - padding)),
-              };
-            });
-          }
-        } else if (e.target.classList.contains('thumbnail--video')
-          || e.target.classList.contains('thumbnail__content--video')) {
-          const $video = DOM.qs('video', $videoModal);
-          if (videoModal.isOpen && $video.getAttribute('src') === link) {
-            videoModal.hide();
-          } else {
-            ($video as HTMLVideoElement).pause();
-            $video.setAttribute('src', '');
-            $video.setAttribute('src', link);
-            ($video as HTMLVideoElement).load();
-
-            imageModal.hide();
-
-            videoModal.show(left, top, width, height, () => {
-              ($video as HTMLVideoElement).pause();
-              $video.setAttribute('src', '');
-            }, (left, top, width, height) => {
-              const padding = 40;
-              return {
-                left: Math.max(padding - width, Math.min(left, window.innerWidth - padding)),
-                top: Math.max(padding - height, Math.min(top, window.innerHeight - padding)),
-              };
-            });
+        if (link === this.currentModalFile) {
+          closeModals();
+        } else {
+          const post = this.posts.find(post => post.file === link);
+          if (post) {
+            showFileModal(post);
           }
         }
 
@@ -195,11 +208,8 @@ export class Post {
           videoModal,
         ];
 
-        modals.forEach(modal => {
-          if (!modal.isDragging) {
-            modal.hide();
-          }
-        });
+        modals.filter(modal => !modal.isDragging)
+          .forEach(modal => modal.hide());
       }
     });
 
