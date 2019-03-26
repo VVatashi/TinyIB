@@ -28,7 +28,7 @@ export class NewPostsDetector {
         // Flatten posts array.
         .reduce((total, current) =>
           total.concat(current), [])
-        .filter(post => !post.hasAttribute('data-processed'));
+        .filter(post => !post.hasAttribute('data-processed') && !post.classList.contains('post--popup'));
 
       posts.forEach(post => post.setAttribute('data-processed', 'true'));
 

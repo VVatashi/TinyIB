@@ -13,8 +13,24 @@ interface FileData {
   height: number;
 }
 
+interface PostPopup {
+  id: number;
+  parentId?: number;
+  childrenIds: number[];
+  $parentLink: HTMLElement;
+  $popup: HTMLElement;
+  hover: boolean;
+}
+
 function checkKeyCode(e: KeyboardEvent, code: number) {
   return e.keyCode === code || e.which === code;
+}
+
+function offset($el: HTMLElement) {
+  const rect = $el.getBoundingClientRect();
+  const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  return { top: rect.top + scrollTop, left: rect.left + scrollLeft }
 }
 
 export class Post {
@@ -34,6 +50,9 @@ export class Post {
   protected modals: Modal[];
 
   protected modalFileIndex?: number = null;
+
+  protected nextPopupId = 0;
+  protected popups: { [key: number]: PostPopup } = {};
 
   constructor() {
     eventBus.$on(Events.Ready, this.onReady.bind(this));
@@ -127,6 +146,160 @@ export class Post {
       } else if (settings.common.hidePopupOnOutsideClick) {
         this.modals.filter(modal => !modal.isDragging)
           .forEach(modal => modal.hide());
+      }
+    });
+
+    const checkPopup = (popup: PostPopup) => {
+      if (popup.hover) {
+        return false;
+      }
+
+      // Check if any children has hover.
+      const childrenIds = [...popup.childrenIds];
+      while (childrenIds.length) {
+        const childId = childrenIds.shift();
+        const child = this.popups[childId];
+        if (!child) {
+          continue;
+        }
+
+        if (child.hover) {
+          return false;
+        }
+
+        childrenIds.push(...child.childrenIds);
+      }
+
+      // Close popup if none of it's children has hover.
+      popup.$popup.remove();
+      popup.$parentLink.removeAttribute('data-opened');
+
+      const popupId = popup.id;
+      const parentId = popup.parentId;
+      delete this.popups[popupId];
+
+      // Check parent popup.
+      if (parentId !== null) {
+        const parent = this.popups[parentId];
+        if (parent) {
+          parent.childrenIds = parent.childrenIds.filter(id => id !== popupId);
+          checkPopup(parent);
+        }
+      }
+
+      return true;
+    }
+
+    document.addEventListener('mouseover', e => {
+      const $target = e.target as HTMLElement;
+      if ($target.tagName === 'A'
+        && $target.classList.contains('post__reference-link')
+        && !$target.hasAttribute('data-opened')) {
+        const postId = +$target.getAttribute('data-target-post-id');
+        if (!postId) {
+          return;
+        }
+
+        const $postContent = DOM.qs(`[data-post-id="${postId}"] > .post__inner`);
+        if (!$postContent) {
+          return;
+        }
+
+        const $popup = document.createElement('div');
+        $popup.classList.add('post', 'post_reply', 'post--reply', 'post--popup');
+        $popup.style.position = 'absolute';
+
+        const targetOffset = offset($target);
+        const layoutOffset = offset(this.$layout);
+
+        const targetRect = $target.getBoundingClientRect();
+        const postRect = $postContent.getBoundingClientRect();
+
+        let left = targetOffset.left - layoutOffset.left + targetRect.width / 2;
+        let top = targetOffset.top - layoutOffset.top;
+
+        if (window.innerHeight - targetRect.top < postRect.height) {
+          top = top - postRect.height;
+        } else {
+          top += targetRect.height;
+        }
+
+        const scrollBarPadding = 16;
+        if (window.innerWidth - targetRect.left < postRect.width - scrollBarPadding) {
+          left = Math.max(0, left - postRect.width);
+        }
+
+        $popup.style.left = `${left}px`;
+        $popup.style.top = `${top}px`;
+
+        const $postContentCopy = $postContent.cloneNode(true);
+        $popup.appendChild($postContentCopy);
+
+        this.$layout.appendChild($popup);
+
+        const popupId = this.nextPopupId;
+        this.nextPopupId++;
+
+        $popup.setAttribute('data-popup-id', popupId.toString());
+
+        let parentId = null;
+        const $targetPost = $target.closest('.post');
+        if ($targetPost.hasAttribute('data-popup-id')) {
+          parentId = +$targetPost.getAttribute('data-popup-id');
+          this.popups[parentId].childrenIds.push(popupId);
+        }
+
+        this.popups[popupId] = {
+          id: popupId,
+          parentId,
+          childrenIds: [],
+          $parentLink: $target,
+          $popup,
+          hover: true,
+        };
+
+        $target.setAttribute('data-opened', 'true');
+
+        const linkMouseLeave = (e: Event) => {
+          const popupId = +$popup.getAttribute('data-popup-id');
+          const popup = this.popups[popupId];
+          if (!popup) {
+            $target.removeEventListener('mouseleave', linkMouseLeave);
+            return;
+          }
+
+          popup.hover = false;
+
+          setTimeout(() => {
+            if (checkPopup(popup)) {
+              $target.removeEventListener('mouseleave', linkMouseLeave);
+            }
+          }, 500);
+        };
+
+        $target.addEventListener('mouseleave', linkMouseLeave);
+
+        $popup.addEventListener('mouseenter', e => {
+          const popupId = +$popup.getAttribute('data-popup-id');
+          const popup = this.popups[popupId];
+          if (!popup) {
+            return;
+          }
+
+          popup.hover = true;
+        });
+
+        $popup.addEventListener('mouseleave', e => {
+          const popupId = +$popup.getAttribute('data-popup-id');
+          const popup = this.popups[popupId];
+          popup.hover = false;
+
+          setTimeout(() => {
+            if (checkPopup(popup)) {
+              $target.removeEventListener('mouseleave', linkMouseLeave);
+            }
+          }, 500);
+        });
       }
     });
   }

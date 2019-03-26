@@ -301,6 +301,10 @@ class Post extends Model
     ]);
     $message = $parser->parse($message);
 
+    // Make post reference links undetectable by DE.
+    /** @todo Fix later. */
+    $message = preg_replace('#&gt;&gt;(\d+)#', '&gt;&#8203;&gt;$1', $message);
+
     return static::fixLinks($message);
   }
 
