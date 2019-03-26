@@ -171,7 +171,11 @@ export class Post {
       }
 
       // Close popup if none of it's children has hover.
-      popup.$popup.remove();
+      popup.$popup.classList.add('faded');
+      setTimeout(() => {
+        popup.$popup.remove();
+      }, 200);
+
       popup.$parentLink.removeAttribute('data-opened');
 
       const popupId = popup.id;
@@ -206,7 +210,7 @@ export class Post {
         }
 
         const $popup = document.createElement('div');
-        $popup.classList.add('post', 'post_reply', 'post--reply', 'post--popup');
+        $popup.classList.add('post', 'post_reply', 'post--popup', 'fade', 'faded');
         $popup.style.position = 'absolute';
 
         const targetOffset = offset($target);
@@ -218,16 +222,23 @@ export class Post {
         let left = targetOffset.left - layoutOffset.left + targetRect.width / 2;
         let top = targetOffset.top - layoutOffset.top;
 
+        let transformOriginX = '0';
+        let transformOriginY = '0';
+
         if (window.innerHeight - targetRect.top < postRect.height) {
           top = top - postRect.height;
+          transformOriginY = '100%';
         } else {
           top += targetRect.height;
         }
 
         const scrollBarPadding = 16;
-        if (window.innerWidth - targetRect.left < postRect.width - scrollBarPadding) {
+        if (window.innerWidth - targetRect.left - scrollBarPadding < postRect.width) {
           left = Math.max(0, left - postRect.width);
+          transformOriginX = '100%';
         }
+
+        $popup.style.transformOrigin = `${transformOriginX} ${transformOriginY}`;
 
         $popup.style.left = `${left}px`;
         $popup.style.top = `${top}px`;
@@ -236,6 +247,10 @@ export class Post {
         $popup.appendChild($postContentCopy);
 
         this.$layout.appendChild($popup);
+
+        setTimeout(() => {
+          $popup.classList.remove('faded');
+        }, 50);
 
         const popupId = this.nextPopupId;
         this.nextPopupId++;
