@@ -69,7 +69,7 @@ export class Post {
     this.player = new VideoPlayer(this.$player);
     this.imageModal = new Modal(this.$imageModal);
     this.videoModal = new Modal(this.$videoModal);
-    this.coubModal = new Modal(this.$coubModal);
+    this.coubModal = new Modal(this.$coubModal, false);
 
     this.modals = [
       this.imageModal,
