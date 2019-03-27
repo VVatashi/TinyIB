@@ -97,6 +97,23 @@
     }
   }
 
+  &__refmap {
+    margin-top: 0.5em;
+
+    font-style: italic;
+    font-size: 0.8em;
+  }
+
+  &__refmap:not(:empty)::before {
+    content: 'Replies: ';
+    margin-right: 0.25em;
+  }
+
+  &__refmap-item:not(:last-child)::after {
+    content: ', ';
+    margin-right: 0.25em;
+  }
+
   &--own &__inner {
     box-shadow: 6px 0 2px -2px rgba(#808080, 0.75), -6px 0 2px -2px rgba(#808080, 0.75);
   }

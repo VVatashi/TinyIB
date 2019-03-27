@@ -560,7 +560,7 @@ export class PostingForm {
             } else {
               // Redirect to thread.
               if (location) {
-                window.location.href = location;
+                window.location.href = location.replace(/#[^\/]*$/g, '');
               }
             }
           } catch (e) {
@@ -589,9 +589,9 @@ export class PostingForm {
       });
     }
 
-    const content = DOM.qs('.layout__content');
-    if (content) {
-      content.addEventListener('click', e => {
+    const layout = DOM.qs('.layout');
+    if (layout) {
+      layout.addEventListener('click', e => {
         const target = e.target as HTMLElement;
         if (!target.getAttribute('data-reflink')) {
           return;
@@ -643,9 +643,15 @@ export class PostingForm {
           } else {
             if (vm.position !== 'float') {
               // Move form to the post.
-              const post = target.closest('.post') as HTMLElement;
-              if (post) {
-                this.moveToPost(post);
+              const targetPost = target.closest('.post') as HTMLElement;
+              if (targetPost) {
+                const postId = targetPost.getAttribute('data-post-id');
+                const post = DOM.qid(`reply_${postId}`);
+                if (post) {
+                  this.moveToPost(post);
+                } else {
+                  this.moveToBottom();
+                }
               } else {
                 this.moveToBottom();
               }

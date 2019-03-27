@@ -16,6 +16,7 @@ interface FileData {
 interface PostPopup {
   id: number;
   parentId?: number;
+  postId: number;
   childrenIds: number[];
   $parentLink: HTMLElement;
   $popup: HTMLElement;
@@ -176,8 +177,6 @@ export class Post {
         popup.$popup.remove();
       }, 200);
 
-      popup.$parentLink.removeAttribute('data-opened');
-
       const popupId = popup.id;
       const parentId = popup.parentId;
       delete this.popups[popupId];
@@ -187,7 +186,9 @@ export class Post {
         const parent = this.popups[parentId];
         if (parent) {
           parent.childrenIds = parent.childrenIds.filter(id => id !== popupId);
-          checkPopup(parent);
+          setTimeout(() => {
+            checkPopup(parent);
+          }, 100);
         }
       }
 
@@ -197,19 +198,34 @@ export class Post {
     document.addEventListener('mouseover', e => {
       const $target = e.target as HTMLElement;
       if ($target.tagName === 'A'
-        && $target.classList.contains('post__reference-link')
-        && !$target.hasAttribute('data-opened')) {
+        && ($target.classList.contains('post__reference-link')
+          || $target.classList.contains('post__refmap-link'))) {
         const postId = +$target.getAttribute('data-target-post-id');
         if (!postId) {
           return;
         }
 
-        const $postContent = DOM.qs(`[data-post-id="${postId}"] > .post__inner`);
+        const $postContent = DOM.qs(`#reply_${postId} > .post__inner`);
         if (!$postContent) {
           return;
         }
 
+        let parentId: number = null;
+        const $targetPost = $target.closest('.post');
+        if ($targetPost.hasAttribute('data-popup-id')) {
+          parentId = +$targetPost.getAttribute('data-popup-id');
+        }
+
+        const isAlreadyOpen = Object.keys(this.popups)
+          .map(key => this.popups[+key])
+          .filter(popup => popup.postId === postId && popup.parentId === parentId)
+          .length;
+        if (isAlreadyOpen) {
+          return;
+        }
+
         const $popup = document.createElement('div');
+        $popup.setAttribute('data-post-id', postId.toString());
         $popup.classList.add('post', 'post_reply', 'post--popup', 'fade', 'faded');
         $popup.style.position = 'absolute';
 
@@ -232,9 +248,10 @@ export class Post {
           top += targetRect.height;
         }
 
+        const maxWidth = 0.6;
         const scrollBarPadding = 16;
-        if (window.innerWidth - targetRect.left - scrollBarPadding < postRect.width) {
-          left = Math.max(0, left - postRect.width);
+        if (window.innerWidth - targetRect.left - scrollBarPadding < postRect.width * maxWidth) {
+          left = Math.max(0, left - postRect.width * maxWidth);
           transformOriginX = '100%';
         }
 
@@ -242,6 +259,7 @@ export class Post {
 
         $popup.style.left = `${left}px`;
         $popup.style.top = `${top}px`;
+        $popup.style.maxWidth = `${Math.floor(maxWidth * 100)}%`;
 
         const $postContentCopy = $postContent.cloneNode(true);
         $popup.appendChild($postContentCopy);
@@ -255,25 +273,24 @@ export class Post {
         const popupId = this.nextPopupId;
         this.nextPopupId++;
 
-        $popup.setAttribute('data-popup-id', popupId.toString());
-
-        let parentId = null;
-        const $targetPost = $target.closest('.post');
-        if ($targetPost.hasAttribute('data-popup-id')) {
-          parentId = +$targetPost.getAttribute('data-popup-id');
-          this.popups[parentId].childrenIds.push(popupId);
+        const parent = this.popups[parentId];
+        if (parent) {
+          parent.childrenIds.push(popupId);
         }
+
+        $popup.setAttribute('data-popup-id', popupId.toString());
 
         this.popups[popupId] = {
           id: popupId,
           parentId,
+          postId,
           childrenIds: [],
           $parentLink: $target,
           $popup,
           hover: true,
         };
 
-        $target.setAttribute('data-opened', 'true');
+        const popupCloseTimeout = 750;
 
         const linkMouseLeave = (e: Event) => {
           const popupId = +$popup.getAttribute('data-popup-id');
@@ -289,7 +306,7 @@ export class Post {
             if (checkPopup(popup)) {
               $target.removeEventListener('mouseleave', linkMouseLeave);
             }
-          }, 500);
+          }, popupCloseTimeout);
         };
 
         $target.addEventListener('mouseleave', linkMouseLeave);
@@ -307,13 +324,17 @@ export class Post {
         $popup.addEventListener('mouseleave', e => {
           const popupId = +$popup.getAttribute('data-popup-id');
           const popup = this.popups[popupId];
+          if (!popup) {
+            return;
+          }
+
           popup.hover = false;
 
           setTimeout(() => {
             if (checkPopup(popup)) {
               $target.removeEventListener('mouseleave', linkMouseLeave);
             }
-          }, 500);
+          }, popupCloseTimeout);
         });
       }
     });
@@ -358,8 +379,8 @@ export class Post {
     const postName = (postNameEl ? postNameEl.textContent : '')
       + (postTripcodeEl ? postTripcodeEl.textContent : '');
 
+    const postId = +post.getAttribute('data-post-id');
     if (name.length && postName.indexOf(name) !== -1) {
-      const postId = +post.getAttribute('data-post-id');
       this.ownPostIds.push(postId);
 
       post.classList.add('post--own');
@@ -379,6 +400,26 @@ export class Post {
 
         post.classList.add('post--reply');
         link.classList.add('post__reference-link--reply');
+      }
+
+      const $targetPost = DOM.qid(`reply_${targetId}`);
+      if ($targetPost) {
+        const $refmap = DOM.qs('.post__refmap', $targetPost);
+        if (DOM.qs(`[data-target-post-id="${postId}"]`, $refmap)) {
+          return;
+        }
+
+        const $reflink = document.createElement('a');
+        $reflink.href = `#reply_${postId}`;
+        $reflink.setAttribute('data-target-post-id', postId.toString());
+        $reflink.classList.add('post__refmap-link');
+        $reflink.textContent = `>\u200b>${postId}`;
+
+        const $reflinkWrapper = document.createElement('li');
+        $reflinkWrapper.classList.add('post__refmap-item');
+        $reflinkWrapper.appendChild($reflink);
+
+        $refmap.appendChild($reflinkWrapper);
       }
     });
   }
