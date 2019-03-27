@@ -244,7 +244,7 @@ class Post extends Model
       $target_post_id = (int)$matches[2];
 
       return 'class="post__reference-link"'
-        . ' href="/' . TINYIB_BOARD . "/res/$target_thread_id#$target_post_id\""
+        . ' href="/' . TINYIB_BOARD . "/res/$target_thread_id#reply_$target_post_id\""
         . " data-target-post-id=\"$target_post_id\"";
     }, $message);
   }

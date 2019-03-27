@@ -60,6 +60,7 @@ export class Modal {
   protected top: number = 0;
   protected width: number = 0;
   protected height: number = 0;
+  protected scale: number = 1;
   protected aspect: number = 1;
 
   protected onMove?: (left: number, top: number, width: number, heiht: number)
@@ -84,6 +85,7 @@ export class Modal {
 
   constructor(
     readonly $modal: HTMLElement,
+    readonly fitHeightToContent: boolean = true,
   ) {
     this.$content = DOM.qs('.modal__content', $modal) as HTMLElement;
 
@@ -166,15 +168,24 @@ export class Modal {
     $modal.addEventListener('wheel', e => {
       e.preventDefault();
 
-      const sensitivity = 0.20;
-      const scale = 1 - sensitivity * Math.sign(e.deltaY);
-      const newWidth = Math.max(128, Math.min(this.width * scale, 8192));
-      const newHeight = newWidth / this.aspect;
+      const pow = -1.25;
+      const prevWidth = this.width * Math.pow(this.scale, pow);
+      const prevHeight = prevWidth / this.aspect;
 
-      const rx = (e.clientX - this.left) / this.width;
-      const ry = (e.clientY - this.top) / this.height;
-      const dx = (newWidth - this.width) * rx;
-      const dy = (newHeight - this.height) * ry;
+      const sensitivity = 0.1;
+      const newScale = this.scale + sensitivity * Math.sign(e.deltaY);
+      const newWidth = this.width * Math.pow(newScale, pow);
+      if (newWidth > 128 && newWidth < 8192) {
+        this.scale = newScale;
+      }
+
+      const width = this.width * Math.pow(this.scale, pow);
+      const height = width / this.aspect;
+
+      const rx = (e.clientX - this.left) / prevWidth;
+      const ry = (e.clientY - this.top) / prevHeight;
+      const dx = (width - prevWidth) * rx;
+      const dy = (height - prevHeight) * ry;
 
       if (this.dragStart) {
         this.dragStart.left -= dx;
@@ -183,19 +194,20 @@ export class Modal {
 
       this.left -= dx;
       this.top -= dy;
-      this.width = newWidth;
-      this.height = newHeight;
 
       if (this.onMove) {
-        const { left, top } = this.onMove(this.left, this.top, this.width, this.height);
+        const { left, top } = this.onMove(this.left, this.top, width, height);
         this.left = left;
         this.top = top;
       }
 
       this.$modal.style.left = `${this.left}px`;
       this.$modal.style.top = `${this.top}px`;
-      this.$content.style.width = `${this.width}px`;
-      this.$content.style.height = `${this.height}px`;
+      this.$content.style.width = `${width}px`;
+
+      if (!this.fitHeightToContent) {
+        this.$content.style.height = `${height}px`;
+      }
 
       return false;
     });
@@ -214,6 +226,7 @@ export class Modal {
     this.top = top;
     this.width = width;
     this.height = height;
+    this.scale = 1;
     this.aspect = this.height > 0 ? this.width / this.height : 1;
 
     this.onClose = onClose;
@@ -222,7 +235,10 @@ export class Modal {
     this.$modal.style.left = `${left}px`;
     this.$modal.style.top = `${top}px`;
     this.$content.style.width = `${width}px`;
-    this.$content.style.height = `${height}px`;
+
+    if (!this.fitHeightToContent) {
+      this.$content.style.height = `${height}px`;
+    }
 
     this.$modal.classList.remove('modal--hidden');
 
