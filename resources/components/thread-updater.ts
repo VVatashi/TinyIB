@@ -78,10 +78,13 @@ export default Vue.extend({
     latestPostId = +DOM.qs('.post:last-of-type').getAttribute('data-post-id');
     this._interval = setInterval(this.updateCounter.bind(this), 1000);
 
-    eventBus.$on(Events.PostCreated, () => {
+    const update = () => {
       this.counter = updateInterval;
       this.getNewPosts();
-    });
+    };
+
+    eventBus.$on(Events.PostCreated, update);
+    eventBus.$on(Events.UpdateThread, update);
   },
   beforeDestroy() {
     if (this._interval) {

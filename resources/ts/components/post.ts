@@ -27,6 +27,10 @@ function checkKeyCode(e: KeyboardEvent, code: number) {
   return e.keyCode === code || e.which === code;
 }
 
+function checkKeyChar(e: KeyboardEvent, char: string) {
+  return e.key === char || checkKeyCode(e, char.toUpperCase().charCodeAt(0));
+}
+
 function offset($el: HTMLElement) {
   const rect = $el.getBoundingClientRect();
   const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
@@ -84,9 +88,23 @@ export class Post {
         return;
       }
 
-      if (e.key === 'b' || checkKeyCode(e, 66)) {
+      if (checkKeyChar(e, 'b')) {
         e.preventDefault();
         this.toggleNsfw();
+
+        return false;
+      } else if (checkKeyChar(e, 'u')) {
+        e.preventDefault();
+
+        const settings = SettingsManager.load();
+        if (settings.common.threadAutoupdate) {
+          eventBus.$emit(Events.UpdateThread);
+        } else {
+          const updater = DOM.qs('.de-thr-updater-link') as HTMLAnchorElement;
+          if (updater) {
+            updater.click();
+          }
+        }
 
         return false;
       } else if (e.key === 'Escape' || checkKeyCode(e, 27)) {
@@ -241,7 +259,8 @@ export class Post {
         let transformOriginX = '0';
         let transformOriginY = '0';
 
-        if (window.innerHeight - targetRect.top < postRect.height) {
+        const heightPadding = 32;
+        if (window.innerHeight - targetRect.top - heightPadding < postRect.height) {
           top = top - postRect.height;
           transformOriginY = '100%';
         } else {
@@ -249,9 +268,10 @@ export class Post {
         }
 
         const maxWidth = 0.6;
-        const scrollBarPadding = 16;
-        if (window.innerWidth - targetRect.left - scrollBarPadding < postRect.width * maxWidth) {
-          left = Math.max(0, left - postRect.width * maxWidth);
+        const maxPostWidth = Math.min(postRect.width, window.innerWidth * maxWidth);
+        const widthPadding = 32;
+        if (window.innerWidth - targetRect.left - widthPadding < maxPostWidth) {
+          left = Math.max(0, left - maxPostWidth);
           transformOriginX = '100%';
         }
 
