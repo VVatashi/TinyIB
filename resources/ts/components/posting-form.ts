@@ -27,6 +27,10 @@ function checkKeyCode(e: KeyboardEvent, code: number) {
   return e.keyCode === code || e.which === code;
 }
 
+function checkKeyChar(e: KeyboardEvent, char: string) {
+  return e.key === char || checkKeyCode(e, char.toUpperCase().charCodeAt(0));
+}
+
 export class PostingForm {
   protected isInThread: boolean = false;
   protected viewModel: Vue & ViewModel;
@@ -382,19 +386,19 @@ export class PostingForm {
           // Submit form on Ctrl+Enter in the message field.
           if ((e.key === 'Enter' || checkKeyCode(e, 10) || checkKeyCode(e, 13)) && e.ctrlKey) {
             this.onSubmit();
-          } else if ((e.key === 'b' || checkKeyCode(e, 66)) && e.altKey) {
+          } else if (checkKeyChar(e, 'b') && e.altKey) {
             e.preventDefault();
             this.insertMarkup('b');
-          } else if ((e.key === 'i' || checkKeyCode(e, 73)) && e.altKey) {
+          } else if (checkKeyChar(e, 'i') && e.altKey) {
             e.preventDefault();
             this.insertMarkup('i');
-          } else if ((e.key === 't' || checkKeyCode(e, 84)) && e.altKey) {
+          } else if (checkKeyChar(e, 't') && e.altKey) {
             e.preventDefault();
             this.insertMarkup('s');
-          } else if ((e.key === 'p' || checkKeyCode(e, 80)) && e.altKey) {
+          } else if (checkKeyChar(e, 'p') && e.altKey) {
             e.preventDefault();
             this.insertMarkup('spoiler');
-          } else if ((e.key === 'c' || checkKeyCode(e, 67)) && e.altKey) {
+          } else if (checkKeyChar(e, 'c') && e.altKey) {
             e.preventDefault();
             this.insertMarkup('code');
           }
