@@ -38,7 +38,7 @@ class MobilePostController implements MobilePostControllerInterface
     }
 
     protected function fixLinks(string $message, int $thread_id): string {
-        $link_pattern = '#href="/' . TINYIB_BOARD . '/res/(\d+)\#(\d+)"#';
+        $link_pattern = '#href="/' . TINYIB_BOARD . '/res/(\d+)\#reply_(\d+)"#';
         return preg_replace_callback($link_pattern, function ($matches) use ($thread_id) {
             $target_thread_id = (int)$matches[1];
             $target_post_id = (int)$matches[2];

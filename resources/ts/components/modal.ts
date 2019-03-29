@@ -63,9 +63,6 @@ export class Modal {
   protected scale: number = 1;
   protected aspect: number = 1;
 
-  protected onMove?: (left: number, top: number, width: number, heiht: number)
-    => { left: number, top: number } = null;
-
   protected onClose?: () => any = null;
 
   protected $content?: HTMLElement = null;
@@ -93,17 +90,16 @@ export class Modal {
       e.preventDefault();
 
       const { x, y } = getEventCoords(e);
+
+      if (x < 0 || y < 0 || x > window.innerWidth || y > window.innerHeight) {
+        return;
+      }
+
       const dx = x - this.dragStart.x;
       const dy = y - this.dragStart.y;
 
       this.left = this.dragStart.left + dx;
       this.top = this.dragStart.top + dy;
-
-      if (this.onMove) {
-        const { left, top } = this.onMove(this.left, this.top, this.width, this.height);
-        this.left = left;
-        this.top = top;
-      }
 
       this.$modal.style.left = `${this.left}px`;
       this.$modal.style.top = `${this.top}px`;
@@ -168,14 +164,14 @@ export class Modal {
     $modal.addEventListener('wheel', e => {
       e.preventDefault();
 
-      const pow = -1.25;
+      const pow = -1.125;
       const prevWidth = this.width * Math.pow(this.scale, pow);
       const prevHeight = prevWidth / this.aspect;
 
       const sensitivity = 0.1;
       const newScale = this.scale + sensitivity * Math.sign(e.deltaY);
       const newWidth = this.width * Math.pow(newScale, pow);
-      if (newWidth > 128 && newWidth < 8192) {
+      if (newWidth > 128 && newWidth < 32768) {
         this.scale = newScale;
       }
 
@@ -195,12 +191,6 @@ export class Modal {
       this.left -= dx;
       this.top -= dy;
 
-      if (this.onMove) {
-        const { left, top } = this.onMove(this.left, this.top, width, height);
-        this.left = left;
-        this.top = top;
-      }
-
       this.$modal.style.left = `${this.left}px`;
       this.$modal.style.top = `${this.top}px`;
       this.$content.style.width = `${width}px`;
@@ -219,8 +209,6 @@ export class Modal {
     width: number,
     height: number,
     onClose?: () => any,
-    onMove?: (left: number, top: number, width: number, heiht: number)
-      => { left: number, top: number },
   ) {
     this.left = left;
     this.top = top;
@@ -230,7 +218,6 @@ export class Modal {
     this.aspect = this.height > 0 ? this.width / this.height : 1;
 
     this.onClose = onClose;
-    this.onMove = onMove;
 
     this.$modal.style.left = `${left}px`;
     this.$modal.style.top = `${top}px`;
