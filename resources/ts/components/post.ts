@@ -213,149 +213,158 @@ export class Post {
       return true;
     }
 
+    const openPopup = ($link: HTMLElement) => {
+      const postId = +$link.getAttribute('data-target-post-id');
+      if (!postId) {
+        return;
+      }
+
+      const $postContent = DOM.qs(`#reply_${postId} > .post__inner`);
+      if (!$postContent) {
+        return;
+      }
+
+      let parentId: number = null;
+      const $targetPost = $link.closest('.post');
+      if ($targetPost.hasAttribute('data-popup-id')) {
+        parentId = +$targetPost.getAttribute('data-popup-id');
+      }
+
+      const isAlreadyOpen = Object.keys(this.popups)
+        .map(key => this.popups[+key])
+        .filter(popup => popup.postId === postId && popup.parentId === parentId)
+        .length;
+      if (isAlreadyOpen) {
+        return;
+      }
+
+      const $popup = document.createElement('div');
+      $popup.setAttribute('data-post-id', postId.toString());
+      $popup.classList.add('post', 'post_reply', 'post--popup', 'fade', 'faded');
+      $popup.style.position = 'absolute';
+      $popup.style.maxWidth = '60%';
+
+      const $postContentCopy = $postContent.cloneNode(true);
+      $popup.appendChild($postContentCopy);
+
+      this.$layout.appendChild($popup);
+
+      setTimeout(() => {
+        $popup.classList.remove('faded');
+      }, 50);
+
+      const targetOffset = offset($link);
+      const layoutOffset = offset(this.$layout);
+      const targetRect = $link.getBoundingClientRect();
+      let left = targetOffset.left - layoutOffset.left + targetRect.width / 2;
+      let top = targetOffset.top - layoutOffset.top;
+      let transformOriginX = '0';
+      let transformOriginY = '0';
+
+      const widthPadding = 16;
+      if (window.innerWidth - targetRect.left - widthPadding < $popup.offsetWidth) {
+        left = Math.max(0, left - $popup.offsetWidth);
+        transformOriginX = '100%';
+      }
+
+      const heightPadding = 16;
+      if (window.innerHeight - targetRect.top - heightPadding < $popup.offsetHeight) {
+        top = top - $popup.offsetHeight;
+        transformOriginY = '100%';
+      } else {
+        top += targetRect.height;
+      }
+
+      $popup.style.left = `${left}px`;
+      $popup.style.top = `${top}px`;
+      $popup.style.transformOrigin = `${transformOriginX} ${transformOriginY}`;
+
+      const popupId = this.nextPopupId;
+      this.nextPopupId++;
+
+      const parent = this.popups[parentId];
+      if (parent) {
+        parent.childrenIds.push(popupId);
+      }
+
+      $popup.setAttribute('data-popup-id', popupId.toString());
+
+      this.popups[popupId] = {
+        id: popupId,
+        parentId,
+        postId,
+        childrenIds: [],
+        $parentLink: $link,
+        $popup,
+        hover: true,
+      };
+
+      const popupCloseTimeout = 1000;
+
+      const linkMouseLeave = (e: Event) => {
+        const popupId = +$popup.getAttribute('data-popup-id');
+        const popup = this.popups[popupId];
+        if (!popup) {
+          $link.removeEventListener('mouseleave', linkMouseLeave);
+          return;
+        }
+
+        popup.hover = false;
+
+        setTimeout(() => {
+          if (checkPopup(popup)) {
+            $link.removeEventListener('mouseleave', linkMouseLeave);
+          }
+        }, popupCloseTimeout);
+      };
+
+      $link.addEventListener('mouseleave', linkMouseLeave);
+
+      $popup.addEventListener('mouseenter', e => {
+        const popupId = +$popup.getAttribute('data-popup-id');
+        const popup = this.popups[popupId];
+        if (!popup) {
+          return;
+        }
+
+        popup.hover = true;
+      });
+
+      $popup.addEventListener('mouseleave', e => {
+        const popupId = +$popup.getAttribute('data-popup-id');
+        const popup = this.popups[popupId];
+        if (!popup) {
+          return;
+        }
+
+        popup.hover = false;
+
+        setTimeout(() => {
+          if (checkPopup(popup)) {
+            $link.removeEventListener('mouseleave', linkMouseLeave);
+          }
+        }, popupCloseTimeout);
+      });
+    };
+
     document.addEventListener('mouseover', e => {
       const $target = e.target as HTMLElement;
       if ($target.tagName === 'A'
         && ($target.classList.contains('post__reference-link')
           || $target.classList.contains('post__refmap-link'))) {
-        const postId = +$target.getAttribute('data-target-post-id');
-        if (!postId) {
-          return;
-        }
+        $target.setAttribute('data-hover', 'true');
 
-        const $postContent = DOM.qs(`#reply_${postId} > .post__inner`);
-        if (!$postContent) {
-          return;
-        }
-
-        let parentId: number = null;
-        const $targetPost = $target.closest('.post');
-        if ($targetPost.hasAttribute('data-popup-id')) {
-          parentId = +$targetPost.getAttribute('data-popup-id');
-        }
-
-        const isAlreadyOpen = Object.keys(this.popups)
-          .map(key => this.popups[+key])
-          .filter(popup => popup.postId === postId && popup.parentId === parentId)
-          .length;
-        if (isAlreadyOpen) {
-          return;
-        }
-
-        const $popup = document.createElement('div');
-        $popup.setAttribute('data-post-id', postId.toString());
-        $popup.classList.add('post', 'post_reply', 'post--popup', 'fade', 'faded');
-        $popup.style.position = 'absolute';
-
-        const targetOffset = offset($target);
-        const layoutOffset = offset(this.$layout);
-
-        const targetRect = $target.getBoundingClientRect();
-        const postRect = $postContent.getBoundingClientRect();
-
-        let left = targetOffset.left - layoutOffset.left + targetRect.width / 2;
-        let top = targetOffset.top - layoutOffset.top;
-
-        let transformOriginX = '0';
-        let transformOriginY = '0';
-
-        const heightPadding = 32;
-        if (window.innerHeight - targetRect.top - heightPadding < postRect.height) {
-          top = top - postRect.height;
-          transformOriginY = '100%';
-        } else {
-          top += targetRect.height;
-        }
-
-        const maxWidth = 0.6;
-        const maxPostWidth = Math.min(postRect.width, window.innerWidth * maxWidth);
-        const widthPadding = 32;
-        if (window.innerWidth - targetRect.left - widthPadding < maxPostWidth) {
-          left = Math.max(0, left - maxPostWidth);
-          transformOriginX = '100%';
-        }
-
-        $popup.style.transformOrigin = `${transformOriginX} ${transformOriginY}`;
-
-        $popup.style.left = `${left}px`;
-        $popup.style.top = `${top}px`;
-        $popup.style.maxWidth = `${Math.floor(maxWidth * 100)}%`;
-
-        const $postContentCopy = $postContent.cloneNode(true);
-        $popup.appendChild($postContentCopy);
-
-        this.$layout.appendChild($popup);
+        const onMouseLeave = (e: MouseEvent) => {
+          $target.removeAttribute('data-hover');
+          $target.removeEventListener('mouseleave', onMouseLeave);
+        };
+        $target.addEventListener('mouseleave', onMouseLeave);
 
         setTimeout(() => {
-          $popup.classList.remove('faded');
-        }, 50);
-
-        const popupId = this.nextPopupId;
-        this.nextPopupId++;
-
-        const parent = this.popups[parentId];
-        if (parent) {
-          parent.childrenIds.push(popupId);
-        }
-
-        $popup.setAttribute('data-popup-id', popupId.toString());
-
-        this.popups[popupId] = {
-          id: popupId,
-          parentId,
-          postId,
-          childrenIds: [],
-          $parentLink: $target,
-          $popup,
-          hover: true,
-        };
-
-        const popupCloseTimeout = 750;
-
-        const linkMouseLeave = (e: Event) => {
-          const popupId = +$popup.getAttribute('data-popup-id');
-          const popup = this.popups[popupId];
-          if (!popup) {
-            $target.removeEventListener('mouseleave', linkMouseLeave);
-            return;
+          if ($target.hasAttribute('data-hover')) {
+            openPopup($target);
           }
-
-          popup.hover = false;
-
-          setTimeout(() => {
-            if (checkPopup(popup)) {
-              $target.removeEventListener('mouseleave', linkMouseLeave);
-            }
-          }, popupCloseTimeout);
-        };
-
-        $target.addEventListener('mouseleave', linkMouseLeave);
-
-        $popup.addEventListener('mouseenter', e => {
-          const popupId = +$popup.getAttribute('data-popup-id');
-          const popup = this.popups[popupId];
-          if (!popup) {
-            return;
-          }
-
-          popup.hover = true;
-        });
-
-        $popup.addEventListener('mouseleave', e => {
-          const popupId = +$popup.getAttribute('data-popup-id');
-          const popup = this.popups[popupId];
-          if (!popup) {
-            return;
-          }
-
-          popup.hover = false;
-
-          setTimeout(() => {
-            if (checkPopup(popup)) {
-              $target.removeEventListener('mouseleave', linkMouseLeave);
-            }
-          }, popupCloseTimeout);
-        });
+        }, 100);
       }
     });
   }
@@ -529,14 +538,6 @@ export class Post {
     const left = Math.round(window.innerWidth / 2 - width / 2);
     const top = Math.round(window.innerHeight / 2 - height / 2);
 
-    const onMove = (left: number, top: number, width: number, height: number) => {
-      const padding = 40;
-      return {
-        left: Math.max(padding - width, Math.min(left, window.innerWidth - padding)),
-        top: Math.max(padding - height, Math.min(top, window.innerHeight - padding)),
-      };
-    };
-
     if (file.type === 'image') {
       const $image = DOM.qs('img', this.$imageModal);
       $image.setAttribute('src', file.url);
@@ -544,7 +545,7 @@ export class Post {
       this.imageModal.show(left, top, width, height, () => {
         $image.setAttribute('src', '');
         this.modalFileIndex = null;
-      }, onMove);
+      });
     } else if (file.type === 'video') {
       const $video = DOM.qs('video', this.$videoModal);
       $video.setAttribute('src', file.url);
@@ -554,7 +555,7 @@ export class Post {
         ($video as HTMLVideoElement).pause();
         $video.setAttribute('src', '');
         this.modalFileIndex = null;
-      }, onMove);
+      });
     } else if (file.type === 'coub') {
       const $content = DOM.qid('coub-modal_content');
       $content.innerHTML = await getCoubHtml(file.url);
@@ -562,7 +563,7 @@ export class Post {
       this.coubModal.show(left, top, width, height, () => {
         $content.innerHTML = '';
         this.modalFileIndex = null;
-      }, onMove);
+      });
     }
   }
 
