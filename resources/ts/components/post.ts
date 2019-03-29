@@ -213,15 +213,31 @@ export class Post {
       return true;
     }
 
-    const openPopup = ($link: HTMLElement) => {
+    const openPopup = async ($link: HTMLElement) => {
       const postId = +$link.getAttribute('data-target-post-id');
       if (!postId) {
         return;
       }
 
-      const $postContent = DOM.qs(`#reply_${postId} > .post__inner`);
+      let $postContent = DOM.qs(`#reply_${postId} > .post__inner`);
       if (!$postContent) {
-        return;
+        // Try fetch post.
+        const response = await fetch(`${window.baseUrl}/ajax/post/${postId}`, {
+          credentials: 'same-origin',
+        });
+
+        if (response.status !== 200) {
+          return;
+        }
+
+        const html = await response.text();
+        const $post = document.createElement('div');
+        $post.classList.add('hidden');
+        $post.insertAdjacentHTML('beforeend', html);
+
+        this.$layout.appendChild($post);
+
+        $postContent = DOM.qs('.post__inner', $post);
       }
 
       let parentId: number = null;
