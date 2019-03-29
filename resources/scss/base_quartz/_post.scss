@@ -98,10 +98,15 @@
   }
 
   &__refmap {
+    flex-flow: row wrap;
     margin-top: 0.5em;
 
     font-style: italic;
     font-size: 0.8em;
+  }
+
+  &__refmap:empty {
+    display: none;
   }
 
   &__refmap:not(:empty)::before {
