@@ -4,7 +4,7 @@ namespace Imageboard\Controller\Api;
 
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Command\{CommandDispatcher, CreatePost};
-use Imageboard\Query\{QueryDispatcher, BoardThreads, ThreadPosts};
+use Imageboard\Query\{QueryDispatcher, BoardThreads, ThreadPosts, Post};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
 class PostController implements PostControllerInterface
@@ -98,6 +98,18 @@ class PostController implements PostControllerInterface
     $params = $request->getQueryParams();
     $after = (int)($params['after'] ?? 0);
     $query = new ThreadPosts($id, $after);
+    $handler = $this->query_dispatcher->getHandler($query);
+
+    return $handler->handle($query);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  function post(array $args) : array
+  {
+    $id = (int)$args['id'];
+    $query = new Post($id);
     $handler = $this->query_dispatcher->getHandler($query);
 
     return $handler->handle($query);

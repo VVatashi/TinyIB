@@ -43,4 +43,27 @@ interface PostControllerInterface
      * @return ResponseInterface Response.
      */
     public function thread(ServerRequestInterface $request, array $args) : ResponseInterface;
+
+    /**
+     * Returns page partial HTML for a post.
+     *
+     * @param array $args Path arguments.
+     *
+     * @return string Response HTML.
+     *
+     * @throws NotFoundException
+     */
+    public function ajaxPost(array $args) : string;
+
+    /**
+     * Returns page partial HTML for a thread.
+     *
+     * @param ServerRequestInterface $request
+     * @param array $args Path arguments.
+     *
+     * @return string Response HTML.
+     *
+     * @throws NotFoundException
+     */
+    public function ajaxThread(ServerRequestInterface $request, array $args) : string;
 }

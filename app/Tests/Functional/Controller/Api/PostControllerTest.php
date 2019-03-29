@@ -5,6 +5,7 @@ namespace Imageboard\Tests\Functional\Controller\Api;
 use GuzzleHttp\Psr7\ServerRequest;
 use Imageboard\Command\CommandDispatcher;
 use Imageboard\Controller\Api\{PostControllerInterface, PostController};
+use Imageboard\Exception\NotFoundException;
 use Imageboard\Model\Post;
 use Imageboard\Query\QueryDispatcher;
 use PHPUnit\Framework\TestCase;
@@ -105,5 +106,22 @@ final class PostControllerTest extends TestCase
 
     $this->assertIsArray($items);
     $this->assertCount($count + 1, $items);
+  }
+
+  function test_post_shouldReturnItem(): void
+  {
+    $post = $this->createPost();
+    $id = $post->id;
+
+    $item = $this->controller->post(['id' => $id]);
+
+    $this->assertIsArray($item);
+  }
+
+  function test_post_notFound_shouldThrow(): void
+  {
+    $this->expectException(NotFoundException::class);
+
+    $item = $this->controller->post(['id' => 1]);
   }
 }

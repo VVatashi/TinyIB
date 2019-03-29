@@ -4,7 +4,7 @@ namespace Imageboard\Controller;
 
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Cache\CacheInterface;
-use Imageboard\Exception\ValidationException;
+use Imageboard\Exception\{NotFoundException, ValidationException};
 use Imageboard\Model\Post;
 use Imageboard\Service\{
     CaptchaServiceInterface,
@@ -276,11 +276,26 @@ class PostController implements PostControllerInterface
     /**
      * {@inheritDoc}
      */
-    public function ajaxThread(ServerRequestInterface $request) : ResponseInterface
+    public function ajaxPost(array $args) : string
     {
-        $args = explode('/', $request->getUri()->getPath());
-        $id = (int)$args[3];
+        $id = (int)$args['id'];
+        $post = Post::find($id);
+        if (!isset($post)) {
+            throw new NotFoundException("Post #$id not found.");
+        }
 
+        return $this->renderer->render('ajax/post.twig', [
+            'post' => $post,
+            'res' => TINYIB_RESPAGE,
+        ]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function ajaxThread(ServerRequestInterface $request, array $args) : string
+    {
+        $id = (int)$args['id'];
         $thread = Post::find($id);
         if (!isset($thread)) {
             throw new NotFoundException("Thread #$id not found.");
@@ -294,12 +309,10 @@ class PostController implements PostControllerInterface
             $query->orWhere('parent_id', $id);
         })->where('id', '>', $after)->orderBy('id', 'asc')->get();
 
-        $data = $this->renderer->render('ajax/thread.twig', [
+        return $this->renderer->render('ajax/thread.twig', [
             'posts' => $posts,
             'parent' => $id,
             'res' => TINYIB_RESPAGE,
         ]);
-
-        return new Response(200, [], $data);
     }
 }

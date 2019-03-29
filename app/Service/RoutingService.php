@@ -52,6 +52,10 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
           $routes->addRoute('POST', '', [TokenApi::class, 'createToken']);
         });
 
+        $routes->addGroup('/posts', function (RouteCollector $routes) {
+          $routes->addRoute('GET', '/{id:\d+}', [PostApi::class, 'post']);
+        });
+
         $routes->addGroup('/threads', function (RouteCollector $routes) {
           $routes->addRoute('GET',  '',                [PostApi::class, 'threads']);
           $routes->addRoute('POST', '',                [PostApi::class, 'createThread']);
@@ -128,6 +132,7 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
           $routes->addRoute('POST', '/post/create',     [MobilePosts::class, 'ajaxCreatePost']);
         });
 
+        $routes->addRoute('GET',  '/post/{id:\d+}',   [Posts::class, 'ajaxPost']);
         $routes->addRoute('GET',  '/thread/{id:\d+}', [Posts::class, 'ajaxThread']);
         $routes->addRoute('POST', '/post/create',     [Posts::class, 'ajaxCreatePost']);
       });
