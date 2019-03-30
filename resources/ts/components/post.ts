@@ -508,6 +508,11 @@ export class Post {
             thumbnail.style.maxWidth = '250px';
             postContent.insertBefore(thumbnail, postMessage);
 
+            if (DOM.qsa('.post__file-preview', postContent).length > 1) {
+              const message = DOM.qs('.post__message', postContent) as HTMLElement;
+              message.style.clear = 'both';
+            }
+
             const postId = +$post.getAttribute('data-post-id');
             const url = `https://coub.com/view/${coub.permalink}`;
             if (!this.media.find(file => file.postId === postId && file.url === url)) {
@@ -554,6 +559,11 @@ export class Post {
             thumbnail.style.maxHeight = '250px';
             thumbnail.style.maxWidth = '250px';
             postContent.insertBefore(thumbnail, postMessage);
+
+            if (DOM.qsa('.post__file-preview', postContent).length > 1) {
+              const message = DOM.qs('.post__message', postContent) as HTMLElement;
+              message.style.clear = 'both';
+            }
 
             const postId = +$post.getAttribute('data-post-id');
             const html = embedInfo.html
