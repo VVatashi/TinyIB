@@ -215,15 +215,18 @@ export class Post {
     }
 
     const openPopup = async ($link: HTMLElement) => {
-      const postId = +$link.getAttribute('data-target-post-id');
-      if (!postId) {
+      const targetPostId = +$link.getAttribute('data-target-post-id');
+      if (!targetPostId) {
         return;
       }
 
-      let $postContent = DOM.qs(`#reply_${postId} > .post__inner`);
+      const $parentPost = $link.closest('.post');
+      const parentPostId = +$parentPost.getAttribute('data-post-id');
+
+      let $postContent = DOM.qs(`#reply_${targetPostId} > .post__inner`);
       if (!$postContent) {
         // Try fetch post.
-        const response = await fetch(`${window.baseUrl}/ajax/post/${postId}`, {
+        const response = await fetch(`${window.baseUrl}/ajax/post/${targetPostId}`, {
           credentials: 'same-origin',
         });
 
@@ -249,14 +252,14 @@ export class Post {
 
       const isAlreadyOpen = Object.keys(this.popups)
         .map(key => this.popups[+key])
-        .filter(popup => popup.postId === postId && popup.parentId === parentId)
+        .filter(popup => popup.postId === targetPostId && popup.parentId === parentId)
         .length;
       if (isAlreadyOpen) {
         return;
       }
 
       const $popup = document.createElement('div');
-      $popup.setAttribute('data-post-id', postId.toString());
+      $popup.setAttribute('data-post-id', targetPostId.toString());
       $popup.classList.add('post', 'post_reply', 'post--popup', 'fade', 'faded');
       $popup.style.position = 'absolute';
       $popup.style.maxWidth = '60%';
@@ -265,6 +268,9 @@ export class Post {
       $popup.appendChild($postContentCopy);
 
       this.$layout.appendChild($popup);
+
+      const backLinks = DOM.qsa(`a[data-target-post-id="${parentPostId}"]`, $popup) as HTMLElement[];
+      backLinks.forEach(link => link.style.fontWeight = '700');
 
       setTimeout(() => {
         $popup.classList.remove('faded');
@@ -309,7 +315,7 @@ export class Post {
       this.popups[popupId] = {
         id: popupId,
         parentId,
-        postId,
+        postId: targetPostId,
         childrenIds: [],
         $parentLink: $link,
         $popup,

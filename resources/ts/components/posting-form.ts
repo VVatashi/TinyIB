@@ -573,6 +573,13 @@ export class PostingForm {
 
           this.disabled = false;
 
+          if (document.activeElement) {
+            const element = document.activeElement;
+            if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+              (element as any).blur();
+            }
+          }
+
           if (component.settings.form.scrollBottom) {
             // Scroll to the last post.
             setTimeout(() => {
