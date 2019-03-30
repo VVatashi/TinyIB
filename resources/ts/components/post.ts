@@ -7,10 +7,11 @@ import { DOM } from '../utils';
 
 interface FileData {
   postId: number;
-  type: 'image' | 'audio' | 'video' | 'coub';
+  type: 'image' | 'audio' | 'video' | 'coub' | 'youtube';
   url: string;
   width: number;
   height: number;
+  data?: string;
 }
 
 interface PostPopup {
@@ -42,13 +43,13 @@ export class Post {
   protected $layout: HTMLElement;
   protected $imageModal: HTMLElement;
   protected $videoModal: HTMLElement;
-  protected $coubModal: HTMLElement;
+  protected $embedModal: HTMLElement;
   protected $player: HTMLElement;
 
   protected player: VideoPlayer;
   protected imageModal: Modal;
   protected videoModal: Modal;
-  protected coubModal: Modal;
+  protected embedModal: Modal;
 
   protected readonly media: FileData[] = [];
   protected readonly ownPostIds: number[] = [];
@@ -68,18 +69,18 @@ export class Post {
     this.$layout = DOM.qs('.layout') as HTMLElement;
     this.$imageModal = DOM.qid('image-modal') as HTMLElement;
     this.$videoModal = DOM.qid('video-modal') as HTMLElement;
-    this.$coubModal = DOM.qid('coub-modal') as HTMLElement;
+    this.$embedModal = DOM.qid('embed-modal') as HTMLElement;
     this.$player = DOM.qs('.player', this.$videoModal) as HTMLElement;
 
     this.player = new VideoPlayer(this.$player);
     this.imageModal = new Modal(this.$imageModal);
     this.videoModal = new Modal(this.$videoModal);
-    this.coubModal = new Modal(this.$coubModal, false);
+    this.embedModal = new Modal(this.$embedModal, false);
 
     this.modals = [
       this.imageModal,
       this.videoModal,
-      this.coubModal,
+      this.embedModal,
     ];
 
     const onKeyDown = (e: KeyboardEvent) => {
@@ -482,42 +483,98 @@ export class Post {
         link.setAttribute('data-processed', 'true');
         return link.getAttribute('href');
       })
-      .map(url => url.match('^https?:\/\/(?:www\.)?coub\.com\/view\/([0-9a-z]+)$'))
+      .map(url => {
+        return url.match(/^https?:\/\/(?:www\.)?(coub)\.com\/view\/([0-9a-z]+)$/i)
+          || url.match(/^https?:\/\/(?:www\.)?(youtube)\.com\/watch\?v=([0-9a-z]+)$/i);
+      })
       .filter(matches => matches && matches.length >= 1)
       .forEach(async matches => {
-        try {
-          const coub = await getCoubData(matches[1]);
-          const thumbnailUrl = coub.image_versions.template.replace('%{version}', 'small');
-          const thumbnail = document.createElement('div');
-          thumbnail.classList.add('post__file-preview', 'file');
-          thumbnail.innerHTML = `
+        if (matches[1] === 'coub') {
+          try {
+            const coub = await getCoubData(matches[2]);
+            const thumbnailUrl = coub.image_versions.template.replace('%{version}', 'small');
+            const thumbnail = document.createElement('div');
+            thumbnail.classList.add('post__file-preview', 'file');
+            thumbnail.innerHTML = `
 <div class="post__file-info file-info filesize">
   <a class="file-info__link" href="https://coub.com/view/${coub.permalink}" target="_blank">Coub</a>
   <span class="file-info__size"></span>
 </div>
 
-<a class="file__thumbnail thumbnail thumbnail--coub" href="https://coub.com/view/${coub.permalink}" target="_blank">
-  <img class="thumbnail__content thumbnail__content--coub" src="${thumbnailUrl}" />
+<a class="file__thumbnail thumbnail thumbnail--embed" href="https://coub.com/view/${coub.permalink}" target="_blank">
+  <img class="thumbnail__content thumbnail__content--embed" src="${thumbnailUrl}" />
 </a>`;
-          thumbnail.style.maxHeight = '250px';
-          thumbnail.style.maxWidth = '250px';
-          postContent.insertBefore(thumbnail, postMessage);
+            thumbnail.style.maxHeight = '250px';
+            thumbnail.style.maxWidth = '250px';
+            postContent.insertBefore(thumbnail, postMessage);
 
-          const postId = +$post.getAttribute('data-post-id');
-          const url = `https://coub.com/view/${coub.permalink}`;
-          if (!this.media.find(file => file.postId === postId && file.url === url)) {
-            this.media.push({
-              postId,
-              type: 'coub',
-              url,
-              width: coub.dimensions.big[0],
-              height: coub.dimensions.big[1],
-            });
+            const postId = +$post.getAttribute('data-post-id');
+            const url = `https://coub.com/view/${coub.permalink}`;
+            if (!this.media.find(file => file.postId === postId && file.url === url)) {
+              this.media.push({
+                postId,
+                type: 'coub',
+                url,
+                width: coub.dimensions.big[0],
+                height: coub.dimensions.big[1],
+              });
+            }
+
+            this.media.sort((a, b) => a.postId - b.postId);
+          } catch (e) {
+            console.warn(`Can\'t load coub '${matches[0]}':`, e);
           }
+        } else if (matches[1] === 'youtube') {
+          try {
+            const id = matches[2];
+            const embedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}`;
+            const dataUrl = `${window.baseUrl}/api/embed?url=${encodeURIComponent(embedUrl)}`;
+            const response = await fetch(dataUrl, {
+              credentials: 'same-origin',
+            });
 
-          this.media.sort((a, b) => a.postId - b.postId);
-        } catch (e) {
-          console.warn(`Can\'t load coub '${matches[0]}':`, e);
+            if (response.status !== 200) {
+              throw new Error(response.statusText);
+            }
+
+            const url = `https://www.youtube.com/watch?v=${id}`;
+            const embedInfo = await response.json();
+            const thumbnailUrl = embedInfo.thumbnail_url;
+            const thumbnail = document.createElement('div');
+            thumbnail.classList.add('post__file-preview', 'file');
+            thumbnail.innerHTML = `
+<div class="post__file-info file-info filesize">
+  <a class="file-info__link" href="${url}" target="_blank">YouTube</a>
+  <span class="file-info__size"></span>
+</div>
+
+<a class="file__thumbnail thumbnail thumbnail--embed" href="${url}" target="_blank">
+  <img class="thumbnail__content thumbnail__content--embed" src="${thumbnailUrl}" />
+</a>`;
+            thumbnail.style.maxHeight = '250px';
+            thumbnail.style.maxWidth = '250px';
+            postContent.insertBefore(thumbnail, postMessage);
+
+            const postId = +$post.getAttribute('data-post-id');
+            const html = embedInfo.html
+              .replace(/src="([^"]+)"/i, 'src="$1&autoplay=1"')
+              .replace(/width="\d+"/i, 'width="100%"')
+              .replace(/height="\d+"/i, 'height="100%"');
+            if (!this.media.find(file => file.postId === postId && file.url === url)) {
+              this.media.push({
+                postId,
+                type: 'youtube',
+                url,
+                width: embedInfo.thumbnail_width,
+                height: embedInfo.thumbnail_height,
+                data: html,
+              });
+            }
+
+            this.media.sort((a, b) => a.postId - b.postId);
+          } catch (e) {
+            console.warn(`Can\'t load youtube video '${matches[0]}':`, e);
+          }
         }
       });
   }
@@ -573,10 +630,18 @@ export class Post {
         this.modalFileIndex = null;
       });
     } else if (file.type === 'coub') {
-      const $content = DOM.qid('coub-modal_content');
+      const $content = DOM.qid('embed-modal_content');
       $content.innerHTML = await getCoubHtml(file.url);
 
-      this.coubModal.show(left, top, width, height, () => {
+      this.embedModal.show(left, top, width, height, () => {
+        $content.innerHTML = '';
+        this.modalFileIndex = null;
+      });
+    } else if (file.type === 'youtube') {
+      const $content = DOM.qid('embed-modal_content');
+      $content.innerHTML = file.data;
+
+      this.embedModal.show(left, top, width, height, () => {
         $content.innerHTML = '';
         this.modalFileIndex = null;
       });

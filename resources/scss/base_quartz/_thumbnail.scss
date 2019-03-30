@@ -2,7 +2,8 @@
   position: relative;
   box-sizing: border-box;
 
-  &--video {
+  &--video,
+  &--embed {
     border: $input-border;
     border-style: dashed;
 
