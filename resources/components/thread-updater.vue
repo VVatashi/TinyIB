@@ -16,6 +16,8 @@
     </x-checkbox>
 
     <span class="thread-updater__loader" v-if="loading"></span>
+
+    <span class="thread-updater__status" v-if="status">{{ status }}</span>
   </div>
 </template>
 

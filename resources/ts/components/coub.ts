@@ -19,7 +19,7 @@ export async function getCoubData(coubId: string) {
   });
 
   if (response.status !== 200) {
-    throw new Error();
+    throw new Error(response.statusText);
   }
 
   return await response.json() as CoubData;
@@ -33,7 +33,7 @@ export async function getCoubHtml(coubUrl: string) {
   });
 
   if (response.status !== 200) {
-    throw new Error();
+    throw new Error(response.statusText);
   }
 
   const json = await response.json();
