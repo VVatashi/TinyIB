@@ -8,8 +8,6 @@
 
 {% block content %}
   <main class="{{class is defined ? class ~ ' '}}">
-    <div class="content__replymode replymode">Posting mode: Reply</div>
-
     <form id="delform" action="{{ base_url }}/post/delete" method="post">
       <input type="hidden" name="board" value="{{ constant('TINYIB_BOARD') }}" />
 
@@ -17,12 +15,14 @@
         {% include 'components/_post.twig' %}
       {% endfor %}
 
-      <hr />
+      <hr class="hidden" />
 
       {% include 'components/_userdelete.twig' with {'class': 'content__userdelete'} %}
     </form>
 
     <div id="thread-updater"></div>
+
+    <hr />
 
     {% include 'components/_posting_form.twig' with {'class': 'content__posting-form'} %}
 

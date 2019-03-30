@@ -11,12 +11,25 @@ const updateInterval = 10;
 let threadId = 0;
 let latestPostId = 0;
 
+async function fetchPostsHtml(threadId: number, after: number = 0) {
+  const response = await fetch(`${window.baseUrl}/ajax/thread/${threadId}?after=${after}`, {
+    credentials: 'same-origin',
+  });
+
+  if (response.status !== 200) {
+    throw new Error(response.statusText);
+  }
+
+  return await response.text();
+}
+
 export default Vue.extend({
   data() {
     return {
       autoupdate: autoupdate,
       counter: updateInterval,
       loading: false,
+      status: null,
     };
   },
   methods: {
@@ -33,12 +46,12 @@ export default Vue.extend({
 
       this.loading = true;
 
-      const response = await fetch(`${window.baseUrl}/ajax/thread/${threadId}?after=${latestPostId}`, {
-        credentials: 'same-origin',
-      });
-
-      const html = await response.text();
-      postsWrapper.insertAdjacentHTML('beforeend', html);
+      try {
+        const html = await fetchPostsHtml(threadId, latestPostId);
+        postsWrapper.insertAdjacentHTML('beforeend', html);
+      } catch (e) {
+        this.status = `Error: ${e}`;
+      }
 
       const newPosts = DOM.qsa('.post', postsWrapper)
         .filter(post => {
@@ -67,6 +80,8 @@ export default Vue.extend({
       } else {
         this.counter = updateInterval;
       }
+
+      setTimeout(this.updateCounter.bind(this), 1000);
     },
   },
   created() {
@@ -76,7 +91,7 @@ export default Vue.extend({
     }
 
     latestPostId = +DOM.qs('.post:last-of-type').getAttribute('data-post-id');
-    this._interval = setInterval(this.updateCounter.bind(this), 1000);
+    setTimeout(this.updateCounter.bind(this), 1000);
 
     const update = () => {
       this.counter = updateInterval;
@@ -85,12 +100,6 @@ export default Vue.extend({
 
     eventBus.$on(Events.PostCreated, update);
     eventBus.$on(Events.UpdateThread, update);
-  },
-  beforeDestroy() {
-    if (this._interval) {
-      clearInterval(this._interval);
-      this._interval = null;
-    }
   },
   components: {
     'x-checkbox': Checkbox,
