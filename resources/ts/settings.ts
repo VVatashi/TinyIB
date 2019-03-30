@@ -1,3 +1,8 @@
+export interface PostAuthor {
+  name: string;
+  tripcode: string;
+}
+
 export interface CommonSettings {
   layout: 'center' | 'left';
 
@@ -12,6 +17,8 @@ export interface CommonSettings {
   threadAutoupdate: boolean;
   addNamesToLinks: boolean;
   addYouToLinks: boolean;
+
+  hiddenPosts: PostAuthor[];
 }
 
 export interface Replace {
@@ -56,7 +63,6 @@ export interface Settings {
   time: TimeSettings;
 }
 
-const settingsKey = 'settings';
 const defaultSettings: Settings = {
   common: {
     layout: 'left',
@@ -72,6 +78,8 @@ const defaultSettings: Settings = {
     threadAutoupdate: false,
     addNamesToLinks: true,
     addYouToLinks: true,
+
+    hiddenPosts: [],
   },
   form: {
     align: 'center',
@@ -126,6 +134,8 @@ function merge(target: any, source: any) {
   }
   return output;
 }
+
+const settingsKey = 'settings';
 
 export class SettingsManager {
   static load(): Settings {

@@ -1,4 +1,8 @@
 .post {
+  &--hidden &__inner:not(:hover) &__content {
+    display: none;
+  }
+
   &__inner {
     @include clearfix;
 
@@ -117,6 +121,10 @@
   &__refmap-item:not(:last-child)::after {
     content: ', ';
     margin-right: 0.25em;
+  }
+
+  &__refmap-link--hidden {
+    text-decoration: line-through;
   }
 
   &--own &__inner {

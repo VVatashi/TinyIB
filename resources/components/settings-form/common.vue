@@ -94,6 +94,34 @@
         Add '(you)' to the links
       </x-checkbox>
     </div>
+
+    <h3 class="settings-form__option-title">Hide posts</h3>
+
+    <ul class="settings-form__list">
+      <li class="settings-form__list-item"
+        v-for="(item, index) in settings.common.hiddenPosts"
+        :key="index">
+        <input type="text" class="input settings-form__text"
+          v-model="item.name" placeholder="Name" />
+
+        <input type="text" class="input settings-form__text"
+          v-model="item.tripcode" placeholder="!Tripcode" />
+
+        <button class="button"
+          @click="removeAuthorAt(index)">Remove</button>
+      </li>
+
+      <li class="settings-form__list-item">
+        <input type="text" class="input settings-form__text"
+          v-model="newAuthor.name" placeholder="Name" />
+
+        <input type="text" class="input settings-form__text"
+          v-model="newAuthor.tripcode" placeholder="!Tripcode" />
+
+        <button class="button"
+          @click="addAuthor(newAuthor)">Add</button>
+      </li>
+    </ul>
   </div>
 </template>
 
