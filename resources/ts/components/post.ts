@@ -392,6 +392,20 @@ export class Post {
     });
   }
 
+  protected checkHidden($post: HTMLElement) {
+    const hidden = SettingsManager.load().common.hiddenPosts;
+
+    const $name = DOM.qs('.post-header__name', $post);
+    const $tripcode = DOM.qs('.post-header__tripcode', $post);
+
+    const name = $name ? $name.textContent : '';
+    const tripcode = $tripcode ? $tripcode.textContent : '';
+
+    if (hidden.some(author => author.name === name && author.tripcode === tripcode)) {
+      $post.classList.add('post--hidden');
+    }
+  }
+
   protected onPostsInserted(posts: HTMLElement[]) {
     posts.forEach($post => {
       const $fileLink = DOM.qs('.thumbnail', $post);
@@ -417,6 +431,7 @@ export class Post {
         }
       }
 
+      this.checkHidden($post);
       this.processReplies($post);
       this.processOEmbedLinks($post);
     });
@@ -466,6 +481,18 @@ export class Post {
         $reflink.setAttribute('data-target-post-id', postId.toString());
         $reflink.classList.add('post__refmap-link');
         $reflink.textContent = `>\u200b>${postId}`;
+
+        const $name = DOM.qs('.post-header__name', post);
+        const $tripcode = DOM.qs('.post-header__tripcode', post);
+
+        const name = $name ? $name.textContent : '';
+        const tripcode = $tripcode ? $tripcode.textContent : '';
+
+        const hidden = SettingsManager.load().common.hiddenPosts;
+        if (hidden.some(author => author.name === name && author.tripcode === tripcode)) {
+
+          $reflink.classList.add('post__refmap-link--hidden');
+        }
 
         const $reflinkWrapper = document.createElement('li');
         $reflinkWrapper.classList.add('post__refmap-item');
