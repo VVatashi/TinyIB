@@ -109,7 +109,8 @@ export default Vue.extend({
         this.status = `Error: ${e}`;
       }
 
-      const newPosts = DOM.qsa('.post', postsWrapper)
+      const posts = DOM.qsa('.post', postsWrapper);
+      const newPosts = posts
         .filter(post => {
           const id = +post.getAttribute('data-post-id');
           return id > latestPostId;
@@ -123,6 +124,18 @@ export default Vue.extend({
           unreadPosts += newPosts.length;
           updateFavicon(unreadPosts);
         }
+
+        newPosts.forEach(($post, index) => {
+          const $postNo = document.createElement('span');
+          $postNo.classList.add('post-header__post-no');
+          $postNo.textContent = `#${posts.length - newPosts.length + index + 1}`;
+
+          const $refWrapper = DOM.qs('.post-header__reflink-wrapper', $post);
+          $refWrapper.appendChild($postNo);
+
+          const $mobileRefWrapper = DOM.qs('.post-header-mobile__reflink-wrapper', $post);
+          $mobileRefWrapper.appendChild($postNo.cloneNode(true));
+        });
       }
 
       this.loading = false;
