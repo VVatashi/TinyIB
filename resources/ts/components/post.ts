@@ -98,13 +98,8 @@ export class Post {
         e.preventDefault();
 
         const settings = SettingsManager.load();
-        if (settings.common.threadAutoupdate) {
+        if (settings.common.enableThreadAutoupdate) {
           eventBus.$emit(Events.UpdateThread);
-        } else {
-          const updater = DOM.qs('.de-thr-updater-link') as HTMLAnchorElement;
-          if (updater) {
-            updater.click();
-          }
         }
 
         return false;

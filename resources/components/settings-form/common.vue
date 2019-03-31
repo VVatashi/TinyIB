@@ -26,13 +26,6 @@
     </div>
 
     <div class="settings-form__row">
-      <x-checkbox v-model="settings.common.movePostHeaderReflinkIconToDE"
-        label-class="settings-form__label" input-class="settings-form__checkbox">
-        Move DE hide button before reply icon
-      </x-checkbox>
-    </div>
-
-    <div class="settings-form__row">
       <x-checkbox v-model="settings.common.showPostReflinkIcon"
         label-class="settings-form__label" input-class="settings-form__checkbox">
         Show reply icon in the bottom right corner of post message
@@ -75,7 +68,7 @@
     </div>
 
     <div class="settings-form__row">
-      <x-checkbox v-model="settings.common.threadAutoupdate"
+      <x-checkbox v-model="settings.common.enableThreadAutoupdate"
         label-class="settings-form__label" input-class="settings-form__checkbox">
         Enable thread autoupdate
       </x-checkbox>

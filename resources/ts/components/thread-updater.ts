@@ -15,7 +15,7 @@ export class ThreadUpdater {
 
   protected onReady() {
     const settings = SettingsManager.load();
-    if (!settings.common.threadAutoupdate) {
+    if (!settings.common.enableThreadAutoupdate) {
       return;
     }
 
