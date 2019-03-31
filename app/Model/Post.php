@@ -292,7 +292,7 @@ class Post extends Model
 '/
   #
   (?:
-      [0-9a-f]{3}
+      [0-9a-fA-F]{3}
   ){1,2}
 /x',
         'outputFormat' => '<span style="color: {attribute};">{content}</span>',

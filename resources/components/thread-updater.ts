@@ -44,7 +44,17 @@ function updateFavicon(unreadPosts: number) {
       }
     }
 
+    const oldFavicon = DOM.qid('favicon') as HTMLLinkElement;
+    if (oldFavicon) {
+      document.head.removeChild(oldFavicon);
+      oldFavicon.remove();
+    }
+
+    const favicon = document.createElement('link');
+    favicon.id = 'favicon';
+    favicon.rel = 'icon';
     favicon.href = canvas.toDataURL('image/png');
+    document.head.appendChild(favicon);
 
     canvas.remove();
     img.remove();

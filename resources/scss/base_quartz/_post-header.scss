@@ -50,6 +50,10 @@
     display: none;
   }
 
+  &__post-no {
+    color: #008700;
+  }
+
   @include breakpoint($xs-up) {
     &__reflink-icon {
       font-size: 1em;

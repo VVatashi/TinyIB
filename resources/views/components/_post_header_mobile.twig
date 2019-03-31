@@ -39,6 +39,10 @@
           <a class="post-header-mobile__reply-link" href="{{ replylink }}">Reply</a>
         </span>
       {% endif %}
+
+      {% if postNo %}
+        <span class="post-header-mobile__post-no">#{{ postNo }}</span>
+      {% endif %}
     </span>
   </div>
 

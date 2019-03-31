@@ -65,5 +65,9 @@
         <a class="post-header__reply-link" href="{{ replylink }}">Reply</a>
       </span>
     {% endif %}
+
+    {% if postNo %}
+      <span class="post-header__post-no">#{{ postNo }}</span>
+    {% endif %}
   </span>
 </div>
