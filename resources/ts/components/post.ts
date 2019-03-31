@@ -512,12 +512,13 @@ export class Post {
         return link.getAttribute('href');
       })
       .map(url => {
-        return url.match(/^https?:\/\/(?:www\.)?(coub)\.com\/view\/([0-9a-z]+)$/i)
-          || url.match(/^https?:\/\/(?:www\.)?(youtube)\.com\/watch\?v=([0-9a-z]+)$/i);
+        return url.match(/^https?:\/\/(?:www\.)?(coub\.com)\/view\/([0-9a-z]+)$/i)
+          || url.match(/^https?:\/\/(?:www\.)?(youtube\.com)\/watch\?v=([0-9a-z_-]+)$/i)
+          || url.match(/^https?:\/\/(?:www\.)?(youtu\.be)\/([0-9a-z_-]+)$/i);
       })
       .filter(matches => matches && matches.length >= 1)
       .forEach(async matches => {
-        if (matches[1] === 'coub') {
+        if (matches[1] === 'coub.com') {
           try {
             const coub = await getCoubData(matches[2]);
             const thumbnailUrl = coub.image_versions.template.replace('%{version}', 'small');
@@ -557,7 +558,7 @@ export class Post {
           } catch (e) {
             console.warn(`Can\'t load coub '${matches[0]}':`, e);
           }
-        } else if (matches[1] === 'youtube') {
+        } else if (matches[1] === 'youtube.com' || matches[1] === 'youtu.be') {
           try {
             const id = matches[2];
             const embedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}`;
