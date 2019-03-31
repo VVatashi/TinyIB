@@ -14,10 +14,6 @@
       {% for post in posts %}
         {% include 'components/_post.twig' %}
       {% endfor %}
-
-      <hr class="hidden" />
-
-      {% include 'components/_userdelete.twig' with {'class': 'content__userdelete'} %}
     </form>
 
     <div id="thread-updater"></div>
@@ -25,6 +21,7 @@
     <hr />
 
     {% include 'components/_posting_form.twig' with {'class': 'content__posting-form'} %}
+    {% include 'components/_tools.twig' with {'class': 'content__tools'} %}
 
     {% include 'components/_image-modal.twig' %}
     {% include 'components/_video-modal.twig' %}
