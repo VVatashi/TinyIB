@@ -12,6 +12,7 @@
       <input type="hidden" name="board" value="{{ constant('TINYIB_BOARD') }}" />
 
       {% for post in posts %}
+        {% set postNo = loop.index %}
         {% include 'components/_post.twig' %}
       {% endfor %}
     </form>
