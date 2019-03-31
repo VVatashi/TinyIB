@@ -52,6 +52,10 @@
     margin: $post-file-margin;
   }
 
+  &__file-preview:hover .file__hide {
+    display: inline-block;
+  }
+
   &__reference-link-author {
     font-size: 0.8em;
     margin-left: 0.25em;

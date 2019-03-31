@@ -174,6 +174,11 @@ export class Post {
         this.modals.filter(modal => !modal.isDragging)
           .forEach(modal => modal.hide());
       }
+
+      if (e.target.classList.contains('file__hide')) {
+        const $file = e.target.closest('.file');
+        $file.classList.add('hidden');
+      }
     });
 
     const checkPopup = (popup: PostPopup) => {
