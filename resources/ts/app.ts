@@ -3,7 +3,6 @@ import {
   Captcha,
   CorrectTime,
   DeleteForm,
-  NewPostsDetector,
   Post,
   PostingForm,
   PostReferenceMap,
@@ -30,10 +29,8 @@ new Settings();
 new StyleSwitch();
 
 const settings = SettingsManager.load();
-if (settings.common.threadAutoupdate) {
+if (settings.common.enableThreadAutoupdate) {
   new ThreadUpdater();
-} else {
-  new NewPostsDetector();
 }
 
 document.addEventListener('DOMContentLoaded', e => {

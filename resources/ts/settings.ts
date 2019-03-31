@@ -7,14 +7,13 @@ export interface CommonSettings {
   layout: 'center' | 'left';
 
   showPostHeaderReflinkIcon: boolean;
-  movePostHeaderReflinkIconToDE: boolean;
   showPostReflinkIcon: boolean;
   scrollToNewPosts: boolean;
   smoothScroll: boolean;
   showVideoOverlay: boolean;
   hidePopupOnOutsideClick: boolean;
   nsfw: boolean;
-  threadAutoupdate: boolean;
+  enableThreadAutoupdate: boolean;
   addNamesToLinks: boolean;
   addYouToLinks: boolean;
 
@@ -68,14 +67,13 @@ const defaultSettings: Settings = {
     layout: 'left',
 
     showPostHeaderReflinkIcon: true,
-    movePostHeaderReflinkIconToDE: false,
     showPostReflinkIcon: false,
     scrollToNewPosts: true,
     smoothScroll: true,
     showVideoOverlay: false,
     hidePopupOnOutsideClick: false,
     nsfw: false,
-    threadAutoupdate: false,
+    enableThreadAutoupdate: true,
     addNamesToLinks: true,
     addYouToLinks: true,
 

@@ -552,14 +552,8 @@ export class PostingForm {
 
             if (isInThread) {
               const settings = SettingsManager.load();
-              if (settings.common.threadAutoupdate) {
+              if (settings.common.enableThreadAutoupdate) {
                 eventBus.$emit(Events.PostCreated);
-              } else {
-                // Trigger DE thread update.
-                const updater = DOM.qs('.de-thr-updater-link') as HTMLAnchorElement;
-                if (updater) {
-                  updater.click();
-                }
               }
             } else {
               // Redirect to thread.
@@ -703,17 +697,6 @@ export class PostingForm {
           }
         }, 300);
       }
-    }
-
-    if (this.settings.common.movePostHeaderReflinkIconToDE) {
-      posts.forEach(post => {
-        // Move reply icon after DE hide icon.
-        const replyIcon = DOM.qs('.post-header__reflink-wrapper > .post-header__reflink-icon', post);
-        const deHide = DOM.qs('.de-btn-hide', post);
-        if (replyIcon && deHide) {
-          replyIcon.parentElement.insertBefore(deHide, replyIcon);
-        }
-      });
     }
   }
 
