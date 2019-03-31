@@ -5,6 +5,52 @@ import { DOM } from '../ts/utils';
 
 import Checkbox from './checkbox.vue';
 
+const favicon = DOM.qid('favicon') as HTMLLinkElement;
+const faviconHref = favicon.href;
+const faviconSize = 16;
+
+let unreadPosts = 0;
+
+function updateFavicon(unreadPosts: number) {
+  const canvas = document.createElement('canvas');
+  canvas.width = faviconSize;
+  canvas.height = faviconSize;
+
+  const context = canvas.getContext('2d');
+  const img = document.createElement('img');
+  img.src = faviconHref;
+  img.onload = () => {
+    context.drawImage(img, 0, 0, faviconSize, faviconSize);
+
+    if (unreadPosts > 0) {
+      const x = canvas.width - faviconSize / 3;
+      const y = canvas.height - faviconSize / 3;
+
+      context.beginPath();
+      context.arc(x, y, faviconSize / 3, 0, 2 * Math.PI);
+      context.fillStyle = '#FF0000';
+      context.fill();
+
+      context.textAlign = 'center';
+      context.textBaseline = 'middle';
+      context.fillStyle = '#FFFFFF';
+
+      if (unreadPosts < 10) {
+        context.font = `700 10px 'Roboto Condensed', sans-serif`;
+        context.fillText(unreadPosts.toString(), x, y + 1);
+      } else {
+        context.font = `700 8px 'Roboto Condensed', sans-serif`;
+        context.fillText(unreadPosts.toString(), x, y);
+      }
+    }
+
+    favicon.href = canvas.toDataURL('image/png');
+
+    canvas.remove();
+    img.remove();
+  };
+}
+
 const autoupdate = true;
 const updateInterval = 10;
 
@@ -62,6 +108,11 @@ export default Vue.extend({
       if (newPosts.length) {
         latestPostId = +newPosts[newPosts.length - 1].getAttribute('data-post-id');
         eventBus.$emit(Events.PostsInserted, newPosts, false);
+
+        if (document.hidden) {
+          unreadPosts += newPosts.length;
+          updateFavicon(unreadPosts);
+        }
       }
 
       this.loading = false;
@@ -100,6 +151,14 @@ export default Vue.extend({
 
     eventBus.$on(Events.PostCreated, update);
     eventBus.$on(Events.UpdateThread, update);
+  },
+  mounted() {
+    document.addEventListener('visibilitychange', (e) => {
+      if (!document.hidden && unreadPosts > 0) {
+        unreadPosts = 0;
+        updateFavicon(unreadPosts);
+      }
+    });
   },
   components: {
     'x-checkbox': Checkbox,

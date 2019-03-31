@@ -20,13 +20,12 @@
 
         {% include 'components/_post.twig' %}
       {% endfor %}
-
-      <hr />
-
-      {% include 'components/_userdelete.twig' with {'class': 'content__userdelete'} %}
     </form>
 
+    <hr />
+
     {% include 'components/_pager.twig' with {'class': 'content__pager'} %}
+    {% include 'components/_tools.twig' with {'class': 'content__tools'} %}
 
     {% include 'components/_image-modal.twig' %}
     {% include 'components/_video-modal.twig' %}

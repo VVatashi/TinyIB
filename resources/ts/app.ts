@@ -9,6 +9,7 @@ import {
   Settings,
   StyleSwitch,
   ThreadUpdater,
+  Tools,
 } from './components';
 import { SettingsManager } from './settings';
 import { DOM } from './utils';
@@ -27,6 +28,7 @@ new PostingForm();
 new PostReferenceMap();
 new Settings();
 new StyleSwitch();
+new Tools();
 
 const settings = SettingsManager.load();
 if (settings.common.enableThreadAutoupdate) {
