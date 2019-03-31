@@ -114,6 +114,12 @@ export class Post {
 
         const prevIndex = this.modalFileIndex > 0
           ? this.modalFileIndex - 1 : this.media.length - 1;
+
+        const $post = DOM.qid(`reply_${this.media[prevIndex].postId}`);
+        if ($post) {
+          $post.scrollIntoView(true);
+        }
+
         this.showMediaModal(prevIndex);
 
         return false;
@@ -123,6 +129,12 @@ export class Post {
 
         const nextIndex = this.modalFileIndex < this.media.length - 1
           ? this.modalFileIndex + 1 : 0;
+
+        const $post = DOM.qid(`reply_${this.media[nextIndex].postId}`);
+        if ($post) {
+          $post.scrollIntoView(true);
+        }
+
         this.showMediaModal(nextIndex);
 
         return false;
