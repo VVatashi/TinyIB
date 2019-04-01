@@ -1,6 +1,8 @@
 .post-header {
-  @include breakpoint-max($xs-up) {
-    display: none;
+  display: none;
+
+  @include breakpoint($xs-up) {
+    display: block;
   }
 
   &__delete {

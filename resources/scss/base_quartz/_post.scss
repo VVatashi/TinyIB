@@ -23,8 +23,6 @@
     color: $post-content-color;
 
     padding: $post-content-padding;
-    overflow-y: auto;
-    max-height: 80vh;
 
     overflow-wrap: break-word;
     word-wrap: break-word;
@@ -41,7 +39,7 @@
     color: #ffffff;
     font-size: 0.8em;
     font-weight: bold;
-    text-shadow: 0.1em 0 #000000, 0 0.1em #000000, -0.1em 0 #000000, 0 -0.1em #000000;
+    text-shadow: 1px 0 #000000, 0 1px #000000, -1px 0 #000000, 0 -1px #000000;
 
     pointer-events: none;
 
@@ -54,10 +52,6 @@
   &__file-preview {
     position: relative;
     margin: $post-file-margin;
-  }
-
-  &__file-preview:hover .file__hide {
-    display: inline-block;
   }
 
   &__reference-link-author {
@@ -162,6 +156,10 @@
     }
 
     &__file-preview:hover &__file-info {
+      display: inline-block;
+    }
+
+    &__file-preview:hover .file__hide {
       display: inline-block;
     }
 
