@@ -23,8 +23,7 @@
     color: #ffffff;
     font-size: 0.8em;
     font-weight: bold;
-    text-shadow: 0.1em 0 #000000, 0 0.1em #000000,
-      -0.1em 0 #000000, 0 -0.1em #000000;
+    text-shadow: 1px 0 #000000, 0 1px #000000, -1px 0 #000000, 0 -1px #000000;
     text-align: left;
     word-wrap: break-word;
 
@@ -38,7 +37,6 @@
     height: 100%;
     object-fit: scale-down;
     object-position: 50% 50%;
-    pointer-events: none;
   }
 
   @include breakpoint($xs-up) {

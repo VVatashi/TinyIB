@@ -13,13 +13,15 @@
 }
 
 @mixin breakpoint($min-width) {
-  @media screen and (min-width: $min-width) {
-    @content;
-  }
-}
-
-@mixin breakpoint-max($max-width) {
-  @media screen and (max-width: $max-width - 1) {
+  @media screen and (min-width: #{2 * $min-width}),
+  screen and (-webkit-max-device-pixel-ratio: 1.5) and (min-width: #{1.5 * $min-width}),
+  screen and (max--moz-device-pixel-ratio: 1.5) and (min-width: #{1.5 * $min-width}),
+  screen and (-o-max-device-pixel-ratio: 1.5) and (min-width: #{1.5 * $min-width}),
+  screen and (max-device-pixel-ratio: 1.5) and (min-width: #{1.5 * $min-width}),
+  screen and (-webkit-max-device-pixel-ratio: 1) and (min-width: $min-width),
+  screen and (max--moz-device-pixel-ratio: 1) and (min-width: $min-width),
+  screen and (-o-max-device-pixel-ratio: 1) and (min-width: $min-width),
+  screen and (max-device-pixel-ratio: 1) and (min-width: $min-width) {
     @content;
   }
 }

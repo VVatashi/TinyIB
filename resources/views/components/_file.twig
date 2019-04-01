@@ -9,7 +9,7 @@
 >
   {% include 'components/_file_info.twig' with {'class': 'post__file-info filesize'} %}
 
-  <span class="file__hide fas fa-window-close"></span>
+  <span class="file__hide fas fa-window-close" title="Hide preview"></span>
 
   {% if post.thumbWidth > 0 and post.thumbHeight > 0 %}
     <a class="file__thumbnail thumbnail thumbnail--{{ post.fileType }}" id="thumbnail_wrapper_{{ post.id }}"

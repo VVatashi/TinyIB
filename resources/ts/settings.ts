@@ -18,6 +18,7 @@ export interface CommonSettings {
   addYouToLinks: boolean;
 
   hiddenPosts: PostAuthor[];
+  removeHiddenPosts: boolean;
 }
 
 export interface Replace {
@@ -78,6 +79,7 @@ const defaultSettings: Settings = {
     addYouToLinks: true,
 
     hiddenPosts: [],
+    removeHiddenPosts: false,
   },
   form: {
     align: 'center',

@@ -64,6 +64,10 @@ document.addEventListener('DOMContentLoaded', e => {
     if (settings.common.nsfw) {
       layout.classList.add('layout--nsfw');
     }
+
+    if (settings.common.removeHiddenPosts) {
+      layout.classList.add('layout--remove-hidden');
+    }
   }
 
   const formWrapper = DOM.qs('.content__posting-form-wrapper');

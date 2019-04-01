@@ -1,6 +1,12 @@
 .layout {
   position: relative;
 
+  font-size: 1.14285em;
+
+  @include breakpoint($xs-up) {
+    font-size: 1em;
+  }
+
   &--center {
     max-width: 1200px;
     margin: 0 auto;

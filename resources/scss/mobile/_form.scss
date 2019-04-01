@@ -13,11 +13,12 @@ $file-preview-size: 150px;
   }
 
   &__file-column {
-    @include breakpoint-max($xs-up) {
-      display: none;
+    display: none;
+
+    @include breakpoint($xs-up) {
+      display: flex;
     }
 
-    display: flex;
     margin-right: 0.5rem;
   }
 
@@ -121,8 +122,10 @@ $file-preview-size: 150px;
   &__submit {
     @extend .form__field;
 
-    @include breakpoint-max($xs-up) {
-      display: none;
+    display: none;
+
+    @include breakpoint($xs-up) {
+      display: block;
     }
   }
 
