@@ -3,6 +3,10 @@
     display: none;
   }
 
+  @at-root .layout--remove-hidden &--hidden {
+    display: none;
+  }
+
   &__inner {
     @include clearfix;
 

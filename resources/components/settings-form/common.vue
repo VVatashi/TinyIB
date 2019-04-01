@@ -115,6 +115,13 @@
           @click="addAuthor(newAuthor)">Add</button>
       </li>
     </ul>
+
+    <div class="settings-form__row">
+      <x-checkbox v-model="settings.common.removeHiddenPosts"
+        label-class="settings-form__label" input-class="settings-form__checkbox">
+        Remove hidden posts
+      </x-checkbox>
+    </div>
   </div>
 </template>
 
