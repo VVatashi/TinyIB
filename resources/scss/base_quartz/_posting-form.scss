@@ -197,6 +197,10 @@
       }
     }
 
+    @at-root .layout.layout--show-markup &__markup-row {
+      display: flex;
+    }
+
     @at-root .layout:not(.layout--show-markup) &__markup-row {
       display: none;
     }
