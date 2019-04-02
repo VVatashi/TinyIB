@@ -2,33 +2,31 @@ import { eventBus, Events } from '.';
 import {
   Captcha,
   CorrectTime,
-  DeleteForm,
   Post,
   PostingForm,
   PostReferenceMap,
   Settings,
   StyleSwitch,
   ThreadUpdater,
-  Tools,
 } from './components';
 import { SettingsManager } from './settings';
 import { DOM } from './utils';
+import { Page, BoardPage, ThreadPage } from './pages';
 
 declare global {
   interface Window {
     baseUrl: string;
+    app: App;
   }
 }
 
 new Captcha();
 new CorrectTime();
-new DeleteForm();
 new Post();
 new PostingForm();
 new PostReferenceMap();
 new Settings();
 new StyleSwitch();
-new Tools();
 
 const settings = SettingsManager.load();
 if (settings.common.enableThreadAutoupdate) {
@@ -82,4 +80,21 @@ document.addEventListener('DOMContentLoaded', e => {
   if (formWrapper) {
     formWrapper.classList.add('content__posting-form-wrapper--' + settings.form.align);
   }
+});
+
+class App {
+  readonly view: Page;
+
+  constructor() {
+    const path = window.location.pathname;
+    if (path.match(/^\/[0-9a-z_-]+\/?$/i)) {
+      this.view = new BoardPage();
+    } else if (path.match(/^\/[0-9a-z_-]+\/res\/(\d+)\/?$/i)) {
+      this.view = new ThreadPage();
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', e => {
+  window.app = new App();
 });
