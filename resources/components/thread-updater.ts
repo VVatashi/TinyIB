@@ -105,6 +105,7 @@ export default Vue.extend({
       try {
         const html = await fetchPostsHtml(threadId, latestPostId);
         postsWrapper.insertAdjacentHTML('beforeend', html);
+        this.status = null;
       } catch (e) {
         this.status = `Error: ${e}`;
       }
