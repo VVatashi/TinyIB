@@ -19,7 +19,6 @@ interface ViewModel {
   status: string;
   hidden: boolean;
   position: 'bottom' | 'post' | 'float';
-  mode: 'mobile' | 'default';
   colorPopupVisible: boolean;
 }
 
@@ -67,32 +66,36 @@ export class PostingForm {
     }}</span>
 
     <span class="posting-form__header-buttons">
-      <span class="posting-form__reset"
+      <span class="posting-form__reset fas fa-ban"
         v-on:click.stop="resetFields()" title="Clear form"></span>
 
-      <span class="posting-form__float"
-        v-if="position !== 'float' && mode !== 'mobile'"
+      <span class="posting-form__float far fa-window-maximize"
+        v-if="position !== 'float'"
         v-on:click.stop="makeFloating()" title="Floating form"></span>
 
-      <span class="posting-form__restore"
-        v-if="position === 'float' && mode !== 'mobile'"
+      <span class="posting-form__restore fas fa-arrow-down"
+        v-if="position === 'float'"
         v-on:click.stop="moveToBottom()" title="Move form to bottom"></span>
 
-      <span class="posting-form__close"
+      <span class="posting-form__close far fa-window-close"
         v-on:click.stop="onCloseClick()" title="Close form"></span>
     </span>
   </div>
 
   <div class="posting-form__content">
-    <x-file-preview class="posting-form__preview"
-      v-bind:class="{
-        'posting-form__preview--right': mode == 'default'
-          && settings.previewAlign == 'right',
-      }"
+    <x-file-preview class="posting-form__preview posting-form__preview--mobile"
       v-bind:file="file"
       v-on:click="showFileDialog()"
       v-on:drop="onFileDrop($event)"
-      v-show="mode == 'default' || file">
+      v-show="file">
+      <span class="posting-form__preview-remove" v-on:click.stop="file = null"></span>
+    </x-file-preview>
+
+    <x-file-preview class="posting-form__preview posting-form__preview--desktop"
+      v-bind:class="{ 'posting-form__preview--right': settings.previewAlign == 'right' }"
+      v-bind:file="file"
+      v-on:click="showFileDialog()"
+      v-on:drop="onFileDrop($event)">
       <span class="posting-form__preview-remove"
         v-if="file" v-on:click.stop="file = null"></span>
     </x-file-preview>
@@ -109,20 +112,18 @@ export class PostingForm {
           v-bind:disabled="disabled"
           v-on:change="onNameChange()" />
 
-        <label class="posting-form__attachment" v-show="mode == 'mobile'">
+        <label class="posting-form__attachment fas fa-paperclip">
           <input type="file" class="posting-form__attachment-input"
             v-model="fields.file" v-bind:disabled="disabled"
             v-on:change="onFileChange($event.target.files)"
             ref="file" />
         </label>
 
-        <button type="submit" class="button posting-form__submit"
-          v-if="mode == 'default'" v-bind:disabled="disabled">Reply</button>
+        <button type="submit" class="button posting-form__submit  posting-form__submit--desktop"
+          v-bind:disabled="disabled">Reply</button>
       </div>
 
-      <div class="posting-form__markup-row markup"
-        v-show="(mode === 'mobile') && settings.showMarkupMobile
-          || (mode !== 'mobile') && settings.showMarkup">
+      <div class="posting-form__markup-row markup">
         <button type="button" class="button posting-form__markup-button"
           v-on:click.prevent="insertMarkup('b')">
           <strong>b</strong>
@@ -204,8 +205,8 @@ export class PostingForm {
 
       <div v-if="status" class="posting-form__status">{{ status }}</div>
 
-      <button type="submit" class="posting-form__submit  posting-form__submit--mobile"
-        v-if="mode == 'mobile'" v-bind:disabled="disabled">Reply</button>
+      <button type="submit" class="posting-form__submit posting-form__submit--mobile"
+        v-bind:disabled="disabled">Reply</button>
     </div>
   </div>
 </form>`,
@@ -224,7 +225,6 @@ export class PostingForm {
           position: component.settings.form.saveFormState
             && component.settings.form.float
             ? 'float' : 'bottom',
-          mode: 'mobile',
           colorPopupVisible: false,
         };
       },
@@ -253,8 +253,6 @@ export class PostingForm {
           }
         }
 
-        this.updateMode();
-        this._resize = this.updateMode.bind(this);
         window.addEventListener('resize', this._resize);
       },
       mounted() {
@@ -330,12 +328,6 @@ export class PostingForm {
         showFileDialog() {
           if (this.$refs.file) {
             this.$refs.file.click();
-          }
-        },
-        updateMode() {
-          this.mode = window.innerWidth < 600 ? 'mobile' : 'default';
-          if (this.mode === 'mobile' && this.position === 'float') {
-            component.moveToBottom();
           }
         },
         onCloseClick() {

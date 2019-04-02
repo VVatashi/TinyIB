@@ -68,6 +68,14 @@ document.addEventListener('DOMContentLoaded', e => {
     if (settings.common.removeHiddenPosts) {
       layout.classList.add('layout--remove-hidden');
     }
+
+    if (settings.form.showMarkup) {
+      layout.classList.add('layout--show-markup');
+    }
+
+    if (settings.form.showMarkupMobile) {
+      layout.classList.add('layout--show-markup-mobile');
+    }
   }
 
   const formWrapper = DOM.qs('.content__posting-form-wrapper');

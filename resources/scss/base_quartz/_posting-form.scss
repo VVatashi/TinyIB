@@ -32,34 +32,24 @@
 
   &__float,
   &__restore,
-  &__reset {
-    margin-right: 0.5em;
-  }
-
-  &__close,
-  &__float,
-  &__restore,
-  &__reset {
+  &__reset,
+  &__close {
     @extend %clickable;
+
     padding: 0.1em;
     font-size: 1.5em;
     vertical-align: middle;
   }
 
-  &__close {
-    @extend %icon-close;
-  }
-
-  &__float {
-    @extend %icon-float;
-  }
-
-  &__restore {
-    @extend %icon-down;
-  }
-
+  &__float,
+  &__restore,
   &__reset {
-    @extend %icon-clear;
+    margin-right: 0.5em;
+  }
+
+  &__float,
+  &__restore {
+    display: none;
   }
 
   &__content {
@@ -69,7 +59,6 @@
 
   &__row,
   &__markup-row {
-    display: flex;
     flex-flow: row nowrap;
     align-items: stretch;
 
@@ -78,9 +67,15 @@
     }
   }
 
+  &__row,
   &__markup-row {
+    display: flex;
     justify-content: space-between;
     position: relative;
+  }
+
+  @at-root .layout:not(.layout--show-markup-mobile) &__markup-row {
+    display: none;
   }
 
   &__subject,
@@ -93,8 +88,8 @@
   }
 
   &__attachment {
-    @extend %icon-attachment;
     @extend %clickable;
+
     padding: 0.1em;
     font-size: 1.5em;
   }
@@ -146,6 +141,10 @@
       height: $submit-height;
       margin: 0 0 9px 0;
     }
+
+    &--desktop {
+      display: none;
+    }
   }
 
   &__preview {
@@ -162,6 +161,10 @@
     margin-right: 9px;
 
     flex-shrink: 0;
+
+    &--desktop {
+      display: none;
+    }
   }
 
   &__preview-remove {
@@ -194,6 +197,10 @@
       }
     }
 
+    @at-root .layout:not(.layout--show-markup) &__markup-row {
+      display: none;
+    }
+
     &__subject,
     &__name {
       margin: 0 4px 0 0;
@@ -202,6 +209,14 @@
 
     &__submit {
       height: unset;
+
+      &--mobile {
+        display: none;
+      }
+
+      &--desktop {
+        display: inline;
+      }
     }
 
     &__message {
@@ -220,6 +235,14 @@
         margin-left: 6px;
         margin-right: 0;
       }
+
+      &--mobile {
+        display: none;
+      }
+
+      &--desktop {
+        display: flex;
+      }
     }
 
     &__status {
@@ -234,6 +257,15 @@
     &__attachment,
     &__preview-remove {
         font-size: 1em;
+    }
+
+    &__attachment {
+      display: none;
+    }
+
+    &__float,
+    &__restore {
+      display: inline;
     }
   }
 }
