@@ -1,7 +1,6 @@
 import { eventBus, Events } from '.';
 import {
   Captcha,
-  CorrectTime,
   Post,
   PostingForm,
   PostReferenceMap,
@@ -21,7 +20,6 @@ declare global {
 }
 
 new Captcha();
-new CorrectTime();
 new Post();
 new PostingForm();
 new PostReferenceMap();

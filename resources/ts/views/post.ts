@@ -41,5 +41,9 @@ export class PostView implements View {
       fileWidth,
       fileHeight,
     );
+
+    if ($dateTime) {
+      $dateTime.textContent = this.model.formattedTime;
+    }
   }
 }

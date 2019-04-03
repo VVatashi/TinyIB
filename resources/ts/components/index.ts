@@ -1,5 +1,4 @@
 export { Captcha } from './captcha';
-export { CorrectTime } from './correct-time';
 export { draggable } from './draggable';
 export { FilePreview } from './file-preview';
 export { Post } from './post';

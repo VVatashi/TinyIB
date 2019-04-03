@@ -1,15 +1,18 @@
 import { View } from '.';
+import { Tools } from '../model';
 import { DOM } from '../utils';
 
 export class ToolsView implements View {
+  readonly model: Tools;
+
   constructor(readonly $tools: HTMLElement) {
-    const $scrollElement = document.documentElement || document.body;
+    this.model = new Tools();
 
     const $scrollTop = DOM.qs('#tools-scroll-top', $tools);
     if ($scrollTop) {
       $scrollTop.addEventListener('click', e => {
         e.preventDefault();
-        $scrollElement.scrollTop = 0;
+        this.model.scrollToTop();
         return false;
       });
     }
@@ -18,9 +21,19 @@ export class ToolsView implements View {
     if ($scrollBottom) {
       $scrollBottom.addEventListener('click', e => {
         e.preventDefault();
-        $scrollElement.scrollTop = document.body.scrollHeight;
+        this.model.scrollToBottom();
         return false;
       });
     }
+
+    const $container = document.documentElement || document.body;
+
+    this.model.on('scroll-top', () => {
+      $container.scrollTop = 0;
+    });
+
+    this.model.on('scroll-bottom', () => {
+      $container.scrollTop = document.body.scrollHeight;
+    });
   }
 }

@@ -1,3 +1,7 @@
+import { DateTime } from 'luxon';
+import { SettingsManager } from '../settings';
+import { Time } from '../utils';
+
 export class Post {
   constructor(
     readonly id: number,
@@ -10,4 +14,10 @@ export class Post {
     readonly fileWidth: number,
     readonly fileHeight: number,
   ) { }
+
+  get formattedTime() {
+    const settings = SettingsManager.load();
+    const time = DateTime.fromMillis(this.createdAt);
+    return Time.format(time, settings);
+  }
 }

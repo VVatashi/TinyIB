@@ -1,14 +1,15 @@
 import { Page } from '.';
 import { Board } from '../model';
 import { DOM } from '../utils';
-import { ThreadPreviewView, ToolsView, View } from '../views';
+import { ThreadPreviewView, ToolsView } from '../views';
 
 export class BoardPage implements Page {
+  readonly threads: ThreadPreviewView[];
+  readonly tools: ToolsView;
   readonly model: Board;
-  readonly children: View[];
 
   constructor() {
-    this.children = [];
+    this.threads = [];
 
     const $posts = DOM.qsa('.post') as HTMLElement[];
     const $postGroups: HTMLElement[][] = [];
@@ -20,15 +21,14 @@ export class BoardPage implements Page {
 
       $postGroups[$postGroups.length - 1].push($post);
     }
-    const threadViews = $postGroups.map($posts => new ThreadPreviewView($posts))
-    this.children = threadViews;
-
-    const threads = threadViews.map(view => view.model);
-    this.model = new Board(threads);
+    this.threads = $postGroups.map($posts => new ThreadPreviewView($posts));
 
     const $tools = DOM.qs('.tools') as HTMLElement;
     if ($tools) {
-      this.children.push(new ToolsView($tools));
+      this.tools = new ToolsView($tools);
     }
+
+    const threads = this.threads.map(view => view.model);
+    this.model = new Board(threads);
   }
 }

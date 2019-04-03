@@ -1,23 +1,23 @@
 import { Page } from '.';
 import { Thread } from '../model';
 import { DOM } from '../utils';
-import { PostView, ToolsView, View } from '../views';
+import { PostView, ToolsView } from '../views';
 
 export class ThreadPage implements Page {
+  readonly posts: PostView[];
+  readonly tools: ToolsView;
   readonly model: Thread;
-  readonly children: View[];
 
   constructor() {
     const $posts = DOM.qsa('.post') as HTMLElement[];
-    const postViews = $posts.map($post => new PostView($post));
-    this.children = postViews;
-
-    const posts = postViews.map(view => view.model);
-    this.model = new Thread(posts);
+    this.posts = $posts.map($post => new PostView($post));
 
     const $tools = DOM.qs('.tools') as HTMLElement;
     if ($tools) {
-      this.children.push(new ToolsView($tools));
+      this.tools = new ToolsView($tools);
     }
+
+    const posts = this.posts.map(view => view.model);
+    this.model = new Thread(posts);
   }
 }
