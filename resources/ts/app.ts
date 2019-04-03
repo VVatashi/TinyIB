@@ -6,7 +6,6 @@ import {
   PostReferenceMap,
   Settings,
   StyleSwitch,
-  ThreadUpdater,
 } from './components';
 import { SettingsManager } from './settings';
 import { DOM } from './utils';
@@ -27,9 +26,6 @@ new Settings();
 new StyleSwitch();
 
 const settings = SettingsManager.load();
-if (settings.common.enableThreadAutoupdate) {
-  new ThreadUpdater();
-}
 
 document.addEventListener('DOMContentLoaded', e => {
   eventBus.$emit(Events.Ready);
@@ -85,10 +81,12 @@ class App {
 
   constructor() {
     const path = window.location.pathname;
+    let matches = [];
     if (path.match(/^\/[0-9a-z_-]+\/?$/i)) {
       this.view = new BoardPage();
-    } else if (path.match(/^\/[0-9a-z_-]+\/res\/(\d+)\/?$/i)) {
-      this.view = new ThreadPage();
+    } else if (matches = path.match(/^\/[0-9a-z_-]+\/res\/(\d+)\/?$/i)) {
+      const threadId = +matches[1];
+      this.view = new ThreadPage(threadId);
     }
   }
 }

@@ -6,4 +6,3 @@ export { PostingForm } from './posting-form';
 export { PostReferenceMap } from './post-reference-map';
 export { Settings } from './settings';
 export { StyleSwitch } from './style-switch';
-export { ThreadUpdater } from './thread-updater';

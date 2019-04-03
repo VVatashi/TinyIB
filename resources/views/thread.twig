@@ -17,7 +17,17 @@
       {% endfor %}
     </form>
 
-    <div id="thread-updater"></div>
+    <div id="thread-updater" class="thread-updater content__thread-updater">
+      <button class="button thread-updater__update">Get new posts</button>
+
+      <label class="thread-updater__auto-label">
+        <input type="checkbox" class="thread-updater__auto-checkbox" />
+        <span class="thread-updater__count"></span>
+      </label>
+
+      <span class="thread-updater__loader hidden"></span>
+      <span class="thread-updater__status"></span>
+    </div>
 
     <hr />
 
