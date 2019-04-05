@@ -3,7 +3,7 @@ import { DOM } from '../../utils';
 
 export class PostQuote {
   constructor() {
-    eventBus.$on(Events.PostsInserted, (posts: Element[]) =>
+    eventBus.on(Events.PostsInserted, (posts: Element[]) =>
       posts.forEach(this.onPostInsert.bind(this)));
   }
 
@@ -13,7 +13,7 @@ export class PostQuote {
       quoteLink.addEventListener('click', e => {
         e.preventDefault();
         const id = quoteLink.getAttribute('data-post-id');
-        eventBus.$emit(Events.InsertMarkup, [`>>${id}\n`, '', true]);
+        eventBus.emit(Events.InsertMarkup, [`>>${id}\n`, '', true]);
         return false;
       });
     }

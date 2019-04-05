@@ -36,8 +36,8 @@ export class PostingForm {
   protected settings: Settings = SettingsManager.load();
 
   constructor() {
-    eventBus.$on(Events.Ready, this.onReady.bind(this));
-    eventBus.$on(Events.PostsInserted, this.onPostsInserted.bind(this));
+    eventBus.on(Events.Ready, this.onReady.bind(this));
+    eventBus.on(Events.PostsInserted, this.onPostsInserted.bind(this));
   }
 
   onReady() {
@@ -545,7 +545,7 @@ export class PostingForm {
             if (isInThread) {
               const settings = SettingsManager.load();
               if (settings.common.enableThreadAutoupdate) {
-                eventBus.$emit(Events.PostCreated);
+                eventBus.emit(Events.PostCreated);
               }
             } else {
               // Redirect to thread.

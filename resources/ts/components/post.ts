@@ -1,8 +1,8 @@
-import { getCoubData, getCoubHtml } from './coub';
 import { Modal } from './modal';
 import { VideoPlayer } from './video-player';
 
 import { eventBus, Events, SettingsManager } from '..';
+import { Coub } from '../services';
 import { DOM } from '../utils';
 
 interface FileData {
@@ -61,8 +61,8 @@ export class Post {
   protected popups: { [key: number]: PostPopup } = {};
 
   constructor() {
-    eventBus.$on(Events.Ready, this.onReady.bind(this));
-    eventBus.$on(Events.PostsInserted, this.onPostsInserted.bind(this));
+    eventBus.on(Events.Ready, this.onReady.bind(this));
+    eventBus.on(Events.PostsInserted, this.onPostsInserted.bind(this));
   }
 
   protected onReady() {
@@ -99,7 +99,7 @@ export class Post {
 
         const settings = SettingsManager.load();
         if (settings.common.enableThreadAutoupdate) {
-          eventBus.$emit(Events.UpdateThread);
+          eventBus.emit(Events.UpdateThread);
         }
 
         return false;
@@ -461,8 +461,6 @@ export class Post {
     const postId = +post.getAttribute('data-post-id');
     if (name.length && postName.indexOf(name) !== -1) {
       this.ownPostIds.push(postId);
-
-      post.classList.add('post--own');
     }
 
     const settings = SettingsManager.load();
@@ -537,7 +535,7 @@ export class Post {
       .forEach(async matches => {
         if (matches[1] === 'coub.com') {
           try {
-            const coub = await getCoubData(matches[2]);
+            const coub = await Coub.getData(matches[2]);
             const thumbnailUrl = coub.image_versions.template.replace('%{version}', 'small');
             const thumbnail = document.createElement('div');
             thumbnail.classList.add('post__file-preview', 'file');
@@ -687,7 +685,7 @@ export class Post {
       });
     } else if (file.type === 'coub') {
       const $content = DOM.qid('embed-modal_content');
-      $content.innerHTML = await getCoubHtml(file.url);
+      $content.innerHTML = await Coub.getHtml(file.url);
 
       this.embedModal.show(left, top, width, height, () => {
         $content.innerHTML = '';

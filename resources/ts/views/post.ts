@@ -30,6 +30,11 @@ export class PostView implements View {
     const fileWidth = $fileLink ? +$fileLink.getAttribute('data-width') : null;
     const fileHeight = $fileLink ? +$fileLink.getAttribute('data-height') : null;
 
+    const $references = DOM.qsa('a[data-target-post-id]', $element);
+    const referencedIds = $references.map($reference => {
+      return +$reference.getAttribute('data-target-post-id');
+    });
+
     this.model = new Post(
       id,
       createdAt,
@@ -40,10 +45,15 @@ export class PostView implements View {
       file,
       fileWidth,
       fileHeight,
+      referencedIds,
     );
 
     if ($dateTime) {
       $dateTime.textContent = this.model.formattedTime;
+    }
+
+    if (this.model.isOwn) {
+      $element.classList.add('post--own');
     }
   }
 }

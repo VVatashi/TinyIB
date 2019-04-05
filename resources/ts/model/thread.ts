@@ -59,6 +59,10 @@ export class Thread extends EventEmitter {
     super();
   }
 
+  get ownPosts() {
+    return this.posts.filter(post => post.isOwn);
+  }
+
   protected async loadNewPosts() {
     if (this.isLoading) {
       return;
@@ -91,6 +95,8 @@ export class Thread extends EventEmitter {
   }
 
   readAll() {
-    this.unreadPosts = 0;
+    if (this.unreadPosts > 0) {
+      this.unreadPosts = 0;
+    }
   }
 }

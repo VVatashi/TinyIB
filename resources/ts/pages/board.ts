@@ -1,14 +1,15 @@
-import { Page } from '.';
+import { BasePage } from './base';
 import { Board } from '../model';
 import { DOM } from '../utils';
-import { ThreadPreviewView, ToolsView } from '../views';
+import { ThreadPreviewView } from '../views';
 
-export class BoardPage implements Page {
+export class BoardPage extends BasePage {
   readonly threads: ThreadPreviewView[];
-  readonly tools: ToolsView;
   readonly model: Board;
 
   constructor() {
+    super();
+
     this.threads = [];
 
     const $posts = DOM.qsa('.post') as HTMLElement[];
@@ -22,11 +23,6 @@ export class BoardPage implements Page {
       $postGroups[$postGroups.length - 1].push($post);
     }
     this.threads = $postGroups.map($posts => new ThreadPreviewView($posts));
-
-    const $tools = DOM.qs('.tools') as HTMLElement;
-    if ($tools) {
-      this.tools = new ToolsView($tools);
-    }
 
     const threads = this.threads.map(view => view.model);
     this.model = new Board(threads);

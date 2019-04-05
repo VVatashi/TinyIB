@@ -3,8 +3,8 @@ import { DOM } from '../../utils';
 
 export class PostForm {
   constructor() {
-    eventBus.$on(Events.Ready, this.onReady.bind(this));
-    eventBus.$on(Events.InsertMarkup, (data: any[]) => {
+    eventBus.on(Events.Ready, this.onReady.bind(this));
+    eventBus.on(Events.InsertMarkup, (data: any[]) => {
       const form = DOM.qid('postform');
       if (!form) {
         console.warn('#postform is not found.');
@@ -152,7 +152,7 @@ export class PostForm {
           localStorage.removeItem('user.tripcode');
         }
 
-        eventBus.$emit(Events.PostCreated);
+        eventBus.emit(Events.PostCreated);
       } else {
         // TODO: show error in the form.
         console.error(response);

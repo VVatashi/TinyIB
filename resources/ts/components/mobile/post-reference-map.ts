@@ -9,7 +9,7 @@ export class PostReferenceMap {
     this.user.name = localStorage.getItem('user.name');
     this.user.tripcode = localStorage.getItem('user.tripcode');
 
-    eventBus.$on(Events.PostsInserted, (posts: Element[]) =>
+    eventBus.on(Events.PostsInserted, (posts: Element[]) =>
       posts.forEach(this.onPostInsert.bind(this)));
   }
 

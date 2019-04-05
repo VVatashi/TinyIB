@@ -1,125 +1,33 @@
-import { Page } from '.';
+import { BasePage } from './base';
+import { eventBus } from '../event-bus';
+import { Events } from '../events';
 import { Thread } from '../model';
 import { DOM } from '../utils';
-import { PostView, ToolsView } from '../views';
+import { PostView } from '../views';
 
 const faviconSize = 16;
 
-export class ThreadPage implements Page {
+export class ThreadPage extends BasePage {
   readonly posts: PostView[];
-  readonly tools: ToolsView;
   readonly model: Thread;
 
   protected readonly $updater: HTMLElement;
   protected readonly faviconHref: string;
 
   constructor(readonly threadId: number) {
-    const $posts = DOM.qsa('.post') as HTMLElement[];
-    this.posts = $posts.map($post => new PostView($post));
-
-    const $tools = DOM.qs('.tools') as HTMLElement;
-    if ($tools) {
-      this.tools = new ToolsView($tools);
-    }
-
-    const posts = this.posts.map(view => view.model);
-    this.model = new Thread(threadId, posts);
-
-    this.$updater = DOM.qid('thread-updater');
-    if (this.$updater) {
-      const $update = DOM.qs('.thread-updater__update', this.$updater);
-      if ($update) {
-        $update.addEventListener('click', e => {
-          e.preventDefault();
-          this.model.getNewPosts();
-          return false;
-        });
-      }
-
-      const $enabled = DOM.qs('.thread-updater__auto-checkbox', this.$updater) as HTMLInputElement;
-      if ($enabled) {
-        $enabled.checked = this.model.isUpdateEnabled;
-
-        $enabled.addEventListener('change', () => {
-          this.model.isUpdateEnabled = $enabled.checked;
-        });
-      }
-
-      const $count = DOM.qs('.thread-updater__count', this.$updater);
-      if ($count) {
-        this.model.on('counter-changed', count => {
-          $count.textContent = this.model.isUpdateEnabled ? `Autoupdate in ${count}` : 'Autoupdate';
-        });
-      }
-
-      const $loader = DOM.qs('.thread-updater__loader', this.$updater);
-      if ($loader) {
-        this.model.on('loading-changed', loading => {
-          if (loading) {
-            $loader.classList.remove('hidden');
-          } else {
-            $loader.classList.add('hidden');
-          }
-        });
-      }
-
-      setTimeout(this.updateCounter.bind(this), 1000);
-    }
-
-    this.model.on('new-posts-loaded', html => {
-      const $wrapper = DOM.qs('.post').parentElement;
-      if (!$wrapper) {
-        return;
-      }
-
-      const latestPostId = this.model.latestPostId;
-      $wrapper.insertAdjacentHTML('beforeend', html);
-      const $posts = DOM.qsa('.post', $wrapper);
-      const $newPosts = $posts
-        .filter($post => {
-          const id = +$post.getAttribute('data-post-id');
-          return id > latestPostId;
-        });
-
-      if ($newPosts.length) {
-        $newPosts.forEach(($post, index) => {
-          // Add post number in thread.
-          const $postNo = document.createElement('span');
-          $postNo.classList.add('post-header__post-no');
-          $postNo.textContent = `#${$posts.length - $newPosts.length + index + 1}`;
-
-          const $refWrapper = DOM.qs('.post-header__reflink-wrapper', $post);
-          $refWrapper.appendChild($postNo);
-
-          const $mobileRefWrapper = DOM.qs('.post-header-mobile__reflink-wrapper', $post);
-          $mobileRefWrapper.appendChild($postNo.cloneNode(true));
-
-          // Create view & model for post.
-          const view = new PostView($post as HTMLElement);
-          this.posts.push(view);
-          this.model.posts.push(view.model);
-        });
-
-        // Update unread posts count.
-        if (document.hidden) {
-          this.model.unreadPosts += $newPosts.length;
-        }
-      }
-    });
+    super();
 
     const $favicon = DOM.qid('favicon');
     this.faviconHref = $favicon.getAttribute('href');
 
-    document.addEventListener('visibilitychange', () => {
-      // Update unread posts count.
-      if (!document.hidden && this.model.unreadPosts > 0) {
-        this.model.readAll();
-      }
-    });
+    this.$updater = DOM.qid('thread-updater');
 
-    this.model.on('unread-posts-changed', count => {
-      this.updateFavicon(count);
-    })
+    const $posts = DOM.qsa('.post') as HTMLElement[];
+    this.posts = $posts.map($post => new PostView($post));
+
+    const posts = this.posts.map(view => view.model);
+    this.model = new Thread(threadId, posts);
+    this.bindModel();
   }
 
   async updateCounter() {
@@ -197,5 +105,103 @@ export class ThreadPage implements Page {
       $canvas.remove();
       $img.remove();
     };
+  }
+
+  protected onNewPostsLoaded(html: string) {
+    const $wrapper = DOM.qs('.post').parentElement;
+    if (!$wrapper) {
+      return;
+    }
+
+    const latestPostId = this.model.latestPostId;
+    $wrapper.insertAdjacentHTML('beforeend', html);
+    const $posts = DOM.qsa('.post', $wrapper);
+    const $newPosts = $posts
+      .filter($post => {
+        const id = +$post.getAttribute('data-post-id');
+        return id > latestPostId;
+      });
+
+    if ($newPosts.length) {
+      $newPosts.forEach(($post, index) => {
+        // Add post number in thread.
+        const $postNo = document.createElement('span');
+        $postNo.classList.add('post-header__post-no');
+        $postNo.textContent = `#${$posts.length - $newPosts.length + index + 1}`;
+
+        const $refWrapper = DOM.qs('.post-header__reflink-wrapper', $post);
+        $refWrapper.appendChild($postNo);
+
+        const $mobileRefWrapper = DOM.qs('.post-header-mobile__reflink-wrapper', $post);
+        $mobileRefWrapper.appendChild($postNo.cloneNode(true));
+
+        // Create view & model for post.
+        const view = new PostView($post as HTMLElement);
+        this.posts.push(view);
+        this.model.posts.push(view.model);
+      });
+
+      // Update unread posts count.
+      if (document.hidden) {
+        this.model.unreadPosts += $newPosts.length;
+      }
+
+      eventBus.emit(Events.PostsInserted, $newPosts);
+    }
+  }
+
+  protected bindModel() {
+    if (this.$updater) {
+      const $update = DOM.qs('.thread-updater__update', this.$updater);
+      if ($update) {
+        $update.addEventListener('click', e => {
+          e.preventDefault();
+          this.model.getNewPosts();
+          return false;
+        });
+      }
+
+      const $enabled = DOM.qs('.thread-updater__auto-checkbox', this.$updater) as HTMLInputElement;
+      if ($enabled) {
+        $enabled.checked = this.model.isUpdateEnabled;
+
+        $enabled.addEventListener('change', () => {
+          this.model.isUpdateEnabled = $enabled.checked;
+        });
+      }
+
+      const $count = DOM.qs('.thread-updater__count', this.$updater);
+      if ($count) {
+        this.model.on('counter-changed', count => {
+          $count.textContent = this.model.isUpdateEnabled ? `Autoupdate in ${count}` : 'Autoupdate';
+        });
+      }
+
+      const $loader = DOM.qs('.thread-updater__loader', this.$updater);
+      if ($loader) {
+        this.model.on('loading-changed', loading => {
+          if (loading) {
+            $loader.classList.remove('hidden');
+          } else {
+            $loader.classList.add('hidden');
+          }
+        });
+      }
+
+      setTimeout(this.updateCounter.bind(this), 1000);
+    }
+
+    this.model.on('new-posts-loaded', this.onNewPostsLoaded.bind(this));
+
+    document.addEventListener('visibilitychange', () => {
+      // Update unread posts count.
+      if (!document.hidden) {
+        this.model.readAll();
+      }
+    });
+
+    this.model.on('unread-posts-changed', this.updateFavicon.bind(this));
+
+    eventBus.on(Events.PostCreated, this.model.getNewPosts.bind(this.model));
   }
 }

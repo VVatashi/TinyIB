@@ -14,7 +14,7 @@ export class PostImagePopup {
   protected dragStartMouseY = 0;
 
   constructor() {
-    eventBus.$on(Events.PostsInserted, (posts: Element[]) =>
+    eventBus.on(Events.PostsInserted, (posts: Element[]) =>
       posts.forEach(this.onPostInsert.bind(this)));
   }
 
