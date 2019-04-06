@@ -735,7 +735,7 @@ export class Post {
       this.$layout.appendChild(this.$modal);
 
       this.modal = new Modal(this.$modal);
-      this.modal.show(left, top, 300, height, () => {
+      this.modal.show(left, top, 300, 50, () => {
         this.$modal.remove();
         this.modal = null;
         this.modalFileIndex = null;

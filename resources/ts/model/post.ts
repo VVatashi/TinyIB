@@ -39,6 +39,6 @@ export class Post {
     const tripcode = localStorage.getItem('user.tripcode') || '';
     const authorName = name + tripcode;
     const postAuthorName = this.name + this.tripcode;
-    return this._isOwn = authorName.length && postAuthorName.indexOf(name) === 0;
+    return this._isOwn = authorName.length && postAuthorName.indexOf(authorName) === 0;
   }
 }
