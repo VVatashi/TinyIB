@@ -40,22 +40,15 @@ function offset($el: HTMLElement) {
 }
 
 export class Post {
-  protected $layout: HTMLElement;
-  protected $imageModal: HTMLElement;
-  protected $videoModal: HTMLElement;
-  protected $embedModal: HTMLElement;
-  protected $player: HTMLElement;
-
-  protected player: VideoPlayer;
-  protected imageModal: Modal;
-  protected videoModal: Modal;
-  protected embedModal: Modal;
+  protected $layout: HTMLElement = null;
+  protected $modal: HTMLElement = null;
+  protected modal: Modal = null;
+  protected player: VideoPlayer = null;
 
   protected readonly media: FileData[] = [];
   protected readonly ownPostIds: number[] = [];
-  protected modals: Modal[];
 
-  protected modalFileIndex?: number = null;
+  protected modalFileIndex: number = null;
 
   protected nextPopupId = 0;
   protected popups: { [key: number]: PostPopup } = {};
@@ -67,21 +60,6 @@ export class Post {
 
   protected onReady() {
     this.$layout = DOM.qs('.layout') as HTMLElement;
-    this.$imageModal = DOM.qid('image-modal') as HTMLElement;
-    this.$videoModal = DOM.qid('video-modal') as HTMLElement;
-    this.$embedModal = DOM.qid('embed-modal') as HTMLElement;
-    this.$player = DOM.qs('.player', this.$videoModal) as HTMLElement;
-
-    this.player = new VideoPlayer(this.$player);
-    this.imageModal = new Modal(this.$imageModal);
-    this.videoModal = new Modal(this.$videoModal);
-    this.embedModal = new Modal(this.$embedModal, false);
-
-    this.modals = [
-      this.imageModal,
-      this.videoModal,
-      this.embedModal,
-    ];
 
     const onKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -171,13 +149,67 @@ export class Post {
 
         return false;
       } else if (settings.common.hidePopupOnOutsideClick) {
-        this.modals.filter(modal => !modal.isDragging)
-          .forEach(modal => modal.hide());
+        if (this.modal && !this.modal.isDragging) {
+          this.modal.hide();
+        }
       }
 
       if (e.target.classList.contains('file__hide')) {
         const $file = e.target.closest('.file');
-        $file.classList.add('hidden');
+        if (!$file) {
+          return;
+        }
+
+        $file.classList.add('file--hidden');
+
+        const $info = DOM.qs('.post__file-info', $file);
+        if ($info) {
+          $info.classList.add('hidden');
+        }
+
+        const $hide = DOM.qs('.file__hide', $file);
+        if ($hide) {
+          $hide.classList.add('hidden');
+        }
+
+        const $show = DOM.qs('.file__show', $file);
+        if ($show) {
+          $show.classList.remove('hidden');
+        }
+
+        const $thumbnail = DOM.qs('.file__thumbnail', $file);
+        if ($thumbnail) {
+          $thumbnail.classList.add('hidden');
+        }
+      }
+
+      if (e.target.classList.contains('file__show')) {
+        const $file = e.target.closest('.file');
+        if (!$file) {
+          return;
+        }
+
+        $file.classList.remove('file--hidden');
+
+        const $info = DOM.qs('.post__file-info', $file);
+        if ($info) {
+          $info.classList.remove('hidden');
+        }
+
+        const $hide = DOM.qs('.file__hide', $file);
+        if ($hide) {
+          $hide.classList.remove('hidden');
+        }
+
+        const $show = DOM.qs('.file__show', $file);
+        if ($show) {
+          $show.classList.add('hidden');
+        }
+
+        const $thumbnail = DOM.qs('.file__thumbnail', $file);
+        if ($thumbnail) {
+          $thumbnail.classList.remove('hidden');
+        }
       }
     });
 
@@ -382,26 +414,28 @@ export class Post {
       });
     };
 
-    document.addEventListener('mouseover', e => {
-      const $target = e.target as HTMLElement;
-      if ($target.tagName === 'A'
-        && ($target.classList.contains('post__reference-link')
-          || $target.classList.contains('post__refmap-link'))) {
-        $target.setAttribute('data-hover', 'true');
+    if (settings.common.showPostPopups) {
+      document.addEventListener('mouseover', e => {
+        const $target = e.target as HTMLElement;
+        if ($target.tagName === 'A'
+          && ($target.classList.contains('post__reference-link')
+            || $target.classList.contains('post__refmap-link'))) {
+          $target.setAttribute('data-hover', 'true');
 
-        const onMouseLeave = (e: MouseEvent) => {
-          $target.removeAttribute('data-hover');
-          $target.removeEventListener('mouseleave', onMouseLeave);
-        };
-        $target.addEventListener('mouseleave', onMouseLeave);
+          const onMouseLeave = (e: MouseEvent) => {
+            $target.removeAttribute('data-hover');
+            $target.removeEventListener('mouseleave', onMouseLeave);
+          };
+          $target.addEventListener('mouseleave', onMouseLeave);
 
-        setTimeout(() => {
-          if ($target.hasAttribute('data-hover')) {
-            openPopup($target);
-          }
-        }, 100);
-      }
-    });
+          setTimeout(() => {
+            if ($target.hasAttribute('data-hover')) {
+              openPopup($target);
+            }
+          }, 100);
+        }
+      });
+    }
   }
 
   protected checkHidden($post: HTMLElement) {
@@ -475,8 +509,8 @@ export class Post {
           link.parentElement.insertBefore(youEl, link.nextSibling);
         }
 
-        post.classList.add('post--reply');
-        link.classList.add('post__reference-link--reply');
+        post.classList.add('post--own-reply');
+        link.classList.add('post__reference-link--own-reply');
       }
 
       const $targetPost = DOM.qid(`reply_${targetId}`);
@@ -540,10 +574,13 @@ export class Post {
             const thumbnail = document.createElement('div');
             thumbnail.classList.add('post__file-preview', 'file');
             thumbnail.innerHTML = `
-<div class="post__file-info file-info filesize">
+<div class="post__file-info file-info">
   <a class="file-info__link" href="https://coub.com/view/${coub.permalink}" target="_blank">Coub</a>
   <span class="file-info__size"></span>
 </div>
+
+<span class="file__hide fas fa-window-close" title="Hide preview"></span>
+<span class="file__show far fa-plus-square hidden" title="Show hidden preview"></span>
 
 <a class="file__thumbnail thumbnail thumbnail--embed" href="https://coub.com/view/${coub.permalink}" target="_blank">
   <img class="thumbnail__content thumbnail__content--embed" src="${thumbnailUrl}" />
@@ -592,10 +629,13 @@ export class Post {
             const thumbnail = document.createElement('div');
             thumbnail.classList.add('post__file-preview', 'file');
             thumbnail.innerHTML = `
-<div class="post__file-info file-info filesize">
+<div class="post__file-info file-info">
   <a class="file-info__link" href="${url}" target="_blank">YouTube</a>
   <span class="file-info__size"></span>
 </div>
+
+<span class="file__hide fas fa-window-close" title="Hide preview"></span>
+<span class="file__show far fa-plus-square hidden" title="Show hidden preview"></span>
 
 <a class="file__thumbnail thumbnail thumbnail--embed" href="${url}" target="_blank">
   <img class="thumbnail__content thumbnail__content--embed" src="${thumbnailUrl}" />
@@ -666,43 +706,139 @@ export class Post {
     const top = Math.round(window.innerHeight / 2 - height / 2);
 
     if (file.type === 'image') {
-      const $image = DOM.qs('img', this.$imageModal);
-      $image.setAttribute('src', file.url);
+      this.$modal = document.createElement('div');
+      this.$modal.classList.add('modal');
+      this.$modal.innerHTML = `
+<div class="modal__content modal__content--image">
+  <img class="modal__image" src="${file.url}" />
+</div>`;
+      this.$layout.appendChild(this.$modal);
 
-      this.imageModal.show(left, top, width, height, () => {
-        $image.setAttribute('src', '');
+      this.modal = new Modal(this.$modal);
+      this.modal.show(left, top, width, height, () => {
+        this.$modal.remove();
+        this.modal = null;
+        this.modalFileIndex = null;
+      });
+    } else if (file.type === 'audio') {
+      this.$modal = document.createElement('div');
+      this.$modal.classList.add('modal');
+      this.$modal.innerHTML = `
+<div class="modal__header">
+</div>
+
+<div class="modal__content modal__content--audio">
+  <audio class="modal__audio" src="${file.url}"
+    autoplay="true" loop="true" preload="none" controls="true">
+  </audio>
+</div>`;
+      this.$layout.appendChild(this.$modal);
+
+      this.modal = new Modal(this.$modal);
+      this.modal.show(left, top, 300, height, () => {
+        this.$modal.remove();
+        this.modal = null;
         this.modalFileIndex = null;
       });
     } else if (file.type === 'video') {
-      const $video = DOM.qs('video', this.$videoModal);
-      $video.setAttribute('src', file.url);
-      ($video as HTMLVideoElement).load();
+      this.$modal = document.createElement('div');
+      this.$modal.classList.add('modal');
+      this.$modal.innerHTML = `
+<div class="modal__content modal__content--video">
+  <div class="player">
+    <video class="player__video" src="${file.url}"
+      autoplay="true" loop="true" preload="none">
+    </video>
 
-      this.videoModal.show(left, top, width, height, () => {
-        ($video as HTMLVideoElement).pause();
-        $video.setAttribute('src', '');
+    <div class="player__controls">
+      <button class="player__play hidden">
+        <span class="fas fa-play"></span>
+      </button>
+
+      <button class="player__pause">
+        <span class="fas fa-pause"></span>
+      </button>
+
+      <input type="range" class="player__seek"
+        value="0" min="0" max="1" step="0.001" />
+
+      <button class="player__mute">
+        <span class="fas fa-volume-up"></span>
+      </button>
+
+      <button class="player__unmute hidden">
+        <span class="fas fa-volume-mute"></span>
+      </button>
+
+      <input type="range" class="player__volume"
+        value="1" min="0" max="1" step="0.01" />
+
+      <button class="player__expand">
+        <span class="fas fa-expand"></span>
+      </button>
+
+      <button class="player__compress hidden">
+        <span class="fas fa-compress"></span>
+      </button>
+    </div>
+  </div>
+</div>`;
+      this.$layout.appendChild(this.$modal);
+
+      const $player = DOM.qs('.player', this.$modal);
+      this.player = new VideoPlayer($player);
+
+      this.modal = new Modal(this.$modal);
+      this.modal.show(left, top, width, height, () => {
+        this.player.setPlaying(false);
+        this.player = null;
+
+        this.$modal.remove();
+        this.modal = null;
         this.modalFileIndex = null;
       });
     } else if (file.type === 'coub') {
-      const $content = DOM.qid('embed-modal_content');
-      $content.innerHTML = await Coub.getHtml(file.url);
+      this.$modal = document.createElement('div');
+      this.$modal.classList.add('modal');
+      this.$modal.innerHTML = `
+<div class="modal__header">
+</div>
 
-      this.embedModal.show(left, top, width, height, () => {
-        $content.innerHTML = '';
+<div id="embed-modal_content" class="modal__content modal__content--embed">
+  ${await Coub.getHtml(file.url)}
+</div>`;
+      this.$layout.appendChild(this.$modal);
+
+      this.modal = new Modal(this.$modal, false);
+      this.modal.show(left, top, width, height, () => {
+        this.$modal.remove();
+        this.modal = null;
         this.modalFileIndex = null;
       });
     } else if (file.type === 'youtube') {
-      const $content = DOM.qid('embed-modal_content');
-      $content.innerHTML = file.data;
+      this.$modal = document.createElement('div');
+      this.$modal.classList.add('modal');
+      this.$modal.innerHTML = `
+<div class="modal__header">
+</div>
 
-      this.embedModal.show(left, top, width, height, () => {
-        $content.innerHTML = '';
+<div id="embed-modal_content" class="modal__content modal__content--embed">
+  ${file.data}
+</div>`;
+      this.$layout.appendChild(this.$modal);
+
+      this.modal = new Modal(this.$modal, false);
+      this.modal.show(left, top, width, height, () => {
+        this.$modal.remove();
+        this.modal = null;
         this.modalFileIndex = null;
       });
     }
   }
 
   protected closeModals = () => {
-    this.modals.forEach(modal => modal.hide());
+    if (this.modal) {
+      this.modal.hide();
+    }
   };
 }

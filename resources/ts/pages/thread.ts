@@ -51,7 +51,7 @@ export class ThreadPage extends BasePage {
     setTimeout(this.updateCounter.bind(this), 1000);
   }
 
-  updateFavicon(unreadPosts: number) {
+  updateFavicon(unreadPosts: number, hasReplies: boolean) {
     const $canvas = document.createElement('canvas');
     $canvas.width = faviconSize;
     $canvas.height = faviconSize;
@@ -70,7 +70,7 @@ export class ThreadPage extends BasePage {
 
         context.beginPath();
         context.arc(x, y, faviconSize / 3, 0, 2 * Math.PI);
-        context.fillStyle = '#FF0000';
+        context.fillStyle = hasReplies ? '#0000FF' : '#FF0000';
         context.fill();
 
         context.textAlign = 'center';
@@ -134,17 +134,15 @@ export class ThreadPage extends BasePage {
 
         const $mobileRefWrapper = DOM.qs('.post-header-mobile__reflink-wrapper', $post);
         $mobileRefWrapper.appendChild($postNo.cloneNode(true));
-
-        // Create view & model for post.
-        const view = new PostView($post as HTMLElement);
-        this.posts.push(view);
-        this.model.posts.push(view.model);
       });
 
-      // Update unread posts count.
-      if (document.hidden) {
-        this.model.unreadPosts += $newPosts.length;
-      }
+      // Create view & model for each post.
+      const views = $newPosts.map($post => new PostView($post as HTMLElement));
+      this.posts.push(...views);
+
+      const models = views.map(view => view.model);
+      this.model.addPosts(models, document.hidden);
+      this.updateFavicon(this.model.unreadPosts, this.model.hasReplies);
 
       eventBus.emit(Events.PostsInserted, $newPosts);
     }
@@ -197,10 +195,9 @@ export class ThreadPage extends BasePage {
       // Update unread posts count.
       if (!document.hidden) {
         this.model.readAll();
+        this.updateFavicon(this.model.unreadPosts, this.model.hasReplies);
       }
     });
-
-    this.model.on('unread-posts-changed', this.updateFavicon.bind(this));
 
     eventBus.on(Events.PostCreated, this.model.getNewPosts.bind(this.model));
   }

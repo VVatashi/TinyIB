@@ -51,6 +51,7 @@ interface DragStart {
   y: number;
   top: number;
   left: number;
+  timestamp: number;
 }
 
 export class Modal {
@@ -118,7 +119,8 @@ export class Modal {
       moveEvents.forEach(event => window.removeEventListener(event, onMove));
       endEvents.forEach(event => window.removeEventListener(event, onUp));
 
-      if (!this.isDragged) {
+      const elapsedTime = e.timeStamp - this.dragStart.timestamp;
+      if (!this.isDragged && elapsedTime < 500) {
         this.hide();
       }
 
@@ -147,6 +149,7 @@ export class Modal {
         y,
         left: this.left,
         top: this.top,
+        timestamp: e.timeStamp,
       };
 
       this._isDragging = true;

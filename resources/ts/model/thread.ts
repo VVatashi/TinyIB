@@ -9,6 +9,7 @@ export class Thread extends EventEmitter {
   protected _counter: number = updateInterval;
   protected _isLoading: boolean = false;
   protected _unreadPosts: number = 0;
+  protected _hasReplies: boolean = false;
 
   get counter() {
     return this._counter;
@@ -46,6 +47,10 @@ export class Thread extends EventEmitter {
     const settings = SettingsManager.load();
     settings.common.enableThreadAutoupdate = value;
     SettingsManager.save(settings);
+  }
+
+  get hasReplies() {
+    return this._hasReplies;
   }
 
   get latestPostId() {
@@ -94,9 +99,31 @@ export class Thread extends EventEmitter {
     }
   }
 
+  addPosts(posts: Post[], unread: boolean = false) {
+    this.posts.push(...posts);
+
+    if (unread) {
+      this.unreadPosts += posts.length;
+
+      if (!this._hasReplies) {
+        const references = posts
+          .map(post => post.referencedIds)
+          .reduce((prev, curr) => prev.concat(curr), []);
+
+        const referencedPosts = references
+          .map(ref => this.posts.find(post => post.id === ref))
+          .filter(post => post);
+
+        this._hasReplies = referencedPosts.some(post => post.isOwn);
+      }
+    }
+  }
+
   readAll() {
     if (this.unreadPosts > 0) {
       this.unreadPosts = 0;
     }
+
+    this._hasReplies = false;
   }
 }

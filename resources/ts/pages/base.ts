@@ -19,5 +19,24 @@ export class BasePage implements Page {
     if ($tools) {
       this.tools = new ToolsView($tools);
     }
+
+    document.addEventListener('click', e => {
+      if (!(e.target instanceof HTMLElement)) {
+        return;
+      }
+
+      if (e.target.tagName === 'A'
+        && (e.target.classList.contains('post-header__hide')
+          || e.target.classList.contains('post-header-mobile__hide'))) {
+        e.preventDefault();
+
+        const $post = e.target.closest('.post');
+        if ($post) {
+          $post.classList.toggle('post--hidden');
+        }
+
+        return false;
+      }
+    });
   }
 }
