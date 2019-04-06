@@ -7,7 +7,10 @@
     style="min-height: {{ post.thumbHeight }}px;"
   {% endif %}
 >
-  {% include 'components/_file_info.twig' with {'class': 'post__file-info filesize'} %}
+  {% include 'components/_file_info.twig' with {'class': 'post__file-info'} %}
+
+  <span class="file__hide fas fa-window-close" title="Hide preview"></span>
+  <span class="file__show far fa-plus-square hidden" title="Show hidden preview"></span>
 
   {% if post.thumbWidth > 0 and post.thumbHeight > 0 %}
     <a class="file__thumbnail thumbnail thumbnail--{{ post.fileType }}" id="thumbnail_wrapper_{{ post.id }}"

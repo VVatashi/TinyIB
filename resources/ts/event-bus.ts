@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import { EventEmitter } from './utils';
 
-const eventBus = new Vue();
+const eventBus = new EventEmitter();
 export { eventBus };

@@ -41,4 +41,13 @@ interface PostControllerInterface
    * @return array Array of post view models.
    */
   function threadPosts(ServerRequestInterface $request, array $args) : array;
+
+  /**
+   * Returns post.
+   *
+   * @param array $args Path arguments.
+   *
+   * @return array Post view models.
+   */
+  function post(array $args) : array;
 }

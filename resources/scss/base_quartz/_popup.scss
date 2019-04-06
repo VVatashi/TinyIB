@@ -10,7 +10,7 @@
 
   display: inline-block;
 
-  z-index: 1;
+  z-index: 10000;
 
   &__header {
     border-bottom: $post-header-border;
@@ -22,14 +22,6 @@
 
   &__header-buttons {
     float: right;
-  }
-
-  &__close {
-    @extend %clickable;
-    @extend %icon-close;
-    padding: 0.1em;
-    font-size: 1.5em;
-    vertical-align: middle;
   }
 
   &__body {
@@ -44,9 +36,5 @@
   @include breakpoint($xs-up) {
     border: $post-border;
     border-radius: $post-border-radius;
-
-    &__close {
-        font-size: 1em;
-    }
   }
 }

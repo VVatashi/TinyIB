@@ -1,4 +1,13 @@
-import { PostData } from './model';
+export interface PostData {
+  id: number;
+  parent_id: number;
+  name: string;
+  tripcode: string;
+  email: string;
+  subject: string;
+  file?: string;
+  created_at: number;
+}
 
 export interface CreatePostRequest {
   parent: number;
@@ -47,12 +56,15 @@ export class Api {
             location: xhr.getResponseHeader('Location'),
           });
         } else {
-          const data = JSON.parse(xhr.responseText);
-          if (data && data.error) {
-            reject(data.error);
-          } else {
-            reject(`${xhr.status} ${xhr.statusText}`);
+          let message = '';
+          try {
+            const data = JSON.parse(xhr.responseText);
+            message = data.error;
+          } catch (e) {
+            message = `${xhr.status} ${xhr.statusText}`;
           }
+
+          reject(message);
         }
       });
 

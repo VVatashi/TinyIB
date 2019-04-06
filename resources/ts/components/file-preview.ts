@@ -15,6 +15,9 @@ export const FilePreview = Vue.extend({
   <img class="file-preview__content"
     v-if="type === 'image' && src"
     :src="src" />
+  <img class="file-preview__content"
+    v-else-if="type === 'audio'"
+    :src="window.baseUrl + '/images/audio_thumbnail.png'" />
   <video class="file-preview__content" autoplay loop muted
     v-else-if="type === 'video' && src"
     :src="src"

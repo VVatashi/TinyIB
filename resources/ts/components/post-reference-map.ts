@@ -1,12 +1,19 @@
 import { eventBus, Events } from '..';
 import { DOM } from '../utils';
+import { SettingsManager } from '../settings';
 
 export class PostReferenceMap {
   protected readonly posts: { [id: number]: Element } = {};
 
   constructor() {
-    eventBus.$on(Events.PostsInserted, (posts: Element[]) =>
-      posts.forEach(this.onPostInsert.bind(this)));
+    eventBus.on(Events.PostsInserted, (posts: Element[]) => {
+      const settings = SettingsManager.load();
+      if (!settings.common.addNamesToLinks) {
+        return;
+      }
+
+      posts.forEach(this.onPostInsert.bind(this));
+    });
   }
 
   protected onPostInsert(post: Element) {

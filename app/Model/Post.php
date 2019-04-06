@@ -221,6 +221,7 @@ class Post extends Model
       case 'jpg':
       case 'png':
       case 'gif':
+      case 'webp':
         return 'image';
 
       case 'mp3':
@@ -243,7 +244,7 @@ class Post extends Model
       $target_post_id = (int)$matches[2];
 
       return 'class="post__reference-link"'
-        . ' href="/' . TINYIB_BOARD . "/res/$target_thread_id#$target_post_id\""
+        . ' href="/' . TINYIB_BOARD . "/res/$target_thread_id#reply_$target_post_id\""
         . " data-target-post-id=\"$target_post_id\"";
     }, $message);
   }
@@ -291,7 +292,7 @@ class Post extends Model
 '/
   #
   (?:
-      [0-9a-f]{3}
+      [0-9a-fA-F]{3}
   ){1,2}
 /x',
         'outputFormat' => '<span style="color: {attribute};">{content}</span>',
@@ -299,6 +300,10 @@ class Post extends Model
       new TagDef('quote', ['outputFormat' => '<span class="markup__quote">{content}</span>']),
     ]);
     $message = $parser->parse($message);
+
+    // Make post reference links undetectable by DE.
+    /** @todo Fix later. */
+    $message = preg_replace('#&gt;&gt;(\d+)#', '&gt;&#8203;&gt;$1', $message);
 
     return static::fixLinks($message);
   }

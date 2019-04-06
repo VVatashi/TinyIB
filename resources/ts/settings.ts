@@ -1,15 +1,26 @@
+export interface PostAuthor {
+  name: string;
+  tripcode: string;
+}
+
 export interface CommonSettings {
   layout: 'center' | 'left';
 
   showPostHeaderReflinkIcon: boolean;
-  movePostHeaderReflinkIconToDE: boolean;
   showPostReflinkIcon: boolean;
   scrollToNewPosts: boolean;
   smoothScroll: boolean;
   showVideoOverlay: boolean;
   hidePopupOnOutsideClick: boolean;
   nsfw: boolean;
-  threadAutoupdate: boolean;
+  enableThreadAutoupdate: boolean;
+  addNamesToLinks: boolean;
+  addYouToLinks: boolean;
+
+  hiddenPosts: PostAuthor[];
+  removeHiddenPosts: boolean;
+
+  showPostPopups: boolean;
 }
 
 export interface Replace {
@@ -54,20 +65,25 @@ export interface Settings {
   time: TimeSettings;
 }
 
-const settingsKey = 'settings';
 const defaultSettings: Settings = {
   common: {
     layout: 'left',
 
     showPostHeaderReflinkIcon: true,
-    movePostHeaderReflinkIconToDE: false,
     showPostReflinkIcon: false,
     scrollToNewPosts: true,
     smoothScroll: true,
     showVideoOverlay: false,
     hidePopupOnOutsideClick: false,
     nsfw: false,
-    threadAutoupdate: false,
+    enableThreadAutoupdate: true,
+    addNamesToLinks: true,
+    addYouToLinks: true,
+
+    hiddenPosts: [],
+    removeHiddenPosts: false,
+
+    showPostPopups: true,
   },
   form: {
     align: 'center',
@@ -122,6 +138,8 @@ function merge(target: any, source: any) {
   }
   return output;
 }
+
+const settingsKey = 'settings';
 
 export class SettingsManager {
   static load(): Settings {

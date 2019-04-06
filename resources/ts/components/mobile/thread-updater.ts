@@ -19,10 +19,10 @@ export class ThreadUpdater {
   protected isUpdating = false;
 
   constructor() {
-    eventBus.$on(Events.Ready, this.onReady.bind(this));
-    eventBus.$on(Events.PostsInserted, (posts: Element[]) =>
+    eventBus.on(Events.Ready, this.onReady.bind(this));
+    eventBus.on(Events.PostsInserted, (posts: Element[]) =>
       posts.forEach(this.onPostInsert.bind(this)));
-    eventBus.$on(Events.PostCreated, () => {
+    eventBus.on(Events.PostCreated, () => {
       const isAuto = this.viewModel.isAuto;
       this.viewModel.isAuto = false;
       this.viewModel.counter = this.interval;
@@ -45,7 +45,7 @@ export class ThreadUpdater {
 
     const posts = DOM.qsa('.post');
     if (posts.length > 0) {
-      eventBus.$emit(Events.PostsInserted, posts);
+      eventBus.emit(Events.PostsInserted, posts);
     }
 
     this.viewModel = new Vue({
@@ -137,7 +137,7 @@ export class ThreadUpdater {
           newPosts.forEach(post => post.classList.remove('fade'));
         }, 100);
 
-        eventBus.$emit(Events.PostsInserted, newPosts);
+        eventBus.emit(Events.PostsInserted, newPosts);
 
         // Remove old posts.
         const posts = DOM.qsa('.thread__post', postsWrapper);

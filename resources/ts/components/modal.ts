@@ -51,6 +51,7 @@ interface DragStart {
   y: number;
   top: number;
   left: number;
+  timestamp: number;
 }
 
 export class Modal {
@@ -60,10 +61,8 @@ export class Modal {
   protected top: number = 0;
   protected width: number = 0;
   protected height: number = 0;
+  protected scale: number = 1;
   protected aspect: number = 1;
-
-  protected onMove?: (left: number, top: number, width: number, heiht: number)
-    => { left: number, top: number } = null;
 
   protected onClose?: () => any = null;
 
@@ -84,6 +83,7 @@ export class Modal {
 
   constructor(
     readonly $modal: HTMLElement,
+    readonly fitHeightToContent: boolean = true,
   ) {
     this.$content = DOM.qs('.modal__content', $modal) as HTMLElement;
 
@@ -91,17 +91,16 @@ export class Modal {
       e.preventDefault();
 
       const { x, y } = getEventCoords(e);
+
+      if (x < 0 || y < 0 || x > window.innerWidth || y > window.innerHeight) {
+        return;
+      }
+
       const dx = x - this.dragStart.x;
       const dy = y - this.dragStart.y;
 
       this.left = this.dragStart.left + dx;
       this.top = this.dragStart.top + dy;
-
-      if (this.onMove) {
-        const { left, top } = this.onMove(this.left, this.top, this.width, this.height);
-        this.left = left;
-        this.top = top;
-      }
 
       this.$modal.style.left = `${this.left}px`;
       this.$modal.style.top = `${this.top}px`;
@@ -120,11 +119,13 @@ export class Modal {
       moveEvents.forEach(event => window.removeEventListener(event, onMove));
       endEvents.forEach(event => window.removeEventListener(event, onUp));
 
-      if (!this.isDragged) {
+      const elapsedTime = e.timeStamp - this.dragStart.timestamp;
+      if (!this.isDragged && elapsedTime < 500) {
         this.hide();
       }
 
       this.dragStart = null;
+      this.$modal.classList.remove('modal--dragging');
 
       setTimeout(() => {
         this._isDragging = false;
@@ -148,10 +149,12 @@ export class Modal {
         y,
         left: this.left,
         top: this.top,
+        timestamp: e.timeStamp,
       };
 
       this._isDragging = true;
       this.isDragged = false;
+      this.$modal.classList.add('modal--dragging');
 
       moveEvents.forEach(event => window.addEventListener(event, onMove));
       endEvents.forEach(event => window.addEventListener(event, onUp));
@@ -164,15 +167,24 @@ export class Modal {
     $modal.addEventListener('wheel', e => {
       e.preventDefault();
 
-      const sensitivity = 0.20;
-      const scale = 1 - sensitivity * Math.sign(e.deltaY);
-      const newWidth = Math.max(128, Math.min(this.width * scale, 8192));
-      const newHeight = newWidth / this.aspect;
+      const pow = -1.125;
+      const prevWidth = this.width * Math.pow(this.scale, pow);
+      const prevHeight = prevWidth / this.aspect;
 
-      const rx = (e.clientX - this.left) / this.width;
-      const ry = (e.clientY - this.top) / this.height;
-      const dx = (newWidth - this.width) * rx;
-      const dy = (newHeight - this.height) * ry;
+      const sensitivity = 0.1;
+      const newScale = this.scale + sensitivity * Math.sign(e.deltaY);
+      const newWidth = this.width * Math.pow(newScale, pow);
+      if (newWidth > 128 && newWidth < 32768) {
+        this.scale = newScale;
+      }
+
+      const width = this.width * Math.pow(this.scale, pow);
+      const height = width / this.aspect;
+
+      const rx = (e.clientX - this.left) / prevWidth;
+      const ry = (e.clientY - this.top) / prevHeight;
+      const dx = (width - prevWidth) * rx;
+      const dy = (height - prevHeight) * ry;
 
       if (this.dragStart) {
         this.dragStart.left -= dx;
@@ -181,19 +193,14 @@ export class Modal {
 
       this.left -= dx;
       this.top -= dy;
-      this.width = newWidth;
-      this.height = newHeight;
-
-      if (this.onMove) {
-        const { left, top } = this.onMove(this.left, this.top, this.width, this.height);
-        this.left = left;
-        this.top = top;
-      }
 
       this.$modal.style.left = `${this.left}px`;
       this.$modal.style.top = `${this.top}px`;
-      this.$content.style.width = `${this.width}px`;
-      this.$content.style.height = `${this.height}px`;
+      this.$content.style.width = `${width}px`;
+
+      if (!this.fitHeightToContent) {
+        this.$content.style.height = `${height}px`;
+      }
 
       return false;
     });
@@ -205,22 +212,23 @@ export class Modal {
     width: number,
     height: number,
     onClose?: () => any,
-    onMove?: (left: number, top: number, width: number, heiht: number)
-      => { left: number, top: number },
   ) {
     this.left = left;
     this.top = top;
     this.width = width;
     this.height = height;
+    this.scale = 1;
     this.aspect = this.height > 0 ? this.width / this.height : 1;
 
     this.onClose = onClose;
-    this.onMove = onMove;
 
     this.$modal.style.left = `${left}px`;
     this.$modal.style.top = `${top}px`;
     this.$content.style.width = `${width}px`;
-    this.$content.style.height = `${height}px`;
+
+    if (!this.fitHeightToContent) {
+      this.$content.style.height = `${height}px`;
+    }
 
     this.$modal.classList.remove('modal--hidden');
 
@@ -233,6 +241,7 @@ export class Modal {
     }
 
     this.$modal.classList.add('modal--hidden');
+    this.$modal.classList.remove('modal--dragging');
 
     if (this.onClose) {
       this.onClose();

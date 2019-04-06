@@ -1,5 +1,6 @@
 .thumbnail {
-  &--video {
+  &--video,
+  &--embed {
     border: $post-header-border;
     border-style: dashed;
     border-color: #fb99f9;

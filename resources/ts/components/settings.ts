@@ -9,7 +9,7 @@ export class Settings {
   protected viewModel: Vue;
 
   constructor() {
-    eventBus.$on(Events.Ready, this.onReady.bind(this));
+    eventBus.on(Events.Ready, this.onReady.bind(this));
   }
 
   onReady() {

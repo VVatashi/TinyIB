@@ -53,8 +53,10 @@
     </a>
 
     {% if res != constant('TINYIB_INDEXPAGE') %}
-      <a class="post-header__reflink-icon" href="{{ reflink }}" title="Quick reply" data-reflink="{{ post.id }}"></a>
+      <a class="post-header__reflink-icon fas fa-reply" href="{{ reflink }}" title="Quick reply" data-reflink="{{ post.id }}"></a>
     {% endif %}
+
+    <a class="post-header__hide fas fa-times" href="#" title="Hide post"></a>
 
     {% if post.isStickied %}
       <img src="{{ base_url }}/images/sticky.png" alt="Stickied" title="Stickied" width="16" height="16" />
@@ -64,6 +66,10 @@
       <span class="post-header__reply-wrapper">
         <a class="post-header__reply-link" href="{{ replylink }}">Reply</a>
       </span>
+    {% endif %}
+
+    {% if postNo %}
+      <span class="post-header__post-no">#{{ postNo }}</span>
     {% endif %}
   </span>
 </div>

@@ -6,6 +6,10 @@ import RadioButton from '../radio-button.vue';
 import { Replace } from '../../ts/settings';
 
 export default Vue.extend({
+  components: {
+    'x-checkbox': Checkbox,
+    'x-radio-button': RadioButton,
+  },
   props: ['settings'],
   data() {
     return {
@@ -30,9 +34,5 @@ export default Vue.extend({
       this.settings.form.replaces.push({ ...item });
       this.newReplace = { pattern: '', replace: '' };
     },
-  },
-  components: {
-    'x-checkbox': Checkbox,
-    'x-radio-button': RadioButton,
   },
 });

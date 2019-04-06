@@ -28,8 +28,8 @@
     color: inherit;
   }
 
-  &__reflink-icon {
-    @extend %icon-reply;
+  &__reflink-icon,
+  &__hide {
     @extend %clickable;
     font-size: 1.25em;
     padding: 0 0.1em;
@@ -42,12 +42,20 @@
     }
   }
 
+  .post--hidden &__hide {
+    &,
+    &:hover {
+      color: #4f7942;
+    }
+  }
+
   @at-root .layout--hide-post-header-reflink-icon &__reflink-icon {
     display: none;
   }
 
   @include breakpoint($xs-up) {
-    &__reflink-icon {
+    &__reflink-icon,
+    &__hide {
       font-size: 1em;
     }
   }
@@ -70,5 +78,9 @@
     & > a {
       color: inherit;
     }
+  }
+
+  &__post-no {
+    color: #008700;
   }
 }

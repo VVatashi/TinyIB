@@ -1,6 +1,10 @@
 @import '../utils/index';
 
 .post {
+  &--popup &__inner {
+    border: 1px solid #333;
+  }
+
   &__inner {
     box-sizing: border-box;
     background: $post-background;
@@ -21,6 +25,10 @@
   }
 
   @include breakpoint($xs-up) {
+    &--popup &__inner {
+      border: 1px solid #333;
+    }
+
     &__header {
       float: left;
     }

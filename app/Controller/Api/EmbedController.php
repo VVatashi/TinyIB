@@ -27,6 +27,8 @@ class EmbedController implements EmbedControllerInterface
   {
     $allowed = [
       '/^https?:\/\/(?:www\.)?coub\.com\//',
+      '/^https?:\/\/(?:www\.)?youtube\.com\//',
+      '/^https?:\/\/(?:www\.)?youtu\.be\//',
     ];
 
     foreach ($allowed as $pattern) {

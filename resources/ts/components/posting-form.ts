@@ -19,12 +19,15 @@ interface ViewModel {
   status: string;
   hidden: boolean;
   position: 'bottom' | 'post' | 'float';
-  mode: 'mobile' | 'default';
   colorPopupVisible: boolean;
 }
 
 function checkKeyCode(e: KeyboardEvent, code: number) {
   return e.keyCode === code || e.which === code;
+}
+
+function checkKeyChar(e: KeyboardEvent, char: string) {
+  return e.key === char || checkKeyCode(e, char.toUpperCase().charCodeAt(0));
 }
 
 export class PostingForm {
@@ -33,8 +36,8 @@ export class PostingForm {
   protected settings: Settings = SettingsManager.load();
 
   constructor() {
-    eventBus.$on(Events.Ready, this.onReady.bind(this));
-    eventBus.$on(Events.PostsInserted, this.onPostsInserted.bind(this));
+    eventBus.on(Events.Ready, this.onReady.bind(this));
+    eventBus.on(Events.PostsInserted, this.onPostsInserted.bind(this));
   }
 
   onReady() {
@@ -63,33 +66,37 @@ export class PostingForm {
     }}</span>
 
     <span class="posting-form__header-buttons">
-      <span class="posting-form__reset"
+      <span class="posting-form__reset fas fa-ban"
         v-on:click.stop="resetFields()" title="Clear form"></span>
 
-      <span class="posting-form__float"
-        v-if="position !== 'float' && mode !== 'mobile'"
+      <span class="posting-form__float far fa-window-maximize"
+        v-if="position !== 'float'"
         v-on:click.stop="makeFloating()" title="Floating form"></span>
 
-      <span class="posting-form__restore"
-        v-if="position === 'float' && mode !== 'mobile'"
+      <span class="posting-form__restore fas fa-arrow-down"
+        v-if="position === 'float'"
         v-on:click.stop="moveToBottom()" title="Move form to bottom"></span>
 
-      <span class="posting-form__close"
+      <span class="posting-form__close far fa-window-close"
         v-on:click.stop="onCloseClick()" title="Close form"></span>
     </span>
   </div>
 
   <div class="posting-form__content">
-    <x-file-preview class="posting-form__preview"
-      v-bind:class="{
-        'posting-form__preview--right': mode == 'default'
-          && settings.previewAlign == 'right',
-      }"
+    <x-file-preview class="posting-form__preview posting-form__preview--mobile"
       v-bind:file="file"
       v-on:click="showFileDialog()"
       v-on:drop="onFileDrop($event)"
-      v-show="mode == 'default' || file">
-      <span class="posting-form__preview-remove"
+      v-show="file">
+      <span class="posting-form__preview-remove fas fa-window-close" v-on:click.stop="file = null"></span>
+    </x-file-preview>
+
+    <x-file-preview class="posting-form__preview posting-form__preview--desktop"
+      v-bind:class="{ 'posting-form__preview--right': settings.previewAlign == 'right' }"
+      v-bind:file="file"
+      v-on:click="showFileDialog()"
+      v-on:drop="onFileDrop($event)">
+      <span class="posting-form__preview-remove fas fa-window-close"
         v-if="file" v-on:click.stop="file = null"></span>
     </x-file-preview>
 
@@ -105,20 +112,18 @@ export class PostingForm {
           v-bind:disabled="disabled"
           v-on:change="onNameChange()" />
 
-        <label class="posting-form__attachment" v-show="mode == 'mobile'">
+        <label class="posting-form__attachment fas fa-paperclip">
           <input type="file" class="posting-form__attachment-input"
             v-model="fields.file" v-bind:disabled="disabled"
             v-on:change="onFileChange($event.target.files)"
             ref="file" />
         </label>
 
-        <button type="submit" class="button posting-form__submit"
-          v-if="mode == 'default'" v-bind:disabled="disabled">Reply</button>
+        <button type="submit" class="button posting-form__submit  posting-form__submit--desktop"
+          v-bind:disabled="disabled">Reply</button>
       </div>
 
-      <div class="posting-form__markup-row markup"
-        v-show="(mode === 'mobile') && settings.showMarkupMobile
-          || (mode !== 'mobile') && settings.showMarkup">
+      <div class="posting-form__markup-row markup">
         <button type="button" class="button posting-form__markup-button"
           v-on:click.prevent="insertMarkup('b')">
           <strong>b</strong>
@@ -200,8 +205,8 @@ export class PostingForm {
 
       <div v-if="status" class="posting-form__status">{{ status }}</div>
 
-      <button type="submit" class="posting-form__submit  posting-form__submit--mobile"
-        v-if="mode == 'mobile'" v-bind:disabled="disabled">Reply</button>
+      <button type="submit" class="posting-form__submit posting-form__submit--mobile"
+        v-bind:disabled="disabled">Reply</button>
     </div>
   </div>
 </form>`,
@@ -220,7 +225,6 @@ export class PostingForm {
           position: component.settings.form.saveFormState
             && component.settings.form.float
             ? 'float' : 'bottom',
-          mode: 'mobile',
           colorPopupVisible: false,
         };
       },
@@ -249,8 +253,6 @@ export class PostingForm {
           }
         }
 
-        this.updateMode();
-        this._resize = this.updateMode.bind(this);
         window.addEventListener('resize', this._resize);
       },
       mounted() {
@@ -328,12 +330,6 @@ export class PostingForm {
             this.$refs.file.click();
           }
         },
-        updateMode() {
-          this.mode = window.innerWidth < 600 ? 'mobile' : 'default';
-          if (this.mode === 'mobile' && this.position === 'float') {
-            component.moveToBottom();
-          }
-        },
         onCloseClick() {
           component.hide();
           component.updateReplyButton();
@@ -382,19 +378,19 @@ export class PostingForm {
           // Submit form on Ctrl+Enter in the message field.
           if ((e.key === 'Enter' || checkKeyCode(e, 10) || checkKeyCode(e, 13)) && e.ctrlKey) {
             this.onSubmit();
-          } else if ((e.key === 'b' || checkKeyCode(e, 66)) && e.altKey) {
+          } else if (checkKeyChar(e, 'b') && e.altKey) {
             e.preventDefault();
             this.insertMarkup('b');
-          } else if ((e.key === 'i' || checkKeyCode(e, 73)) && e.altKey) {
+          } else if (checkKeyChar(e, 'i') && e.altKey) {
             e.preventDefault();
             this.insertMarkup('i');
-          } else if ((e.key === 't' || checkKeyCode(e, 84)) && e.altKey) {
+          } else if (checkKeyChar(e, 't') && e.altKey) {
             e.preventDefault();
             this.insertMarkup('s');
-          } else if ((e.key === 'p' || checkKeyCode(e, 80)) && e.altKey) {
+          } else if (checkKeyChar(e, 'p') && e.altKey) {
             e.preventDefault();
             this.insertMarkup('spoiler');
-          } else if ((e.key === 'c' || checkKeyCode(e, 67)) && e.altKey) {
+          } else if (checkKeyChar(e, 'c') && e.altKey) {
             e.preventDefault();
             this.insertMarkup('code');
           }
@@ -548,19 +544,13 @@ export class PostingForm {
 
             if (isInThread) {
               const settings = SettingsManager.load();
-              if (settings.common.threadAutoupdate) {
-                eventBus.$emit(Events.PostCreated);
-              } else {
-                // Trigger DE thread update.
-                const updater = DOM.qs('.de-thr-updater-link') as HTMLAnchorElement;
-                if (updater) {
-                  updater.click();
-                }
+              if (settings.common.enableThreadAutoupdate) {
+                eventBus.emit(Events.PostCreated);
               }
             } else {
               // Redirect to thread.
               if (location) {
-                window.location.href = location;
+                window.location.href = location.replace(/#[^\/]*$/g, '');
               }
             }
           } catch (e) {
@@ -568,6 +558,13 @@ export class PostingForm {
           }
 
           this.disabled = false;
+
+          if (document.activeElement) {
+            const element = document.activeElement;
+            if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+              (element as any).blur();
+            }
+          }
 
           if (component.settings.form.scrollBottom) {
             // Scroll to the last post.
@@ -589,9 +586,9 @@ export class PostingForm {
       });
     }
 
-    const content = DOM.qs('.layout__content');
-    if (content) {
-      content.addEventListener('click', e => {
+    const layout = DOM.qs('.layout');
+    if (layout) {
+      layout.addEventListener('click', e => {
         const target = e.target as HTMLElement;
         if (!target.getAttribute('data-reflink')) {
           return;
@@ -643,9 +640,15 @@ export class PostingForm {
           } else {
             if (vm.position !== 'float') {
               // Move form to the post.
-              const post = target.closest('.post') as HTMLElement;
-              if (post) {
-                this.moveToPost(post);
+              const targetPost = target.closest('.post') as HTMLElement;
+              if (targetPost) {
+                const postId = targetPost.getAttribute('data-post-id');
+                const post = DOM.qid(`reply_${postId}`);
+                if (post) {
+                  this.moveToPost(post);
+                } else {
+                  this.moveToBottom();
+                }
               } else {
                 this.moveToBottom();
               }
@@ -686,17 +689,6 @@ export class PostingForm {
           }
         }, 300);
       }
-    }
-
-    if (this.settings.common.movePostHeaderReflinkIconToDE) {
-      posts.forEach(post => {
-        // Move reply icon after DE hide icon.
-        const replyIcon = DOM.qs('.post-header__reflink-wrapper > .post-header__reflink-icon', post);
-        const deHide = DOM.qs('.de-btn-hide', post);
-        if (replyIcon && deHide) {
-          replyIcon.parentElement.insertBefore(deHide, replyIcon);
-        }
-      });
     }
   }
 

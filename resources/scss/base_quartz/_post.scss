@@ -1,4 +1,12 @@
 .post {
+  &--hidden &__inner:not(:hover) &__content {
+    display: none;
+  }
+
+  @at-root .layout--remove-hidden &--hidden {
+    display: none;
+  }
+
   &__inner {
     @include clearfix;
 
@@ -15,8 +23,6 @@
     color: $post-content-color;
 
     padding: $post-content-padding;
-    overflow-y: auto;
-    max-height: 80vh;
 
     overflow-wrap: break-word;
     word-wrap: break-word;
@@ -33,16 +39,12 @@
     color: #ffffff;
     font-size: 0.8em;
     font-weight: bold;
-    text-shadow: 0.1em 0 #000000, 0 0.1em #000000, -0.1em 0 #000000, 0 -0.1em #000000;
+    text-shadow: 1px 0 #000000, 0 1px #000000, -1px 0 #000000, 0 -1px #000000;
 
     pointer-events: none;
 
     & > a {
       color: inherit;
-      pointer-events: initial;
-    }
-
-    & > .de-btn-src {
       pointer-events: initial;
     }
   }
@@ -80,8 +82,6 @@
   }
 
   &__reflink-icon {
-    @extend %icon-reply;
-
     position: absolute;
     bottom: 5px;
     right: 5px;
@@ -97,12 +97,38 @@
     }
   }
 
-  &--own &__inner {
-    box-shadow: 6px 0 2px -2px rgba(#808080, 0.75), -6px 0 2px -2px rgba(#808080, 0.75);
+  &__refmap {
+    flex-flow: row wrap;
+    margin-top: 0.5em;
+
+    font-style: italic;
+    font-size: 0.8em;
   }
 
-  &--reply &__inner {
-    box-shadow: 6px 0 2px -2px rgba(#b31a8d, 0.75), -6px 0 2px -2px rgba(#b31a8d, 0.75);
+  &__refmap:empty {
+    display: none;
+  }
+
+  &__refmap:not(:empty)::before {
+    content: 'Replies: ';
+    margin-right: 0.25em;
+  }
+
+  &__refmap-item:not(:last-child)::after {
+    content: ', ';
+    margin-right: 0.25em;
+  }
+
+  &__refmap-link--hidden {
+    text-decoration: line-through;
+  }
+
+  &--own &__inner {
+    box-shadow: 6px 0 2px -2px rgba(#c0c0c0, 0.75), -6px 0 2px -2px rgba(#c0c0c0, 0.75);
+  }
+
+  &--own-reply &__inner {
+    box-shadow: 6px 0 2px -2px rgba(#d820aa, 0.75), -6px 0 2px -2px rgba(#d820aa, 0.75);
   }
 
   @at-root .layout--hide-post-reflink-icon &__reflink-icon {

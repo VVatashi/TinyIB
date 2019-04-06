@@ -2,7 +2,11 @@ body, html {
   background: $background;
   color: $color;
   font: $font;
-  line-height: 1.4;
+  line-height: 1.5;
+
+  @include breakpoint($xs-up) {
+    line-height: 1.4;
+  }
 }
 
 .smooth-scroll {
@@ -45,17 +49,19 @@ ul, ol {
   opacity: 0.5;
 }
 
-// DE fixes.
-.de-cfg-body,
-.de-menu,
-.de-popup,
-.de-pview,
-.de-win > .de-win-body,
-#de-cfg-buttons {
-  background: $post-background;
-  color: $color;
+.fade {
+  opacity: 1;
+
+  transform: scale(1);
+  transform-origin: 0 0;
+
+  transition: opacity 0.15s linear, transform 0.15s linear;
 }
 
-.de-btn-src {
-  vertical-align: top;
+.faded {
+  opacity: 0;
+
+  transform: scale(0);
+
+  pointer-events: none;
 }
