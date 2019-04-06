@@ -2,7 +2,11 @@ body, html {
   background: $background;
   color: $color;
   font: $font;
-  line-height: 1.4;
+  line-height: 1.5;
+
+  @include breakpoint($xs-up) {
+    line-height: 1.4;
+  }
 }
 
 .smooth-scroll {

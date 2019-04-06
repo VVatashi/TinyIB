@@ -6,7 +6,7 @@ export class PostReferenceMap {
   protected readonly posts: { [id: number]: Element } = {};
 
   constructor() {
-    eventBus.$on(Events.PostsInserted, (posts: Element[]) => {
+    eventBus.on(Events.PostsInserted, (posts: Element[]) => {
       const settings = SettingsManager.load();
       if (!settings.common.addNamesToLinks) {
         return;

@@ -11,7 +11,7 @@
     top: 0;
     left: 0;
 
-    z-index: 1;
+    z-index: 10;
   }
 
   &--floating &__header {
@@ -168,7 +168,6 @@
   }
 
   &__preview-remove {
-    @extend %icon-close-solid;
     position: absolute;
     padding: 0.1em;
     top: 0;

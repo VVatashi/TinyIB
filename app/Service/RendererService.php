@@ -29,7 +29,7 @@ class RendererService implements RendererServiceInterface
 
     $this->twig->addGlobal('base_url', TINYIB_BASE_URL . TINYIB_BOARD);
     $this->twig->addGlobal('uploads', $tinyib_uploads);
-    $this->twig->addGlobal('style', $_COOKIE['tinyib_style'] ?? 'Synthwave');
+    $this->twig->addGlobal('style', $_COOKIE['style'] ?? 'Synthwave');
 
     $this->twig->addFunction(new Twig_SimpleFunction('mtime', function ($path) {
       $filename = basename($path);

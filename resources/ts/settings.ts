@@ -19,6 +19,8 @@ export interface CommonSettings {
 
   hiddenPosts: PostAuthor[];
   removeHiddenPosts: boolean;
+
+  showPostPopups: boolean;
 }
 
 export interface Replace {
@@ -80,6 +82,8 @@ const defaultSettings: Settings = {
 
     hiddenPosts: [],
     removeHiddenPosts: false,
+
+    showPostPopups: true,
   },
   form: {
     align: 'center',

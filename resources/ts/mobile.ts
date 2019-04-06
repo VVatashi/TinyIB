@@ -22,5 +22,5 @@ new PostReferenceMap();
 new ThreadUpdater();
 
 document.addEventListener('DOMContentLoaded', e => {
-  eventBus.$emit(Events.Ready);
+  eventBus.emit(Events.Ready);
 });

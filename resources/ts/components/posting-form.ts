@@ -36,8 +36,8 @@ export class PostingForm {
   protected settings: Settings = SettingsManager.load();
 
   constructor() {
-    eventBus.$on(Events.Ready, this.onReady.bind(this));
-    eventBus.$on(Events.PostsInserted, this.onPostsInserted.bind(this));
+    eventBus.on(Events.Ready, this.onReady.bind(this));
+    eventBus.on(Events.PostsInserted, this.onPostsInserted.bind(this));
   }
 
   onReady() {
@@ -88,7 +88,7 @@ export class PostingForm {
       v-on:click="showFileDialog()"
       v-on:drop="onFileDrop($event)"
       v-show="file">
-      <span class="posting-form__preview-remove" v-on:click.stop="file = null"></span>
+      <span class="posting-form__preview-remove fas fa-window-close" v-on:click.stop="file = null"></span>
     </x-file-preview>
 
     <x-file-preview class="posting-form__preview posting-form__preview--desktop"
@@ -96,7 +96,7 @@ export class PostingForm {
       v-bind:file="file"
       v-on:click="showFileDialog()"
       v-on:drop="onFileDrop($event)">
-      <span class="posting-form__preview-remove"
+      <span class="posting-form__preview-remove fas fa-window-close"
         v-if="file" v-on:click.stop="file = null"></span>
     </x-file-preview>
 
@@ -545,7 +545,7 @@ export class PostingForm {
             if (isInThread) {
               const settings = SettingsManager.load();
               if (settings.common.enableThreadAutoupdate) {
-                eventBus.$emit(Events.PostCreated);
+                eventBus.emit(Events.PostCreated);
               }
             } else {
               // Redirect to thread.

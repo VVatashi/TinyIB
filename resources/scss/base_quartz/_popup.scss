@@ -24,14 +24,6 @@
     float: right;
   }
 
-  &__close {
-    @extend %clickable;
-    @extend %icon-close;
-    padding: 0.1em;
-    font-size: 1.5em;
-    vertical-align: middle;
-  }
-
   &__body {
     position: relative;
     padding: $post-content-padding;
@@ -44,9 +36,5 @@
   @include breakpoint($xs-up) {
     border: $post-border;
     border-radius: $post-border-radius;
-
-    &__close {
-        font-size: 1em;
-    }
   }
 }

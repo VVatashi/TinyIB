@@ -82,8 +82,6 @@
   }
 
   &__reflink-icon {
-    @extend %icon-reply;
-
     position: absolute;
     bottom: 5px;
     right: 5px;
@@ -126,11 +124,11 @@
   }
 
   &--own &__inner {
-    box-shadow: 6px 0 2px -2px rgba(#808080, 0.75), -6px 0 2px -2px rgba(#808080, 0.75);
+    box-shadow: 6px 0 2px -2px rgba(#c0c0c0, 0.75), -6px 0 2px -2px rgba(#c0c0c0, 0.75);
   }
 
-  &--reply &__inner {
-    box-shadow: 6px 0 2px -2px rgba(#b31a8d, 0.75), -6px 0 2px -2px rgba(#b31a8d, 0.75);
+  &--own-reply &__inner {
+    box-shadow: 6px 0 2px -2px rgba(#d820aa, 0.75), -6px 0 2px -2px rgba(#d820aa, 0.75);
   }
 
   @at-root .layout--hide-post-reflink-icon &__reflink-icon {
@@ -156,10 +154,6 @@
     }
 
     &__file-preview:hover &__file-info {
-      display: inline-block;
-    }
-
-    &__file-preview:hover .file__hide {
       display: inline-block;
     }
 
