@@ -80,7 +80,7 @@ class App {
     let matches = [];
     if (path.match(/^\/[0-9a-z_-]+\/?$/i)) {
       this.view = new BoardPage();
-    } else if (matches = path.match(/^\/[0-9a-z_-]+\/res\/(\d+)\/?$/i)) {
+    } else if (matches = path.match(/^\/[0-9a-z_-]+\/res\/(\d+)(?:\.html)?\/?$/i)) {
       const threadId = +matches[1];
       this.view = new ThreadPage(threadId);
     } else {
