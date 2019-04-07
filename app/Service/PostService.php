@@ -359,8 +359,8 @@ class PostService implements PostServiceInterface
     $post->password = !empty($password) ? md5(md5($password)) : '';
 
     $file = null;
-    $post->message = preg_replace_callback('#\[safebooru=([^]]+)\]#', function (array $matches) use (&$file) {
-      // Try get & download a random image from the safebooru for the specified tag.
+    $post->subject = preg_replace_callback('#\[safebooru=([^]]+)\]#', function (array $matches) use (&$file) {
+      // Try get & download a random image from the safebooru for the specified tags.
       $url = $this->safebooru->getRandomImageUrl($matches[1]);
       if (!isset($url)) {
         return '';
@@ -382,7 +382,7 @@ class PostService implements PostServiceInterface
       ];
 
       return '';
-    }, $post->message);
+    }, $post->subject);
 
     if (!isset($file)) {
       if (isset($_FILES['file']) && !empty($_FILES['file']['name'])) {
