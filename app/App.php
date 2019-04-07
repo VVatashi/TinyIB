@@ -5,16 +5,14 @@ namespace Imageboard;
 use GuzzleHttp\Psr7\{ServerRequest, Response};
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Imageboard\Cache\{CacheInterface, NoCache, RedisCache};
+use Imageboard\Helper\DatabaseHelper;
 use Imageboard\Middleware\{
   AuthMiddleware,
   CorsMiddleware,
   ExceptionMiddleware,
   RequestHandler
 };
-use Imageboard\Service\{
-  RoutingServiceInterface,
-  RendererServiceInterface
-};
+use Imageboard\Service\{ConfigService, RoutingServiceInterface, RendererServiceInterface};
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
@@ -29,6 +27,16 @@ class App
   /** @var Container */
   protected $container;
 
+  /**
+   * @var \Imageboard\Service\ConfigServiceInterface
+   */
+  protected $config;
+
+  /**
+   * @var \Imageboard\Helper\DatabaseHelper
+   */
+  protected $databaseHelper;
+
   function getContainer() : ContainerInterface
   {
     return $this->container;
@@ -40,6 +48,10 @@ class App
   function bootstrap(bool $handleErrors = true) : self
   {
     $this->setupErrorHandling();
+
+    // Set up config
+    $this->config = new ConfigService();
+    $this->databaseHelper = new DatabaseHelper($this->config);
 
     // Set default constants.
     defined('TINYIB_NEWTHREAD') || define('TINYIB_NEWTHREAD', 0);
@@ -131,12 +143,13 @@ EOF;
 
     // Create database connection and ORM.
     $capsule = new Capsule();
+
     $capsule->addConnection([
-      'driver'    => TINYIB_DBDRIVER,
-      'host'      => TINYIB_DBHOST,
-      'database'  => TINYIB_DBNAME,
-      'username'  => TINYIB_DBUSERNAME,
-      'password'  => TINYIB_DBPASSWORD,
+      'driver'    => $this->config->get('TINYIB_DBDRIVER'),
+      'host'      => $this->config->get('TINYIB_DBHOST'),
+      'database'  => $this->databaseHelper->getFullPath(),
+      'username'  => $this->config->get('TINYIB_DBUSERNAME'),
+      'password'  => $this->config->get('TINYIB_DBPASSWORD'),
       'charset'   => 'utf8',
       'collation' => 'utf8_unicode_ci',
       'prefix'    => '',
