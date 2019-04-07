@@ -342,7 +342,6 @@ class PostService implements PostServiceInterface
     $post->name = $this->cleanString(substr($nameAndTripcode['name'], 0, 75));
     $post->tripcode = $nameAndTripcode['tripcode'];
     $post->email = $this->cleanString(str_replace('"', '&quot;', substr($email, 0, 75)));
-    $post->subject = $this->cleanString(substr($subject, 0, 75));
 
     $message = rtrim($message);
     $message = $this->cleanString($message);
@@ -358,8 +357,19 @@ class PostService implements PostServiceInterface
     $post->message = $message;
     $post->password = !empty($password) ? md5(md5($password)) : '';
 
-    $file = null;
-    $post->subject = preg_replace_callback('#\[safebooru=([^]]+)\]#', function (array $matches) use (&$file) {
+    if (isset($_FILES['file']) && !empty($_FILES['file']['name'])) {
+      $file = $_FILES['file'];
+    } elseif (isset($_FILES['file_mobile']) && !empty($_FILES['file_mobile']['name'])) {
+      $file = $_FILES['file_mobile'];
+    } else {
+      $file = null;
+    }
+
+    $subject = preg_replace_callback('#\[safebooru=([^]]+)\]#', function (array $matches) use (&$file) {
+      if (isset($file)) {
+        return '';
+      }
+
       // Try get & download a random image from the safebooru for the specified tags.
       $url = $this->safebooru->getRandomImageUrl($matches[1]);
       if (!isset($url)) {
@@ -382,17 +392,9 @@ class PostService implements PostServiceInterface
       ];
 
       return '';
-    }, $post->subject);
+    }, $subject);
 
-    if (!isset($file)) {
-      if (isset($_FILES['file']) && !empty($_FILES['file']['name'])) {
-        $file = $_FILES['file'];
-      } elseif (isset($_FILES['file_mobile']) && !empty($_FILES['file_mobile']['name'])) {
-        $file = $_FILES['file_mobile'];
-      } else {
-        $file = null;
-      }
-    }
+    $post->subject = $this->cleanString(substr($subject, 0, 75));
 
     if (!empty($file)) {
       $this->validateFileUpload($file);

@@ -219,7 +219,13 @@ class Post extends Model
 
     switch ($extension) {
       case 'jpg':
+      case 'jpeg':
+      case 'jpe':
+      case 'jfi':
+      case 'jfif':
+      case 'jif':
       case 'png':
+      case 'apng':
       case 'gif':
       case 'webp':
         return 'image';
