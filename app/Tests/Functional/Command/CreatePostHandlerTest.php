@@ -7,7 +7,7 @@ use Imageboard\Model\{Post, User};
 use PHPUnit\Framework\TestCase;
 use Imageboard\Service\PostService;
 use Imageboard\Cache\NoCache;
-use Imageboard\Service\{CryptographyService, FileService, ThumbnailService};
+use Imageboard\Service\{CryptographyService, FileService, SafebooruService, ThumbnailService};
 
 final class CreatePostHandlerTest extends TestCase
 {
@@ -23,7 +23,14 @@ final class CreatePostHandlerTest extends TestCase
     $cryptography = new CryptographyService();
     $file_service = new FileService();
     $thumbnail_service = new ThumbnailService($file_service);
-    $post_service = new PostService($cache, $cryptography, $file_service, $thumbnail_service);
+    $safebooru = new SafebooruService();
+    $post_service = new PostService(
+      $cache,
+      $cryptography,
+      $file_service,
+      $thumbnail_service,
+      $safebooru
+    );
     $user = User::createUser('test@example.com', 'test');
     $this->handler = new CreatePostHandler($post_service, $user);
   }

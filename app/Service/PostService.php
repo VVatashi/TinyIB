@@ -24,6 +24,9 @@ class PostService implements PostServiceInterface
   /** @var ThumbnailServiceInterface */
   protected $thubmnail_service;
 
+  /** @var SafebooruServiceInterface */
+  protected $safebooru;
+
   /**
    * Creates a new PostService instance.
    *
@@ -34,12 +37,14 @@ class PostService implements PostServiceInterface
     CacheInterface $cache,
     CryptographyServiceInterface $cryptography_service,
     FileServiceInterface $file_service,
-    ThumbnailServiceInterface $thubmnail_service
+    ThumbnailServiceInterface $thubmnail_service,
+    SafebooruServiceInterface $safebooru
   ) {
     $this->cache = $cache;
     $this->cryptography_service = $cryptography_service;
     $this->file_service = $file_service;
     $this->thubmnail_service = $thubmnail_service;
+    $this->safebooru = $safebooru;
   }
 
   /**
@@ -353,12 +358,40 @@ class PostService implements PostServiceInterface
     $post->message = $message;
     $post->password = !empty($password) ? md5(md5($password)) : '';
 
-    if (isset($_FILES['file']) && !empty($_FILES['file']['name'])) {
-      $file = $_FILES['file'];
-    } elseif (isset($_FILES['file_mobile']) && !empty($_FILES['file_mobile']['name'])) {
-      $file = $_FILES['file_mobile'];
-    } else {
-      $file = null;
+    $file = null;
+    $post->message = preg_replace_callback('#\[safebooru=([^]]+)\]#', function (array $matches) use (&$file) {
+      // Try get & download a random image from the safebooru for the specified tag.
+      $url = $this->safebooru->getRandomImageUrl($matches[1]);
+      if (!isset($url)) {
+        return '';
+      }
+
+      $path = tempnam(sys_get_temp_dir(), '');
+      unlink($path);
+
+      $size = file_put_contents($path, file_get_contents($url));
+      if ($size === false) {
+        return '';
+      }
+
+      $file = [
+        'name' => basename($url),
+        'tmp_name' => $path,
+        'size' => $size,
+        'error' => UPLOAD_ERR_OK,
+      ];
+
+      return '';
+    }, $post->message);
+
+    if (!isset($file)) {
+      if (isset($_FILES['file']) && !empty($_FILES['file']['name'])) {
+        $file = $_FILES['file'];
+      } elseif (isset($_FILES['file_mobile']) && !empty($_FILES['file_mobile']['name'])) {
+        $file = $_FILES['file_mobile'];
+      } else {
+        $file = null;
+      }
     }
 
     if (!empty($file)) {
@@ -392,7 +425,7 @@ class PostService implements PostServiceInterface
       $post->file = "$file_name.$file_extension";
 
       $file_path = "src/{$post->file}";
-      if (!move_uploaded_file($file['tmp_name'], $file_path)) {
+      if (!rename($file['tmp_name'], $file_path)) {
         throw new \Exception('Could not copy uploaded file.');
       }
 
