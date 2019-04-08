@@ -206,8 +206,7 @@ class Post extends Model
       return '';
     }
 
-    $file_parts = explode('.', $this->file);
-    return end($file_parts);
+    return strtolower(pathinfo($this->file, PATHINFO_EXTENSION));
   }
 
   /**
@@ -219,7 +218,13 @@ class Post extends Model
 
     switch ($extension) {
       case 'jpg':
+      case 'jpeg':
+      case 'jpe':
+      case 'jfi':
+      case 'jfif':
+      case 'jif':
       case 'png':
+      case 'apng':
       case 'gif':
       case 'webp':
         return 'image';
