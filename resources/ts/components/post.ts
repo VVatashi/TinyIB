@@ -49,6 +49,7 @@ export class Post {
   protected readonly ownPostIds: number[] = [];
 
   protected modalFileIndex: number = null;
+  protected modalParentPopupId: number = null;
 
   protected nextPopupId = 0;
   protected popups: { [key: number]: PostPopup } = {};
@@ -141,6 +142,11 @@ export class Post {
         if (this.modalFileIndex !== null && this.media[this.modalFileIndex].url === link) {
           this.closeModals();
         } else {
+          const $post = $link.closest('.post');
+          if ($post.hasAttribute('data-popup-id')) {
+            this.modalParentPopupId = +$post.getAttribute('data-popup-id');
+          }
+
           const index = this.media.findIndex(file => file.url === link);
           if (index !== -1) {
             this.showMediaModal(index);
@@ -213,207 +219,6 @@ export class Post {
       }
     });
 
-    const checkPopup = (popup: PostPopup) => {
-      if (popup.hover) {
-        return false;
-      }
-
-      // Check if any children has hover.
-      const childrenIds = [...popup.childrenIds];
-      while (childrenIds.length) {
-        const childId = childrenIds.shift();
-        const child = this.popups[childId];
-        if (!child) {
-          continue;
-        }
-
-        if (child.hover) {
-          return false;
-        }
-
-        childrenIds.push(...child.childrenIds);
-      }
-
-      // Close popup if none of it's children has hover.
-      popup.$popup.classList.add('faded');
-      setTimeout(() => {
-        popup.$popup.remove();
-      }, 200);
-
-      const popupId = popup.id;
-      const parentId = popup.parentId;
-      delete this.popups[popupId];
-
-      // Check parent popup.
-      if (parentId !== null) {
-        const parent = this.popups[parentId];
-        if (parent) {
-          parent.childrenIds = parent.childrenIds.filter(id => id !== popupId);
-          setTimeout(() => {
-            checkPopup(parent);
-          }, 100);
-        }
-      }
-
-      return true;
-    }
-
-    const openPopup = async ($link: HTMLElement) => {
-      const targetPostId = +$link.getAttribute('data-target-post-id');
-      if (!targetPostId) {
-        return;
-      }
-
-      const $parentPost = $link.closest('.post');
-      const parentPostId = +$parentPost.getAttribute('data-post-id');
-
-      let $postContent = DOM.qs(`#reply_${targetPostId} > .post__inner`);
-      if (!$postContent) {
-        // Try fetch post.
-        const response = await fetch(`${window.baseUrl}/ajax/post/${targetPostId}`, {
-          credentials: 'same-origin',
-        });
-
-        if (response.status !== 200) {
-          return;
-        }
-
-        const html = await response.text();
-        const $post = document.createElement('div');
-        $post.classList.add('hidden');
-        $post.insertAdjacentHTML('beforeend', html);
-
-        this.$layout.appendChild($post);
-
-        $postContent = DOM.qs('.post__inner', $post);
-      }
-
-      let parentId: number = null;
-      const $targetPost = $link.closest('.post');
-      if ($targetPost.hasAttribute('data-popup-id')) {
-        parentId = +$targetPost.getAttribute('data-popup-id');
-      }
-
-      const isAlreadyOpen = Object.keys(this.popups)
-        .map(key => this.popups[+key])
-        .filter(popup => popup.postId === targetPostId && popup.parentId === parentId)
-        .length;
-      if (isAlreadyOpen) {
-        return;
-      }
-
-      const $popup = document.createElement('div');
-      $popup.setAttribute('data-post-id', targetPostId.toString());
-      $popup.classList.add('post', 'post_reply', 'post--popup', 'fade', 'faded');
-      $popup.style.position = 'absolute';
-      $popup.style.maxWidth = '60%';
-
-      const $postContentCopy = $postContent.cloneNode(true);
-      $popup.appendChild($postContentCopy);
-
-      this.$layout.appendChild($popup);
-
-      const backLinks = DOM.qsa(`a[data-target-post-id="${parentPostId}"]`, $popup) as HTMLElement[];
-      backLinks.forEach(link => link.style.fontWeight = '700');
-
-      setTimeout(() => {
-        $popup.classList.remove('faded');
-      }, 50);
-
-      const targetOffset = offset($link);
-      const layoutOffset = offset(this.$layout);
-      const targetRect = $link.getBoundingClientRect();
-      let left = targetOffset.left - layoutOffset.left + targetRect.width / 2;
-      let top = targetOffset.top - layoutOffset.top;
-      let transformOriginX = '0';
-      let transformOriginY = '0';
-
-      const widthPadding = 16;
-      if (window.innerWidth - targetRect.left - widthPadding < $popup.offsetWidth) {
-        left = Math.max(0, left - $popup.offsetWidth);
-        transformOriginX = '100%';
-      }
-
-      const heightPadding = 16;
-      if (window.innerHeight - targetRect.top - heightPadding < $popup.offsetHeight) {
-        top = top - $popup.offsetHeight;
-        transformOriginY = '100%';
-      } else {
-        top += targetRect.height;
-      }
-
-      $popup.style.left = `${left}px`;
-      $popup.style.top = `${top}px`;
-      $popup.style.transformOrigin = `${transformOriginX} ${transformOriginY}`;
-
-      const popupId = this.nextPopupId;
-      this.nextPopupId++;
-
-      const parent = this.popups[parentId];
-      if (parent) {
-        parent.childrenIds.push(popupId);
-      }
-
-      $popup.setAttribute('data-popup-id', popupId.toString());
-
-      this.popups[popupId] = {
-        id: popupId,
-        parentId,
-        postId: targetPostId,
-        childrenIds: [],
-        $parentLink: $link,
-        $popup,
-        hover: true,
-      };
-
-      const popupCloseTimeout = 1000;
-
-      const linkMouseLeave = (e: Event) => {
-        const popupId = +$popup.getAttribute('data-popup-id');
-        const popup = this.popups[popupId];
-        if (!popup) {
-          $link.removeEventListener('mouseleave', linkMouseLeave);
-          return;
-        }
-
-        popup.hover = false;
-
-        setTimeout(() => {
-          if (checkPopup(popup)) {
-            $link.removeEventListener('mouseleave', linkMouseLeave);
-          }
-        }, popupCloseTimeout);
-      };
-
-      $link.addEventListener('mouseleave', linkMouseLeave);
-
-      $popup.addEventListener('mouseenter', e => {
-        const popupId = +$popup.getAttribute('data-popup-id');
-        const popup = this.popups[popupId];
-        if (!popup) {
-          return;
-        }
-
-        popup.hover = true;
-      });
-
-      $popup.addEventListener('mouseleave', e => {
-        const popupId = +$popup.getAttribute('data-popup-id');
-        const popup = this.popups[popupId];
-        if (!popup) {
-          return;
-        }
-
-        popup.hover = false;
-
-        setTimeout(() => {
-          if (checkPopup(popup)) {
-            $link.removeEventListener('mouseleave', linkMouseLeave);
-          }
-        }, popupCloseTimeout);
-      });
-    };
-
     if (settings.common.showPostPopups) {
       document.addEventListener('mouseover', e => {
         const $target = e.target as HTMLElement;
@@ -430,7 +235,7 @@ export class Post {
 
           setTimeout(() => {
             if ($target.hasAttribute('data-hover')) {
-              openPopup($target);
+              this.openPostPopup($target);
             }
           }, 100);
         }
@@ -688,7 +493,12 @@ export class Post {
   }
 
   protected async showMediaModal(mediaIndex: number) {
+    const modalParentPopupId = this.modalParentPopupId;
     this.closeModals();
+
+    if (modalParentPopupId !== null) {
+      this.modalParentPopupId = modalParentPopupId;
+    }
 
     this.modalFileIndex = mediaIndex;
 
@@ -705,6 +515,23 @@ export class Post {
     const left = Math.round(window.innerWidth / 2 - width / 2);
     const top = Math.round(window.innerHeight / 2 - height / 2);
 
+    const onModalHide = () => {
+      this.$modal.remove();
+      this.modal = null;
+      this.modalFileIndex = null;
+
+      if (this.modalParentPopupId !== null) {
+        setTimeout(() => {
+          const popup = this.popups[this.modalParentPopupId];
+          if (popup) {
+            this.checkPostPopup(popup);
+          }
+        }, 100);
+
+        this.modalParentPopupId = null;
+      }
+    }
+
     if (file.type === 'image') {
       this.$modal = document.createElement('div');
       this.$modal.classList.add('modal');
@@ -715,11 +542,7 @@ export class Post {
       this.$layout.appendChild(this.$modal);
 
       this.modal = new Modal(this.$modal);
-      this.modal.show(left, top, width, height, () => {
-        this.$modal.remove();
-        this.modal = null;
-        this.modalFileIndex = null;
-      });
+      this.modal.show(left, top, width, height, onModalHide.bind(this));
     } else if (file.type === 'audio') {
       this.$modal = document.createElement('div');
       this.$modal.classList.add('modal');
@@ -735,11 +558,7 @@ export class Post {
       this.$layout.appendChild(this.$modal);
 
       this.modal = new Modal(this.$modal);
-      this.modal.show(left, top, 300, 50, () => {
-        this.$modal.remove();
-        this.modal = null;
-        this.modalFileIndex = null;
-      });
+      this.modal.show(left, top, 300, 50, onModalHide.bind(this));
     } else if (file.type === 'video') {
       this.$modal = document.createElement('div');
       this.$modal.classList.add('modal');
@@ -793,9 +612,7 @@ export class Post {
         this.player.setPlaying(false);
         this.player = null;
 
-        this.$modal.remove();
-        this.modal = null;
-        this.modalFileIndex = null;
+        onModalHide();
       });
     } else if (file.type === 'coub') {
       this.$modal = document.createElement('div');
@@ -810,11 +627,7 @@ export class Post {
       this.$layout.appendChild(this.$modal);
 
       this.modal = new Modal(this.$modal, false);
-      this.modal.show(left, top, width, height, () => {
-        this.$modal.remove();
-        this.modal = null;
-        this.modalFileIndex = null;
-      });
+      this.modal.show(left, top, width, height, onModalHide.bind(this));
     } else if (file.type === 'youtube') {
       this.$modal = document.createElement('div');
       this.$modal.classList.add('modal');
@@ -828,11 +641,7 @@ export class Post {
       this.$layout.appendChild(this.$modal);
 
       this.modal = new Modal(this.$modal, false);
-      this.modal.show(left, top, width, height, () => {
-        this.$modal.remove();
-        this.modal = null;
-        this.modalFileIndex = null;
-      });
+      this.modal.show(left, top, width, height, onModalHide.bind(this));
     }
   }
 
@@ -841,4 +650,215 @@ export class Post {
       this.modal.hide();
     }
   };
+
+  protected async openPostPopup($link: HTMLElement) {
+    const targetPostId = +$link.getAttribute('data-target-post-id');
+    if (!targetPostId) {
+      return;
+    }
+
+    const $parentPost = $link.closest('.post');
+    const parentPostId = +$parentPost.getAttribute('data-post-id');
+
+    let $postContent = DOM.qs(`#reply_${targetPostId} > .post__inner`);
+    if (!$postContent) {
+      // Try fetch post.
+      const response = await fetch(`${window.baseUrl}/ajax/post/${targetPostId}`, {
+        credentials: 'same-origin',
+      });
+
+      if (response.status !== 200) {
+        return;
+      }
+
+      const html = await response.text();
+      const $post = document.createElement('div');
+      $post.classList.add('hidden');
+      $post.insertAdjacentHTML('beforeend', html);
+
+      this.$layout.appendChild($post);
+
+      $postContent = DOM.qs('.post__inner', $post);
+    }
+
+    let parentId: number = null;
+    const $targetPost = $link.closest('.post');
+    if ($targetPost.hasAttribute('data-popup-id')) {
+      parentId = +$targetPost.getAttribute('data-popup-id');
+    }
+
+    const isAlreadyOpen = Object.keys(this.popups)
+      .map(key => this.popups[+key])
+      .filter(popup => popup.postId === targetPostId && popup.parentId === parentId)
+      .length;
+    if (isAlreadyOpen) {
+      return;
+    }
+
+    const $popup = document.createElement('div');
+    $popup.setAttribute('data-post-id', targetPostId.toString());
+    $popup.classList.add('post', 'post_reply', 'post--popup', 'fade', 'faded');
+    $popup.style.position = 'absolute';
+    $popup.style.maxWidth = '60%';
+
+    const $postContentCopy = $postContent.cloneNode(true);
+    $popup.appendChild($postContentCopy);
+
+    this.$layout.appendChild($popup);
+
+    const backLinks = DOM.qsa(`a[data-target-post-id="${parentPostId}"]`, $popup) as HTMLElement[];
+    backLinks.forEach(link => link.style.fontWeight = '700');
+
+    setTimeout(() => {
+      $popup.classList.remove('faded');
+    }, 50);
+
+    const targetOffset = offset($link);
+    const layoutOffset = offset(this.$layout);
+    const targetRect = $link.getBoundingClientRect();
+    let left = targetOffset.left - layoutOffset.left + targetRect.width / 2;
+    let top = targetOffset.top - layoutOffset.top;
+    let transformOriginX = '0';
+    let transformOriginY = '0';
+
+    const widthPadding = 16;
+    if (window.innerWidth - targetRect.left - widthPadding < $popup.offsetWidth) {
+      left = Math.max(0, left - $popup.offsetWidth);
+      transformOriginX = '100%';
+    }
+
+    const heightPadding = 16;
+    if (window.innerHeight - targetRect.top - heightPadding < $popup.offsetHeight) {
+      top = top - $popup.offsetHeight;
+      transformOriginY = '100%';
+    } else {
+      top += targetRect.height;
+    }
+
+    $popup.style.left = `${left}px`;
+    $popup.style.top = `${top}px`;
+    $popup.style.transformOrigin = `${transformOriginX} ${transformOriginY}`;
+
+    const popupId = this.nextPopupId;
+    this.nextPopupId++;
+
+    const parent = this.popups[parentId];
+    if (parent) {
+      parent.childrenIds.push(popupId);
+    }
+
+    $popup.setAttribute('data-popup-id', popupId.toString());
+
+    this.popups[popupId] = {
+      id: popupId,
+      parentId,
+      postId: targetPostId,
+      childrenIds: [],
+      $parentLink: $link,
+      $popup,
+      hover: true,
+    };
+
+    const popupCloseTimeout = 1000;
+
+    const linkMouseLeave = (e: Event) => {
+      const popupId = +$popup.getAttribute('data-popup-id');
+      const popup = this.popups[popupId];
+      if (!popup) {
+        $link.removeEventListener('mouseleave', linkMouseLeave);
+        return;
+      }
+
+      popup.hover = false;
+
+      setTimeout(() => {
+        if (this.checkPostPopup(popup)) {
+          $link.removeEventListener('mouseleave', linkMouseLeave);
+        }
+      }, popupCloseTimeout);
+    };
+
+    $link.addEventListener('mouseleave', linkMouseLeave);
+
+    $popup.addEventListener('mouseenter', e => {
+      const popupId = +$popup.getAttribute('data-popup-id');
+      const popup = this.popups[popupId];
+      if (!popup) {
+        return;
+      }
+
+      popup.hover = true;
+    });
+
+    $popup.addEventListener('mouseleave', e => {
+      const popupId = +$popup.getAttribute('data-popup-id');
+      const popup = this.popups[popupId];
+      if (!popup) {
+        return;
+      }
+
+      popup.hover = false;
+
+      setTimeout(() => {
+        if (this.checkPostPopup(popup)) {
+          $link.removeEventListener('mouseleave', linkMouseLeave);
+        }
+      }, popupCloseTimeout);
+    });
+  }
+
+  protected checkPostPopup(popup: PostPopup) {
+    if (popup.hover) {
+      return false;
+    }
+
+    // Do not close post popup if file modal is open.
+    if (this.modalParentPopupId === popup.id) {
+      return false;
+    }
+
+    // Check if any children has hover.
+    const childrenIds = [...popup.childrenIds];
+    while (childrenIds.length) {
+      const childId = childrenIds.shift();
+      const child = this.popups[childId];
+      if (!child) {
+        continue;
+      }
+
+      if (child.hover) {
+        return false;
+      }
+
+      // Do not close post popup if file modal for one of it's children is open.
+      if (this.modalParentPopupId === child.id) {
+        return false;
+      }
+
+      childrenIds.push(...child.childrenIds);
+    }
+
+    // Close popup if none of it's children has hover.
+    popup.$popup.classList.add('faded');
+    setTimeout(() => {
+      popup.$popup.remove();
+    }, 200);
+
+    const popupId = popup.id;
+    const parentId = popup.parentId;
+    delete this.popups[popupId];
+
+    // Check parent popup.
+    if (parentId !== null) {
+      const parent = this.popups[parentId];
+      if (parent) {
+        parent.childrenIds = parent.childrenIds.filter(id => id !== popupId);
+        setTimeout(() => {
+          this.checkPostPopup(parent);
+        }, 100);
+      }
+    }
+
+    return true;
+  }
 }

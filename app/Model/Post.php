@@ -206,8 +206,7 @@ class Post extends Model
       return '';
     }
 
-    $file_parts = explode('.', $this->file);
-    return end($file_parts);
+    return strtolower(pathinfo($this->file, PATHINFO_EXTENSION));
   }
 
   /**

@@ -52,6 +52,11 @@ export class PostView implements View {
       $dateTime.textContent = this.model.formattedTime;
     }
 
+    const $mobileDateTime = DOM.qs('.post-header-mobile__datetime', $element);
+    if ($mobileDateTime) {
+      $mobileDateTime.textContent = this.model.formattedTime;
+    }
+
     if (this.model.isOwn) {
       $element.classList.add('post--own');
     }
