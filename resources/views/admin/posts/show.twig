@@ -82,7 +82,7 @@
             <th class="item__cell item__cell--nostretch" scope="row">User</th>
             <td class="item__cell">
               {% if item.user_id %}
-                <a href="{{ base_url }}/admin/users/{{ item.user_id }}">{{ user|e }}</a>
+                <a href="{{ base_url }}/admin/users?id={{ item.user_id }}">{{ user|e }}</a>
               {% endif %}
             </td>
           </tr>
