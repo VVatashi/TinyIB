@@ -16,31 +16,12 @@ define('TINYIB_DELAY', 0);
 define('TINYIB_MAXTHREADS', 50);
 define('TINYIB_MAXREPLIES', 500);
 
-$tinyib_uploads = [
-    'image/jpeg' => ['jpg'],
-    'image/pjpeg' => ['jpg'],
-    'image/png' => ['png'],
-    'image/gif' => ['gif'],
-    'image/webp' => ['webp'],
-
-    'audio/mpeg' => ['mp3', 'images/audio_thumbnail.png'],
-    'audio/mp3' => ['mp3', 'images/audio_thumbnail.png'],
-    'audio/x-mpeg' => ['mp3', 'images/audio_thumbnail.png'],
-    'audio/x-mpeg-3' => ['mp3', 'images/audio_thumbnail.png'],
-    'audio/mp4' => ['mp4', 'images/audio_thumbnail.png'],
-    'audio/webm' => ['webm', 'images/audio_thumbnail.png'],
-
-    'video/mp4' => ['mp4'],
-    'video/webm' => ['webm'],
-];
-
 define('TINYIB_DICE_ENABLED', true);
 define('TINYIB_DICE_MAX_COUNT', 20);
 define('TINYIB_DICE_MAX_VALUE', 10000);
 
 define('TINYIB_MAXKB', 20480);
 define('TINYIB_MAXKBDESC', '20 MB');
-define('TINYIB_THUMBNAIL', 'imagemagick');
 define('TINYIB_NOFILEOK', true);
 define('TINYIB_FILE_ALLOW_DUPLICATE', true);
 define('TINYIB_FILE_ANIM_GIF_THUMB', false);

@@ -12,6 +12,7 @@ export class ThreadPage extends BasePage {
   readonly model: Thread;
 
   protected readonly $updater: HTMLElement;
+  protected readonly $status: HTMLElement;
   protected readonly faviconHref: string;
 
   constructor(readonly threadId: number) {
@@ -21,6 +22,8 @@ export class ThreadPage extends BasePage {
     this.faviconHref = $favicon.getAttribute('href');
 
     this.$updater = DOM.qid('thread-updater');
+    this.$status = this.$updater ?
+      DOM.qs('.thread-updater__status', this.$updater) as HTMLElement : null;
 
     const $posts = DOM.qsa('.post') as HTMLElement[];
     this.posts = $posts.map($post => new PostView($post));
@@ -31,20 +34,13 @@ export class ThreadPage extends BasePage {
   }
 
   async updateCounter() {
-    const $status = this.$updater ? DOM.qs('.thread-updater__status', this.$updater) : null;
-
     try {
       await this.model.updateCounter();
-
-      // Reset error message if have updated thread successfully.
-      if ($status) {
-        $status.textContent = '';
-      }
     } catch (e) {
-      console.error(e.message);
+      console.error(e);
 
-      if ($status) {
-        $status.textContent = e.message;
+      if (this.$status) {
+        this.$status.textContent = `Error: ${e.message}`;
       }
     }
 
@@ -108,6 +104,11 @@ export class ThreadPage extends BasePage {
   }
 
   protected onNewPostsLoaded(html: string) {
+    // Reset error message if have updated thread successfully.
+    if (this.$status) {
+      this.$status.textContent = '';
+    }
+
     const $wrapper = DOM.qs('.post').parentElement;
     if (!$wrapper) {
       return;
@@ -152,9 +153,19 @@ export class ThreadPage extends BasePage {
     if (this.$updater) {
       const $update = DOM.qs('.thread-updater__update', this.$updater);
       if ($update) {
-        $update.addEventListener('click', e => {
+        $update.addEventListener('click', async e => {
           e.preventDefault();
-          this.model.getNewPosts();
+
+          try {
+            await this.model.getNewPosts();
+          } catch (e) {
+            console.error(e);
+
+            if (this.$status) {
+              this.$status.textContent = `Error: ${e.message}`;
+            }
+          }
+
           return false;
         });
       }

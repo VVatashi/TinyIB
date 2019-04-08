@@ -89,10 +89,14 @@ export class Thread extends EventEmitter {
 
   async updateCounter() {
     if (this.isUpdateEnabled) {
-      this.counter--;
-      if (this.counter === 0) {
-        await this.loadNewPosts();
-        this.counter = updateInterval;
+      if (this.counter > 0) {
+        this.counter--;
+      } else {
+        try {
+          await this.loadNewPosts();
+        } finally {
+          this.counter = updateInterval;
+        }
       }
     } else {
       this.counter = updateInterval;

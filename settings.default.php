@@ -25,30 +25,6 @@ define('TINYIB_DELAY', 30);           // Delay (in seconds) between posts from t
 define('TINYIB_MAXTHREADS', 100);     // Oldest threads are discarded when the thread count passes this limit  [0 to disable]
 define('TINYIB_MAXREPLIES', 0);       // Maximum replies before a thread stops bumping  [0 to disable]
 
-// Upload types
-//   Empty array to disable
-//   Format: MIME type => (extension, optional thumbnail)
-$tinyib_uploads = [
-    'image/jpeg' => ['jpg'],
-    'image/pjpeg' => ['jpg'],
-    'image/png' => ['png'],
-    'image/gif' => ['gif'],
-    'image/webp' => ['webp'],
-
-    'audio/mpeg' => ['mp3', 'images/audio_thumbnail.png'],
-    'audio/mp3' => ['mp3', 'images/audio_thumbnail.png'],
-    'audio/x-mpeg' => ['mp3', 'images/audio_thumbnail.png'],
-    'audio/x-mpeg-3' => ['mp3', 'images/audio_thumbnail.png'],
-    'audio/mp4' => ['mp4', 'images/audio_thumbnail.png'],
-    //'audio/webm' => ['webm', 'images/audio_thumbnail.png'],
-
-    // Video upload requires mediainfo and ffmpegthumbnailer  (see README for instructions)
-    'video/mp4' => ['mp4'],
-    //'video/webm' => ['webm'],
-
-    //'application/x-shockwave-flash' => ['swf', 'images/swf_thumbnail.png'];
-];
-
 // Dice roll
 define('TINYIB_DICE_ENABLED', true);
 define('TINYIB_DICE_MAX_COUNT', 20);
@@ -57,7 +33,6 @@ define('TINYIB_DICE_MAX_VALUE', 10000);
 // File control
 define('TINYIB_MAXKB', 2048);         // Maximum file size in kilobytes  [0 to disable]
 define('TINYIB_MAXKBDESC', '2 MB');   // Human-readable representation of the maximum file size
-define('TINYIB_THUMBNAIL', 'gd');     // Thumbnail method to use: gd / imagemagick  (see README for instructions)
 define('TINYIB_NOFILEOK', false);     // Allow the creation of new threads without uploading a file
 define('TINYIB_FILE_ALLOW_DUPLICATE', false); // Allow duplicate files
 define('TINYIB_FILE_ANIM_GIF_THUMB', true); // Animate gif thumbnails
