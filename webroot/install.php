@@ -29,8 +29,9 @@ $capsule->addConnection([
 $capsule->setAsGlobal();
 $capsule->bootEloquent();
 
-if (!Capsule::schema()->hasTable(TINYIB_DBBANS)) {
-  Capsule::schema()->create(TINYIB_DBBANS, function (Blueprint $table) {
+try{
+if (!Capsule::schema()->hasTable($config->get('TINYIB_DBBANS'))) {
+  Capsule::schema()->create($config->get('TINYIB_DBBANS'), function (Blueprint $table) {
     $table->increments('id');
     $table->string('ip');
     $table->string('reason')->nullable();
@@ -39,6 +40,9 @@ if (!Capsule::schema()->hasTable(TINYIB_DBBANS)) {
     $table->integer('updated_at')->default(0);
     $table->integer('deleted_at')->nullable();
   });
+}}catch (\Exception $ex) {
+    echo '<pre>';
+    var_dump($ex->getMessage());
 }
 
 if (!Capsule::schema()->hasTable('users')) {

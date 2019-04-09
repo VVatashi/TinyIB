@@ -131,7 +131,7 @@ EOF;
       });
     }
 
-    if (TINYIB_CACHE === 'redis') {
+    if ($this->config->get('TINYIB_CACHE') === 'redis') {
       // Lazy create Redis cache.
       $this->container->registerCallback(CacheInterface::class, function ($container) {
         return new RedisCache(TINYIB_CACHE_REDIS_HOST);
@@ -143,6 +143,8 @@ EOF;
 
     // Create database connection and ORM.
     $capsule = new Capsule();
+
+
 
     $capsule->addConnection([
       'driver'    => $this->config->get('TINYIB_DBDRIVER'),

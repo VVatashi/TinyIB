@@ -6,6 +6,7 @@ use GuzzleHttp\Psr7\Response;
 use Imageboard\Command\CommandDispatcher;
 use Imageboard\Command\Admin\ClearCache;
 use Imageboard\Exception\AccessDeniedException;
+use Imageboard\Model\User;
 use Imageboard\Service\RendererServiceInterface;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
@@ -18,9 +19,11 @@ class SystemController implements SystemControllerInterface
   protected $renderer;
 
   /**
+   * SystemController constructor.
    * Creates a new SystemController instance.
    *
-   * @param RendererServiceInterface $renderer
+   * @param \Imageboard\Command\CommandDispatcher        $command_dispatcher
+   * @param \Imageboard\Service\RendererServiceInterface $renderer
    */
   function __construct(
     CommandDispatcher $command_dispatcher,
@@ -58,6 +61,8 @@ class SystemController implements SystemControllerInterface
 
   /**
    * {@inheritDoc}
+   *
+   * @throws \Imageboard\Exception\AccessDeniedException
    */
   function clearCache(ServerRequestInterface $request) : ResponseInterface
   {

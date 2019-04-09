@@ -15,6 +15,12 @@ class TokenController implements TokenControllerInterface
   /** @var QueryDispatcher */
   protected $query_dispatcher;
 
+  /**
+   * TokenController constructor.
+   *
+   * @param \Imageboard\Command\CommandDispatcher $command_dispatcher
+   * @param \Imageboard\Query\QueryDispatcher     $query_dispatcher
+   */
   function __construct(
     CommandDispatcher $command_dispatcher,
     QueryDispatcher $query_dispatcher
@@ -47,13 +53,13 @@ class TokenController implements TokenControllerInterface
 
     $expires_at = $token->expires_at->timestamp;
     return new Response(201, [], json_encode([
-      'token' => $token->token,
-      'created_at' => $token->created_at->timestamp,
-      'expires_at' => $expires_at,
-      'expires_in' => $expires_at - time(),
-      'user_id' => $token->user_id,
-      'user_email' => $token->user->email,
-      'user_role' => $token->user->role,
+      'token'       => $token->token,
+      'created_at'  => $token->created_at->timestamp,
+      'expires_at'  => $expires_at,
+      'expires_in'  => $expires_at - time(),
+      'user_id'     => $token->user_id,
+      'user_email'  => $token->user->email,
+      'user_role'   => $token->user->role,
     ]));
   }
 

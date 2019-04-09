@@ -13,16 +13,17 @@ class ConfigService implements ConfigServiceInterface
 {
   const CONFIG_PREFIX = 'TINYIB_';
   const PARAM_GET = 'get';
+  const HASH_SYMBOL = '#';
 
   /**
    * @var string
    */
-  protected $_configPath = __DIR__ . "./../../settings.php";
+  protected $_configPath = __DIR__ . "/../../.env";
 
   /**
    * @var array
    */
-  protected $_config;
+  protected $_config = [];
 
   /**
    * @var ConfigService
@@ -34,74 +35,111 @@ class ConfigService implements ConfigServiceInterface
   }
 
   /**
-   * ConfigService constructor.
+   * Reset internal config array
    *
+   * @return $this
+   */
+  public function resetConfig() {
+    $this->_config = [];
+
+    return $this;
+  }
+
+  /**
+   * Set config path
+   *
+   * @param string $path
+   *
+   * @return $this
+   */
+  public function setConfigPath(string $path) {
+    $this->_configPath = $path;
+
+    return $this;
+  }
+
+  /**
+   * Cleanup array
+   *
+   * @param string $value
+   *
+   * @return string
+   */
+  protected function removeComment(string $value) {
+    $temp = preg_split('/(#)/', $value, -1, PREG_SPLIT_DELIM_CAPTURE);
+    $hashArray = [];
+
+    foreach ($temp as $item) {
+
+      // Remove useless spaces and tabs
+      $item = trim($item);
+
+      // Ignore any string after comment
+      $isEmptyOrComment = strlen($item) > 0 && $item[0] != self::HASH_SYMBOL;
+
+      if(!$isEmptyOrComment) {
+        break;
+      }
+
+      // Add trimmed value
+      $hashArray[] = $item;
+    }
+
+    return implode("", $hashArray);
+  }
+
+  protected function importEnvData(string $data) {
+    // Processing line-by-line
+    foreach (\mb_split("\n", $data) as $line) {
+      $splited = mb_split("=", $line);
+
+      $isSplitted = !isset($splited[0]);
+
+      $key = $this->removeComment($splited[0]);
+      $emptyLine = strlen($key) < 1;
+
+      // Ignore empty keys
+      if($isSplitted || $emptyLine) continue;
+
+      $this->_config[$key] = isset($splited[1]) && $this->removeComment($splited[1])
+          ? $this->removeComment($splited[1]) : "";
+    }
+  }
+
+  /**
    * @throws \Imageboard\Exception\ConfigServiceException
    */
-  public function __construct() {
-    if(!@require_once($this->_configPath)) {
+  protected function _setupConfig() {
+    // Do not rewrite config
+    if(count($this->_config) > 0) return;
+
+    // Stop application on missing configuration file
+    if(!file_exists($this->_configPath)) {
       throw new ConfigServiceException(
-        "Please copy the file settings.default.php to settings.php",
+        "Please copy the file .env.sample to .env",
         0,
         null,
         self::class
       );
     }
 
-    foreach (get_defined_constants() as $key => $value) {
-      if(strtoupper(substr( $key, 0, strlen(self::CONFIG_PREFIX) )) == self::CONFIG_PREFIX) {
-        $this->_config[$key] = $value;
-      }
-    }
+    // Normalize file endings
+    $data = str_replace("\r\n", "\n", file_get_contents($this->_configPath));
+    $this->importEnvData($data);
   }
 
   /**
-   * @property  string $bar
-   *
-   * @param string $name
-   * @param array  $params
-   *
-   * @return mixed
+   * {@inheritDoc}
    * @throws \Imageboard\Exception\ConfigServiceException
    */
-  public function __call(string $name, array $params) {
-    // TODO: PhpStorm validator fix "PhpUndefinedMethodInspection"
+  public function get(string $key, $default = '') {
+    $this->_setupConfig();
 
-    if(!strtolower(substr($name, 0, strlen(self::PARAM_GET))) == self::PARAM_GET) {
-      throw new ConfigServiceException(
-        "Cannot find method. Are you drunk?",
-        0,
-        null,
-        self::class);
-    }
+    // Remove TINYIB_
 
-    // Get key
-    $regexp = '!([A-Z][A-Z0-9]*(?=$|[A-Z][a-z0-9])|[A-Za-z][a-z0-9]+)!';
-    preg_match_all($regexp, substr($name, 2), $matches);
+    $key = str_replace('TINYIB_', "", $key);
 
-    $ret = $matches[0];
-    foreach ($ret as &$match) {
-      $match = strtoupper($match);
-    }
-
-    return $this->get(self::CONFIG_PREFIX . implode('_', $ret));
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public function get(string $key, $default = false) {
-    return $this->_config[$key] ?? $default;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public function setIfNotExists(string $key, $value) {
-    if(!array_key_exists($this->_config[$key], $this->_config)) {
-      $this->_config[$key] = $value;
-    }
-
-    return $this;
+    $result = $this->_config[$key] ?? $default;
+    return $result;
   }
 }

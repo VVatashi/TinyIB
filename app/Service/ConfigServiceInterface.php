@@ -17,15 +17,5 @@ interface ConfigServiceInterface
    *
    * @return mixed
    */
-  public function get(string $key, $default = false);
-
-  /**
-   * Set value if not exists
-   *
-   * @param string $key
-   * @param        $value
-   *
-   * @return mixed
-   */
-  public function setIfNotExists(string $key, $value);
+  public function get(string $key, $default = '');
 }

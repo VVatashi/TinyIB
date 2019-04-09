@@ -5,29 +5,35 @@ namespace Imageboard\Controller;
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Exception\ValidationException;
 use Imageboard\Model\User;
-use Imageboard\Service\{
-    CaptchaServiceInterface,
-    RendererServiceInterface
-};
+use Imageboard\Service\{CaptchaServiceInterface, ConfigServiceInterface, RendererServiceInterface};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
 class AuthController implements AuthControllerInterface
 {
-    /** @var CaptchaService */
+    /** @var CaptchaServiceInterface */
     protected $captcha_service;
 
     /** @var RendererServiceInterface */
     protected $renderer;
 
-    /**
-     * Creates a new AuthController instance.
-     */
+    /** @var ConfigServiceInterface  */
+    protected $config_service;
+
+  /**
+   * Creates a new AuthController instance.
+   *
+   * @param \Imageboard\Service\CaptchaServiceInterface  $captcha_service
+   * @param \Imageboard\Service\RendererServiceInterface $renderer
+   * @param \Imageboard\Service\ConfigServiceInterface   $config_service
+   */
     public function __construct(
         CaptchaServiceInterface $captcha_service,
-        RendererServiceInterface $renderer
+        RendererServiceInterface $renderer,
+        ConfigServiceInterface $config_service
     ) {
         $this->captcha_service = $captcha_service;
         $this->renderer = $renderer;
+        $this->config_service = $config_service;
     }
 
     /**
@@ -41,7 +47,7 @@ class AuthController implements AuthControllerInterface
             // Allow only anonymous user access.
             // Redirect logged in users to the index page.
             $_SESSION['error'] = 'Already logged in';
-            return new Response(302, ['Location' => '/' . TINYIB_BOARD]);
+            return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD")]);
         }
 
         // Restore form input from the session.
@@ -68,7 +74,7 @@ class AuthController implements AuthControllerInterface
             // Allow only anonymous user access.
             // Redirect logged in users to the index page.
             $_SESSION['error'] = 'Already logged in';
-            return new Response(302, ['Location' => '/' . TINYIB_BOARD]);
+            return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD")]);
         }
 
         $data = $request->getParsedBody();
@@ -82,7 +88,7 @@ class AuthController implements AuthControllerInterface
         $captcha = isset($data['captcha']) ? $data['captcha'] : '';
         if (!$this->captcha_service->checkCaptcha($captcha)) {
             $_SESSION['error'] = 'Incorrect CAPTCHA';
-            return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/auth/register']);
+            return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD") . '/auth/register']);
         }
 
         try {
@@ -91,11 +97,11 @@ class AuthController implements AuthControllerInterface
         }
         catch(ValidationException $e) {
             $_SESSION['error'] = $e->getMessage();
-            return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/auth/register']);
+            return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD") . '/auth/register']);
         }
 
         // Redirect to the index page.
-        return new Response(302, ['Location' => '/' . TINYIB_BOARD]);
+        return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD")]);
     }
 
     /**
@@ -109,7 +115,7 @@ class AuthController implements AuthControllerInterface
             // Allow only anonymous user access.
             // Redirect logged in users to the index page.
             $_SESSION['error'] = 'Already logged in';
-            return new Response(302, ['Location' => '/' . TINYIB_BOARD]);
+            return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD")]);
         }
 
         // Restore form input from the session.
@@ -136,7 +142,7 @@ class AuthController implements AuthControllerInterface
             // Allow only anonymous user access.
             // Redirect logged in users to the index page.
             $_SESSION['error'] = 'Already logged in';
-            return new Response(302, ['Location' => '/' . TINYIB_BOARD]);
+            return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD")]);
         }
 
         $data = $request->getParsedBody();
@@ -150,7 +156,7 @@ class AuthController implements AuthControllerInterface
         $captcha = isset($data['captcha']) ? $data['captcha'] : '';
         if (!$this->captcha_service->checkCaptcha($captcha)) {
             $_SESSION['error'] = 'Incorrect CAPTCHA';
-            return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/auth/login']);
+            return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD") . '/auth/login']);
         }
 
         try {
@@ -158,11 +164,11 @@ class AuthController implements AuthControllerInterface
         }
         catch(ValidationException $e) {
             $_SESSION['error'] = $e->getMessage();
-            return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/auth/login']);
+            return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD") . '/auth/login']);
         }
 
         // Redirect to the index page.
-        return new Response(302, ['Location' => '/' . TINYIB_BOARD]);
+        return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD")]);
     }
 
     /**
@@ -173,6 +179,6 @@ class AuthController implements AuthControllerInterface
         User::logout();
 
         // Redirect to the index page.
-        return new Response(302, ['Location' => '/' . TINYIB_BOARD]);
+        return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD")]);
     }
 }

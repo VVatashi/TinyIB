@@ -6,14 +6,14 @@ use Illuminate\Database\Eloquent\{Collection, Model, SoftDeletes};
 use VVatashi\BBCode\{Parser, TagDef};
 
 /**
- * @property int $id
- * @property int $created_at
- * @property int $updated_at
- * @property int $deleted_at
- * @property int $parent_id
- * @property int $bumped_at
+ * @property int    $id
+ * @property int    $created_at
+ * @property int    $updated_at
+ * @property int    $deleted_at
+ * @property int    $parent_id
+ * @property int    $bumped_at
  * @property string $ip
- * @property int $user_id
+ * @property int    $user_id
  * @property string $name
  * @property string $tripcode
  * @property string $email
@@ -23,14 +23,15 @@ use VVatashi\BBCode\{Parser, TagDef};
  * @property string $file
  * @property string $file_hex
  * @property string $file_original
- * @property int $file_size
- * @property int $image_width
- * @property int $image_height
+ * @property int    $file_size
+ * @property int    $image_width
+ * @property int    $image_height
  * @property string $thumb
- * @property int $thumb_width
- * @property int $thumb_height
- * @property bool $stickied
- * @property bool $moderated
+ * @property int    $thumb_width
+ * @property int    $thumb_height
+ * @property bool   $stickied
+ * @property bool   $moderated
+ * @method static where(array $array)
  */
 class Post extends Model
 {

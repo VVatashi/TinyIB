@@ -11,9 +11,11 @@ class CaptchaController implements CaptchaControllerInterface
     /** @var CaptchaServiceInterface */
     protected $captcha_service;
 
-    /**
-     * Constructs a new captcha controller.
-     */
+  /**
+   * Constructs a new captcha controller.
+   *
+   * @param \Imageboard\Service\CaptchaServiceInterface $captcha_service
+   */
     public function __construct(CaptchaServiceInterface $captcha_service)
     {
         $this->captcha_service = $captcha_service;
