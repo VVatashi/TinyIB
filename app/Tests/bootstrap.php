@@ -8,6 +8,9 @@ use Imageboard\Service\ConfigService;
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
+//
+putenv("ENVIRONMENT=test");
+
 // Bootstrap application.
 $app = new App();
 $app->bootstrap(false);
@@ -17,9 +20,6 @@ $container = $app->getContainer();
 
 // Init config
 $config = new ConfigService();
-$config
-  ->setConfigPath(__DIR__ . '/../../settings.test.php')
-  ->resetConfig();
 $databaseHelper = new DatabaseHelper($config);
 
 $databaseHelper->createDatabaseStructure();

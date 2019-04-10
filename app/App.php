@@ -12,7 +12,7 @@ use Imageboard\Middleware\{
   ExceptionMiddleware,
   RequestHandler
 };
-use Imageboard\Service\{ConfigService, RoutingServiceInterface, RendererServiceInterface};
+use Imageboard\Service\{ConfigService, ConfigServiceInterface, RoutingServiceInterface, RendererServiceInterface};
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
@@ -117,6 +117,7 @@ EOF;
 
     // Register container itself.
     $this->container->registerInstance(ContainerInterface::class, $this->container);
+    $this->container->registerInstance(ConfigServiceInterface::class , $this->config);
 
     if (TINYIB_ERROR_LOG) {
       // Lazy create logger.

@@ -20,7 +20,8 @@ class DatabaseHelper implements HelperInterface
    * @return bool
    */
   public function isSqlite() : bool {
-    return strtolower($this->_configService->get('TINYIB_DBDRIVER')) == 'sqlite';
+    $result = strtolower($this->_configService->get('TINYIB_DBDRIVER')) == 'sqlite';
+    return $result;
   }
 
   /**
@@ -91,8 +92,8 @@ class DatabaseHelper implements HelperInterface
       });
     }
 
-    if (!Capsule::schema()->hasTable(TINYIB_DBPOSTS)) {
-      Capsule::schema()->create(TINYIB_DBPOSTS, function (Blueprint $table) {
+    if (!Capsule::schema()->hasTable($this->_configService->get("DBPOSTS"))) {
+      Capsule::schema()->create($this->_configService->get("DBPOSTS"), function (Blueprint $table) {
         $table->increments('id');
         $table->integer('parent_id')->index()->default(0);
         $table->integer('user_id')->index()->default(0);

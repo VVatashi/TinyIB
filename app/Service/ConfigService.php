@@ -18,7 +18,7 @@ class ConfigService implements ConfigServiceInterface
   /**
    * @var string
    */
-  protected $_configPath = __DIR__ . "/../../.env";
+  protected $_configPath;
 
   /**
    * @var array
@@ -32,6 +32,15 @@ class ConfigService implements ConfigServiceInterface
 
   public static function getInstance(): ConfigService {
     return static::$instance = static::$instance ?? new static();
+  }
+
+  public function __construct ()
+  {
+    $this->_configPath = __DIR__ . "/../../.env";
+
+    if(strtolower(getenv("ENVIRONMENT")) == "test") {
+      $this->_configPath .= ".testing";
+    }
   }
 
   /**
@@ -114,7 +123,9 @@ class ConfigService implements ConfigServiceInterface
     if(count($this->_config) > 0) return;
 
     // Stop application on missing configuration file
-    if(!file_exists($this->_configPath)) {
+    $isConfigFileExists = file_exists($this->_configPath);
+
+    if(!$isConfigFileExists) {
       throw new ConfigServiceException(
         "Please copy the file .env.sample to .env",
         0,
