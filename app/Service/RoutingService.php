@@ -163,10 +163,9 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
     $method = $request->getMethod();
     $path = $uri->getPath();
 
-    // Remove board prefix.
-    $prefix = '/' . TINYIB_BOARD;
-    $prefix_length = strlen($prefix);
-    if (strncmp($path, $prefix, $prefix_length) === 0) {
+    // Remove base url.
+    $prefix_length = strlen(TINYIB_BASE_PATH);
+    if (strncmp($path, TINYIB_BASE_PATH, $prefix_length) === 0) {
       $path = substr($path, $prefix_length);
     }
 

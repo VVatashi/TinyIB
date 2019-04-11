@@ -2,7 +2,7 @@
 {% set show_name = config('FILE_SHOW_ORIG_NAME') and post.fileOriginal %}
 
 {% if post.fileType %}
-  {% set direct_link = '/' ~ config('BOARD') ~ '/src/' ~ post.file %}
+  {% set direct_link = config('CONTENT_PATH') ~ '/src/' ~ post.file %}
 {% endif %}
 
 <div class="{{ class is defined ? class ~ ' ' }}file-info">

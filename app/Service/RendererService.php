@@ -25,7 +25,8 @@ class RendererService implements RendererServiceInterface
       'debug' => true,
     ]);
 
-    $this->twig->addGlobal('base_url', TINYIB_BASE_URL . TINYIB_BOARD);
+    $this->twig->addGlobal('base_url', TINYIB_BASE_PATH);
+    $this->twig->addGlobal('content_url', TINYIB_CONTENT_PATH);
     $this->twig->addGlobal('style', $_COOKIE['style'] ?? 'Synthwave');
 
     $this->twig->addFunction(new Twig_SimpleFunction('mtime', function ($path) {

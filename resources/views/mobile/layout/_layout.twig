@@ -1,5 +1,5 @@
 {% macro script(filename) %}
-  <script src="{{ base_url }}/js/{{ filename }}.js?mtime={{ mtime('js/' ~ filename ~ '.js') }}"></script>
+  <script src="{{ content_url }}/js/{{ filename }}.js?mtime={{ mtime('js/' ~ filename ~ '.js') }}"></script>
 {% endmacro %}
 
 {% import _self as self %}
@@ -14,11 +14,11 @@
     <link rel="canonical" href="{{ base_url }}" />
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1" />
 
-    <link rel="shortcut icon" href="{{ base_url }}/favicon.ico" />
+    <link rel="shortcut icon" href="{{ content_url }}/favicon.ico" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans" />
 
     <link rel="stylesheet" type="text/css"
-      href="{{ base_url }}/css/mobile.css?mtime={{ mtime('css/mobile.css') }}" />
+      href="{{ content_url }}/css/mobile.css?mtime={{ mtime('css/mobile.css') }}" />
 
     {% if config('GTM') %}
       <!-- Google Tag Manager -->

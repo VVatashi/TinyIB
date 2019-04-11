@@ -7,7 +7,7 @@ use Imageboard\Query\Admin\{ListPosts, ShowPost};
 
 class PostController extends CrudController implements PostControllerInterface
 {
-  protected $list_url = TINYIB_BASE_URL . TINYIB_BOARD . '/admin/posts';
+  protected $list_url = TINYIB_BASE_PATH . '/admin/posts';
   protected $list_query_type = ListPosts::class;
   protected $list_template = 'admin/posts/list.twig';
   protected $ajax_list_template = 'admin/posts/_list.twig';

@@ -7,12 +7,12 @@ use Imageboard\Query\Admin\ListBans;
 
 class BanController extends CrudController implements BanControllerInterface
 {
-  protected $list_url = TINYIB_BASE_URL . TINYIB_BOARD . '/admin/bans';
+  protected $list_url = TINYIB_BASE_PATH . '/admin/bans';
   protected $list_query_type = ListBans::class;
   protected $list_template = 'admin/bans/list.twig';
   protected $ajax_list_template = 'admin/bans/_list.twig';
 
-  protected $create_url = TINYIB_BASE_URL . TINYIB_BOARD . '/admin/bans/create';
+  protected $create_url = TINYIB_BASE_PATH . '/admin/bans/create';
   protected $create_command_type = CreateBan::class;
   protected $new_item = [
     'ip' => '',

@@ -9,13 +9,13 @@ use Imageboard\Query\Admin\ListUsers;
 
 class UserController extends CrudController implements UserControllerInterface
 {
-  protected $list_url = TINYIB_BASE_URL . TINYIB_BOARD . '/admin/users';
+  protected $list_url = TINYIB_BASE_PATH . '/admin/users';
   protected $list_query_type = ListUsers::class;
   protected $list_template = 'admin/users/list.twig';
   protected $ajax_list_template = 'admin/users/_list.twig';
 
-  protected $create_url = TINYIB_BASE_URL . TINYIB_BOARD . '/admin/users/create';
-  protected $edit_url = TINYIB_BASE_URL . TINYIB_BOARD . '/admin/users/:id/edit';
+  protected $create_url = TINYIB_BASE_PATH . '/admin/users/create';
+  protected $edit_url = TINYIB_BASE_PATH . '/admin/users/:id/edit';
   protected $create_command_type = CreateUser::class;
   protected $edit_command_type = EditUser::class;
   protected $new_item = [

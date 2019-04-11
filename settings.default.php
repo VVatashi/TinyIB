@@ -7,7 +7,8 @@
 # See README for instructions on configuring, moderating and upgrading your board.
 
 // Board description and behavior
-define('TINYIB_BASE_URL', 'https://localhost/');
+define('TINYIB_BASE_PATH', '/b');
+define('TINYIB_CONTENT_PATH', '');
 define('TINYIB_BOARD', 'b');          // Unique identifier for this board using only letters and numbers
 define('TINYIB_BOARDDESC', 'TinyIB'); // Displayed at the top of every page
 define('TINYIB_ALWAYSNOKO', false);   // Redirect to thread after posting
