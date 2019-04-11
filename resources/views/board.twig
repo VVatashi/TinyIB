@@ -11,7 +11,7 @@
     {% include 'components/_posting_form.twig' with {'class': 'content__posting-form'} %}
 
     <form id="delform" action="{{ base_url }}/post/delete" method="post">
-      <input type="hidden" name="board" value="{{ constant('TINYIB_BOARD') }}" />
+      <input type="hidden" name="board" value="{{ config('BOARD') }}" />
 
       {% for post in posts %}
         {% if post.isThread() %}
