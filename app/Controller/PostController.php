@@ -215,7 +215,7 @@ class PostController implements PostControllerInterface
   {
     $threads = Post::getThreadsByPage($page);
     $threads_count = Post::getThreadCount();
-    $pages = ceil($threads_count / TINYIB_THREADSPERPAGE) - 1;
+    $pages = ceil($threads_count / (int)$this->config_service->get("THREADSPERPAGE")) - 1;
     $posts = [];
 
     foreach ($threads as $thread) {
@@ -247,7 +247,7 @@ class PostController implements PostControllerInterface
   {
     $page = (int)($args['page'] ?? 0);
     $user = $request->getAttribute('user');
-    $key = TINYIB_BOARD . ':page:' . $page . ':user:' . $user->id;
+    $key = $this->config_service->get("BOARD") . ':page:' . $page . ':user:' . $user->id;
     $headers = [];
     $data = $this->cache->get($key);
     if (isset($data)) {

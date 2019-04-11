@@ -3,6 +3,7 @@
 namespace Imageboard\Model;
 
 use Illuminate\Database\Eloquent\{Collection, Model, SoftDeletes};
+use Imageboard\Exception\ConfigServiceException;
 use VVatashi\BBCode\{Parser, TagDef};
 
 /**
@@ -36,8 +37,9 @@ use VVatashi\BBCode\{Parser, TagDef};
 class Post extends Model
 {
   use SoftDeletes;
+  use ModelTrait;
 
-  protected $table = TINYIB_DBPOSTS;
+  protected $table;
 
   protected $fillable = [
     'parent_id',
@@ -71,6 +73,20 @@ class Post extends Model
   ];
 
   protected $dateFormat = 'U';
+
+  /**
+   * Post constructor.
+   *
+   * @param array $attributes
+   *
+   * @throws \Imageboard\Exception\ConfigServiceException
+   */
+  public function __construct (array $attributes = [])
+  {
+    parent::__construct( $attributes );
+
+    $this->table = $this->config_service()->get( "TINYIB_DBPOSTS" );
+  }
 
   function replies()
   {
@@ -334,11 +350,15 @@ class Post extends Model
    * @param int $page
    *
    * @return Collection
+   * @throws \Imageboard\Exception\ConfigServiceException
    */
   static function getThreadsByPage(int $page): Collection
   {
-    $skip = $page * TINYIB_THREADSPERPAGE;
-    $take = TINYIB_THREADSPERPAGE;
+    $threads_per_page = (int)self::config()->get("THREADSPERPAGE");
+    // $threads_per_page = TINYIB_THREADSPERPAGE;
+
+    $skip = $page * $threads_per_page;
+    $take = $threads_per_page;
 
     return Post::where([
       ['parent_id', 0],
@@ -484,10 +504,12 @@ class Post extends Model
 
   /**
    * Removes old threads.
+   *
+   * @throws \Imageboard\Exception\ConfigServiceException
    */
   static function trimThreads()
   {
-    $limit = (int)TINYIB_MAXTHREADS;
+    $limit = (int)self::$config_service->get("MAXTHREADS");
 
     if ($limit > 0) {
       /** @var Post[] */

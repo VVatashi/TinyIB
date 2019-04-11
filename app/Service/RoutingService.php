@@ -37,13 +37,21 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
   /** @var Dispatcher */
   protected $dispatcher;
 
+  /** @var \Imageboard\Service\ConfigServiceInterface */
+  protected $config_service;
+
   /**
    * Creates a new RoutingService instance.
+   *
+   * @param \Psr\Container\ContainerInterface          $container
+   * @param \Imageboard\Service\ConfigServiceInterface $config_service
    */
   public function __construct(
-    ContainerInterface $container
+    ContainerInterface $container,
+    ConfigServiceInterface $config_service
   ) {
     $this->container = $container;
+    $this->config_service = $config_service;
 
     $this->dispatcher = \FastRoute\simpleDispatcher(function (RouteCollector $routes) {
       $routes->addGroup('/api', function (RouteCollector $routes) {
@@ -156,6 +164,7 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
 
   /**
    * {@inheritDoc}
+   * @throws \Imageboard\Exception\HttpException
    */
   public function handle(ServerRequestInterface $request): ResponseInterface
   {
@@ -164,7 +173,7 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
     $path = $uri->getPath();
 
     // Remove board prefix.
-    $prefix = '/' . TINYIB_BOARD;
+    $prefix = '/' . $this->config_service->get("BOARD");
     $prefix_length = strlen($prefix);
     if (strncmp($path, $prefix, $prefix_length) === 0) {
       $path = substr($path, $prefix_length);
