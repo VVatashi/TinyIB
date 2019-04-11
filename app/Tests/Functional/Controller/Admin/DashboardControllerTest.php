@@ -9,6 +9,7 @@ use Imageboard\Controller\Admin\{
 };
 use Imageboard\Exception\AccessDeniedException;
 use Imageboard\Model\User;
+use Imageboard\Service\ConfigService;
 use Imageboard\Service\RendererService;
 use PHPUnit\Framework\TestCase;
 
@@ -21,7 +22,8 @@ final class DashboardControllerTest extends TestCase
   {
     User::truncate();
 
-    $renderer = new RendererService();
+    $config_service = new ConfigService();
+    $renderer = new RendererService($config_service);
     $this->controller = new DashboardController($renderer);
   }
 

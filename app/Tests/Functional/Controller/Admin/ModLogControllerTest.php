@@ -10,6 +10,7 @@ use Imageboard\Controller\Admin\{
 };
 use Imageboard\Exception\AccessDeniedException;
 use Imageboard\Model\{ModLog, User};
+use Imageboard\Service\ConfigService;
 use Imageboard\Service\RendererService;
 use Imageboard\Query\QueryDispatcher;
 use PHPUnit\Framework\TestCase;
@@ -28,11 +29,14 @@ final class ModLogControllerTest extends TestCase
 
     $command_dispatcher = new CommandDispatcher($container);
     $query_dispatcher = new QueryDispatcher($container);
-    $renderer = new RendererService();
+    $config_service = new ConfigService();
+
+    $renderer = new RendererService($config_service);
     $this->controller = new ModLogController(
       $command_dispatcher,
       $query_dispatcher,
-      $renderer
+      $renderer,
+      $config_service
     );
   }
 

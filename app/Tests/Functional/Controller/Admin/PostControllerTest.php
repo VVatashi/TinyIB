@@ -8,6 +8,7 @@ use Imageboard\Controller\Admin\PostController;
 use Imageboard\Exception\{AccessDeniedException, NotFoundException};
 use Imageboard\Model\{Post, User};
 use Imageboard\Query\QueryDispatcher;
+use Imageboard\Service\ConfigService;
 use Imageboard\Service\RendererService;
 use PHPUnit\Framework\TestCase;
 
@@ -23,13 +24,15 @@ final class PostControllerTest extends TestCase
     Post::truncate();
     User::truncate();
 
+    $config_service = new ConfigService();
     $command_dispatcher = new CommandDispatcher($container);
     $query_dispatcher = new QueryDispatcher($container);
-    $renderer = new RendererService();
+    $renderer = new RendererService($config_service);
     $this->controller = new PostController(
       $command_dispatcher,
       $query_dispatcher,
-      $renderer
+      $renderer,
+      $config_service
     );
   }
 

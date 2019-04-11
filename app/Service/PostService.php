@@ -27,24 +27,33 @@ class PostService implements PostServiceInterface
   /** @var SafebooruServiceInterface */
   protected $safebooru;
 
+  /** @var \Imageboard\Service\ConfigServiceInterface */
+  protected $config_service;
+
   /**
    * Creates a new PostService instance.
    *
-   * @param CacheInterface $cache
-   * @param CryptographyServiceInterface $cryptography_service
+   * @param CacheInterface                                $cache
+   * @param CryptographyServiceInterface                  $cryptography_service
+   * @param \Imageboard\Service\FileServiceInterface      $file_service
+   * @param \Imageboard\Service\ThumbnailServiceInterface $thubmnail_service
+   * @param \Imageboard\Service\SafebooruServiceInterface $safebooru
+   * @param \Imageboard\Service\ConfigServiceInterface    $config_service
    */
   function __construct(
     CacheInterface $cache,
     CryptographyServiceInterface $cryptography_service,
     FileServiceInterface $file_service,
     ThumbnailServiceInterface $thubmnail_service,
-    SafebooruServiceInterface $safebooru
+    SafebooruServiceInterface $safebooru,
+    ConfigServiceInterface $config_service
   ) {
     $this->cache = $cache;
     $this->cryptography_service = $cryptography_service;
     $this->file_service = $file_service;
     $this->thubmnail_service = $thubmnail_service;
     $this->safebooru = $safebooru;
+    $this->config_service = $config_service;
   }
 
   /**
@@ -94,7 +103,9 @@ class PostService implements PostServiceInterface
    */
   protected function checkFlood(string $ip, &$remains_time): bool
   {
-    if (TINYIB_DELAY <= 0) {
+    $delay = (int)$this->config_service->get("DELAY");
+
+    if ($delay <= 0) {
       return true;
     }
 
@@ -102,7 +113,7 @@ class PostService implements PostServiceInterface
     if (isset($post)) {
       /** @var Post */
       $timestamp = $post->getCreatedTimestamp();
-      $remains_time = TINYIB_DELAY - (time() - $timestamp);
+      $remains_time = $delay - (time() - $timestamp);
       return $remains_time < 0;
     }
 
@@ -350,7 +361,7 @@ class PostService implements PostServiceInterface
     $message = $this->makeLinksClickable($message);
     $message = str_replace("\n", '<br>', $message);
 
-    if (TINYIB_DICE_ENABLED) {
+    if ($this->config_service->get("DICE_ENABLED")) {
       $message = $this->dice($message);
     }
 
@@ -463,7 +474,7 @@ class PostService implements PostServiceInterface
 
     if (empty($post->file)) {
       // No file uploaded.
-      if ($post->isThread() && !TINYIB_NOFILEOK) {
+      if ($post->isThread() && !(bool)$this->config_service->get("NOFILEOK")) {
         throw new ValidationException('A file is required to start a thread.');
       }
 
@@ -477,13 +488,15 @@ class PostService implements PostServiceInterface
     $post->moderated = true;
     $post->save();
 
+    $board = $this->config_service->get("BOARD");
+
     if ($post->isModerated()) {
       Post::trimThreads();
 
       if ($post->isReply()) {
         $parent = $post->parent_id;
-        $this->cache->deletePattern(TINYIB_BOARD . ":thread:$parent:*");
-        $this->cache->deletePattern(TINYIB_BOARD . ":mobile:thread:$parent:page:*");
+        $this->cache->deletePattern($board . ":thread:$parent:*");
+        $this->cache->deletePattern($board . ":mobile:thread:$parent:page:*");
 
         if (strtolower($post->email) !== 'sage') {
           if (
@@ -499,12 +512,12 @@ class PostService implements PostServiceInterface
         }
       } else {
         $id = $post->id;
-        $this->cache->deletePattern(TINYIB_BOARD . ":thread:$id:*");
-        $this->cache->deletePattern(TINYIB_BOARD . ":mobile:thread:$id:page:*");
+        $this->cache->deletePattern($board . ":thread:$id:*");
+        $this->cache->deletePattern($board . ":mobile:thread:$id:page:*");
       }
 
-      $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
-      $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
+      $this->cache->deletePattern($board . ':page:*');
+      $this->cache->deletePattern($board . ':mobile:page:*');
     }
 
     return $post;
@@ -512,9 +525,13 @@ class PostService implements PostServiceInterface
 
   /**
    * {@inheritDoc}
+   * @throws \Imageboard\Exception\NotFoundException
+   * @throws \Imageboard\Exception\AccessDeniedException
    */
   function delete(int $id, string $password)
   {
+    $board = $this->config_service->get("BOARD");
+
     /** @var Post */
     $post = Post::find($id);
     if ($post === null) {
@@ -529,8 +546,8 @@ class PostService implements PostServiceInterface
     Post::deletePostByID($id);
 
     $thread_id = $post->isThread() ? $id : $post->parent_id;
-    $this->cache->deletePattern(TINYIB_BOARD . ":thread:$thread_id:*");
-    $this->cache->deletePattern(TINYIB_BOARD . ':page:*');
-    $this->cache->deletePattern(TINYIB_BOARD . ':mobile:page:*');
+    $this->cache->deletePattern($board . ":thread:$thread_id:*");
+    $this->cache->deletePattern($board . ':page:*');
+    $this->cache->deletePattern($board . ':mobile:page:*');
   }
 }

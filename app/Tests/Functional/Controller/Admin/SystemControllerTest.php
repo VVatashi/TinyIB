@@ -9,6 +9,7 @@ use Imageboard\Controller\Admin\{
 };
 use Imageboard\Exception\AccessDeniedException;
 use Imageboard\Model\User;
+use Imageboard\Service\ConfigService;
 use Imageboard\Service\RendererService;
 use PHPUnit\Framework\TestCase;
 use Imageboard\Command\CommandDispatcher;
@@ -24,9 +25,10 @@ final class SystemControllerTest extends TestCase
 
     User::truncate();
 
+    $config_service = new ConfigService();
     $command_dispatcher = new CommandDispatcher($container);
-    $renderer = new RendererService();
-    $this->controller = new SystemController($command_dispatcher, $renderer);
+    $renderer = new RendererService($config_service);
+    $this->controller = new SystemController($command_dispatcher, $renderer, $config_service);
   }
 
   protected function createAnonymous(): User

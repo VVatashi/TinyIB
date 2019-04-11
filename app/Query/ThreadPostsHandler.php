@@ -2,16 +2,19 @@
 
 namespace Imageboard\Query;
 
+use Imageboard\Service\ConfigService;
 use PDO;
 
 class ThreadPostsHandler extends QueryHandler
 {
   /**
    * {@inheritDoc}
+   *
+   * @throws \Imageboard\Exception\ConfigServiceException
    */
   protected function sql(): string
   {
-    $posts_table = TINYIB_DBPOSTS;
+    $posts_table = (new ConfigService())->get("DBPOSTS");
     $sql = <<<EOF
 SELECT p.id, p.created_at,
   p.subject, p.name, p.tripcode, p.message,

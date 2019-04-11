@@ -16,7 +16,7 @@ class BanController extends CrudController implements BanControllerInterface
   protected $list_template = 'admin/bans/list.twig';
   protected $ajax_list_template = 'admin/bans/_list.twig';
 
-  protected $create_url = TINYIB_BASE_URL . TINYIB_BOARD . '/admin/bans/create';
+  protected $create_url;
   protected $create_command_type = CreateBan::class;
   protected $new_item = [
     'ip'          => '',
@@ -27,6 +27,9 @@ class BanController extends CrudController implements BanControllerInterface
 
   protected $delete_command_type = DeleteBan::class;
 
+  /** @var  */
+  protected $config_service;
+
   public function __construct (
     CommandDispatcher $command_dispatcher,
     QueryDispatcher $query_dispatcher,
@@ -35,6 +38,8 @@ class BanController extends CrudController implements BanControllerInterface
   )
   {
     parent::__construct( $command_dispatcher, $query_dispatcher, $renderer, $config_service );
+
+    $this->config_service = $config_service;
 
     $this->list_url   = "$this->board_full_url/admin/bans";
     $this->create_url = "$this->board_full_url/admin/bans/create";

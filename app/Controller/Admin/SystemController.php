@@ -7,6 +7,7 @@ use Imageboard\Command\CommandDispatcher;
 use Imageboard\Command\Admin\ClearCache;
 use Imageboard\Exception\AccessDeniedException;
 use Imageboard\Model\User;
+use Imageboard\Service\ConfigServiceInterface;
 use Imageboard\Service\RendererServiceInterface;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
@@ -18,19 +19,25 @@ class SystemController implements SystemControllerInterface
   /** @var RendererServiceInterface */
   protected $renderer;
 
+  /** @var \Imageboard\Service\ConfigServiceInterface */
+  protected $config_service;
+
   /**
    * SystemController constructor.
    * Creates a new SystemController instance.
    *
    * @param \Imageboard\Command\CommandDispatcher        $command_dispatcher
    * @param \Imageboard\Service\RendererServiceInterface $renderer
+   * @param \Imageboard\Service\ConfigServiceInterface   $config_service
    */
   function __construct(
     CommandDispatcher $command_dispatcher,
-    RendererServiceInterface $renderer
+    RendererServiceInterface $renderer,
+    ConfigServiceInterface$config_service
   ) {
     $this->command_dispatcher = $command_dispatcher;
     $this->renderer = $renderer;
+    $this->config_service = $config_service;
   }
 
   protected function checkAccess(ServerRequestInterface $request) {
@@ -41,6 +48,7 @@ class SystemController implements SystemControllerInterface
 
   /**
    * {@inheritDoc}
+   * @throws \Imageboard\Exception\AccessDeniedException
    */
   function index(ServerRequestInterface $request) : string
   {
@@ -49,7 +57,7 @@ class SystemController implements SystemControllerInterface
     }
 
     // Show status message from a session.
-    $url = TINYIB_BASE_URL . TINYIB_BOARD . '/admin/system';
+    $url = $this->config_service->get("BASE_URL") . $this->config_service->get("BOARD") . '/admin/system';
     $key = "$url:message";
     $message = $_SESSION[$key] ?? null;
     unset($_SESSION[$key]);
@@ -70,7 +78,7 @@ class SystemController implements SystemControllerInterface
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 
-    $back_url = TINYIB_BASE_URL . TINYIB_BOARD . '/admin/system';
+    $back_url = $this->config_service->get("BASE_URL") . $this->config_service->get("BOARD") . '/admin/system';
     $message_key = "$back_url:message";
 
     $command = new ClearCache();
