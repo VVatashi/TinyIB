@@ -1,6 +1,7 @@
 <?php
 
-define('TINYIB_BASE_URL', 'http://localhost/');
+define('TINYIB_BASE_PATH', '/test');
+define('TINYIB_CONTENT_PATH', '');
 define('TINYIB_BOARD', 'test');
 define('TINYIB_BOARDDESC', 'Test');
 define('TINYIB_ALWAYSNOKO', true);

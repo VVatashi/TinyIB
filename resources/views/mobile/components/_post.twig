@@ -48,11 +48,11 @@
       {% if post.file %}
         {% set alt = 'Thumbnail #' ~ post.id %}
 
-        {% set thumb_url = base_url ~ '/thumb/' ~ post.thumb %}
+        {% set thumb_url = content_url ~ '/thumb/' ~ post.thumb %}
         {% set thumb_w = post.thumb_width %}
         {% set thumb_h = post.thumb_height %}
 
-        {% set file_url = base_url ~ '/src/' ~ post.file %}
+        {% set file_url = content_url ~ '/src/' ~ post.file %}
         {% set file_w = post.image_width %}
 
         <div class="post__thumbnail">

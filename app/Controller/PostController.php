@@ -149,7 +149,7 @@ class PostController implements PostControllerInterface
         );
 
         $thread_id = $post->isThread() ? $post->id : $post->parent_id;
-        $destination = TINYIB_BASE_URL . TINYIB_BOARD . '/res/' . $thread_id . '#reply_' . $post->id;
+        $destination = TINYIB_BASE_PATH . '/res/' . $thread_id . '#reply_' . $post->id;
 
         $name = !empty($post->name) || !empty($post->tripcode)
             ? $post->name : 'Anonymous';

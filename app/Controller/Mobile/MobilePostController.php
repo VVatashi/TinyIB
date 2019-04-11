@@ -166,7 +166,7 @@ class MobilePostController implements MobilePostControllerInterface
         );
 
         $thread_id = $post->isThread() ? $post->id : $post->parent_id;
-        $destination = TINYIB_BASE_URL . TINYIB_BOARD . '/mobile/thread/' . $thread_id . '#footer';
+        $destination = TINYIB_BASE_PATH . '/mobile/thread/' . $thread_id . '#footer';
 
         return new Response(303, [
             'Location' => $destination,
@@ -233,7 +233,7 @@ class MobilePostController implements MobilePostControllerInterface
         );
 
         $thread_id = $post->isThread() ? $post->id : $post->parent_id;
-        $destination = TINYIB_BASE_URL . TINYIB_BOARD . '/mobile/thread/' . $thread_id . '#footer';
+        $destination = TINYIB_BASE_PATH . '/mobile/thread/' . $thread_id . '#footer';
 
         return new Response(201, [
             'Content-type' => 'application/json',

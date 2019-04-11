@@ -46,7 +46,7 @@ class SystemController implements SystemControllerInterface
     }
 
     // Show status message from a session.
-    $url = TINYIB_BASE_URL . TINYIB_BOARD . '/admin/system';
+    $url = TINYIB_BASE_PATH . '/admin/system';
     $key = "$url:message";
     $message = $_SESSION[$key] ?? null;
     unset($_SESSION[$key]);
@@ -65,7 +65,7 @@ class SystemController implements SystemControllerInterface
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 
-    $back_url = TINYIB_BASE_URL . TINYIB_BOARD . '/admin/system';
+    $back_url = TINYIB_BASE_PATH . '/admin/system';
     $message_key = "$back_url:message";
 
     $command = new ClearCache();
