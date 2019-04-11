@@ -8,9 +8,9 @@
   </head>
 
   <body {{ body_attribs }}>
-    {% if constant('TINYIB_GTM') %}
+    {% if config('GTM') %}
       <!-- Google Tag Manager (noscript) -->
-      <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ constant('TINYIB_GTM') }}"
+      <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ config('GTM') }}"
       height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <!-- End Google Tag Manager (noscript) -->
     {% endif %}

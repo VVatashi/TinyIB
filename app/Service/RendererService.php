@@ -39,6 +39,17 @@ class RendererService implements RendererServiceInterface
       }
     }));
 
+    $this->twig->addFunction(new Twig_SimpleFunction('config', function ($name, $default = null) {
+      /** @todo Read value from the configuration service. */
+
+      $name = 'TINYIB_' . $name;
+      if (!defined($name)) {
+        return $default;
+      }
+
+      return constant($name);
+    }));
+
     $this->twig->addFilter(new \Twig_Filter('truncate', function ($str, $length) {
       if (mb_strlen($str) < $length) {
         return $str;
