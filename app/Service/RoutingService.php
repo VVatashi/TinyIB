@@ -37,13 +37,21 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
   /** @var Dispatcher */
   protected $dispatcher;
 
+  /** @var \Imageboard\Service\ConfigServiceInterface */
+  protected $config;
+
   /**
    * Creates a new RoutingService instance.
+   *
+   * @param \Psr\Container\ContainerInterface          $container
+   * @param \Imageboard\Service\ConfigServiceInterface $config
    */
   public function __construct(
-    ContainerInterface $container
+    ContainerInterface $container,
+    ConfigServiceInterface $config
   ) {
     $this->container = $container;
+    $this->config = $config;
 
     $this->dispatcher = \FastRoute\simpleDispatcher(function (RouteCollector $routes) {
       $routes->addGroup('/api', function (RouteCollector $routes) {
@@ -156,6 +164,7 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
 
   /**
    * {@inheritDoc}
+   * @throws \Imageboard\Exception\HttpException
    */
   public function handle(ServerRequestInterface $request): ResponseInterface
   {
@@ -164,8 +173,9 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
     $path = $uri->getPath();
 
     // Remove base url.
-    $prefix_length = strlen(TINYIB_BASE_PATH);
-    if (strncmp($path, TINYIB_BASE_PATH, $prefix_length) === 0) {
+    $base_path = $this->config->get('BASE_PATH', '');
+    $prefix_length = strlen($base_path);
+    if (strncmp($path, $base_path, $prefix_length) === 0) {
       $path = substr($path, $prefix_length);
     }
 

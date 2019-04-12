@@ -22,6 +22,10 @@ class EmbedController implements EmbedControllerInterface
 
   /**
    * Checks if URL is allowed.
+   *
+   * @param string $url
+   *
+   * @return bool
    */
   protected function isAllowed(string $url): bool
   {

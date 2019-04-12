@@ -17,8 +17,9 @@ use Imageboard\Exception\ValidationException;
 class Ban extends Model
 {
   use SoftDeletes;
+  use ModelTrait;
 
-  protected $table = TINYIB_DBBANS;
+  protected $table;
 
   protected $fillable = [
     'ip',
@@ -35,6 +36,28 @@ class Ban extends Model
 
   protected $dateFormat = 'U';
 
+  /**
+   * Ban constructor.
+   *
+   * @param array $attributes
+   *
+   * @throws \Imageboard\Exception\ConfigServiceException
+   */
+  public function __construct (array $attributes = [])
+  {
+    parent::__construct($attributes);
+
+    $this->table = $this->config('DBBANS');
+  }
+
+  /**
+   * @param string $ip
+   * @param int    $expires_in
+   * @param string $reason
+   *
+   * @return \Imageboard\Model\Ban
+   * @throws \Imageboard\Exception\ValidationException
+   */
   static function createBan(string $ip, int $expires_in, string $reason) : Ban
   {
     $errors = [];

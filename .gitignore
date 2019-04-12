@@ -11,3 +11,5 @@
 clover.xml
 npm-debug.log*
 settings.php
+/.env
+/*.sqlite

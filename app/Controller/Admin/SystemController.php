@@ -6,6 +6,8 @@ use GuzzleHttp\Psr7\Response;
 use Imageboard\Command\CommandDispatcher;
 use Imageboard\Command\Admin\ClearCache;
 use Imageboard\Exception\AccessDeniedException;
+use Imageboard\Model\User;
+use Imageboard\Service\ConfigServiceInterface;
 use Imageboard\Service\RendererServiceInterface;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
@@ -17,17 +19,25 @@ class SystemController implements SystemControllerInterface
   /** @var RendererServiceInterface */
   protected $renderer;
 
+  /** @var \Imageboard\Service\ConfigServiceInterface */
+  protected $config;
+
   /**
+   * SystemController constructor.
    * Creates a new SystemController instance.
    *
-   * @param RendererServiceInterface $renderer
+   * @param \Imageboard\Command\CommandDispatcher        $command_dispatcher
+   * @param \Imageboard\Service\RendererServiceInterface $renderer
+   * @param \Imageboard\Service\ConfigServiceInterface   $config
    */
   function __construct(
     CommandDispatcher $command_dispatcher,
-    RendererServiceInterface $renderer
+    RendererServiceInterface $renderer,
+    ConfigServiceInterface $config
   ) {
     $this->command_dispatcher = $command_dispatcher;
     $this->renderer = $renderer;
+    $this->config = $config;
   }
 
   protected function checkAccess(ServerRequestInterface $request) {
@@ -38,6 +48,7 @@ class SystemController implements SystemControllerInterface
 
   /**
    * {@inheritDoc}
+   * @throws \Imageboard\Exception\AccessDeniedException
    */
   function index(ServerRequestInterface $request) : string
   {
@@ -46,7 +57,7 @@ class SystemController implements SystemControllerInterface
     }
 
     // Show status message from a session.
-    $url = TINYIB_BASE_PATH . '/admin/system';
+    $url = $this->config->get('BASE_PATH', '') . '/admin/system';
     $key = "$url:message";
     $message = $_SESSION[$key] ?? null;
     unset($_SESSION[$key]);
@@ -58,6 +69,8 @@ class SystemController implements SystemControllerInterface
 
   /**
    * {@inheritDoc}
+   *
+   * @throws \Imageboard\Exception\AccessDeniedException
    */
   function clearCache(ServerRequestInterface $request) : ResponseInterface
   {
@@ -65,7 +78,7 @@ class SystemController implements SystemControllerInterface
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 
-    $back_url = TINYIB_BASE_PATH . '/admin/system';
+    $back_url = $this->config->get('BASE_PATH', '') . '/admin/system';
     $message_key = "$back_url:message";
 
     $command = new ClearCache();

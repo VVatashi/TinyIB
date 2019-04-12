@@ -3,6 +3,7 @@
 namespace Imageboard\Controller\Admin;
 
 use Imageboard\Exception\AccessDeniedException;
+use Imageboard\Model\User;
 use Imageboard\Service\RendererServiceInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -30,6 +31,8 @@ class DashboardController implements DashboardControllerInterface
 
   /**
    * {@inheritDoc}
+   *
+   * @throws \Imageboard\Exception\AccessDeniedException
    */
   function index(ServerRequestInterface $request) : string
   {

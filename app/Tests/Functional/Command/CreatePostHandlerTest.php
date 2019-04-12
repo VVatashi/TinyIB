@@ -7,13 +7,16 @@ use Imageboard\Model\{Post, User};
 use PHPUnit\Framework\TestCase;
 use Imageboard\Service\PostService;
 use Imageboard\Cache\NoCache;
-use Imageboard\Service\{CryptographyService, FileService, SafebooruService, ThumbnailService};
+use Imageboard\Service\{ConfigService, CryptographyService, FileService, SafebooruService, ThumbnailService};
 
 final class CreatePostHandlerTest extends TestCase
 {
   /** @var CreatePostHandler */
   protected $handler;
 
+  /**
+   * @throws \Imageboard\Exception\ValidationException
+   */
   function setUp(): void
   {
     Post::truncate();
@@ -21,18 +24,22 @@ final class CreatePostHandlerTest extends TestCase
 
     $cache = new NoCache();
     $cryptography = new CryptographyService();
-    $file_service = new FileService();
-    $thumbnail_service = new ThumbnailService($file_service);
+    $file = new FileService();
+    $config = new ConfigService();
+    $thumbnail = new ThumbnailService($file, $config);
     $safebooru = new SafebooruService();
-    $post_service = new PostService(
+
+    $post = new PostService(
       $cache,
       $cryptography,
-      $file_service,
-      $thumbnail_service,
-      $safebooru
+      $file,
+      $thumbnail,
+      $safebooru,
+      $config
     );
+
     $user = User::createUser('test@example.com', 'test');
-    $this->handler = new CreatePostHandler($post_service, $user);
+    $this->handler = new CreatePostHandler($post, $user);
   }
 
   function test_handle_shouldCreate(): void

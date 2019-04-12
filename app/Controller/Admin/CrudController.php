@@ -5,10 +5,13 @@ namespace Imageboard\Controller\Admin;
 use DateInterval;
 use DateTime;
 use DateTimeZone;
+use Exception;
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Command\CommandDispatcher;
 use Imageboard\Exception\AccessDeniedException;
+use Imageboard\Model\User;
 use Imageboard\Query\QueryDispatcher;
+use Imageboard\Service\ConfigServiceInterface;
 use Imageboard\Service\RendererServiceInterface;
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 
@@ -53,6 +56,9 @@ abstract class CrudController implements CrudControllerInterface
   /** @var string */
   protected $delete_command_type = '';
 
+  /** @var string */
+  protected $base_path;
+
   /** @var CommandDispatcher */
   protected $command_dispatcher;
 
@@ -65,21 +71,31 @@ abstract class CrudController implements CrudControllerInterface
   /** @var int */
   protected $items_per_page = 100;
 
+  /** @var \Imageboard\Service\ConfigServiceInterface */
+  protected $config;
+
   /**
+   * CrudController constructor.
+   *
    * Creates a new CRUD controller instance.
    *
-   * @param CommandDispatcher $command_dispatcher
-   * @param QueryDispatcher $query_dispatcher
-   * @param RendererServiceInterface $renderer
+   * @param \Imageboard\Command\CommandDispatcher        $command_dispatcher
+   * @param \Imageboard\Query\QueryDispatcher            $query_dispatcher
+   * @param \Imageboard\Service\RendererServiceInterface $renderer
+   * @param \Imageboard\Service\ConfigServiceInterface   $config
    */
   function __construct(
     CommandDispatcher $command_dispatcher,
     QueryDispatcher $query_dispatcher,
-    RendererServiceInterface $renderer
+    RendererServiceInterface $renderer,
+    ConfigServiceInterface $config
   ) {
     $this->command_dispatcher = $command_dispatcher;
-    $this->query_dispatcher = $query_dispatcher;
-    $this->renderer = $renderer;
+    $this->query_dispatcher   = $query_dispatcher;
+    $this->renderer           = $renderer;
+    $this->config             = $config;
+
+    $this->base_path = $this->config->get('BASE_PATH', '');
   }
 
   /**
@@ -110,6 +126,8 @@ abstract class CrudController implements CrudControllerInterface
 
   /**
    * {@inheritDoc}
+   *
+   * @throws \Imageboard\Exception\AccessDeniedException
    */
   function list(ServerRequestInterface $request): string
   {
@@ -146,17 +164,19 @@ abstract class CrudController implements CrudControllerInterface
       'items' => $items,
       'filter' => [
         'date_from' => $params['date_from'] ?? '',
-        'date_to' => $params['date_to'] ?? '',
+        'date_to'   => $params['date_to']   ?? '',
       ],
       'pager' => [
         'current_page' => $page,
-        'total_pages' => ceil($total_count / $per_page),
+        'total_pages'   => ceil($total_count / $per_page),
       ],
     ]);
   }
 
   /**
    * {@inheritDoc}
+   *
+   * @throws \Imageboard\Exception\AccessDeniedException
    */
   function ajaxList(ServerRequestInterface $request): string
   {
@@ -193,7 +213,7 @@ abstract class CrudController implements CrudControllerInterface
       'items' => $items,
       'filter' => [
         'date_from' => $params['date_from'] ?? '',
-        'date_to' => $params['date_to'] ?? '',
+        'date_to'   => $params['date_to']   ?? '',
       ],
       'pager' => [
         'current_page' => $page,
@@ -204,6 +224,8 @@ abstract class CrudController implements CrudControllerInterface
 
   /**
    * {@inheritDoc}
+   *
+   * @throws \Imageboard\Exception\AccessDeniedException
    */
   function show(ServerRequestInterface $request, array $args): string
   {
@@ -222,6 +244,8 @@ abstract class CrudController implements CrudControllerInterface
 
   /**
    * {@inheritDoc}
+   *
+   * @throws \Imageboard\Exception\AccessDeniedException
    */
   function createForm(ServerRequestInterface $request): string
   {
@@ -241,12 +265,14 @@ abstract class CrudController implements CrudControllerInterface
 
     return $this->renderer->render($this->form_template, [
       'error' => $error,
-      'item' => $item,
+      'item'  => $item,
     ]);
   }
 
   /**
    * {@inheritDoc}
+   *
+   * @throws \Imageboard\Exception\AccessDeniedException
    */
   function create(ServerRequestInterface $request): ResponseInterface
   {
@@ -260,7 +286,7 @@ abstract class CrudController implements CrudControllerInterface
 
     try {
       $handler->handle($command);
-    } catch (\Exception $exception) {
+    } catch (Exception $exception) {
       // Store form data in a session.
       $key = $this->create_url . ':item';
       $_SESSION[$key] = $data;
@@ -284,6 +310,8 @@ abstract class CrudController implements CrudControllerInterface
 
   /**
    * {@inheritDoc}
+   *
+   * @throws \Imageboard\Exception\AccessDeniedException
    */
   function editForm(ServerRequestInterface $request, array $args): string
   {
@@ -304,12 +332,14 @@ abstract class CrudController implements CrudControllerInterface
 
     return $this->renderer->render($this->form_template, [
       'error' => $error,
-      'item' => $item,
+      'item'  => $item,
     ]);
   }
 
   /**
    * {@inheritDoc}
+   *
+   * @throws \Imageboard\Exception\AccessDeniedException
    */
   function edit(ServerRequestInterface $request, array $args): ResponseInterface
   {
@@ -323,7 +353,7 @@ abstract class CrudController implements CrudControllerInterface
 
     try {
       $handler->handle($command);
-    } catch (\Exception $exception) {
+    } catch (Exception $exception) {
       // Store form data in a session.
       $key = $this->edit_url . ':item';
       $_SESSION[$key] = $data;
@@ -349,7 +379,11 @@ abstract class CrudController implements CrudControllerInterface
   /**
    * Deletes item.
    *
-   * @throws AccessDeniedException
+   * @param \Psr\Http\Message\ServerRequestInterface $request
+   * @param array                                    $args
+   *
+   * @return \Psr\Http\Message\ResponseInterface
+   * @throws \Imageboard\Exception\AccessDeniedException
    */
   function delete(ServerRequestInterface $request, array $args): ResponseInterface
   {
@@ -363,7 +397,7 @@ abstract class CrudController implements CrudControllerInterface
     $handler->handle($command);
 
     $query = $request->getQueryParams();
-    $back = $query['back'] ?? $this->list_url;
+    $back  = $query['back'] ?? $this->list_url;
 
     return new Response(302, [
       'Location' => $back,

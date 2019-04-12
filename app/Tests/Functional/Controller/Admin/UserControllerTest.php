@@ -8,6 +8,7 @@ use Imageboard\Controller\Admin\UserController;
 use Imageboard\Exception\{AccessDeniedException, NotFoundException};
 use Imageboard\Model\User;
 use Imageboard\Query\QueryDispatcher;
+use Imageboard\Service\ConfigService;
 use Imageboard\Service\RendererService;
 use PHPUnit\Framework\TestCase;
 
@@ -22,13 +23,15 @@ final class UserControllerTest extends TestCase
 
     User::truncate();
 
+    $config = new ConfigService();
     $command_dispatcher = new CommandDispatcher($container);
     $query_dispatcher = new QueryDispatcher($container);
-    $renderer = new RendererService();
+    $renderer = new RendererService($config);
     $this->controller = new UserController(
       $command_dispatcher,
       $query_dispatcher,
-      $renderer
+      $renderer,
+      $config
     );
   }
 

@@ -12,21 +12,26 @@ class RendererService implements RendererServiceInterface
   /** @var Twig_Environment */
   protected $twig;
 
+  /** @var \Imageboard\Service\ConfigServiceInterface */
+  protected $config;
+
   /**
-   * @param Twig_Environment
+   * @param \Imageboard\Service\ConfigServiceInterface $config
    */
-  function __construct()
+  function __construct(ConfigServiceInterface $config)
   {
+    $this->config = $config;
+
     $loader = new Twig_Loader_Filesystem(__DIR__ . '/../../resources/views');
 
     $this->twig = new Twig_Environment($loader, [
       'autoescape' => false,
-      'cache' => TINYIB_TWIG_CACHE,
+      'cache' => $this->config->get('TWIG_CACHE'),
       'debug' => true,
     ]);
 
-    $this->twig->addGlobal('base_url', TINYIB_BASE_PATH);
-    $this->twig->addGlobal('content_url', TINYIB_CONTENT_PATH);
+    $this->twig->addGlobal('base_url', $this->config->get('BASE_PATH'));
+    $this->twig->addGlobal('content_url', $this->config->get('CONTENT_PATH'));
     $this->twig->addGlobal('style', $_COOKIE['style'] ?? 'Synthwave');
 
     $this->twig->addFunction(new Twig_SimpleFunction('mtime', function ($path) {
@@ -40,15 +45,9 @@ class RendererService implements RendererServiceInterface
       }
     }));
 
-    $this->twig->addFunction(new Twig_SimpleFunction('config', function ($name, $default = null) {
-      /** @todo Read value from the configuration service. */
-
-      $name = 'TINYIB_' . $name;
-      if (!defined($name)) {
-        return $default;
-      }
-
-      return constant($name);
+    $this->twig->addFunction(new Twig_SimpleFunction('config',
+      function ($name, $default = null) use ($config) {
+      return $config->get($name, $default);
     }));
 
     $this->twig->addFilter(new \Twig_Filter('truncate', function ($str, $length) {
