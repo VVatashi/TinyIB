@@ -36,20 +36,20 @@ class UserController extends CrudController implements UserControllerInterface
    * @param \Imageboard\Command\CommandDispatcher        $command_dispatcher
    * @param \Imageboard\Query\QueryDispatcher            $query_dispatcher
    * @param \Imageboard\Service\RendererServiceInterface $renderer
-   * @param \Imageboard\Service\ConfigServiceInterface   $config_service
+   * @param \Imageboard\Service\ConfigServiceInterface   $config
    */
   public function __construct (
     CommandDispatcher $command_dispatcher,
     QueryDispatcher $query_dispatcher,
     RendererServiceInterface $renderer,
-    ConfigServiceInterface $config_service
+    ConfigServiceInterface $config
   )
   {
-    parent::__construct( $command_dispatcher, $query_dispatcher, $renderer, $config_service );
+    parent::__construct($command_dispatcher, $query_dispatcher, $renderer, $config);
 
-    $this->list_url   = "$this->board_full_url/admin/users";
-    $this->create_url = "$this->board_full_url/admin/users/create";
-    $this->edit_url   = "$this->board_full_url/admin/users/:id/edit";
+    $this->list_url   = "{$this->board_full_url}/admin/users";
+    $this->create_url = "{$this->board_full_url}/admin/users/create";
+    $this->edit_url   = "{$this->board_full_url}/admin/users/:id/edit";
   }
 
   /**

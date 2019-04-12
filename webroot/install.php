@@ -16,11 +16,11 @@ $databaseHelper = new DatabaseHelper($config);
 
 $capsule = new Capsule();
 $capsule->addConnection([
-  'driver'    => $config->get('TINYIB_DBDRIVER'),
-  'host'      => $config->get('TINYIB_DBHOST'),
+  'driver'    => $config->get('DBDRIVER'),
+  'host'      => $config->get('DBHOST'),
   'database'  => $databaseHelper->getFullPath(),
-  'username'  => $config->get('TINYIB_DBUSERNAME'),
-  'password'  => $config->get('TINYIB_DBPASSWORD'),
+  'username'  => $config->get('DBUSERNAME'),
+  'password'  => $config->get('BPASSWORD'),
   'charset'   => 'utf8',
   'collation' => 'utf8_unicode_ci',
   'prefix'    => '',
@@ -30,8 +30,8 @@ $capsule->setAsGlobal();
 $capsule->bootEloquent();
 
 try{
-if (!Capsule::schema()->hasTable($config->get('TINYIB_DBBANS'))) {
-  Capsule::schema()->create($config->get('TINYIB_DBBANS'), function (Blueprint $table) {
+if (!Capsule::schema()->hasTable($config->get('DBBANS'))) {
+  Capsule::schema()->create($config->get('DBBANS'), function (Blueprint $table) {
     $table->increments('id');
     $table->string('ip');
     $table->string('reason')->nullable();
@@ -80,8 +80,8 @@ if (!Capsule::schema()->hasTable('mod_log')) {
   });
 }
 
-if (!Capsule::schema()->hasTable($config->get('TINYIB_DBPOSTS'))) {
-  Capsule::schema()->create($config->get('TINYIB_DBPOSTS'), function (Blueprint $table) {
+if (!Capsule::schema()->hasTable($config->get('DBPOSTS'))) {
+  Capsule::schema()->create($config->get('DBPOSTS'), function (Blueprint $table) {
     $table->increments('id');
     $table->integer('parent_id')->index()->default(0);
     $table->integer('user_id')->index()->default(0);

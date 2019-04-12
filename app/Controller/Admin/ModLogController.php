@@ -36,18 +36,18 @@ class ModLogController extends CrudController implements ModLogControllerInterfa
    * @param \Imageboard\Command\CommandDispatcher        $command_dispatcher
    * @param \Imageboard\Query\QueryDispatcher            $query_dispatcher
    * @param \Imageboard\Service\RendererServiceInterface $renderer
-   * @param \Imageboard\Service\ConfigServiceInterface   $config_service
+   * @param \Imageboard\Service\ConfigServiceInterface   $config
    */
   public function __construct (
     CommandDispatcher $command_dispatcher,
     QueryDispatcher $query_dispatcher,
     RendererServiceInterface $renderer,
-    ConfigServiceInterface $config_service
+    ConfigServiceInterface $config
   )
   {
-    parent::__construct( $command_dispatcher, $query_dispatcher, $renderer, $config_service );
+    parent::__construct($command_dispatcher, $query_dispatcher, $renderer, $config);
 
     /** @var string list_url */
-    $this->list_url = "$this->board_full_url/admin/modlog";
+    $this->list_url = "{$this->board_full_url}/admin/modlog";
   }
 }

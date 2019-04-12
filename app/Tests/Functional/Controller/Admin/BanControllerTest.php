@@ -26,15 +26,15 @@ final class BanControllerTest extends TestCase
 
     $command_dispatcher = new CommandDispatcher($container);
     $query_dispatcher = new QueryDispatcher($container);
-    $config_service = new ConfigService();
-    $renderer = new RendererService($config_service);
+    $config = new ConfigService();
+    $renderer = new RendererService($config);
 
 
     $this->controller = new BanController(
       $command_dispatcher,
       $query_dispatcher,
       $renderer,
-      $config_service
+      $config
     );
   }
 

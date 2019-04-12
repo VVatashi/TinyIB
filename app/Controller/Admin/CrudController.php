@@ -75,7 +75,7 @@ abstract class CrudController implements CrudControllerInterface
   protected $items_per_page = 100;
 
   /** @var \Imageboard\Service\ConfigServiceInterface */
-  protected $config_service;
+  protected $config;
 
   /**
    * CrudController constructor.
@@ -85,25 +85,25 @@ abstract class CrudController implements CrudControllerInterface
    * @param \Imageboard\Command\CommandDispatcher        $command_dispatcher
    * @param \Imageboard\Query\QueryDispatcher            $query_dispatcher
    * @param \Imageboard\Service\RendererServiceInterface $renderer
-   * @param \Imageboard\Service\ConfigServiceInterface   $config_service
+   * @param \Imageboard\Service\ConfigServiceInterface   $config
    */
   function __construct(
     CommandDispatcher $command_dispatcher,
     QueryDispatcher $query_dispatcher,
     RendererServiceInterface $renderer,
-    ConfigServiceInterface $config_service
+    ConfigServiceInterface $config
   ) {
     $this->command_dispatcher = $command_dispatcher;
     $this->query_dispatcher   = $query_dispatcher;
     $this->renderer           = $renderer;
-    $this->config_service     = $config_service;
+    $this->config             = $config;
 
     /** @var string $base_url */
-    $base_url = $this->config_service->get(self::BASE_URL_CONFIG_KEY);
+    $base_url = $this->config->get(self::BASE_URL_CONFIG_KEY);
     /** @var string $board */
-    $board    = $this->config_service->get(self::BOARD_CONFIG_KEY);
+    $board    = $this->config->get(self::BOARD_CONFIG_KEY);
 
-    $this->board_full_url = "$base_url/$board";
+    $this->board_full_url = "{$base_url}$board";
   }
 
   /**

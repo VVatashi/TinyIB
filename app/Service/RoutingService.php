@@ -38,20 +38,20 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
   protected $dispatcher;
 
   /** @var \Imageboard\Service\ConfigServiceInterface */
-  protected $config_service;
+  protected $config;
 
   /**
    * Creates a new RoutingService instance.
    *
    * @param \Psr\Container\ContainerInterface          $container
-   * @param \Imageboard\Service\ConfigServiceInterface $config_service
+   * @param \Imageboard\Service\ConfigServiceInterface $config
    */
   public function __construct(
     ContainerInterface $container,
-    ConfigServiceInterface $config_service
+    ConfigServiceInterface $config
   ) {
     $this->container = $container;
-    $this->config_service = $config_service;
+    $this->config = $config;
 
     $this->dispatcher = \FastRoute\simpleDispatcher(function (RouteCollector $routes) {
       $routes->addGroup('/api', function (RouteCollector $routes) {
@@ -173,7 +173,7 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
     $path = $uri->getPath();
 
     // Remove board prefix.
-    $prefix = '/' . $this->config_service->get("BOARD");
+    $prefix = '/' . $this->config->get("BOARD");
     $prefix_length = strlen($prefix);
     if (strncmp($path, $prefix, $prefix_length) === 0) {
       $path = substr($path, $prefix_length);

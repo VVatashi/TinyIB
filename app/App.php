@@ -54,11 +54,10 @@ class App
     $this->databaseHelper = new DatabaseHelper($this->config);
 
     // Set default constants.
-    defined('TINYIB_NEWTHREAD') || define('TINYIB_NEWTHREAD', 0);
-    defined('TINYIB_INDEXPAGE') || define('TINYIB_INDEXPAGE', false);
-    defined('TINYIB_RESPAGE') || define('TINYIB_RESPAGE', true);
-    defined('TINYIB_TWIG_CACHE') || define('TINYIB_TWIG_CACHE', __DIR__ . '/../storage/twig-cache');
-    defined('TINYIB_ERROR_LOG') || define('TINYIB_ERROR_LOG', true);
+    defined('NEWTHREAD') || define('NEWTHREAD', 0);
+    defined('INDEXPAGE') || define('INDEXPAGE', false);
+    defined('RESPAGE') || define('RESPAGE', true);
+    defined('TWIG_CACHE') || define('TWIG_CACHE', __DIR__ . '/../storage/twig-cache');
 
     // Start session.
     session_start();
@@ -119,7 +118,7 @@ EOF;
     $this->container->registerInstance(ContainerInterface::class, $this->container);
     $this->container->registerInstance(ConfigServiceInterface::class , $this->config);
 
-    if (TINYIB_ERROR_LOG) {
+    if (!$this->config->get('ERROR_LOG')) {
       // Lazy create logger.
       $this->container->registerCallback(LoggerInterface::class, function ($container) {
         $logger = new Logger('App');
@@ -132,10 +131,10 @@ EOF;
       });
     }
 
-    if ($this->config->get('TINYIB_CACHE') === 'redis') {
+    if ($this->config->get('CACHE') === 'redis') {
       // Lazy create Redis cache.
       $this->container->registerCallback(CacheInterface::class, function ($container) {
-        return new RedisCache(TINYIB_CACHE_REDIS_HOST);
+        return new RedisCache($this->config->get('CACHE_REDIS_HOST'));
       });
     } else {
       // Disable cache.
@@ -145,14 +144,12 @@ EOF;
     // Create database connection and ORM.
     $capsule = new Capsule();
 
-
-
     $capsule->addConnection([
-      'driver'    => $this->config->get('TINYIB_DBDRIVER'),
-      'host'      => $this->config->get('TINYIB_DBHOST'),
+      'driver'    => $this->config->get('DBDRIVER'),
+      'host'      => $this->config->get('DBHOST'),
       'database'  => $this->databaseHelper->getFullPath(),
-      'username'  => $this->config->get('TINYIB_DBUSERNAME'),
-      'password'  => $this->config->get('TINYIB_DBPASSWORD'),
+      'username'  => $this->config->get('DBUSERNAME'),
+      'password'  => $this->config->get('DBPASSWORD'),
       'charset'   => 'utf8',
       'collation' => 'utf8_unicode_ci',
       'prefix'    => '',

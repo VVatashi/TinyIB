@@ -1,4 +1,4 @@
-{% set isInThread = res != constant('TINYIB_INDEXPAGE') %}
+{% set isInThread = res != constant('INDEXPAGE') %}
 
 <section id="reply_{{ post.id }}"
   class="post {{ post.isThread() ? 'content__oppost post_oppost oppost' : 'content__post post_reply reply' }}"

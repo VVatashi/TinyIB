@@ -20,7 +20,7 @@ class SystemController implements SystemControllerInterface
   protected $renderer;
 
   /** @var \Imageboard\Service\ConfigServiceInterface */
-  protected $config_service;
+  protected $config;
 
   /**
    * SystemController constructor.
@@ -28,16 +28,16 @@ class SystemController implements SystemControllerInterface
    *
    * @param \Imageboard\Command\CommandDispatcher        $command_dispatcher
    * @param \Imageboard\Service\RendererServiceInterface $renderer
-   * @param \Imageboard\Service\ConfigServiceInterface   $config_service
+   * @param \Imageboard\Service\ConfigServiceInterface   $config
    */
   function __construct(
     CommandDispatcher $command_dispatcher,
     RendererServiceInterface $renderer,
-    ConfigServiceInterface$config_service
+    ConfigServiceInterface $config
   ) {
     $this->command_dispatcher = $command_dispatcher;
     $this->renderer = $renderer;
-    $this->config_service = $config_service;
+    $this->config = $config;
   }
 
   protected function checkAccess(ServerRequestInterface $request) {
@@ -57,7 +57,8 @@ class SystemController implements SystemControllerInterface
     }
 
     // Show status message from a session.
-    $url = $this->config_service->get("BASE_URL") . $this->config_service->get("BOARD") . '/admin/system';
+    $base_url = $this->config->get('BASE_URL') . $this->config->get('BOARD');
+    $url = "$base_url/admin/system";
     $key = "$url:message";
     $message = $_SESSION[$key] ?? null;
     unset($_SESSION[$key]);
@@ -78,7 +79,8 @@ class SystemController implements SystemControllerInterface
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 
-    $back_url = $this->config_service->get("BASE_URL") . $this->config_service->get("BOARD") . '/admin/system';
+    $base_url = $this->config->get('BASE_URL') . $this->config->get('BOARD');
+    $back_url = "$base_url/admin/system";
     $message_key = "$back_url:message";
 
     $command = new ClearCache();

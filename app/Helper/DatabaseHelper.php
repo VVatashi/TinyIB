@@ -20,7 +20,7 @@ class DatabaseHelper implements HelperInterface
    * @return bool
    */
   public function isSqlite() : bool {
-    $result = strtolower($this->_configService->get('TINYIB_DBDRIVER')) == 'sqlite';
+    $result = strtolower($this->_configService->get('DBDRIVER')) == 'sqlite';
     return $result;
   }
 
@@ -32,21 +32,21 @@ class DatabaseHelper implements HelperInterface
   public function getFullPath() : string {
     // Is full path or :memory:
     // TODO: Add fix for Windows-based OSes
-    if(!in_array($this->_configService->get('TINYIB_DBNAME')[0] ?? ':', ['/', ':'])) {
-      $dbPath = $this->_configService->get('TINYIB_ROOT', __DIR__ . '/../..')
+    if($this->isSqlite() && !in_array($this->_configService->get('DBNAME')[0] ?? ':', ['/', ':'])) {
+      $dbPath = $this->_configService->get('ROOT', __DIR__ . '/../..')
         . DIRECTORY_SEPARATOR
-        . $this->_configService->get('TINYIB_DBNAME');
+        . $this->_configService->get('DBNAME');
 
 
       return $dbPath;
     }
 
-    return $this->_configService->get('TINYIB_DBNAME');
+    return $this->_configService->get('DBNAME');
   }
 
   public function createDatabaseStructure() {
-    if (!Capsule::schema()->hasTable($this->_configService->get('TINYIB_DBBANS'))) {
-      Capsule::schema()->create($this->_configService->get('TINYIB_DBBANS'), function (Blueprint $table) {
+    if (!Capsule::schema()->hasTable($this->_configService->get('DBBANS'))) {
+      Capsule::schema()->create($this->_configService->get('DBBANS'), function (Blueprint $table) {
         $table->increments('id');
         $table->string('ip');
         $table->string('reason')->nullable();

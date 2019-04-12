@@ -21,51 +21,51 @@ class MobilePostController implements MobilePostControllerInterface
   protected $cache;
 
   /** @var PostServiceInterface */
-  protected $post_service;
+  protected $post;
 
   /** @var RendererServiceInterface */
   protected $renderer;
 
   /** @var ConfigServiceInterface */
-  protected $config_service;
+  protected $config;
 
   /**
    * MobilePostController constructor.
    * Constructs new Mobile post controller.
    *
    * @param \Imageboard\Cache\CacheInterface             $cache
-   * @param \Imageboard\Service\PostServiceInterface     $post_service
+   * @param \Imageboard\Service\PostServiceInterface     $post
    * @param \Imageboard\Service\RendererServiceInterface $renderer
-   * @param \Imageboard\Service\ConfigServiceInterface   $config_service
+   * @param \Imageboard\Service\ConfigServiceInterface   $config
    */
   public function __construct(
     CacheInterface $cache,
-    PostServiceInterface $post_service,
+    PostServiceInterface $post,
     RendererServiceInterface $renderer,
-    ConfigServiceInterface $config_service
+    ConfigServiceInterface $config
   ) {
     $this->cache = $cache;
-    $this->post_service = $post_service;
+    $this->post = $post;
     $this->renderer = $renderer;
-    $this->config_service = $config_service;
+    $this->config = $config;
 
     /** @var string $base_url */
-    $base_url = $this->config_service->get(self::BASE_URL_CONFIG_KEY);
+    $base_url = $this->config->get(self::BASE_URL_CONFIG_KEY);
     /** @var string $board */
-    $board    = $this->config_service->get(self::BOARD_CONFIG_KEY);
+    $board    = $this->config->get(self::BOARD_CONFIG_KEY);
 
     $this->board_full_url = "$base_url/$board";
   }
 
   protected function fixLinks(string $message, int $thread_id): string {
-    $link_pattern = '#href="/' . $this->config_service->get("BOARD") . '/res/(\d+)\#reply_(\d+)"#';
+    $link_pattern = '#href="/' . $this->config->get("BOARD") . '/res/(\d+)\#reply_(\d+)"#';
     return preg_replace_callback($link_pattern, function ($matches) use ($thread_id) {
       $target_thread_id = (int)$matches[1];
       $target_post_id = (int)$matches[2];
       if ($target_thread_id !== $thread_id) {
         // If link to another thread.
         return 'class="post__reference-link"'
-          . ' href="/' . $this->config_service->get("BOARD") . "/mobile/thread/$target_thread_id#post_$target_post_id\""
+          . ' href="/' . $this->config->get("BOARD") . "/mobile/thread/$target_thread_id#post_$target_post_id\""
           . " data-target-post-id=\"$target_post_id\"";
       }
 
@@ -83,7 +83,7 @@ class MobilePostController implements MobilePostControllerInterface
     $query = $request->getQueryParams();
     $page = (int)($query['page'] ?? 0);
 
-    $cache_key = $this->config_service->get("BOARD") . ':mobile:page:' . $page;
+    $cache_key = $this->config->get("BOARD") . ':mobile:page:' . $page;
     $headers = [];
     $content = $this->cache->get($cache_key);
     if (!isset($content)) {
@@ -97,10 +97,10 @@ class MobilePostController implements MobilePostControllerInterface
       });
 
       $content = $this->renderer->render('mobile/board.twig', [
-        'title'   => '/' . $this->config_service->get("BOARD"),
-        'board'   => $this->config_service->get("BOARDDESC"),
+        'title'   => '/' . $this->config->get("BOARD"),
+        'board'   => $this->config->get("BOARDDESC"),
         'threads' => $threads,
-        'limit'   => $this->config_service->get("THREADSPERPAGE"),
+        'limit'   => $this->config->get("THREADSPERPAGE"),
         'page'    => $page,
       ]);
 
@@ -124,7 +124,7 @@ class MobilePostController implements MobilePostControllerInterface
     $query = $request->getQueryParams();
     $page = isset($query['page']) ? (int)$query['page'] : 0;
 
-    $cache_key = $this->config_service->get("BOARD") . ':mobile:thread:' . $thread_id . ':page:' . $page;
+    $cache_key = $this->config->get("BOARD") . ':mobile:thread:' . $thread_id . ':page:' . $page;
     $headers = [];
     $content = $this->cache->get($cache_key);
     if (!isset($content)) {
@@ -143,8 +143,8 @@ class MobilePostController implements MobilePostControllerInterface
       });
 
       $content = $this->renderer->render('mobile/thread.twig', [
-        'title'   => '/' . $this->config_service->get("BOARD") . " &ndash; $thread->subject",
-        'board'   => $this->config_service->get("BOARDDESC"),
+        'title'   => '/' . $this->config->get("BOARD") . " &ndash; $thread->subject",
+        'board'   => $this->config->get("BOARDDESC"),
         'thread'  => $thread,
         'posts'   => $posts,
         'limit'   => $limit,
@@ -176,7 +176,7 @@ class MobilePostController implements MobilePostControllerInterface
     $user_id = $request->getAttribute('user')->id;
     $parent = isset($data['parent']) ? (int)$data['parent'] : 0;
 
-    $post = $this->post_service->create(
+    $post = $this->post->create(
       $name,
       $email,
       $subject,
@@ -248,7 +248,7 @@ class MobilePostController implements MobilePostControllerInterface
     $user_id = $request->getAttribute('user')->id;
     $parent = isset($data['parent']) ? (int)$data['parent'] : 0;
 
-    $post = $this->post_service->create(
+    $post = $this->post->create(
       $name,
       $email,
       $subject,

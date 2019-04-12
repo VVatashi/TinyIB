@@ -3,7 +3,7 @@
 namespace Imageboard\Model;
 
 use Illuminate\Database\Eloquent\{Collection, Model, SoftDeletes};
-use Imageboard\Exception\ConfigServiceException;
+use Imageboard\Service\ConfigService;
 use VVatashi\BBCode\{Parser, TagDef};
 
 /**
@@ -83,9 +83,9 @@ class Post extends Model
    */
   public function __construct (array $attributes = [])
   {
-    parent::__construct( $attributes );
+    parent::__construct($attributes);
 
-    $this->table = $this->config_service()->get( "TINYIB_DBPOSTS" );
+    $this->table = $this->config('DBPOSTS');
   }
 
   function replies()
@@ -260,13 +260,14 @@ class Post extends Model
 
   protected static function fixLinks(string $message): string
   {
-    $link_pattern = '#href="/' . TINYIB_BOARD . '/res/(\d+)\#(\d+)"#';
-    return preg_replace_callback($link_pattern, function ($matches) {
+    $board = ConfigService::getInstance()->get('BOARD');
+    $link_pattern = '#href="/' . $board . '/res/(\d+)\#(\d+)"#';
+    return preg_replace_callback($link_pattern, function ($matches) use ($board) {
       $target_thread_id = (int)$matches[1];
       $target_post_id = (int)$matches[2];
 
       return 'class="post__reference-link"'
-        . ' href="/' . TINYIB_BOARD . "/res/$target_thread_id#reply_$target_post_id\""
+        . ' href="/' . $board . "/res/$target_thread_id#reply_$target_post_id\""
         . " data-target-post-id=\"$target_post_id\"";
     }, $message);
   }
@@ -354,9 +355,7 @@ class Post extends Model
    */
   static function getThreadsByPage(int $page): Collection
   {
-    $threads_per_page = (int)self::config()->get("THREADSPERPAGE");
-    // $threads_per_page = TINYIB_THREADSPERPAGE;
-
+    $threads_per_page = (int)ConfigService::getInstance()->get("THREADSPERPAGE");
     $skip = $page * $threads_per_page;
     $take = $threads_per_page;
 
@@ -509,7 +508,7 @@ class Post extends Model
    */
   static function trimThreads()
   {
-    $limit = (int)self::$config_service->get("MAXTHREADS");
+    $limit = (int)ConfigService::getInstance()->get('MAXTHREADS');
 
     if ($limit > 0) {
       /** @var Post[] */

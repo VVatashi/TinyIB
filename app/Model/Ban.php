@@ -45,9 +45,9 @@ class Ban extends Model
    */
   public function __construct (array $attributes = [])
   {
-    $this->table = $this->config_service()->get("DBBANS");
-
     parent::__construct($attributes);
+
+    $this->table = $this->config('DBBANS');
   }
 
   /**

@@ -25,10 +25,10 @@ final class SystemControllerTest extends TestCase
 
     User::truncate();
 
-    $config_service = new ConfigService();
+    $config = new ConfigService();
     $command_dispatcher = new CommandDispatcher($container);
-    $renderer = new RendererService($config_service);
-    $this->controller = new SystemController($command_dispatcher, $renderer, $config_service);
+    $renderer = new RendererService($config);
+    $this->controller = new SystemController($command_dispatcher, $renderer, $config);
   }
 
   protected function createAnonymous(): User

@@ -21,10 +21,10 @@ final class AuthControllerTest extends TestCase
 
     User::truncate();
 
-    $config_service = new ConfigService();
+    $config = new ConfigService();
     $captcha = new CaptchaService();
-    $renderer = new RendererService($config_service);
-    $this->controller = new AuthController($captcha, $renderer, $config_service);
+    $renderer = new RendererService($config);
+    $this->controller = new AuthController($captcha, $renderer, $config);
   }
 
   function test_logout_shouldLogoutAndRedirect(): void

@@ -11,8 +11,6 @@ use Imageboard\Exception\ConfigServiceException;
  */
 class ConfigService implements ConfigServiceInterface
 {
-  const CONFIG_PREFIX = 'TINYIB_';
-  const PARAM_GET = 'get';
   const HASH_SYMBOL = '#';
 
   /**
@@ -110,8 +108,21 @@ class ConfigService implements ConfigServiceInterface
       // Ignore empty keys
       if($isSplitted || $emptyLine) continue;
 
-      $this->_config[$key] = isset($splited[1]) && $this->removeComment($splited[1])
-          ? $this->removeComment($splited[1]) : "";
+      $value = isset($splited[1]) && $this->removeComment($splited[1])
+        ? $this->removeComment($splited[1]) : "";
+
+      // Normalize value type.
+      if ($value === 'null') {
+        $value = null;
+      } elseif ($value === 'true') {
+        $value = true;
+      } elseif ($value === 'false') {
+        $value = false;
+      } elseif (is_integer($value)) {
+        $value = (int)$value;
+      }
+
+      $this->_config[$key] = $value;
     }
   }
 
@@ -145,11 +156,6 @@ class ConfigService implements ConfigServiceInterface
    */
   public function get(string $key, $default = '') {
     $this->_setupConfig();
-
-    // Remove TINYIB_
-
-    $key = str_replace('TINYIB_', "", $key);
-
     $result = $this->_config[$key] ?? $default;
     return $result;
   }

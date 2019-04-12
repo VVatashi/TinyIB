@@ -21,43 +21,43 @@ class PostController implements PostControllerInterface
   protected $cache;
 
   /** @var CaptchaServiceInterface */
-  protected $captcha_service;
+  protected $captcha;
 
   /** @var PostServiceInterface */
-  protected $post_service;
+  protected $post;
 
   /** @var RendererServiceInterface */
   protected $renderer;
 
   /** @var ConfigServiceInterface  */
-  protected $config_service;
+  protected $config;
 
   /**
    * PostController constructor.
    *
    * @param \Imageboard\Cache\CacheInterface             $cache
-   * @param \Imageboard\Service\CaptchaServiceInterface  $captcha_service
-   * @param \Imageboard\Service\PostServiceInterface     $post_service
+   * @param \Imageboard\Service\CaptchaServiceInterface  $captcha
+   * @param \Imageboard\Service\PostServiceInterface     $post
    * @param \Imageboard\Service\RendererServiceInterface $renderer
-   * @param \Imageboard\Service\ConfigServiceInterface   $config_service
+   * @param \Imageboard\Service\ConfigServiceInterface   $config
    */
   public function __construct(
     CacheInterface $cache,
-    CaptchaServiceInterface $captcha_service,
-    PostServiceInterface $post_service,
+    CaptchaServiceInterface $captcha,
+    PostServiceInterface $post,
     RendererServiceInterface $renderer,
-    ConfigServiceInterface $config_service
+    ConfigServiceInterface $config
   ) {
     $this->cache = $cache;
-    $this->captcha_service = $captcha_service;
-    $this->post_service = $post_service;
+    $this->captcha = $captcha;
+    $this->post = $post;
     $this->renderer = $renderer;
-    $this->config_service = $config_service;
+    $this->config = $config;
 
     /** @var string $base_url */
-    $base_url = $this->config_service->get(self::BASE_URL_CONFIG_KEY);
+    $base_url = $this->config->get(self::BASE_URL_CONFIG_KEY);
     /** @var string $board */
-    $board    = $this->config_service->get(self::BOARD_CONFIG_KEY);
+    $board    = $this->config->get(self::BOARD_CONFIG_KEY);
 
     $this->board_full_url = "$base_url/$board";
   }
@@ -71,15 +71,15 @@ class PostController implements PostControllerInterface
    */
   protected function checkCAPTCHA(string $captcha) : bool
   {
-    $configCaptcha = $this->config_service->get("CAPTCHA", true);
+    $configCaptcha = $this->config->get("CAPTCHA", true);
 
     if ($configCaptcha === true) {
       return true;
     }
 
-    switch ($this->config_service->get("CAPTCHA")) {
+    switch ($this->config->get("CAPTCHA")) {
       case 'simple':
-        return $this->captcha_service->checkCaptcha($captcha);
+        return $this->captcha->checkCaptcha($captcha);
 
       default:
         return true;
@@ -93,7 +93,7 @@ class PostController implements PostControllerInterface
    */
   public function create(ServerRequestInterface $request) : ResponseInterface
   {
-    if ($this->config_service->get("DBMIGRATE")) {
+    if ($this->config->get("DBMIGRATE")) {
       $message = "Posting is currently disabled.\nPlease try again in a few moments.";
       return new Response(503, [], $message);
     }
@@ -114,7 +114,7 @@ class PostController implements PostControllerInterface
     $parent = isset($data['parent']) ? (int)$data['parent'] : 0;
     $rawpost = isset($data['rawpost']);
 
-    $post = $this->post_service->create(
+    $post = $this->post->create(
       $name,
       $email,
       $subject,
@@ -126,12 +126,12 @@ class PostController implements PostControllerInterface
       $rawpost
     );
 
-    $redirect_url = '/' . $this->config_service->get("BOARD") . '/';
+    $redirect_url = '/' . $this->config->get("BOARD") . '/';
     if ($post->isModerated()) {
-      if ($this->config_service->get("ALWAYSNOKO") || strtolower($post->email) === 'noko') {
+      if ($this->config->get("ALWAYSNOKO") || strtolower($post->email) === 'noko') {
         $id = $post->id;
         $thread_id = $post->isThread() ? $id : $post->parent_id;
-        $redirect_url = '/' . $this->config_service->get("BOARD") . "/res/$thread_id#$id";
+        $redirect_url = '/' . $this->config->get("BOARD") . "/res/$thread_id#$id";
       }
     }
 
@@ -156,7 +156,7 @@ class PostController implements PostControllerInterface
 
     $parent = isset($data['parent']) ? (int)$data['parent'] : 0;
 
-    $post = $this->post_service->create(
+    $post = $this->post->create(
       $name,
       $email,
       $subject,
@@ -168,8 +168,8 @@ class PostController implements PostControllerInterface
     );
 
     $thread_id = $post->isThread() ? $post->id : $post->parent_id;
-    $destination = "$this->";
-    $destination = TINYIB_BASE_URL . TINYIB_BOARD . '/res/' . $thread_id . '#reply_' . $post->id;
+    $base_url = $this->config->get("BASE_URL") . $this->config->get("BOARD");
+    $destination = "$base_url/res/$thread_id#reply_{$post->id}";
 
     $name = !empty($post->name) || !empty($post->tripcode)
       ? $post->name : 'Anonymous';
@@ -194,15 +194,10 @@ class PostController implements PostControllerInterface
    */
   public function delete(ServerRequestInterface $request)
   {
-    if (TINYIB_DBMIGRATE) {
-      $message = "Post deletion is currently disabled.\nPlease try again in a few moments.";
-      return new Response(503, [], $message);
-    }
-
     $data = $request->getParsedBody();
     $id = isset($data['delete']) ? $data['delete'] : 0;
     $password = isset($data['password']) ? $data['password'] : '';
-    $this->post_service->delete($id, $password);
+    $this->post->delete($id, $password);
     return 'Post deleted.';
   }
 
@@ -215,13 +210,14 @@ class PostController implements PostControllerInterface
   {
     $threads = Post::getThreadsByPage($page);
     $threads_count = Post::getThreadCount();
-    $pages = ceil($threads_count / (int)$this->config_service->get("THREADSPERPAGE")) - 1;
+    $pages = ceil($threads_count / (int)$this->config->get("THREADSPERPAGE")) - 1;
     $posts = [];
 
     foreach ($threads as $thread) {
       $replies = Post::getPostsByThreadID($thread->id);
-      $omitted = max(0, $replies->count() - TINYIB_PREVIEWREPLIES - 1);
-      $replies = $replies->take(-TINYIB_PREVIEWREPLIES);
+      $preview_replies = $this->config->get('PREVIEWREPLIES');
+      $omitted = max(0, $replies->count() - $preview_replies - 1);
+      $replies = $replies->take(-$preview_replies);
 
       if ($replies->count() === 0 || $replies->first()->id !== $thread->id) {
         $replies->prepend($thread);
@@ -236,7 +232,7 @@ class PostController implements PostControllerInterface
       'pages' => max($pages, 0),
       'this_page' => $page,
       'parent' => 0,
-      'res' => TINYIB_INDEXPAGE,
+      'res' => INDEXPAGE,
     ]);
   }
 
@@ -247,7 +243,7 @@ class PostController implements PostControllerInterface
   {
     $page = (int)($args['page'] ?? 0);
     $user = $request->getAttribute('user');
-    $key = $this->config_service->get("BOARD") . ':page:' . $page . ':user:' . $user->id;
+    $key = $this->config->get("BOARD") . ':page:' . $page . ':user:' . $user->id;
     $headers = [];
     $data = $this->cache->get($key);
     if (isset($data)) {
@@ -270,7 +266,7 @@ class PostController implements PostControllerInterface
   {
     $id = (int)$args['id'];
     $user = $request->getAttribute('user');
-    $key = TINYIB_BOARD . ':thread:' . $id . ':user:' . $user->id;
+    $key = $this->config->get("BOARD") . ':thread:' . $id . ':user:' . $user->id;
     $headers = [];
     $data = $this->cache->get($key);
     if (isset($data)) {
@@ -287,7 +283,7 @@ class PostController implements PostControllerInterface
       $data = $this->renderer->render('thread.twig', [
         'posts' => $posts,
         'parent' => $id,
-        'res' => TINYIB_RESPAGE,
+        'res' => RESPAGE,
       ]);
       $this->cache->set($key, $data, 4 * 60 * 60);
     }
@@ -310,7 +306,7 @@ class PostController implements PostControllerInterface
 
     return $this->renderer->render('ajax/post.twig', [
       'post'  => $post,
-      'res'   => TINYIB_RESPAGE,
+      'res'   => RESPAGE,
     ]);
   }
 
@@ -338,7 +334,7 @@ class PostController implements PostControllerInterface
     return $this->renderer->render('ajax/thread.twig', [
       'posts' => $posts,
       'parent' => $id,
-      'res' => TINYIB_RESPAGE,
+      'res' => RESPAGE,
     ]);
   }
 }

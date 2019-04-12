@@ -23,15 +23,15 @@ final class UserControllerTest extends TestCase
 
     User::truncate();
 
-    $config_service = new ConfigService();
+    $config = new ConfigService();
     $command_dispatcher = new CommandDispatcher($container);
     $query_dispatcher = new QueryDispatcher($container);
-    $renderer = new RendererService($config_service);
+    $renderer = new RendererService($config);
     $this->controller = new UserController(
       $command_dispatcher,
       $query_dispatcher,
       $renderer,
-      $config_service
+      $config
     );
   }
 

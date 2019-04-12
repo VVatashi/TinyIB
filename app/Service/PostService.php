@@ -16,44 +16,44 @@ class PostService implements PostServiceInterface
   protected $cache;
 
   /** @var CryptographyServiceInterface */
-  protected $cryptography_service;
+  protected $cryptography;
 
   /** @var FileServiceInterface */
-  protected $file_service;
+  protected $file;
 
   /** @var ThumbnailServiceInterface */
-  protected $thubmnail_service;
+  protected $thubmnail;
 
   /** @var SafebooruServiceInterface */
   protected $safebooru;
 
   /** @var \Imageboard\Service\ConfigServiceInterface */
-  protected $config_service;
+  protected $config;
 
   /**
    * Creates a new PostService instance.
    *
    * @param CacheInterface                                $cache
-   * @param CryptographyServiceInterface                  $cryptography_service
-   * @param \Imageboard\Service\FileServiceInterface      $file_service
-   * @param \Imageboard\Service\ThumbnailServiceInterface $thubmnail_service
+   * @param CryptographyServiceInterface                  $cryptography
+   * @param \Imageboard\Service\FileServiceInterface      $file
+   * @param \Imageboard\Service\ThumbnailServiceInterface $thubmnail
    * @param \Imageboard\Service\SafebooruServiceInterface $safebooru
-   * @param \Imageboard\Service\ConfigServiceInterface    $config_service
+   * @param \Imageboard\Service\ConfigServiceInterface    $config
    */
   function __construct(
     CacheInterface $cache,
-    CryptographyServiceInterface $cryptography_service,
-    FileServiceInterface $file_service,
-    ThumbnailServiceInterface $thubmnail_service,
+    CryptographyServiceInterface $cryptography,
+    FileServiceInterface $file,
+    ThumbnailServiceInterface $thubmnail,
     SafebooruServiceInterface $safebooru,
-    ConfigServiceInterface $config_service
+    ConfigServiceInterface $config
   ) {
     $this->cache = $cache;
-    $this->cryptography_service = $cryptography_service;
-    $this->file_service = $file_service;
-    $this->thubmnail_service = $thubmnail_service;
+    $this->cryptography = $cryptography;
+    $this->file = $file;
+    $this->thubmnail = $thubmnail;
     $this->safebooru = $safebooru;
-    $this->config_service = $config_service;
+    $this->config = $config;
   }
 
   /**
@@ -103,7 +103,7 @@ class PostService implements PostServiceInterface
    */
   protected function checkFlood(string $ip, &$remains_time): bool
   {
-    $delay = (int)$this->config_service->get("DELAY");
+    $delay = (int)$this->config->get("DELAY");
 
     if ($delay <= 0) {
       return true;
@@ -131,8 +131,8 @@ class PostService implements PostServiceInterface
       // Split secure tripcode password from the name.
       $secure_password = substr($name, $secure_password_index + 2);
       $name = substr($name, 0, $secure_password_index);
-      $salt = defined('TINYIB_TRIPSEED') ? TINYIB_TRIPSEED : '';
-      $secure_tripcode = '!!' . $this->cryptography_service
+      $salt = $this->config->get('TRIPSEED', '');
+      $secure_tripcode = '!!' . $this->cryptography
         ->generateSecureTripcode($secure_password, $salt);
     }
 
@@ -142,7 +142,7 @@ class PostService implements PostServiceInterface
       // Split tripcode password from name.
       $password = substr($name, $password_index + 1);
       $name = substr($name, 0, $password_index);
-      $tripcode = $this->cryptography_service->generateTripcode($password);
+      $tripcode = $this->cryptography->generateTripcode($password);
     }
 
     return [
@@ -174,13 +174,14 @@ class PostService implements PostServiceInterface
    */
   protected function postLink(string $message): string
   {
-    return preg_replace_callback('/&gt;&gt;([0-9]+)/', function ($matches) {
+    $board = $this->config->get('BOARD');
+    return preg_replace_callback('/&gt;&gt;([0-9]+)/', function ($matches) use ($board) {
       $id = (int)$matches[1];
       $post = Post::find($id);
       if ($post !== null) {
         /** @var Post */
         $thread_id = $post->isThread() ? $post->id : $post->parent_id;
-        return '<a href="/' . TINYIB_BOARD . "/res/$thread_id#$id\">" . $matches[0] . '</a>';
+        return '<a href="/' . $board . "/res/$thread_id#$id\">" . $matches[0] . '</a>';
       }
 
       return $matches[0];
@@ -233,8 +234,8 @@ class PostService implements PostServiceInterface
   protected function dice($message)
   {
     return preg_replace_callback('/##(\d+)d(\d+)##/si', function ($matches) {
-      $count = min(max((int)$matches[1], 1), TINYIB_DICE_MAX_COUNT);
-      $max = min(max((int)$matches[2], 1), TINYIB_DICE_MAX_VALUE);
+      $count = min(max((int)$matches[1], 1), $this->config->get('DICE_MAX_COUNT'));
+      $max = min(max((int)$matches[2], 1), $this->config->get('DICE_MAX_VALUE'));
 
       $sum = 0;
       $results = [];
@@ -278,7 +279,8 @@ class PostService implements PostServiceInterface
       case UPLOAD_ERR_OK:
         break;
       case UPLOAD_ERR_FORM_SIZE:
-        throw new \Exception("That file is larger than " . TINYIB_MAXKBDESC . ".");
+        $max_desc = $this->config->get('MAXKBDESC');
+        throw new \Exception("That file is larger than $max_desc.");
       case UPLOAD_ERR_INI_SIZE:
         throw new \Exception("The uploaded file exceeds the upload_max_filesize directive (" . ini_get('upload_max_filesize') . ") in php.ini.");
       case UPLOAD_ERR_PARTIAL:
@@ -333,7 +335,7 @@ class PostService implements PostServiceInterface
         . ($remains_time === 1 ? 's' : '') . '.');
     }
 
-    if ($parent !== TINYIB_NEWTHREAD) {
+    if ($parent !== NEWTHREAD) {
       $thread = Post::where([
         ['id', $parent],
         ['parent_id', 0],
@@ -361,7 +363,7 @@ class PostService implements PostServiceInterface
     $message = $this->makeLinksClickable($message);
     $message = str_replace("\n", '<br>', $message);
 
-    if ($this->config_service->get("DICE_ENABLED")) {
+    if ($this->config->get("DICE_ENABLED")) {
       $message = $this->dice($message);
     }
 
@@ -414,15 +416,18 @@ class PostService implements PostServiceInterface
         throw new ValidationException('File transfer failure. Please retry the submission.');
       }
 
-      if (TINYIB_MAXKB > 0 && filesize($file['tmp_name']) > TINYIB_MAXKB * 1024) {
-        throw new ValidationException('That file is larger than ' . TINYIB_MAXKBDESC . '.');
+      $max = $this->config->get('MAXKB');
+      $max_desc = $this->config->get('MAXKBDESC');
+      if ($max > 0 && filesize($file['tmp_name']) > $max * 1024) {
+        throw new ValidationException("That file is larger than $max_desc.");
       }
 
       $post->file_original = trim(htmlentities(substr($file['name'], 0, 50), ENT_QUOTES));
       $post->file_hex = md5_file($file['tmp_name']);
       $post->file_size = $file['size'];
 
-      if (TINYIB_FILE_ALLOW_DUPLICATE === false) {
+      $allow_dup = $this->config->get('FILE_ALLOW_DUPLICATE');
+      if (!$allow_dup) {
         $posts = [];
         if (!$this->checkDuplicateFile($post->file_hex, $posts)) {
           $post = current($posts);
@@ -434,7 +439,7 @@ class PostService implements PostServiceInterface
       }
 
       $file_name = time() . substr(microtime(), 2, 3);
-      $file_extension = $this->file_service->getExtension($file['name']);
+      $file_extension = $this->file->getExtension($file['name']);
       $post->file = "$file_name.$file_extension";
 
       $file_path = "src/{$post->file}";
@@ -447,19 +452,14 @@ class PostService implements PostServiceInterface
         throw new ValidationException('File transfer failure. Please go back and try again.');
       }
 
-      [$width, $height] = $this->thubmnail_service->getFileSize($file_path);
+      [$width, $height] = $this->thubmnail->getFileSize($file_path);
       $post->image_width = $width;
       $post->image_height = $height;
 
-      if ($post->isThread()) {
-        $max_width = TINYIB_MAXWOP;
-        $max_height = TINYIB_MAXHOP;
-      } else {
-        $max_width = TINYIB_MAXW;
-        $max_height = TINYIB_MAXH;
-      }
+      $max_width = (int)$this->config->get('MAXW');
+      $max_height = (int)$this->config->get('MAXH');
 
-      $post->thumb = $this->thubmnail_service->createThumbnail(
+      $post->thumb = $this->thubmnail->createThumbnail(
         $file_path,
         'thumb',
         $max_width,
@@ -467,14 +467,14 @@ class PostService implements PostServiceInterface
       );
 
       $thumb_path = "thumb/{$post->thumb}";
-      [$thumb_width, $thumb_height] = $this->thubmnail_service->getFileSize($thumb_path);
+      [$thumb_width, $thumb_height] = $this->thubmnail->getFileSize($thumb_path);
       $post->thumb_width = $thumb_width;
       $post->thumb_height = $thumb_height;
     }
 
     if (empty($post->file)) {
       // No file uploaded.
-      if ($post->isThread() && !(bool)$this->config_service->get("NOFILEOK")) {
+      if ($post->isThread() && !(bool)$this->config->get("NOFILEOK")) {
         throw new ValidationException('A file is required to start a thread.');
       }
 
@@ -488,7 +488,7 @@ class PostService implements PostServiceInterface
     $post->moderated = true;
     $post->save();
 
-    $board = $this->config_service->get("BOARD");
+    $board = $this->config->get("BOARD");
 
     if ($post->isModerated()) {
       Post::trimThreads();
@@ -499,9 +499,10 @@ class PostService implements PostServiceInterface
         $this->cache->deletePattern($board . ":mobile:thread:$parent:page:*");
 
         if (strtolower($post->email) !== 'sage') {
+          $max_replies = $this->config->get("MAXREPLIES");
           if (
-            TINYIB_MAXREPLIES == 0
-            || Post::getReplyCountByThreadID($parent) <= TINYIB_MAXREPLIES
+            $max_replies == 0
+            || Post::getReplyCountByThreadID($parent) <= $max_replies
           ) {
             $thread = Post::find($parent);
             if (isset($thread)) {
@@ -530,7 +531,7 @@ class PostService implements PostServiceInterface
    */
   function delete(int $id, string $password)
   {
-    $board = $this->config_service->get("BOARD");
+    $board = $this->config->get("BOARD");
 
     /** @var Post */
     $post = Post::find($id);

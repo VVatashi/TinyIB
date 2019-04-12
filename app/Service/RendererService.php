@@ -13,25 +13,25 @@ class RendererService implements RendererServiceInterface
   protected $twig;
 
   /** @var \Imageboard\Service\ConfigServiceInterface */
-  protected $config_service;
+  protected $config;
 
   /**
-   * @param \Imageboard\Service\ConfigServiceInterface $config_service
+   * @param \Imageboard\Service\ConfigServiceInterface $config
    */
-  function __construct(ConfigServiceInterface $config_service)
+  function __construct(ConfigServiceInterface $config)
   {
-    $this->config_service = $config_service;
+    $this->config = $config;
 
     $loader = new Twig_Loader_Filesystem(__DIR__ . '/../../resources/views');
 
     $this->twig = new Twig_Environment($loader, [
       'autoescape' => false,
-      'cache' => TINYIB_TWIG_CACHE,
+      'cache' => $this->config->get('TWIG_CACHE'),
       'debug' => true,
     ]);
 
-    $base_url = $this->config_service->get("BASE_URL");
-    $board    = $this->config_service->get("BOARD");
+    $base_url = $this->config->get("BASE_URL");
+    $board    = $this->config->get("BOARD");
 
     $this->twig->addGlobal('base_url', $base_url . $board);
     $this->twig->addGlobal('style', $_COOKIE['style'] ?? 'Synthwave');
@@ -48,13 +48,8 @@ class RendererService implements RendererServiceInterface
     }));
 
     $this->twig->addFunction(new Twig_SimpleFunction('config',
-      function ($name, $default = null) use ($config_service) {
-
-      if (!defined($name)) {
-        return $default;
-      }
-
-      return $config_service->get($name);
+      function ($name, $default = null) use ($config) {
+      return $config->get($name, $default);
     }));
 
     $this->twig->addFilter(new \Twig_Filter('truncate', function ($str, $length) {

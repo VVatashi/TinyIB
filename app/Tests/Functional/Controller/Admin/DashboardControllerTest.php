@@ -22,8 +22,8 @@ final class DashboardControllerTest extends TestCase
   {
     User::truncate();
 
-    $config_service = new ConfigService();
-    $renderer = new RendererService($config_service);
+    $config = new ConfigService();
+    $renderer = new RendererService($config);
     $this->controller = new DashboardController($renderer);
   }
 

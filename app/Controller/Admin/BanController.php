@@ -27,21 +27,16 @@ class BanController extends CrudController implements BanControllerInterface
 
   protected $delete_command_type = DeleteBan::class;
 
-  /** @var  */
-  protected $config_service;
-
   public function __construct (
     CommandDispatcher $command_dispatcher,
     QueryDispatcher $query_dispatcher,
     RendererServiceInterface $renderer,
-    ConfigServiceInterface $config_service
+    ConfigServiceInterface $config
   )
   {
-    parent::__construct( $command_dispatcher, $query_dispatcher, $renderer, $config_service );
+    parent::__construct($command_dispatcher, $query_dispatcher, $renderer, $config);
 
-    $this->config_service = $config_service;
-
-    $this->list_url   = "$this->board_full_url/admin/bans";
-    $this->create_url = "$this->board_full_url/admin/bans/create";
+    $this->list_url   = "{$this->board_full_url}/admin/bans";
+    $this->create_url = "{$this->board_full_url}/admin/bans/create";
   }
 }

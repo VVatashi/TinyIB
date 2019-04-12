@@ -11,29 +11,29 @@ use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 class AuthController implements AuthControllerInterface
 {
     /** @var CaptchaServiceInterface */
-    protected $captcha_service;
+    protected $captcha;
 
     /** @var RendererServiceInterface */
     protected $renderer;
 
     /** @var ConfigServiceInterface  */
-    protected $config_service;
+    protected $config;
 
   /**
    * Creates a new AuthController instance.
    *
-   * @param \Imageboard\Service\CaptchaServiceInterface  $captcha_service
+   * @param \Imageboard\Service\CaptchaServiceInterface  $captcha
    * @param \Imageboard\Service\RendererServiceInterface $renderer
-   * @param \Imageboard\Service\ConfigServiceInterface   $config_service
+   * @param \Imageboard\Service\ConfigServiceInterface   $config
    */
     public function __construct(
-        CaptchaServiceInterface $captcha_service,
+        CaptchaServiceInterface $captcha,
         RendererServiceInterface $renderer,
-        ConfigServiceInterface $config_service
+        ConfigServiceInterface $config
     ) {
-        $this->captcha_service = $captcha_service;
+        $this->captcha = $captcha;
         $this->renderer = $renderer;
-        $this->config_service = $config_service;
+        $this->config = $config;
     }
 
     /**
@@ -47,7 +47,7 @@ class AuthController implements AuthControllerInterface
             // Allow only anonymous user access.
             // Redirect logged in users to the index page.
             $_SESSION['error'] = 'Already logged in';
-            return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD")]);
+            return new Response(302, ['Location' => '/' . $this->config->get("BOARD")]);
         }
 
         // Restore form input from the session.
@@ -74,7 +74,7 @@ class AuthController implements AuthControllerInterface
             // Allow only anonymous user access.
             // Redirect logged in users to the index page.
             $_SESSION['error'] = 'Already logged in';
-            return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD")]);
+            return new Response(302, ['Location' => '/' . $this->config->get("BOARD")]);
         }
 
         $data = $request->getParsedBody();
@@ -86,9 +86,9 @@ class AuthController implements AuthControllerInterface
 
         // Check captcha.
         $captcha = isset($data['captcha']) ? $data['captcha'] : '';
-        if (!$this->captcha_service->checkCaptcha($captcha)) {
+        if (!$this->captcha->checkCaptcha($captcha)) {
             $_SESSION['error'] = 'Incorrect CAPTCHA';
-            return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD") . '/auth/register']);
+            return new Response(302, ['Location' => '/' . $this->config->get("BOARD") . '/auth/register']);
         }
 
         try {
@@ -97,11 +97,11 @@ class AuthController implements AuthControllerInterface
         }
         catch(ValidationException $e) {
             $_SESSION['error'] = $e->getMessage();
-            return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD") . '/auth/register']);
+            return new Response(302, ['Location' => '/' . $this->config->get("BOARD") . '/auth/register']);
         }
 
         // Redirect to the index page.
-        return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD")]);
+        return new Response(302, ['Location' => '/' . $this->config->get("BOARD")]);
     }
 
     /**
@@ -115,7 +115,7 @@ class AuthController implements AuthControllerInterface
             // Allow only anonymous user access.
             // Redirect logged in users to the index page.
             $_SESSION['error'] = 'Already logged in';
-            return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD")]);
+            return new Response(302, ['Location' => '/' . $this->config->get("BOARD")]);
         }
 
         // Restore form input from the session.
@@ -142,7 +142,7 @@ class AuthController implements AuthControllerInterface
             // Allow only anonymous user access.
             // Redirect logged in users to the index page.
             $_SESSION['error'] = 'Already logged in';
-            return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD")]);
+            return new Response(302, ['Location' => '/' . $this->config->get("BOARD")]);
         }
 
         $data = $request->getParsedBody();
@@ -154,9 +154,9 @@ class AuthController implements AuthControllerInterface
 
         // Check captcha.
         $captcha = isset($data['captcha']) ? $data['captcha'] : '';
-        if (!$this->captcha_service->checkCaptcha($captcha)) {
+        if (!$this->captcha->checkCaptcha($captcha)) {
             $_SESSION['error'] = 'Incorrect CAPTCHA';
-            return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD") . '/auth/login']);
+            return new Response(302, ['Location' => '/' . $this->config->get("BOARD") . '/auth/login']);
         }
 
         try {
@@ -164,11 +164,11 @@ class AuthController implements AuthControllerInterface
         }
         catch(ValidationException $e) {
             $_SESSION['error'] = $e->getMessage();
-            return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD") . '/auth/login']);
+            return new Response(302, ['Location' => '/' . $this->config->get("BOARD") . '/auth/login']);
         }
 
         // Redirect to the index page.
-        return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD")]);
+        return new Response(302, ['Location' => '/' . $this->config->get("BOARD")]);
     }
 
     /**
@@ -179,6 +179,6 @@ class AuthController implements AuthControllerInterface
         User::logout();
 
         // Redirect to the index page.
-        return new Response(302, ['Location' => '/' . $this->config_service->get("BOARD")]);
+        return new Response(302, ['Location' => '/' . $this->config->get("BOARD")]);
     }
 }
