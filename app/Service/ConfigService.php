@@ -111,12 +111,14 @@ class ConfigService implements ConfigServiceInterface
       $value = isset($splited[1]) && $this->removeComment($splited[1])
         ? $this->removeComment($splited[1]) : "";
 
+      $value_low = strtolower($value);
+
       // Normalize value type.
-      if ($value === 'null') {
+      if ($value_low === 'null') {
         $value = null;
-      } elseif ($value === 'true') {
+      } elseif ($value_low === 'true') {
         $value = true;
-      } elseif ($value === 'false') {
+      } elseif ($value_low === 'false') {
         $value = false;
       } elseif (is_integer($value)) {
         $value = (int)$value;
