@@ -5,9 +5,10 @@ namespace Imageboard\Controller\Api;
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Exception\{AccessDeniedException, NotFoundException};
 use Imageboard\Cache\CacheInterface;
+use Imageboard\Controller\ControllerInterface;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
-class EmbedController implements EmbedControllerInterface
+class EmbedController implements ControllerInterface
 {
   const CACHE_TTL = 4 * 60 * 60;
 
@@ -45,7 +46,11 @@ class EmbedController implements EmbedControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Fetches a content from the URL.
+   *
+   * @param ServerRequestInterface $request
+   *
+   * @return ResponseInterface
    */
   function embed(ServerRequestInterface $request): ResponseInterface
   {

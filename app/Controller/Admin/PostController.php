@@ -3,41 +3,43 @@
 namespace Imageboard\Controller\Admin;
 
 use Imageboard\Command\Admin\DeletePost;
-use Imageboard\Command\CommandDispatcher;
 use Imageboard\Query\Admin\{ListPosts, ShowPost};
-use Imageboard\Query\QueryDispatcher;
-use Imageboard\Service\ConfigServiceInterface;
-use Imageboard\Service\RendererServiceInterface;
 
-class PostController extends CrudController implements PostControllerInterface
+class PostController extends AdminController
 {
-  protected $list_url;
-  protected $list_query_type = ListPosts::class;
-  protected $list_template = 'admin/posts/list.twig';
-  protected $ajax_list_template = 'admin/posts/_list.twig';
+  use ListTrait;
+  use ShowTrait;
+  use DeleteTrait;
 
-  protected $show_query_type = ShowPost::class;
-  protected $show_template = 'admin/posts/show.twig';
+  protected function getDeleteCommand(): string {
+    return DeletePost::class;
+  }
 
-  protected $delete_command_type = DeletePost::class;
+  protected function getListQuery(): string {
+    return ListPosts::class;
+  }
 
-  /**
-   * PostController constructor.
-   *
-   * @param \Imageboard\Command\CommandDispatcher        $command_dispatcher
-   * @param \Imageboard\Query\QueryDispatcher            $query_dispatcher
-   * @param \Imageboard\Service\RendererServiceInterface $renderer
-   * @param \Imageboard\Service\ConfigServiceInterface   $config
-   */
-  public function __construct (
-    CommandDispatcher $command_dispatcher,
-    QueryDispatcher $query_dispatcher,
-    RendererServiceInterface $renderer,
-    ConfigServiceInterface $config
-  )
-  {
-    parent::__construct($command_dispatcher, $query_dispatcher, $renderer, $config);
+  protected function getShowQuery(): string {
+    return ShowPost::class;
+  }
 
-    $this->list_url = "{$this->base_path}/admin/posts";
+  protected function getListUrl(): string {
+    return "{$this->base_path}/admin/posts";
+  }
+
+  protected function getListTemplate(): string {
+    return 'admin/posts/list.twig';
+  }
+
+  protected function getAjaxListTemplate(): string {
+    return 'admin/posts/_list.twig';
+  }
+
+  protected function getShowTemplate(): string {
+    return 'admin/posts/show.twig';
+  }
+
+  protected function getItemsPerPage(): int {
+    return 100;
   }
 }

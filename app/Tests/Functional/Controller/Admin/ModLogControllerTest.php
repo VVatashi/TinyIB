@@ -4,10 +4,7 @@ namespace Imageboard\Tests\Functional\Controller\Admin;
 
 use GuzzleHttp\Psr7\ServerRequest;
 use Imageboard\Command\CommandDispatcher;
-use Imageboard\Controller\Admin\{
-  ModLogControllerInterface,
-  ModLogController
-};
+use Imageboard\Controller\Admin\ModLogController;
 use Imageboard\Exception\AccessDeniedException;
 use Imageboard\Model\{ModLog, User};
 use Imageboard\Service\ConfigService;
@@ -17,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 
 final class ModLogControllerTest extends TestCase
 {
-  /** @var ModLogControllerInterface */
+  /** @var ModLogController */
   protected $controller;
 
   function setUp() : void
@@ -27,16 +24,16 @@ final class ModLogControllerTest extends TestCase
     ModLog::truncate();
     User::truncate();
 
+    $config = new ConfigService();
     $command_dispatcher = new CommandDispatcher($container);
     $query_dispatcher = new QueryDispatcher($container);
-    $config = new ConfigService();
 
     $renderer = new RendererService($config);
     $this->controller = new ModLogController(
+      $config,
       $command_dispatcher,
       $query_dispatcher,
-      $renderer,
-      $config
+      $renderer
     );
   }
 

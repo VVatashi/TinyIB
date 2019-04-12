@@ -4,10 +4,11 @@ namespace Imageboard\Controller\Api;
 
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Command\{CommandDispatcher, CreatePost};
+use Imageboard\Controller\ControllerInterface;
 use Imageboard\Query\{QueryDispatcher, BoardThreads, ThreadPosts, Post};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
-class PostController implements PostControllerInterface
+class PostController implements ControllerInterface
 {
   /** @var CommandDispatcher */
   protected $command_dispatcher;
@@ -24,7 +25,11 @@ class PostController implements PostControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Creates thread.
+   *
+   * @param ServerRequestInterface $request
+   *
+   * @return ResponseInterface
    */
   function createThread(ServerRequestInterface $request) : ResponseInterface
   {
@@ -51,7 +56,12 @@ class PostController implements PostControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Creates post.
+   *
+   * @param ServerRequestInterface $request
+   * @param array $args Path arguments.
+   *
+   * @return ResponseInterface
    */
   function createPost(ServerRequestInterface $request, array $args) : ResponseInterface
   {
@@ -79,7 +89,9 @@ class PostController implements PostControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Returns threads.
+   *
+   * @return array Array of thread view models.
    */
   function threads() : array
   {
@@ -90,7 +102,12 @@ class PostController implements PostControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Returns thread posts.
+   *
+   * @param ServerRequestInterface $request
+   * @param array $args Path arguments.
+   *
+   * @return array Array of post view models.
    */
   function threadPosts(ServerRequestInterface $request, array $args) : array
   {
@@ -104,7 +121,11 @@ class PostController implements PostControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Returns post.
+   *
+   * @param array $args Path arguments.
+   *
+   * @return array Post view models.
    */
   function post(array $args) : array
   {

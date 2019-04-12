@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 
 final class UserControllerTest extends TestCase
 {
-  /** @var UserControllerInterface */
+  /** @var UserController */
   protected $controller;
 
   function setUp(): void
@@ -28,10 +28,10 @@ final class UserControllerTest extends TestCase
     $query_dispatcher = new QueryDispatcher($container);
     $renderer = new RendererService($config);
     $this->controller = new UserController(
+      $config,
       $command_dispatcher,
       $query_dispatcher,
-      $renderer,
-      $config
+      $renderer
     );
   }
 

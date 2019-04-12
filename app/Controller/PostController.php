@@ -12,7 +12,7 @@ use Imageboard\Service\{CaptchaServiceInterface,
   RendererServiceInterface};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
-class PostController implements PostControllerInterface
+class PostController implements ControllerInterface
 {
   /** @var CacheInterface */
   protected $cache;
@@ -38,7 +38,7 @@ class PostController implements PostControllerInterface
    * @param \Imageboard\Service\RendererServiceInterface $renderer
    * @param \Imageboard\Service\ConfigServiceInterface   $config
    */
-  public function __construct(
+  function __construct(
     CacheInterface $cache,
     CaptchaServiceInterface $captcha,
     PostServiceInterface $post,
@@ -61,7 +61,7 @@ class PostController implements PostControllerInterface
    *
    * @return bool
    */
-  protected function checkCAPTCHA(string $captcha) : bool
+  protected function checkCAPTCHA(string $captcha): bool
   {
     $configCaptcha = $this->config->get("CAPTCHA", true);
 
@@ -79,11 +79,15 @@ class PostController implements PostControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Create post.
+   *
+   * @param ServerRequestInterface $request
+   *
+   * @return ResponseInterface Response.
    *
    * @throws \Imageboard\Exception\ValidationException
    */
-  public function create(ServerRequestInterface $request) : ResponseInterface
+  function create(ServerRequestInterface $request): ResponseInterface
   {
     if ($this->config->get("DBMIGRATE")) {
       $message = "Posting is currently disabled.\nPlease try again in a few moments.";
@@ -133,7 +137,7 @@ class PostController implements PostControllerInterface
   /**
    * {@inheritDoc}
    */
-  public function ajaxCreatePost(ServerRequestInterface $request) : ResponseInterface
+  function ajaxCreatePost(ServerRequestInterface $request): ResponseInterface
   {
     $data = $request->getParsedBody();
 
@@ -182,9 +186,13 @@ class PostController implements PostControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Deletes specified post.
+   *
+   * @param ServerRequestInterface
+   *
+   * @return string|ResponseInterface Response.
    */
-  public function delete(ServerRequestInterface $request)
+  function delete(ServerRequestInterface $request)
   {
     $data = $request->getParsedBody();
     $id = isset($data['delete']) ? $data['delete'] : 0;
@@ -198,7 +206,7 @@ class PostController implements PostControllerInterface
    *
    * @return string
    */
-  protected function renderBoardPage(int $page) : string
+  protected function renderBoardPage(int $page): string
   {
     $threads = Post::getThreadsByPage($page);
     $threads_count = Post::getThreadCount();
@@ -229,9 +237,14 @@ class PostController implements PostControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Returns page for a board.
+   *
+   * @param ServerRequestInterface $request
+   * @param array $args Path arguments.
+   *
+   * @return ResponseInterface Response.
    */
-  public function board(ServerRequestInterface $request, array $args) : ResponseInterface
+  function board(ServerRequestInterface $request, array $args): ResponseInterface
   {
     $page = (int)($args['page'] ?? 0);
     $user = $request->getAttribute('user');
@@ -250,11 +263,14 @@ class PostController implements PostControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Returns page for a thread.
    *
-   * @throws \Imageboard\Exception\NotFoundException
+   * @param ServerRequestInterface $request
+   * @param array $args Path arguments.
+   *
+   * @return ResponseInterface Response.
    */
-  public function thread(ServerRequestInterface $request, array $args) : ResponseInterface
+  function thread(ServerRequestInterface $request, array $args): ResponseInterface
   {
     $id = (int)$args['id'];
     $user = $request->getAttribute('user');
@@ -284,11 +300,15 @@ class PostController implements PostControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Returns page partial HTML for a post.
    *
-   * @throws \Imageboard\Exception\NotFoundException
+   * @param array $args Path arguments.
+   *
+   * @return string Response HTML.
+   *
+   * @throws NotFoundException
    */
-  public function ajaxPost(array $args) : string
+  function ajaxPost(array $args): string
   {
     $id = (int)$args['id'];
     $post = Post::find($id);
@@ -303,11 +323,16 @@ class PostController implements PostControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Returns page partial HTML for a thread.
    *
-   * @throws \Imageboard\Exception\NotFoundException
+   * @param ServerRequestInterface $request
+   * @param array $args Path arguments.
+   *
+   * @return string Response HTML.
+   *
+   * @throws NotFoundException
    */
-  public function ajaxThread(ServerRequestInterface $request, array $args) : string
+  function ajaxThread(ServerRequestInterface $request, array $args): string
   {
     $id = (int)$args['id'];
     $thread = Post::find($id);

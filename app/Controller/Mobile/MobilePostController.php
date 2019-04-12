@@ -4,12 +4,13 @@ namespace Imageboard\Controller\Mobile;
 
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Cache\CacheInterface;
+use Imageboard\Controller\ControllerInterface;
 use Imageboard\Exception\NotFoundException;
 use Imageboard\Model\Post;
 use Imageboard\Service\{ConfigServiceInterface, PostServiceInterface, RendererServiceInterface};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
-class MobilePostController implements MobilePostControllerInterface
+class MobilePostController implements ControllerInterface
 {
   /** @var string */
   protected $base_path;
@@ -35,7 +36,7 @@ class MobilePostController implements MobilePostControllerInterface
    * @param \Imageboard\Service\RendererServiceInterface $renderer
    * @param \Imageboard\Service\ConfigServiceInterface   $config
    */
-  public function __construct(
+  function __construct(
     CacheInterface $cache,
     PostServiceInterface $post,
     RendererServiceInterface $renderer,
@@ -49,7 +50,8 @@ class MobilePostController implements MobilePostControllerInterface
     $this->base_path = $this->config->get('BASE_PATH', '');
   }
 
-  protected function fixLinks(string $message, int $thread_id): string {
+  protected function fixLinks(string $message, int $thread_id): string
+  {
     $link_pattern = '#href="/' . $this->config->get("BOARD") . '/res/(\d+)\#reply_(\d+)"#';
     return preg_replace_callback($link_pattern, function ($matches) use ($thread_id) {
       $target_thread_id = (int)$matches[1];
@@ -68,9 +70,13 @@ class MobilePostController implements MobilePostControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Returns an index page.
+   *
+   * @param ServerRequestInterface $request
+   *
+   * @return ResponseInterface
    */
-  public function index(ServerRequestInterface $request) : ResponseInterface
+  function index(ServerRequestInterface $request): ResponseInterface
   {
     $query = $request->getQueryParams();
     $page = (int)($query['page'] ?? 0);
@@ -106,11 +112,16 @@ class MobilePostController implements MobilePostControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Returns a thread page.
+   *
+   * @param ServerRequestInterface $request
+   * @param array $args Path arguments.
+   *
+   * @return ResponseInterface
    *
    * @throws \Imageboard\Exception\NotFoundException
    */
-  public function thread(ServerRequestInterface $request, array $args) : ResponseInterface
+  function thread(ServerRequestInterface $request, array $args): ResponseInterface
   {
     $thread_id = (int)$args['id'];
     $query = $request->getQueryParams();
@@ -153,9 +164,13 @@ class MobilePostController implements MobilePostControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Creates a post.
+   *
+   * @param ServerRequestInterface $request
+   *
+   * @return ResponseInterface
    */
-  public function createPost(ServerRequestInterface $request) : ResponseInterface
+  function createPost(ServerRequestInterface $request): ResponseInterface
   {
     $data     = $request->getParsedBody();
     $name     = isset($data['name'])    ? $data['name']     : '';
@@ -190,11 +205,16 @@ class MobilePostController implements MobilePostControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Returns a thread HTML.
+   *
+   * @param ServerRequestInterface $request
+   * @param array $args Path arguments.
+   *
+   * @return string
    *
    * @throws \Imageboard\Exception\NotFoundException
    */
-  public function ajaxThread(ServerRequestInterface $request, array $args) : string
+  function ajaxThread(ServerRequestInterface $request, array $args): string
   {
     $thread_id = (int)$args['id'];
     $query = $request->getQueryParams();
@@ -223,11 +243,15 @@ class MobilePostController implements MobilePostControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Creates a post.
+   *
+   * @param ServerRequestInterface $request
+   *
+   * @return ResponseInterface
    *
    * @throws \Exception
    */
-  public function ajaxCreatePost(ServerRequestInterface $request) : ResponseInterface
+  function ajaxCreatePost(ServerRequestInterface $request): ResponseInterface
   {
     $data     = $request->getParsedBody();
     $name     = isset($data['name'])    ? $data['name']     : '';

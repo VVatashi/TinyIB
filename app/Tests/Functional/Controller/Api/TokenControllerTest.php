@@ -4,7 +4,7 @@ namespace Imageboard\Tests\Functional\Controller\Api;
 
 use GuzzleHttp\Psr7\ServerRequest;
 use Imageboard\Command\CommandDispatcher;
-use Imageboard\Controller\Api\{TokenControllerInterface, TokenController};
+use Imageboard\Controller\Api\TokenController;
 use Imageboard\Exception\NotFoundException;
 use Imageboard\Model\{Token, User};
 use Imageboard\Query\QueryDispatcher;
@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 
 final class TokenControllerTest extends TestCase
 {
-  /** @var TokenControllerInterface */
+  /** @var TokenController */
   protected $controller;
 
   function setUp(): void

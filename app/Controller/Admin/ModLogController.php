@@ -2,52 +2,25 @@
 
 namespace Imageboard\Controller\Admin;
 
-use Imageboard\Command\CommandDispatcher;
 use Imageboard\Query\Admin\ListModLog;
-use Imageboard\Query\QueryDispatcher;
-use Imageboard\Service\ConfigServiceInterface;
-use Imageboard\Service\RendererServiceInterface;
 
-class ModLogController extends CrudController implements ModLogControllerInterface
+class ModLogController extends AdminController
 {
-  /**
-   * @var string
-   */
-  protected $list_url;
+  use ListTrait;
 
-  /**
-   * @var string
-   */
-  protected $list_query_type = ListModLog::class;
+  protected function getListQuery(): string {
+    return ListModLog::class;
+  }
 
-  /**
-   * @var string
-   */
-  protected $list_template = 'admin/modlog/list.twig';
+  protected function getListTemplate(): string {
+    return 'admin/modlog/list.twig';
+  }
 
-  /**
-   * @var string
-   */
-  protected $ajax_list_template = 'admin/modlog/_list.twig';
+  protected function getAjaxListTemplate(): string {
+    return 'admin/modlog/_list.twig';
+  }
 
-  /**
-   * ModLogController constructor.
-   *
-   * @param \Imageboard\Command\CommandDispatcher        $command_dispatcher
-   * @param \Imageboard\Query\QueryDispatcher            $query_dispatcher
-   * @param \Imageboard\Service\RendererServiceInterface $renderer
-   * @param \Imageboard\Service\ConfigServiceInterface   $config
-   */
-  public function __construct (
-    CommandDispatcher $command_dispatcher,
-    QueryDispatcher $query_dispatcher,
-    RendererServiceInterface $renderer,
-    ConfigServiceInterface $config
-  )
-  {
-    parent::__construct($command_dispatcher, $query_dispatcher, $renderer, $config);
-
-    /** @var string list_url */
-    $this->list_url = "{$this->base_path}/admin/modlog";
+  protected function getItemsPerPage(): int {
+    return 100;
   }
 }

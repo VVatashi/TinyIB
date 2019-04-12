@@ -3,54 +3,23 @@
 namespace Imageboard\Controller\Admin;
 
 use GuzzleHttp\Psr7\Response;
-use Imageboard\Command\CommandDispatcher;
 use Imageboard\Command\Admin\ClearCache;
 use Imageboard\Exception\AccessDeniedException;
-use Imageboard\Model\User;
-use Imageboard\Service\ConfigServiceInterface;
-use Imageboard\Service\RendererServiceInterface;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
-class SystemController implements SystemControllerInterface
+class SystemController extends AdminController
 {
-  /** @var CommandDispatcher */
-  protected $command_dispatcher;
-
-  /** @var RendererServiceInterface */
-  protected $renderer;
-
-  /** @var \Imageboard\Service\ConfigServiceInterface */
-  protected $config;
-
   /**
-   * SystemController constructor.
-   * Creates a new SystemController instance.
+   * Returns the admin system page.
    *
-   * @param \Imageboard\Command\CommandDispatcher        $command_dispatcher
-   * @param \Imageboard\Service\RendererServiceInterface $renderer
-   * @param \Imageboard\Service\ConfigServiceInterface   $config
+   * @param ServerRequestInterface $request
+   *
+   * @return string Response HTML.
+   *
+   * @throws AccessDeniedException
+   *   If current user is not an admin.
    */
-  function __construct(
-    CommandDispatcher $command_dispatcher,
-    RendererServiceInterface $renderer,
-    ConfigServiceInterface $config
-  ) {
-    $this->command_dispatcher = $command_dispatcher;
-    $this->renderer = $renderer;
-    $this->config = $config;
-  }
-
-  protected function checkAccess(ServerRequestInterface $request) {
-    /** @var User */
-    $current_user = $request->getAttribute('user');
-    return $current_user->isMod();
-  }
-
-  /**
-   * {@inheritDoc}
-   * @throws \Imageboard\Exception\AccessDeniedException
-   */
-  function index(ServerRequestInterface $request) : string
+  function index(ServerRequestInterface $request): string
   {
     if (!$this->checkAccess($request)) {
       throw new AccessDeniedException('You are not allowed to access this page');
@@ -68,11 +37,16 @@ class SystemController implements SystemControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Cleares site cache.
    *
-   * @throws \Imageboard\Exception\AccessDeniedException
+   * @param ServerRequestInterface $request
+   *
+   * @return ResponseInterface Response HTML.
+   *
+   * @throws AccessDeniedException
+   *   If current user is not an admin.
    */
-  function clearCache(ServerRequestInterface $request) : ResponseInterface
+  function clearCache(ServerRequestInterface $request): ResponseInterface
   {
     if (!$this->checkAccess($request)) {
       throw new AccessDeniedException('You are not allowed to access this page');

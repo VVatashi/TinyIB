@@ -3,40 +3,55 @@
 namespace Imageboard\Controller\Admin;
 
 use Imageboard\Command\Admin\{CreateBan, DeleteBan};
-use Imageboard\Command\CommandDispatcher;
 use Imageboard\Query\Admin\ListBans;
-use Imageboard\Query\QueryDispatcher;
-use Imageboard\Service\ConfigServiceInterface;
-use Imageboard\Service\RendererServiceInterface;
 
-class BanController extends CrudController implements BanControllerInterface
+class BanController extends AdminController
 {
-  protected $list_url;
-  protected $list_query_type = ListBans::class;
-  protected $list_template = 'admin/bans/list.twig';
-  protected $ajax_list_template = 'admin/bans/_list.twig';
+  use ListTrait;
+  use CreateTrait;
+  use DeleteTrait;
 
-  protected $create_url;
-  protected $create_command_type = CreateBan::class;
-  protected $new_item = [
-    'ip'          => '',
-    'expires_in'  => 60 * 60,
-    'reason'      => '',
-  ];
-  protected $form_template = 'admin/bans/form.twig';
+  protected function getCreateCommand(): string {
+    return CreateBan::class;
+  }
 
-  protected $delete_command_type = DeleteBan::class;
+  protected function getDeleteCommand(): string {
+    return DeleteBan::class;
+  }
 
-  public function __construct (
-    CommandDispatcher $command_dispatcher,
-    QueryDispatcher $query_dispatcher,
-    RendererServiceInterface $renderer,
-    ConfigServiceInterface $config
-  )
-  {
-    parent::__construct($command_dispatcher, $query_dispatcher, $renderer, $config);
+  protected function getListQuery(): string {
+    return ListBans::class;
+  }
 
-    $this->list_url   = "{$this->base_path}/admin/bans";
-    $this->create_url = "{$this->base_path}/admin/bans/create";
+  protected function getCreateUrl(): string {
+    return "{$this->base_path}/admin/bans/create";
+  }
+
+  protected function getListUrl(): string {
+    return "{$this->base_path}/admin/bans";
+  }
+
+  protected function getFormTemplate(): string {
+    return 'admin/bans/form.twig';
+  }
+
+  protected function getListTemplate(): string {
+    return 'admin/bans/list.twig';
+  }
+
+  protected function getAjaxListTemplate(): string {
+    return 'admin/bans/_list.twig';
+  }
+
+  protected function getNewItem(): array {
+    return [
+      'ip'          => '',
+      'expires_in'  => 60 * 60,
+      'reason'      => '',
+    ];
+  }
+
+  protected function getItemsPerPage(): int {
+    return 100;
   }
 }

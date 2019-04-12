@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 
 final class BanControllerTest extends TestCase
 {
-  /** @var BanControllerInterface */
+  /** @var BanController */
   protected $controller;
 
   function setUp(): void
@@ -24,17 +24,17 @@ final class BanControllerTest extends TestCase
     Ban::truncate();
     User::truncate();
 
+    $config = new ConfigService();
     $command_dispatcher = new CommandDispatcher($container);
     $query_dispatcher = new QueryDispatcher($container);
-    $config = new ConfigService();
     $renderer = new RendererService($config);
 
 
     $this->controller = new BanController(
+      $config,
       $command_dispatcher,
       $query_dispatcher,
-      $renderer,
-      $config
+      $renderer
     );
   }
 

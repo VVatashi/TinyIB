@@ -3,7 +3,7 @@
 namespace Imageboard\Tests\Functional\Controller;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Controller\{AuthControllerInterface, AuthController};
+use Imageboard\Controller\AuthController;
 use Imageboard\Model\User;
 use Imageboard\Service\{CaptchaService, ConfigService, RendererService};
 use PHPUnit\Framework\TestCase;
@@ -11,7 +11,7 @@ use Psr\Http\Message\ResponseInterface;
 
 final class AuthControllerTest extends TestCase
 {
-  /** @var AuthControllerInterface */
+  /** @var AuthController */
   protected $controller;
 
   function setUp(): void

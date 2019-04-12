@@ -5,24 +5,24 @@ namespace Imageboard\Service;
 use FastRoute\{Dispatcher, RouteCollector};
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Controller\Admin\{
-  BanControllerInterface as AdminBans,
-  DashboardControllerInterface as AdminDashboard,
-  ModLogControllerInterface as AdminModLog,
-  PostControllerInterface as AdminPosts,
-  SystemControllerInterface as AdminSystem,
-  UserControllerInterface as AdminUsers
+  BanController as AdminBans,
+  DashboardController as AdminDashboard,
+  ModLogController as AdminModLog,
+  PostController as AdminPosts,
+  SystemController as AdminSystem,
+  UserController as AdminUsers
 };
 use Imageboard\Controller\Api\{
-  EmbedControllerInterface as EmbedApi,
-  PostControllerInterface as PostApi,
-  TokenControllerInterface as TokenApi
+  EmbedController as EmbedApi,
+  PostController as PostApi,
+  TokenController as TokenApi
 };
-use Imageboard\Controller\Mobile\MobilePostControllerInterface as MobilePosts;
+use Imageboard\Controller\Mobile\MobilePostController as MobilePosts;
 use Imageboard\Controller\{
-  AuthControllerInterface as Auth,
-  CaptchaControllerInterface as Captcha,
-  PostControllerInterface as Posts,
-  SettingsControllerInterface as Settings
+  AuthController as Auth,
+  CaptchaController as Captcha,
+  PostController as Posts,
+  SettingsController as Settings
 };
 use Imageboard\Exception\{HttpException, NotFoundException};
 use Psr\Container\ContainerInterface;

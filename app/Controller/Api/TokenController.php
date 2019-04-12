@@ -4,10 +4,11 @@ namespace Imageboard\Controller\Api;
 
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Command\{CommandDispatcher, CreateToken};
+use Imageboard\Controller\ControllerInterface;
 use Imageboard\Query\{QueryDispatcher, Token};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
-class TokenController implements TokenControllerInterface
+class TokenController implements ControllerInterface
 {
   /** @var CommandDispatcher */
   protected $command_dispatcher;
@@ -30,9 +31,13 @@ class TokenController implements TokenControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Creates auth token.
+   *
+   * @param ServerRequestInterface $request
+   *
+   * @return array Token view model.
    */
-  function createToken(ServerRequestInterface $request) : ResponseInterface
+  function createToken(ServerRequestInterface $request): ResponseInterface
   {
     if ($request->getHeaderLine('Content-Type') === 'application/json') {
       $data = json_decode((string)$request->getBody(), true);
@@ -64,9 +69,13 @@ class TokenController implements TokenControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Returns current auth token info.
+   *
+   * @param ServerRequestInterface $request
+   *
+   * @return array Token view model.
    */
-  function token(ServerRequestInterface $request) : array
+  function token(ServerRequestInterface $request): array
   {
     $token = $request->getHeaderLine('X-Token');
     $query = new Token($token);
