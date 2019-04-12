@@ -1,12 +1,15 @@
 #!/usr/bin/env php
 <?php
 
+const UNIX_CODE_ERR_GENERAL = 1;
+const UNIX_CODE_OK = 0;
+
 use Imageboard\Service\ConfigService;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
 if (!isset($argc) || $argc < 2) {
-  return;
+  return UNIX_CODE_ERR_GENERAL;
 }
 
 $commands = [];
@@ -21,4 +24,7 @@ if (isset($commands[$command])) {
   $commands[$command]();
 } else {
   print("Unknown command: $command\n");
+  return UNIX_CODE_ERR_GENERAL;
 }
+
+return UNIX_CODE_OK;
