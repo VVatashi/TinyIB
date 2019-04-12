@@ -30,10 +30,8 @@ class RendererService implements RendererServiceInterface
       'debug' => true,
     ]);
 
-    $base_url = $this->config->get("BASE_URL");
-    $board    = $this->config->get("BOARD");
-
-    $this->twig->addGlobal('base_url', $base_url . $board);
+    $this->twig->addGlobal('base_url', $this->config->get('BASE_PATH'));
+    $this->twig->addGlobal('content_url', $this->config->get('CONTENT_PATH'));
     $this->twig->addGlobal('style', $_COOKIE['style'] ?? 'Synthwave');
 
     $this->twig->addFunction(new Twig_SimpleFunction('mtime', function ($path) {

@@ -14,9 +14,6 @@ use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
 class PostController implements PostControllerInterface
 {
-  const BASE_URL_CONFIG_KEY = "BASE_URL";
-  const BOARD_CONFIG_KEY    = "BOARD";
-
   /** @var CacheInterface */
   protected $cache;
 
@@ -54,12 +51,7 @@ class PostController implements PostControllerInterface
     $this->renderer = $renderer;
     $this->config = $config;
 
-    /** @var string $base_url */
-    $base_url = $this->config->get(self::BASE_URL_CONFIG_KEY);
-    /** @var string $board */
-    $board    = $this->config->get(self::BOARD_CONFIG_KEY);
-
-    $this->board_full_url = "$base_url/$board";
+    $this->base_path = $this->config->get('BASE_PATH', '');
   }
 
   /**
@@ -168,8 +160,8 @@ class PostController implements PostControllerInterface
     );
 
     $thread_id = $post->isThread() ? $post->id : $post->parent_id;
-    $base_url = $this->config->get("BASE_URL") . $this->config->get("BOARD");
-    $destination = "$base_url/res/$thread_id#reply_{$post->id}";
+    $base_path = $this->config->get('BASE_PATH');
+    $destination = "$base_path/res/$thread_id#reply_{$post->id}";
 
     $name = !empty($post->name) || !empty($post->tripcode)
       ? $post->name : 'Anonymous';

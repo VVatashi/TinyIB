@@ -47,9 +47,9 @@ class UserController extends CrudController implements UserControllerInterface
   {
     parent::__construct($command_dispatcher, $query_dispatcher, $renderer, $config);
 
-    $this->list_url   = "{$this->board_full_url}/admin/users";
-    $this->create_url = "{$this->board_full_url}/admin/users/create";
-    $this->edit_url   = "{$this->board_full_url}/admin/users/:id/edit";
+    $this->list_url   = "{$this->base_path}/admin/users";
+    $this->create_url = "{$this->base_path}/admin/users/create";
+    $this->edit_url   = "{$this->base_path}/admin/users/:id/edit";
   }
 
   /**

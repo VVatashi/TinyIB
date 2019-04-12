@@ -17,9 +17,6 @@ use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 
 abstract class CrudController implements CrudControllerInterface
 {
-  const BASE_URL_CONFIG_KEY = "BASE_URL";
-  const BOARD_CONFIG_KEY    = "BOARD";
-
   /** @var string */
   protected $list_url = '';
 
@@ -60,7 +57,7 @@ abstract class CrudController implements CrudControllerInterface
   protected $delete_command_type = '';
 
   /** @var string */
-  protected $board_full_url;
+  protected $base_path;
 
   /** @var CommandDispatcher */
   protected $command_dispatcher;
@@ -98,12 +95,7 @@ abstract class CrudController implements CrudControllerInterface
     $this->renderer           = $renderer;
     $this->config             = $config;
 
-    /** @var string $base_url */
-    $base_url = $this->config->get(self::BASE_URL_CONFIG_KEY);
-    /** @var string $board */
-    $board    = $this->config->get(self::BOARD_CONFIG_KEY);
-
-    $this->board_full_url = "{$base_url}$board";
+    $this->base_path = $this->config->get('BASE_PATH', '');
   }
 
   /**

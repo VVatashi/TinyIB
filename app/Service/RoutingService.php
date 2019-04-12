@@ -172,10 +172,10 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
     $method = $request->getMethod();
     $path = $uri->getPath();
 
-    // Remove board prefix.
-    $prefix = '/' . $this->config->get("BOARD");
-    $prefix_length = strlen($prefix);
-    if (strncmp($path, $prefix, $prefix_length) === 0) {
+    // Remove base url.
+    $base_path = $this->config->get('BASE_PATH', '');
+    $prefix_length = strlen($base_path);
+    if (strncmp($path, $base_path, $prefix_length) === 0) {
       $path = substr($path, $prefix_length);
     }
 

@@ -57,8 +57,7 @@ class SystemController implements SystemControllerInterface
     }
 
     // Show status message from a session.
-    $base_url = $this->config->get('BASE_URL') . $this->config->get('BOARD');
-    $url = "$base_url/admin/system";
+    $url = $this->config->get('BASE_PATH', '') . '/admin/system';
     $key = "$url:message";
     $message = $_SESSION[$key] ?? null;
     unset($_SESSION[$key]);
@@ -79,8 +78,7 @@ class SystemController implements SystemControllerInterface
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 
-    $base_url = $this->config->get('BASE_URL') . $this->config->get('BOARD');
-    $back_url = "$base_url/admin/system";
+    $back_url = $this->config->get('BASE_PATH', '') . '/admin/system';
     $message_key = "$back_url:message";
 
     $command = new ClearCache();

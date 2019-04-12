@@ -78,11 +78,11 @@ class App {
   constructor() {
     const path = window.location.pathname;
     let matches = [];
-    if (path.match(/^\/[0-9a-z_-]+\/?$/i)) {
-      this.view = new BoardPage();
-    } else if (matches = path.match(/^\/[0-9a-z_-]+\/res\/(\d+)(?:\.html)?\/?$/i)) {
+    if (matches = path.match(/\/res\/(\d+)(?:\.html)?\/?$/i)) {
       const threadId = +matches[1];
       this.view = new ThreadPage(threadId);
+    } else if (path.match(/\/?$/i)) {
+      this.view = new BoardPage();
     } else {
       this.view = new BasePage();
     }

@@ -11,11 +11,8 @@ use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
 class MobilePostController implements MobilePostControllerInterface
 {
-  const BASE_URL_CONFIG_KEY = "BASE_URL";
-  const BOARD_CONFIG_KEY    = "BOARD";
-
   /** @var string */
-  protected $board_full_url;
+  protected $base_path;
 
   /** @var CacheInterface */
   protected $cache;
@@ -49,12 +46,7 @@ class MobilePostController implements MobilePostControllerInterface
     $this->renderer = $renderer;
     $this->config = $config;
 
-    /** @var string $base_url */
-    $base_url = $this->config->get(self::BASE_URL_CONFIG_KEY);
-    /** @var string $board */
-    $board    = $this->config->get(self::BOARD_CONFIG_KEY);
-
-    $this->board_full_url = "$base_url/$board";
+    $this->base_path = $this->config->get('BASE_PATH', '');
   }
 
   protected function fixLinks(string $message, int $thread_id): string {
@@ -189,7 +181,7 @@ class MobilePostController implements MobilePostControllerInterface
 
     $thread_id = $post->isThread() ? $post->id : $post->parent_id;
 
-    $destination = "$this->board_full_url/mobile/thread/$thread_id#footer";
+    $destination = "{$this->base_path}/mobile/thread/$thread_id#footer";
 
     return new Response(303, [
       'Location'      => $destination,
@@ -261,7 +253,7 @@ class MobilePostController implements MobilePostControllerInterface
 
     $thread_id = $post->isThread() ? $post->id : $post->parent_id;
 
-    $destination = "$this->board_full_url/mobile/thread/$thread_id#footer";
+    $destination = "{$this->base_path}/mobile/thread/$thread_id#footer";
 
     return new Response(201, [
       'Content-type' => 'application/json',

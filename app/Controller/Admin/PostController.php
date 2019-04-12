@@ -38,6 +38,6 @@ class PostController extends CrudController implements PostControllerInterface
   {
     parent::__construct($command_dispatcher, $query_dispatcher, $renderer, $config);
 
-    $this->list_url = "{$this->board_full_url}/admin/posts";
+    $this->list_url = "{$this->base_path}/admin/posts";
   }
 }

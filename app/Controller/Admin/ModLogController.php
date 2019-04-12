@@ -48,6 +48,6 @@ class ModLogController extends CrudController implements ModLogControllerInterfa
     parent::__construct($command_dispatcher, $query_dispatcher, $renderer, $config);
 
     /** @var string list_url */
-    $this->list_url = "{$this->board_full_url}/admin/modlog";
+    $this->list_url = "{$this->base_path}/admin/modlog";
   }
 }

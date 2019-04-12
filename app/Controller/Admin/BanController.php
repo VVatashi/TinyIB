@@ -36,7 +36,7 @@ class BanController extends CrudController implements BanControllerInterface
   {
     parent::__construct($command_dispatcher, $query_dispatcher, $renderer, $config);
 
-    $this->list_url   = "{$this->board_full_url}/admin/bans";
-    $this->create_url = "{$this->board_full_url}/admin/bans/create";
+    $this->list_url   = "{$this->base_path}/admin/bans";
+    $this->create_url = "{$this->base_path}/admin/bans/create";
   }
 }
