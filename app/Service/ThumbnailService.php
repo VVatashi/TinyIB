@@ -11,14 +11,20 @@ class ThumbnailService implements ThumbnailServiceInterface
   const AUDIO_THUMBNAIL = 'images/audio_thumbnail.png';
 
   /** @var FileServiceInterface */
-  protected $file_service;
+  protected $file;
+
+  /** @var ConfigService */
+  protected $config;
 
   /**
    * Creates a new ThumbnailService instance.
    */
-  function __construct(FileServiceInterface $file_service)
-  {
-    $this->file_service = $file_service;
+  function __construct(
+    FileServiceInterface $file,
+    ConfigServiceInterface $config
+  ) {
+    $this->file = $file;
+    $this->config = $config;
   }
 
   /**
@@ -91,7 +97,7 @@ class ThumbnailService implements ThumbnailServiceInterface
 
     if (empty($mime_type) || $mime_type === static::DEFAULT_MIME_TYPE) {
       // Try determine mime-type from file extension.
-      $extension = $this->file_service->getExtension($path);
+      $extension = $this->file->getExtension($path);
       return $this->getMimeTypeByExtension($extension);
     }
 
@@ -188,7 +194,7 @@ class ThumbnailService implements ThumbnailServiceInterface
     int $max_width,
     int $max_height
   ) {
-    $extension = $this->file_service->getExtension($path);
+    $extension = $this->file->getExtension($path);
 
     // Get thumbnail size.
     [$width, $height] = $this->getImageSize($path, $mime_type);
@@ -200,7 +206,7 @@ class ThumbnailService implements ThumbnailServiceInterface
     // Use ImageMagick convert to create thumbnail.
     if ($extension !== 'gif') {
       $options = '-layers OptimizeFrame -depth 8';
-    } elseif (!TINYIB_FILE_ANIM_GIF_THUMB) {
+    } elseif (!$this->config->get('FILE_ANIM_GIF_THUMB')) {
       $path .= '[0]';
       $options = '-layers OptimizeFrame -depth 8';
     } else {
@@ -209,7 +215,7 @@ class ThumbnailService implements ThumbnailServiceInterface
     exec("convert $path -auto-orient -thumbnail '{$width}x$height' $options $output_path");
 
     // Optimize png.
-    if ($extension === 'png' && TINYIB_FILE_OPTIMIZE_PNG) {
+    if ($extension === 'png' && $this->config->get('FILE_OPTIMIZE_PNG')) {
       exec("pngoptimizercl -file:$output_path");
     }
   }
@@ -242,21 +248,21 @@ class ThumbnailService implements ThumbnailServiceInterface
   ): string {
     $mime_type = $this->getMimeType($path);
     if ($this->isImage($mime_type)) {
-      $file_name = $this->file_service->getFileName($path);
-      $extension = $this->file_service->getExtension($path);
+      $file_name = $this->file->getFileName($path);
+      $extension = $this->file->getExtension($path);
       $thumb_name = "{$file_name}s.$extension";
       $thumb_path = "$output_dir/$thumb_name";
       $this->createImageThumbnail($path, $mime_type, $thumb_path, $max_width, $max_height);
       return $thumb_name;
     } elseif ($this->isAudio($mime_type)) {
-      $file_name = $this->file_service->getFileName($path);
-      $extension = $this->file_service->getExtension(static::AUDIO_THUMBNAIL);
+      $file_name = $this->file->getFileName($path);
+      $extension = $this->file->getExtension(static::AUDIO_THUMBNAIL);
       $thumb_name = "{$file_name}s.$extension";
       $thumb_path = "$output_dir/$thumb_name";
       $this->createImageThumbnail(static::AUDIO_THUMBNAIL, $mime_type, $thumb_path, $max_width, $max_height);
       return $thumb_name;
     } elseif ($this->isVideo($mime_type)) {
-      $file_name = $this->file_service->getFileName($path);
+      $file_name = $this->file->getFileName($path);
       $thumb_name = "{$file_name}s.jpg";
       $thumb_path = "$output_dir/$thumb_name";
       $this->createVideoThumbnail($path, $thumb_path, $max_width, $max_height);

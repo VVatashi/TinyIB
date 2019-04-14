@@ -3,16 +3,18 @@
 namespace Imageboard\Query;
 
 use Imageboard\Exception\NotFoundException;
+use Imageboard\Service\ConfigService;
 use PDO;
 
 class PostHandler extends QueryHandler
 {
   /**
    * {@inheritDoc}
+   * @throws \Imageboard\Exception\ConfigServiceException
    */
   protected function sql(): string
   {
-    $posts_table = TINYIB_DBPOSTS;
+    $posts_table = (new ConfigService())->get("DBPOSTS");
     $sql = <<<EOF
 SELECT p.id, p.created_at,
   p.subject, p.name, p.tripcode, p.message,
@@ -29,6 +31,9 @@ EOF;
    * Returns thread posts.
    *
    * @param ThreadPosts $query
+   *
+   * @return mixed
+   * @throws \Imageboard\Exception\NotFoundException
    */
   function handle($query)
   {

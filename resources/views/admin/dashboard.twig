@@ -1,7 +1,7 @@
 {% set title = 'Admin Dashboard' %}
 
 {% set breadcrumb = [
-  { url: base_url, title: constant('TINYIB_BOARDDESC') },
+  { url: base_url, title: config('BOARDDESC') },
 ] %}
 
 {% extends 'admin/layout/_html.twig' %}

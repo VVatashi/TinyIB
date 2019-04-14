@@ -1,3 +1,5 @@
+{% set isInThread = res != constant('INDEXPAGE') %}
+
 {% macro nameblock(post) %}
   {% if post.subject %}
     <span class="post-header__subject filetitle">{{ post.subject }}</span>
@@ -52,7 +54,7 @@
       {{- post.id -}}
     </a>
 
-    {% if res != constant('TINYIB_INDEXPAGE') %}
+    {% if isInThread %}
       <a class="post-header__reflink-icon fas fa-reply" href="{{ reflink }}" title="Quick reply" data-reflink="{{ post.id }}"></a>
     {% endif %}
 
@@ -62,7 +64,7 @@
       <img src="{{ base_url }}/images/sticky.png" alt="Stickied" title="Stickied" width="16" height="16" />
     {% endif %}
 
-    {% if post.isThread() and res == constant('TINYIB_INDEXPAGE') %}
+    {% if post.isThread() and not isInThread %}
       <span class="post-header__reply-wrapper">
         <a class="post-header__reply-link" href="{{ replylink }}">Reply</a>
       </span>

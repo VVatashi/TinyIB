@@ -5,21 +5,53 @@ namespace Imageboard\Controller\Admin;
 use Imageboard\Command\Admin\{CreateBan, DeleteBan};
 use Imageboard\Query\Admin\ListBans;
 
-class BanController extends CrudController implements BanControllerInterface
+class BanController extends AdminController
 {
-  protected $list_url = TINYIB_BASE_URL . TINYIB_BOARD . '/admin/bans';
-  protected $list_query_type = ListBans::class;
-  protected $list_template = 'admin/bans/list.twig';
-  protected $ajax_list_template = 'admin/bans/_list.twig';
+  use ListTrait;
+  use CreateTrait;
+  use DeleteTrait;
 
-  protected $create_url = TINYIB_BASE_URL . TINYIB_BOARD . '/admin/bans/create';
-  protected $create_command_type = CreateBan::class;
-  protected $new_item = [
-    'ip' => '',
-    'expires_in' => 60 * 60,
-    'reason' => '',
-  ];
-  protected $form_template = 'admin/bans/form.twig';
+  protected function getCreateCommand(): string {
+    return CreateBan::class;
+  }
 
-  protected $delete_command_type = DeleteBan::class;
+  protected function getDeleteCommand(): string {
+    return DeleteBan::class;
+  }
+
+  protected function getListQuery(): string {
+    return ListBans::class;
+  }
+
+  protected function getCreateUrl(): string {
+    return "{$this->base_path}/admin/bans/create";
+  }
+
+  protected function getListUrl(): string {
+    return "{$this->base_path}/admin/bans";
+  }
+
+  protected function getFormTemplate(): string {
+    return 'admin/bans/form.twig';
+  }
+
+  protected function getListTemplate(): string {
+    return 'admin/bans/list.twig';
+  }
+
+  protected function getAjaxListTemplate(): string {
+    return 'admin/bans/_list.twig';
+  }
+
+  protected function getNewItem(): array {
+    return [
+      'ip'          => '',
+      'expires_in'  => 60 * 60,
+      'reason'      => '',
+    ];
+  }
+
+  protected function getItemsPerPage(): int {
+    return 100;
+  }
 }

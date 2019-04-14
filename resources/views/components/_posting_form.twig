@@ -1,6 +1,8 @@
+{% set isInThread = res != constant('INDEXPAGE') %}
+
 {% spaceless %}
   <div id="posting-form-wrapper" class="content__posting-form-wrapper">
-    {% if res == constant('TINYIB_INDEXPAGE') %}
+    {% if not isInThread %}
       <button type="button" class="button content__reply-button" id="posting-form-show">Create thread</button>
     {% else %}
       <button type="button" class="button content__reply-button" id="posting-form-show">Reply</button>

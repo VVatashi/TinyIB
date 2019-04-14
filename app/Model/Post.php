@@ -3,17 +3,18 @@
 namespace Imageboard\Model;
 
 use Illuminate\Database\Eloquent\{Collection, Model, SoftDeletes};
+use Imageboard\Service\ConfigService;
 use VVatashi\BBCode\{Parser, TagDef};
 
 /**
- * @property int $id
- * @property int $created_at
- * @property int $updated_at
- * @property int $deleted_at
- * @property int $parent_id
- * @property int $bumped_at
+ * @property int    $id
+ * @property int    $created_at
+ * @property int    $updated_at
+ * @property int    $deleted_at
+ * @property int    $parent_id
+ * @property int    $bumped_at
  * @property string $ip
- * @property int $user_id
+ * @property int    $user_id
  * @property string $name
  * @property string $tripcode
  * @property string $email
@@ -23,20 +24,22 @@ use VVatashi\BBCode\{Parser, TagDef};
  * @property string $file
  * @property string $file_hex
  * @property string $file_original
- * @property int $file_size
- * @property int $image_width
- * @property int $image_height
+ * @property int    $file_size
+ * @property int    $image_width
+ * @property int    $image_height
  * @property string $thumb
- * @property int $thumb_width
- * @property int $thumb_height
- * @property bool $stickied
- * @property bool $moderated
+ * @property int    $thumb_width
+ * @property int    $thumb_height
+ * @property bool   $stickied
+ * @property bool   $moderated
+ * @method static where(array $array)
  */
 class Post extends Model
 {
   use SoftDeletes;
+  use ModelTrait;
 
-  protected $table = TINYIB_DBPOSTS;
+  protected $table;
 
   protected $fillable = [
     'parent_id',
@@ -70,6 +73,20 @@ class Post extends Model
   ];
 
   protected $dateFormat = 'U';
+
+  /**
+   * Post constructor.
+   *
+   * @param array $attributes
+   *
+   * @throws \Imageboard\Exception\ConfigServiceException
+   */
+  public function __construct (array $attributes = [])
+  {
+    parent::__construct($attributes);
+
+    $this->table = $this->config('DBPOSTS');
+  }
 
   function replies()
   {
@@ -243,13 +260,14 @@ class Post extends Model
 
   protected static function fixLinks(string $message): string
   {
-    $link_pattern = '#href="/' . TINYIB_BOARD . '/res/(\d+)\#(\d+)"#';
-    return preg_replace_callback($link_pattern, function ($matches) {
+    $board = ConfigService::getInstance()->get('BOARD');
+    $link_pattern = '#href="/' . $board . '/res/(\d+)\#(\d+)"#';
+    return preg_replace_callback($link_pattern, function ($matches) use ($board) {
       $target_thread_id = (int)$matches[1];
       $target_post_id = (int)$matches[2];
 
       return 'class="post__reference-link"'
-        . ' href="/' . TINYIB_BOARD . "/res/$target_thread_id#reply_$target_post_id\""
+        . ' href="/' . $board . "/res/$target_thread_id#reply_$target_post_id\""
         . " data-target-post-id=\"$target_post_id\"";
     }, $message);
   }
@@ -333,11 +351,13 @@ class Post extends Model
    * @param int $page
    *
    * @return Collection
+   * @throws \Imageboard\Exception\ConfigServiceException
    */
   static function getThreadsByPage(int $page): Collection
   {
-    $skip = $page * TINYIB_THREADSPERPAGE;
-    $take = TINYIB_THREADSPERPAGE;
+    $threads_per_page = (int)ConfigService::getInstance()->get("THREADSPERPAGE");
+    $skip = $page * $threads_per_page;
+    $take = $threads_per_page;
 
     return Post::where([
       ['parent_id', 0],
@@ -483,10 +503,12 @@ class Post extends Model
 
   /**
    * Removes old threads.
+   *
+   * @throws \Imageboard\Exception\ConfigServiceException
    */
   static function trimThreads()
   {
-    $limit = (int)TINYIB_MAXTHREADS;
+    $limit = (int)ConfigService::getInstance()->get('MAXTHREADS');
 
     if ($limit > 0) {
       /** @var Post[] */

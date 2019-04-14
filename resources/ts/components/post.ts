@@ -558,7 +558,7 @@ export class Post {
       this.$layout.appendChild(this.$modal);
 
       this.modal = new Modal(this.$modal);
-      this.modal.show(left, top, 300, 50, onModalHide.bind(this));
+      this.modal.show(left - 150, top - 25, 300, 50, onModalHide.bind(this));
     } else if (file.type === 'video') {
       this.$modal = document.createElement('div');
       this.$modal.classList.add('modal');

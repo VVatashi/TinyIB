@@ -4,10 +4,23 @@ namespace Imageboard\Controller\Admin;
 
 use Imageboard\Query\Admin\ListModLog;
 
-class ModLogController extends CrudController implements ModLogControllerInterface
+class ModLogController extends AdminController
 {
-  protected $list_url = TINYIB_BASE_URL . TINYIB_BOARD . '/admin/modlog';
-  protected $list_query_type = ListModLog::class;
-  protected $list_template = 'admin/modlog/list.twig';
-  protected $ajax_list_template = 'admin/modlog/_list.twig';
+  use ListTrait;
+
+  protected function getListQuery(): string {
+    return ListModLog::class;
+  }
+
+  protected function getListTemplate(): string {
+    return 'admin/modlog/list.twig';
+  }
+
+  protected function getAjaxListTemplate(): string {
+    return 'admin/modlog/_list.twig';
+  }
+
+  protected function getItemsPerPage(): int {
+    return 100;
+  }
 }

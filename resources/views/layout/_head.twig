@@ -2,12 +2,12 @@
   {% set is_selected = style == title %}
   <link rel="{{ relation|default(is_selected ? 'stylesheet' : 'alternate stylesheet') }}"
     type="text/css" title="{{ title }}"
-    href="{{ base_url }}/css/{{ filename }}.css?mtime={{ mtime('css/' ~ filename ~ '.css') }}"
+    href="{{ content_url }}/css/{{ filename }}.css?mtime={{ mtime('css/' ~ filename ~ '.css') }}"
     {{ is_selected ? 'data-selected="true"' : '' }} />
 {% endmacro %}
 
 {% macro script(filename) %}
-  <script src="{{ base_url }}/js/{{ filename }}.js?mtime={{ mtime('js/' ~ filename ~ '.js') }}"></script>
+  <script src="{{ content_url }}/js/{{ filename }}.js?mtime={{ mtime('js/' ~ filename ~ '.js') }}"></script>
 {% endmacro %}
 
 {% import _self as self %}
@@ -20,13 +20,13 @@
 <meta http-equiv="pragma" content="no-cache" />
 <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1" />
 
-<title>{{ constant('TINYIB_BOARDDESC') }}</title>
+<title>{{ config('BOARDDESC') }}</title>
 
-<link id="favicon" rel="icon" href="{{ base_url }}/favicon.ico" />
+<link id="favicon" rel="icon" href="{{ content_url }}/favicon.ico" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Noto+Serif:400,700|Roboto+Condensed:700|Roboto:300,400,700&amp;subset=cyrillic">
-<link rel="stylesheet" href="{{ base_url }}/css/vendor/fontawesome.min.css" />
-<link rel="stylesheet" href="{{ base_url }}/css/vendor/regular.min.css" />
-<link rel="stylesheet" href="{{ base_url }}/css/vendor/solid.min.css" />
+<link rel="stylesheet" href="{{ content_url }}/css/vendor/fontawesome.min.css" />
+<link rel="stylesheet" href="{{ content_url }}/css/vendor/regular.min.css" />
+<link rel="stylesheet" href="{{ content_url }}/css/vendor/solid.min.css" />
 
 {{ self.style('2watch',    '2watch') }}
 {{ self.style('Futaba',    'futaba') }}
@@ -35,13 +35,13 @@
 {{ self.style('Quartz',    'quartz') }}
 {{ self.style('Synthwave', 'synthwave') }}
 
-{% if constant('TINYIB_GTM') %}
+{% if config('GTM') %}
   <!-- Google Tag Manager -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
   new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
   j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','{{ constant('TINYIB_GTM') }}');</script>
+  })(window,document,'script','dataLayer','{{ config('GTM') }}');</script>
   <!-- End Google Tag Manager -->
 {% endif %}
 

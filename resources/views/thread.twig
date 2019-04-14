@@ -9,7 +9,7 @@
 {% block content %}
   <main class="{{class is defined ? class ~ ' '}}">
     <form id="delform" action="{{ base_url }}/post/delete" method="post">
-      <input type="hidden" name="board" value="{{ constant('TINYIB_BOARD') }}" />
+      <input type="hidden" name="board" value="{{ config('BOARD') }}" />
 
       {% for post in posts %}
         {% set postNo = loop.index %}

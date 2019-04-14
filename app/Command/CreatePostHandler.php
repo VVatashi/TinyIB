@@ -9,16 +9,16 @@ use Imageboard\Service\PostServiceInterface;
 class CreatePostHandler implements CommandHandlerInterface
 {
   /** @var PostServiceInterface */
-  protected $post_service;
+  protected $post;
 
   /** @var CurrentUserInterface */
   protected $user;
 
   function __construct(
-    PostServiceInterface $post_service,
+    PostServiceInterface $post,
     CurrentUserInterface $user
   ) {
-    $this->post_service = $post_service;
+    $this->post = $post;
     $this->user = $user;
   }
 
@@ -27,7 +27,7 @@ class CreatePostHandler implements CommandHandlerInterface
    */
   function handle($command)
   {
-    return $this->post_service->create(
+    return $this->post->create(
       $command->name,
       '',
       $command->subject,

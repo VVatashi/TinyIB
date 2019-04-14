@@ -2,6 +2,8 @@
 
 namespace Imageboard\Query\Admin;
 
+use Imageboard\Service\ConfigService;
+
 class ShowPostHandler extends ShowHandler
 {
   /**
@@ -9,7 +11,7 @@ class ShowPostHandler extends ShowHandler
    */
   function sql() : string
   {
-    $posts_table = TINYIB_DBPOSTS;
+    $posts_table = (new ConfigService())->get("DBPOSTS");;
     $sql = <<<EOF
 SELECT p.id, p.parent_id,
   p.subject, p.email, p.name, p.tripcode, p.message, p.created_at,

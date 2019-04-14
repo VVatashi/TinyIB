@@ -1,3 +1,5 @@
+{% set isInThread = res != constant('INDEXPAGE') %}
+
 <section id="reply_{{ post.id }}"
   class="post {{ post.isThread() ? 'content__oppost post_oppost oppost' : 'content__post post_reply reply' }}"
   data-post-id="{{ post.id }}">
@@ -22,7 +24,7 @@
 
       <ul class="post__refmap"></ul>
 
-      {% if res != constant('TINYIB_INDEXPAGE') %}
+      {% if isInThread %}
         <a class="post__reflink-icon fas fa-reply" href="{{ reflink }}" title="Quick reply" data-reflink="{{ post.id }}"></a>
       {% endif %}
     </div>

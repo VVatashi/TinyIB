@@ -3,35 +3,21 @@
 namespace Imageboard\Controller\Admin;
 
 use Imageboard\Exception\AccessDeniedException;
-use Imageboard\Service\RendererServiceInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class DashboardController implements DashboardControllerInterface
+class DashboardController extends AdminController
 {
-  /** @var RendererServiceInterface */
-  protected $renderer;
-
   /**
-   * Creates a new DashboardController instance.
+   * Returns the admin dashboard.
    *
-   * @param RendererServiceInterface $renderer
+   * @param ServerRequestInterface $request
+   *
+   * @return string Response HTML.
+   *
+   * @throws AccessDeniedException
+   *   If current user is not an admin.
    */
-  function __construct(
-    RendererServiceInterface $renderer
-  ) {
-    $this->renderer = $renderer;
-  }
-
-  protected function checkAccess(ServerRequestInterface $request) {
-    /** @var User */
-    $current_user = $request->getAttribute('user');
-    return $current_user->isMod();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  function index(ServerRequestInterface $request) : string
+  function index(ServerRequestInterface $request): string
   {
     if (!$this->checkAccess($request)) {
       throw new AccessDeniedException('You are not allowed to access this page');

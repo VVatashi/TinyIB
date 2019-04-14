@@ -3,14 +3,14 @@
 namespace Imageboard\Tests\Functional\Controller;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Controller\{CaptchaControllerInterface, CaptchaController};
+use Imageboard\Controller\CaptchaController;
 use Imageboard\Service\CaptchaService;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
 final class CaptchaControllerTest extends TestCase
 {
-  /** @var CaptchaControllerInterface */
+  /** @var CaptchaController */
   protected $controller;
 
   function setUp(): void
@@ -22,7 +22,6 @@ final class CaptchaControllerTest extends TestCase
   function testCreateController(): void
   {
     $this->assertNotNull($this->controller);
-    $this->assertInstanceOf(CaptchaControllerInterface::class, $this->controller);
     $this->assertInstanceOf(CaptchaController::class, $this->controller);
   }
 

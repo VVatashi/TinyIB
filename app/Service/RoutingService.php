@@ -5,24 +5,24 @@ namespace Imageboard\Service;
 use FastRoute\{Dispatcher, RouteCollector};
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Controller\Admin\{
-  BanControllerInterface as AdminBans,
-  DashboardControllerInterface as AdminDashboard,
-  ModLogControllerInterface as AdminModLog,
-  PostControllerInterface as AdminPosts,
-  SystemControllerInterface as AdminSystem,
-  UserControllerInterface as AdminUsers
+  BanController as AdminBans,
+  DashboardController as AdminDashboard,
+  ModLogController as AdminModLog,
+  PostController as AdminPosts,
+  SystemController as AdminSystem,
+  UserController as AdminUsers
 };
 use Imageboard\Controller\Api\{
-  EmbedControllerInterface as EmbedApi,
-  PostControllerInterface as PostApi,
-  TokenControllerInterface as TokenApi
+  EmbedController as EmbedApi,
+  PostController as PostApi,
+  TokenController as TokenApi
 };
-use Imageboard\Controller\Mobile\MobilePostControllerInterface as MobilePosts;
+use Imageboard\Controller\Mobile\MobilePostController as MobilePosts;
 use Imageboard\Controller\{
-  AuthControllerInterface as Auth,
-  CaptchaControllerInterface as Captcha,
-  PostControllerInterface as Posts,
-  SettingsControllerInterface as Settings
+  AuthController as Auth,
+  CaptchaController as Captcha,
+  PostController as Posts,
+  SettingsController as Settings
 };
 use Imageboard\Exception\{HttpException, NotFoundException};
 use Psr\Container\ContainerInterface;
@@ -37,13 +37,21 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
   /** @var Dispatcher */
   protected $dispatcher;
 
+  /** @var \Imageboard\Service\ConfigServiceInterface */
+  protected $config;
+
   /**
    * Creates a new RoutingService instance.
+   *
+   * @param \Psr\Container\ContainerInterface          $container
+   * @param \Imageboard\Service\ConfigServiceInterface $config
    */
   public function __construct(
-    ContainerInterface $container
+    ContainerInterface $container,
+    ConfigServiceInterface $config
   ) {
     $this->container = $container;
+    $this->config = $config;
 
     $this->dispatcher = \FastRoute\simpleDispatcher(function (RouteCollector $routes) {
       $routes->addGroup('/api', function (RouteCollector $routes) {
@@ -156,6 +164,7 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
 
   /**
    * {@inheritDoc}
+   * @throws \Imageboard\Exception\HttpException
    */
   public function handle(ServerRequestInterface $request): ResponseInterface
   {
@@ -163,10 +172,10 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
     $method = $request->getMethod();
     $path = $uri->getPath();
 
-    // Remove board prefix.
-    $prefix = '/' . TINYIB_BOARD;
-    $prefix_length = strlen($prefix);
-    if (strncmp($path, $prefix, $prefix_length) === 0) {
+    // Remove base url.
+    $base_path = $this->config->get('BASE_PATH', '');
+    $prefix_length = strlen($base_path);
+    if (strncmp($path, $base_path, $prefix_length) === 0) {
       $path = substr($path, $prefix_length);
     }
 

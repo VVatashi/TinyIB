@@ -4,6 +4,11 @@ namespace Imageboard\Query;
 
 use Psr\Container\ContainerInterface;
 
+/**
+ * Class QueryDispatcher
+ *
+ * @package Imageboard\Query
+ */
 class QueryDispatcher
 {
   /** @var ContainerInterface $container */

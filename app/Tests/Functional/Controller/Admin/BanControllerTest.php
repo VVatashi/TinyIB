@@ -8,12 +8,13 @@ use Imageboard\Controller\Admin\BanController;
 use Imageboard\Exception\{AccessDeniedException, NotFoundException};
 use Imageboard\Model\{Ban, CurrentUserInterface, User};
 use Imageboard\Query\QueryDispatcher;
+use Imageboard\Service\ConfigService;
 use Imageboard\Service\RendererService;
 use PHPUnit\Framework\TestCase;
 
 final class BanControllerTest extends TestCase
 {
-  /** @var BanControllerInterface */
+  /** @var BanController */
   protected $controller;
 
   function setUp(): void
@@ -23,10 +24,14 @@ final class BanControllerTest extends TestCase
     Ban::truncate();
     User::truncate();
 
+    $config = new ConfigService();
     $command_dispatcher = new CommandDispatcher($container);
     $query_dispatcher = new QueryDispatcher($container);
-    $renderer = new RendererService();
+    $renderer = new RendererService($config);
+
+
     $this->controller = new BanController(
+      $config,
       $command_dispatcher,
       $query_dispatcher,
       $renderer
