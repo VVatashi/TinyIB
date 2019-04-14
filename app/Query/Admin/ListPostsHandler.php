@@ -2,14 +2,17 @@
 
 namespace Imageboard\Query\Admin;
 
+use Imageboard\Service\ConfigService;
+
 class ListPostsHandler extends ListHandler
 {
   /**
    * {@inheritDoc}
+   * @throws \Imageboard\Exception\ConfigServiceException
    */
   protected function countSql(): string
   {
-    $posts_table = TINYIB_DBPOSTS;
+    $posts_table = (new ConfigService())->get("DBPOSTS");
     $sql = <<<EOF
 SELECT count(*)
 FROM $posts_table AS p
@@ -22,10 +25,11 @@ EOF;
 
   /**
    * {@inheritDoc}
+   * @throws \Imageboard\Exception\ConfigServiceException
    */
   protected function sql(): string
   {
-    $posts_table = TINYIB_DBPOSTS;
+    $posts_table = (new ConfigService())->get("DBPOSTS");;
     $sql = <<<EOF
 SELECT p.id, p.parent_id,
   p.subject, p.name, p.tripcode, p.message, p.created_at,

@@ -3,10 +3,10 @@
   {% include 'components/_menu.twig' with {'class': 'header__menu'} %}
 
   <div class="header__logo">
-    {{ constant('TINYIB_LOGO') }}
+    {{ config('LOGO') }}
 
-    <a class="header__title-link" href="/{{ constant('TINYIB_BOARD') }}">
-      <h1 class="header__title">{{ constant('TINYIB_BOARDDESC') }}</h1>
+    <a class="header__title-link" href="{{ config('BASE_PATH') }}">
+      <h1 class="header__title">{{ config('BOARDDESC') }}</h1>
     </a>
 
     <h2 style="display: inline; margin: 0 0 0 0.25em;">meh</h2>

@@ -5,175 +5,195 @@ namespace Imageboard\Controller;
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Exception\ValidationException;
 use Imageboard\Model\User;
-use Imageboard\Service\{
-    CaptchaServiceInterface,
-    RendererServiceInterface
-};
+use Imageboard\Service\{CaptchaServiceInterface, ConfigServiceInterface, RendererServiceInterface};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
-class AuthController implements AuthControllerInterface
+class AuthController implements ControllerInterface
 {
-    /** @var CaptchaService */
-    protected $captcha_service;
+  /** @var CaptchaServiceInterface */
+  protected $captcha;
 
-    /** @var RendererServiceInterface */
-    protected $renderer;
+  /** @var RendererServiceInterface */
+  protected $renderer;
 
-    /**
-     * Creates a new AuthController instance.
-     */
-    public function __construct(
-        CaptchaServiceInterface $captcha_service,
-        RendererServiceInterface $renderer
-    ) {
-        $this->captcha_service = $captcha_service;
-        $this->renderer = $renderer;
+  /** @var ConfigServiceInterface  */
+  protected $config;
+
+  /**
+   * Creates a new AuthController instance.
+   *
+   * @param \Imageboard\Service\CaptchaServiceInterface  $captcha
+   * @param \Imageboard\Service\RendererServiceInterface $renderer
+   * @param \Imageboard\Service\ConfigServiceInterface   $config
+   */
+  function __construct(
+    CaptchaServiceInterface $captcha,
+    RendererServiceInterface $renderer,
+    ConfigServiceInterface $config
+  ) {
+    $this->captcha = $captcha;
+    $this->renderer = $renderer;
+    $this->config = $config;
+  }
+
+  /**
+   * Returns register form.
+   *
+   * @param ServerRequestInterface $request
+   *
+   * @return string|ResponseInterface Response.
+   */
+  function registerForm(ServerRequestInterface $request)
+  {
+    /** @var User */
+    $user = $request->getAttribute('user');
+    if (!$user->isAnonymous()) {
+      // Allow only anonymous user access.
+      // Redirect logged in users to the index page.
+      $_SESSION['error'] = 'Already logged in';
+      return new Response(302, ['Location' => '/' . $this->config->get("BOARD")]);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function registerForm(ServerRequestInterface $request)
-    {
-        /** @var User */
-        $user = $request->getAttribute('user');
-        if (!$user->isAnonymous()) {
-            // Allow only anonymous user access.
-            // Redirect logged in users to the index page.
-            $_SESSION['error'] = 'Already logged in';
-            return new Response(302, ['Location' => '/' . TINYIB_BOARD]);
-        }
+    // Restore form input from the session.
+    $error = isset($_SESSION['error']) ? $_SESSION['error'] : '';
+    $email = isset($_SESSION['email']) ? $_SESSION['email'] : '';
 
-        // Restore form input from the session.
-        $error = isset($_SESSION['error']) ? $_SESSION['error'] : '';
-        $email = isset($_SESSION['email']) ? $_SESSION['email'] : '';
+    unset($_SESSION['error']);
+    unset($_SESSION['email']);
 
-        unset($_SESSION['error']);
-        unset($_SESSION['email']);
+    return $this->renderer->render('auth/register.twig', [
+      'error' => $error,
+      'email' => $email,
+    ]);
+  }
 
-        return $this->renderer->render('auth/register.twig', [
-            'error' => $error,
-            'email' => $email,
-        ]);
+  /**
+   * Registers user.
+   *
+   * @param ServerRequestInterface $request
+   *
+   * @return ResponseInterface Response.
+   */
+  function register(ServerRequestInterface $request): ResponseInterface
+  {
+    /** @var User */
+    $user = $request->getAttribute('user');
+    if (!$user->isAnonymous()) {
+      // Allow only anonymous user access.
+      // Redirect logged in users to the index page.
+      $_SESSION['error'] = 'Already logged in';
+      return new Response(302, ['Location' => '/' . $this->config->get("BOARD")]);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function register(ServerRequestInterface $request) : ResponseInterface
-    {
-        /** @var User */
-        $user = $request->getAttribute('user');
-        if (!$user->isAnonymous()) {
-            // Allow only anonymous user access.
-            // Redirect logged in users to the index page.
-            $_SESSION['error'] = 'Already logged in';
-            return new Response(302, ['Location' => '/' . TINYIB_BOARD]);
-        }
+    $data = $request->getParsedBody();
+    $email = isset($data['email']) ? $data['email'] : '';
+    $password = isset($data['password']) ? $data['password'] : '';
 
-        $data = $request->getParsedBody();
-        $email = isset($data['email']) ? $data['email'] : '';
-        $password = isset($data['password']) ? $data['password'] : '';
+    // Store form input to the session.
+    $_SESSION['email'] = $email;
 
-        // Store form input to the session.
-        $_SESSION['email'] = $email;
-
-        // Check captcha.
-        $captcha = isset($data['captcha']) ? $data['captcha'] : '';
-        if (!$this->captcha_service->checkCaptcha($captcha)) {
-            $_SESSION['error'] = 'Incorrect CAPTCHA';
-            return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/auth/register']);
-        }
-
-        try {
-            User::createUser($email, $password);
-            // Do not automatically login user after registration.
-            //User::login($email, $password);
-        }
-        catch(ValidationException $e) {
-            $_SESSION['error'] = $e->getMessage();
-            return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/auth/register']);
-        }
-
-        // Redirect to the index page.
-        return new Response(302, ['Location' => '/' . TINYIB_BOARD]);
+    // Check captcha.
+    $captcha = isset($data['captcha']) ? $data['captcha'] : '';
+    if (!$this->captcha->checkCaptcha($captcha)) {
+      $_SESSION['error'] = 'Incorrect CAPTCHA';
+      return new Response(302, ['Location' => '/' . $this->config->get("BOARD") . '/auth/register']);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function loginForm(ServerRequestInterface $request)
-    {
-        /** @var User */
-        $user = $request->getAttribute('user');
-        if (!$user->isAnonymous()) {
-            // Allow only anonymous user access.
-            // Redirect logged in users to the index page.
-            $_SESSION['error'] = 'Already logged in';
-            return new Response(302, ['Location' => '/' . TINYIB_BOARD]);
-        }
-
-        // Restore form input from the session.
-        $error = isset($_SESSION['error']) ? $_SESSION['error'] : '';
-        $email = isset($_SESSION['email']) ? $_SESSION['email'] : '';
-
-        unset($_SESSION['error']);
-        unset($_SESSION['email']);
-
-        return $this->renderer->render('auth/login.twig', [
-            'error' => $error,
-            'email' => $email,
-        ]);
+    try {
+      User::createUser($email, $password);
+    } catch (ValidationException $e) {
+      $_SESSION['error'] = $e->getMessage();
+      return new Response(302, ['Location' => '/' . $this->config->get("BOARD") . '/auth/register']);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function login(ServerRequestInterface $request) : ResponseInterface
-    {
-        /** @var User */
-        $user = $request->getAttribute('user');
-        if (!$user->isAnonymous()) {
-            // Allow only anonymous user access.
-            // Redirect logged in users to the index page.
-            $_SESSION['error'] = 'Already logged in';
-            return new Response(302, ['Location' => '/' . TINYIB_BOARD]);
-        }
+    // Redirect to the index page.
+    return new Response(302, ['Location' => '/' . $this->config->get("BOARD")]);
+  }
 
-        $data = $request->getParsedBody();
-        $email = isset($data['email']) ? $data['email'] : '';
-        $password = isset($data['password']) ? $data['password'] : '';
-
-        // Store form input to the session.
-        $_SESSION['email'] = $email;
-
-        // Check captcha.
-        $captcha = isset($data['captcha']) ? $data['captcha'] : '';
-        if (!$this->captcha_service->checkCaptcha($captcha)) {
-            $_SESSION['error'] = 'Incorrect CAPTCHA';
-            return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/auth/login']);
-        }
-
-        try {
-            User::login($email, $password);
-        }
-        catch(ValidationException $e) {
-            $_SESSION['error'] = $e->getMessage();
-            return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/auth/login']);
-        }
-
-        // Redirect to the index page.
-        return new Response(302, ['Location' => '/' . TINYIB_BOARD]);
+  /**
+   * Returns login form.
+   *
+   * @param ServerRequestInterface $request
+   *
+   * @return string|ResponseInterface Response.
+   */
+  function loginForm(ServerRequestInterface $request)
+  {
+    /** @var User */
+    $user = $request->getAttribute('user');
+    if (!$user->isAnonymous()) {
+      // Allow only anonymous user access.
+      // Redirect logged in users to the index page.
+      $_SESSION['error'] = 'Already logged in';
+      return new Response(302, ['Location' => '/' . $this->config->get("BOARD")]);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function logout() : ResponseInterface
-    {
-        User::logout();
+    // Restore form input from the session.
+    $error = isset($_SESSION['error']) ? $_SESSION['error'] : '';
+    $email = isset($_SESSION['email']) ? $_SESSION['email'] : '';
 
-        // Redirect to the index page.
-        return new Response(302, ['Location' => '/' . TINYIB_BOARD]);
+    unset($_SESSION['error']);
+    unset($_SESSION['email']);
+
+    return $this->renderer->render('auth/login.twig', [
+      'error' => $error,
+      'email' => $email,
+    ]);
+  }
+
+  /**
+   * Logs in user.
+   *
+   * @param ServerRequestInterface $request
+   *
+   * @return ResponseInterface Response.
+   */
+  function login(ServerRequestInterface $request): ResponseInterface
+  {
+    /** @var User */
+    $user = $request->getAttribute('user');
+    if (!$user->isAnonymous()) {
+      // Allow only anonymous user access.
+      // Redirect logged in users to the index page.
+      $_SESSION['error'] = 'Already logged in';
+      return new Response(302, ['Location' => '/' . $this->config->get("BOARD")]);
     }
+
+    $data = $request->getParsedBody();
+    $email = isset($data['email']) ? $data['email'] : '';
+    $password = isset($data['password']) ? $data['password'] : '';
+
+    // Store form input to the session.
+    $_SESSION['email'] = $email;
+
+    // Check captcha.
+    $captcha = isset($data['captcha']) ? $data['captcha'] : '';
+    if (!$this->captcha->checkCaptcha($captcha)) {
+      $_SESSION['error'] = 'Incorrect CAPTCHA';
+      return new Response(302, ['Location' => '/' . $this->config->get("BOARD") . '/auth/login']);
+    }
+
+    try {
+      User::login($email, $password);
+    } catch (ValidationException $e) {
+      $_SESSION['error'] = $e->getMessage();
+      return new Response(302, ['Location' => '/' . $this->config->get("BOARD") . '/auth/login']);
+    }
+
+    // Redirect to the index page.
+    return new Response(302, ['Location' => '/' . $this->config->get("BOARD")]);
+  }
+
+  /**
+   * Returns logs out user.
+   *
+   * @return ResponseInterface Response.
+   */
+  function logout(): ResponseInterface
+  {
+    User::logout();
+
+    // Redirect to the index page.
+    return new Response(302, ['Location' => '/' . $this->config->get("BOARD")]);
+  }
 }

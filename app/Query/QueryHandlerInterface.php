@@ -2,6 +2,9 @@
 
 namespace Imageboard\Query;
 
+/**
+ * @method count($query)
+ */
 interface QueryHandlerInterface
 {
   /**

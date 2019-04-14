@@ -13,6 +13,7 @@ use Imageboard\Exception\{NotFoundException, ValidationException};
  * @property int $created_at
  * @property int $updated_at
  * @property int $deleted_at
+ * @method static find(int $id)
  */
 class User extends Model implements CurrentUserInterface
 {

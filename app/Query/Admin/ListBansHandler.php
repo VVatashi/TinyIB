@@ -2,14 +2,17 @@
 
 namespace Imageboard\Query\Admin;
 
+use Imageboard\Service\ConfigService;
+
 class ListBansHandler extends ListHandler
 {
   /**
    * {@inheritDoc}
+   * @throws \Imageboard\Exception\ConfigServiceException
    */
   protected function countSql(): string
   {
-    $bans_table = TINYIB_DBBANS;
+    $bans_table = (new ConfigService())->get("DBBANS");
     $sql = <<<EOF
 SELECT count(*)
 FROM $bans_table AS b
@@ -22,10 +25,11 @@ EOF;
 
   /**
    * {@inheritDoc}
+   * @throws \Imageboard\Exception\ConfigServiceException
    */
   protected function sql(): string
   {
-    $bans_table = TINYIB_DBBANS;
+    $bans_table = (new ConfigService())->get("DBBANS");
     $sql = <<<EOF
 SELECT b.id, b.ip, b.reason, b.created_at, b.updated_at, b.expires_at
 FROM $bans_table AS b

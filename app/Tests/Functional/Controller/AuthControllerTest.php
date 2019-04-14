@@ -3,15 +3,15 @@
 namespace Imageboard\Tests\Functional\Controller;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Controller\{AuthControllerInterface, AuthController};
+use Imageboard\Controller\AuthController;
 use Imageboard\Model\User;
-use Imageboard\Service\{CaptchaService, RendererService};
+use Imageboard\Service\{CaptchaService, ConfigService, RendererService};
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
 final class AuthControllerTest extends TestCase
 {
-  /** @var AuthControllerInterface */
+  /** @var AuthController */
   protected $controller;
 
   function setUp(): void
@@ -21,9 +21,10 @@ final class AuthControllerTest extends TestCase
 
     User::truncate();
 
+    $config = new ConfigService();
     $captcha = new CaptchaService();
-    $renderer = new RendererService();
-    $this->controller = new AuthController($captcha, $renderer);
+    $renderer = new RendererService($config);
+    $this->controller = new AuthController($captcha, $renderer, $config);
   }
 
   function test_logout_shouldLogoutAndRedirect(): void

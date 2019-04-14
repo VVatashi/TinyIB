@@ -4,7 +4,7 @@ namespace Imageboard\Tests\Functional\Controller\Api;
 
 use GuzzleHttp\Psr7\ServerRequest;
 use Imageboard\Command\CommandDispatcher;
-use Imageboard\Controller\Api\{PostControllerInterface, PostController};
+use Imageboard\Controller\Api\PostController;
 use Imageboard\Exception\NotFoundException;
 use Imageboard\Model\Post;
 use Imageboard\Query\QueryDispatcher;
@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 
 final class PostControllerTest extends TestCase
 {
-  /** @var PostControllerInterface */
+  /** @var PostController */
   protected $controller;
 
   function setUp(): void

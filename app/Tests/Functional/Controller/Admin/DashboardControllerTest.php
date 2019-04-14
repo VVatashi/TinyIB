@@ -3,26 +3,30 @@
 namespace Imageboard\Tests\Functional\Controller\Admin;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Controller\Admin\{
-  DashboardControllerInterface,
-  DashboardController
-};
+use Imageboard\Command\CommandDispatcher;
+use Imageboard\Controller\Admin\DashboardController;
 use Imageboard\Exception\AccessDeniedException;
 use Imageboard\Model\User;
-use Imageboard\Service\RendererService;
+use Imageboard\Query\QueryDispatcher;
+use Imageboard\Service\{ConfigService, RendererService};
 use PHPUnit\Framework\TestCase;
 
 final class DashboardControllerTest extends TestCase
 {
-  /** @var DashboardControllerInterface */
+  /** @var DashboardController */
   protected $controller;
 
   function setUp() : void
   {
+    global $container;
+
     User::truncate();
 
-    $renderer = new RendererService();
-    $this->controller = new DashboardController($renderer);
+    $config = new ConfigService();
+    $command_dispatcher = new CommandDispatcher($container);
+    $query_dispatcher = new QueryDispatcher($container);
+    $renderer = new RendererService($config);
+    $this->controller = new DashboardController($config, $command_dispatcher, $query_dispatcher, $renderer);
   }
 
   protected function createAnonymous(): User

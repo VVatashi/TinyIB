@@ -3,19 +3,17 @@
 namespace Imageboard\Tests\Functional\Controller\Admin;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Controller\Admin\{
-  SystemControllerInterface,
-  SystemController
-};
+use Imageboard\Command\CommandDispatcher;
+use Imageboard\Controller\Admin\SystemController;
 use Imageboard\Exception\AccessDeniedException;
 use Imageboard\Model\User;
-use Imageboard\Service\RendererService;
+use Imageboard\Query\QueryDispatcher;
+use Imageboard\Service\{ConfigService, RendererService};
 use PHPUnit\Framework\TestCase;
-use Imageboard\Command\CommandDispatcher;
 
 final class SystemControllerTest extends TestCase
 {
-  /** @var SystemControllerInterface */
+  /** @var SystemController */
   protected $controller;
 
   function setUp() : void
@@ -24,9 +22,11 @@ final class SystemControllerTest extends TestCase
 
     User::truncate();
 
+    $config = new ConfigService();
     $command_dispatcher = new CommandDispatcher($container);
-    $renderer = new RendererService();
-    $this->controller = new SystemController($command_dispatcher, $renderer);
+    $query_dispatcher = new QueryDispatcher($container);
+    $renderer = new RendererService($config);
+    $this->controller = new SystemController($config, $command_dispatcher, $query_dispatcher, $renderer);
   }
 
   protected function createAnonymous(): User

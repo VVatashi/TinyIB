@@ -2,33 +2,36 @@
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Schema\Blueprint;
+use Imageboard\Helper\DatabaseHelper;
+use Imageboard\Service\ConfigService;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-// Include settings.php.
-if (!file_exists(__DIR__ . '/../settings.php')) {
-  $message = 'Please copy the file settings.default.php to settings.php';
-  throw new Exception($message);
-}
+// Configure config
+/** @var \Imageboard\Service\ConfigServiceInterface $config */
+$config = new ConfigService();
 
-require_once __DIR__ . '/../settings.php';
+/** @var \Imageboard\Helper\DatabaseHelper $databaseHelper */
+$databaseHelper = new DatabaseHelper($config);
 
 $capsule = new Capsule();
 $capsule->addConnection([
-  'driver'    => TINYIB_DBDRIVER,
-  'host'      => TINYIB_DBHOST,
-  'database'  => TINYIB_DBNAME,
-  'username'  => TINYIB_DBUSERNAME,
-  'password'  => TINYIB_DBPASSWORD,
+  'driver'    => $config->get('DBDRIVER'),
+  'host'      => $config->get('DBHOST'),
+  'database'  => $databaseHelper->getFullPath(),
+  'username'  => $config->get('DBUSERNAME'),
+  'password'  => $config->get('BPASSWORD'),
   'charset'   => 'utf8',
   'collation' => 'utf8_unicode_ci',
   'prefix'    => '',
 ]);
+
 $capsule->setAsGlobal();
 $capsule->bootEloquent();
 
-if (!Capsule::schema()->hasTable(TINYIB_DBBANS)) {
-  Capsule::schema()->create(TINYIB_DBBANS, function (Blueprint $table) {
+try{
+if (!Capsule::schema()->hasTable($config->get('DBBANS'))) {
+  Capsule::schema()->create($config->get('DBBANS'), function (Blueprint $table) {
     $table->increments('id');
     $table->string('ip');
     $table->string('reason')->nullable();
@@ -37,6 +40,9 @@ if (!Capsule::schema()->hasTable(TINYIB_DBBANS)) {
     $table->integer('updated_at')->default(0);
     $table->integer('deleted_at')->nullable();
   });
+}}catch (\Exception $ex) {
+    echo '<pre>';
+    var_dump($ex->getMessage());
 }
 
 if (!Capsule::schema()->hasTable('users')) {
@@ -74,8 +80,8 @@ if (!Capsule::schema()->hasTable('mod_log')) {
   });
 }
 
-if (!Capsule::schema()->hasTable(TINYIB_DBPOSTS)) {
-  Capsule::schema()->create(TINYIB_DBPOSTS, function (Blueprint $table) {
+if (!Capsule::schema()->hasTable($config->get('DBPOSTS'))) {
+  Capsule::schema()->create($config->get('DBPOSTS'), function (Blueprint $table) {
     $table->increments('id');
     $table->integer('parent_id')->index()->default(0);
     $table->integer('user_id')->index()->default(0);

@@ -5,15 +5,41 @@ namespace Imageboard\Controller\Admin;
 use Imageboard\Command\Admin\DeletePost;
 use Imageboard\Query\Admin\{ListPosts, ShowPost};
 
-class PostController extends CrudController implements PostControllerInterface
+class PostController extends AdminController
 {
-  protected $list_url = TINYIB_BASE_URL . TINYIB_BOARD . '/admin/posts';
-  protected $list_query_type = ListPosts::class;
-  protected $list_template = 'admin/posts/list.twig';
-  protected $ajax_list_template = 'admin/posts/_list.twig';
+  use ListTrait;
+  use ShowTrait;
+  use DeleteTrait;
 
-  protected $show_query_type = ShowPost::class;
-  protected $show_template = 'admin/posts/show.twig';
+  protected function getDeleteCommand(): string {
+    return DeletePost::class;
+  }
 
-  protected $delete_command_type = DeletePost::class;
+  protected function getListQuery(): string {
+    return ListPosts::class;
+  }
+
+  protected function getShowQuery(): string {
+    return ShowPost::class;
+  }
+
+  protected function getListUrl(): string {
+    return "{$this->base_path}/admin/posts";
+  }
+
+  protected function getListTemplate(): string {
+    return 'admin/posts/list.twig';
+  }
+
+  protected function getAjaxListTemplate(): string {
+    return 'admin/posts/_list.twig';
+  }
+
+  protected function getShowTemplate(): string {
+    return 'admin/posts/show.twig';
+  }
+
+  protected function getItemsPerPage(): int {
+    return 100;
+  }
 }

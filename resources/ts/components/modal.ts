@@ -141,8 +141,6 @@ export class Modal {
         }
       }
 
-      e.preventDefault();
-
       const { x, y } = getEventCoords(e);
       this.dragStart = {
         x,

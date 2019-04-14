@@ -1,8 +1,8 @@
 {% set has_size = post.imageWidth > 0 and post.imageHeight > 0 %}
-{% set show_name = constant('TINYIB_FILE_SHOW_ORIG_NAME') and post.fileOriginal %}
+{% set show_name = config('FILE_SHOW_ORIG_NAME') and post.fileOriginal %}
 
 {% if post.fileType %}
-  {% set direct_link = '/' ~ constant('TINYIB_BOARD') ~ '/src/' ~ post.file %}
+  {% set direct_link = config('CONTENT_PATH') ~ '/src/' ~ post.file %}
 {% endif %}
 
 <div class="{{ class is defined ? class ~ ' ' }}file-info">

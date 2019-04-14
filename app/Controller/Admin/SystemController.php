@@ -3,50 +3,30 @@
 namespace Imageboard\Controller\Admin;
 
 use GuzzleHttp\Psr7\Response;
-use Imageboard\Command\CommandDispatcher;
 use Imageboard\Command\Admin\ClearCache;
 use Imageboard\Exception\AccessDeniedException;
-use Imageboard\Service\RendererServiceInterface;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
-class SystemController implements SystemControllerInterface
+class SystemController extends AdminController
 {
-  /** @var CommandDispatcher */
-  protected $command_dispatcher;
-
-  /** @var RendererServiceInterface */
-  protected $renderer;
-
   /**
-   * Creates a new SystemController instance.
+   * Returns the admin system page.
    *
-   * @param RendererServiceInterface $renderer
+   * @param ServerRequestInterface $request
+   *
+   * @return string Response HTML.
+   *
+   * @throws AccessDeniedException
+   *   If current user is not an admin.
    */
-  function __construct(
-    CommandDispatcher $command_dispatcher,
-    RendererServiceInterface $renderer
-  ) {
-    $this->command_dispatcher = $command_dispatcher;
-    $this->renderer = $renderer;
-  }
-
-  protected function checkAccess(ServerRequestInterface $request) {
-    /** @var User */
-    $current_user = $request->getAttribute('user');
-    return $current_user->isMod();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  function index(ServerRequestInterface $request) : string
+  function index(ServerRequestInterface $request): string
   {
     if (!$this->checkAccess($request)) {
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 
     // Show status message from a session.
-    $url = TINYIB_BASE_URL . TINYIB_BOARD . '/admin/system';
+    $url = $this->config->get('BASE_PATH', '') . '/admin/system';
     $key = "$url:message";
     $message = $_SESSION[$key] ?? null;
     unset($_SESSION[$key]);
@@ -57,15 +37,22 @@ class SystemController implements SystemControllerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Cleares site cache.
+   *
+   * @param ServerRequestInterface $request
+   *
+   * @return ResponseInterface Response HTML.
+   *
+   * @throws AccessDeniedException
+   *   If current user is not an admin.
    */
-  function clearCache(ServerRequestInterface $request) : ResponseInterface
+  function clearCache(ServerRequestInterface $request): ResponseInterface
   {
     if (!$this->checkAccess($request)) {
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 
-    $back_url = TINYIB_BASE_URL . TINYIB_BOARD . '/admin/system';
+    $back_url = $this->config->get('BASE_PATH', '') . '/admin/system';
     $message_key = "$back_url:message";
 
     $command = new ClearCache();
