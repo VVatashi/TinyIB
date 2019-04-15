@@ -8,6 +8,7 @@ use Imageboard\Service\RendererServiceInterface;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
 use VVatashi\DI\Container;
+use Imageboard\Service\ConfigService;
 
 /**
  * Auth middleware.
@@ -67,13 +68,14 @@ class AuthMiddleware implements MiddlewareInterface
     // Disallow anonymous user acceess.
     if ($user->role === 0) {
       $path = $request->getUri()->getPath();
-      if (!preg_match('#^/' . TINYIB_BOARD . '/(auth|captcha|api/auth)#', $path)) {
+      $base_path = ConfigService::getInstance()->get('BASE_PATH', '');
+      if (!preg_match('#^' . preg_quote($base_path) . '/(auth|captcha|api/auth)#', $path)) {
         if ($request->getHeaderLine('Accept') === 'application/json') {
           $content = json_encode(['error' => 'Auth required']);
           return new Response(403, ['Content-Type' => 'application/json'], $content);
         }
 
-        return new Response(302, ['Location' => '/' . TINYIB_BOARD . '/auth/login']);
+        return new Response(302, ['Location' => "$base_path/auth/login"]);
       }
     }
 
