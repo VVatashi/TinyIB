@@ -4,7 +4,7 @@ import { eventBus, Events, SettingsManager } from '..';
 import { Api } from '../api';
 import { Coords } from './draggable';
 import { Settings } from '../settings';
-import { DOM } from '../utils';
+import { DOM, Keyboard } from '../utils';
 import { HSVColorPicker } from '@vvatashi/color-picker';
 
 interface ViewModel {
@@ -20,14 +20,6 @@ interface ViewModel {
   hidden: boolean;
   position: 'bottom' | 'post' | 'float';
   colorPopupVisible: boolean;
-}
-
-function checkKeyCode(e: KeyboardEvent, code: number) {
-  return e.keyCode === code || e.which === code;
-}
-
-function checkKeyChar(e: KeyboardEvent, char: string) {
-  return e.key === char || checkKeyCode(e, char.toUpperCase().charCodeAt(0));
 }
 
 export class PostingForm {
@@ -378,21 +370,24 @@ export class PostingForm {
         },
         onMessageKeyDown(e: KeyboardEvent) {
           // Submit form on Ctrl+Enter in the message field.
-          if ((e.key === 'Enter' || checkKeyCode(e, 10) || checkKeyCode(e, 13)) && e.ctrlKey) {
+          if ((e.key === 'Enter'
+            || Keyboard.checkKeyCode(e, 10)
+            || Keyboard.checkKeyCode(e, 13))
+            && e.ctrlKey) {
             this.onSubmit();
-          } else if (checkKeyChar(e, 'b') && e.altKey) {
+          } else if (Keyboard.checkKeyChar(e, 'b') && e.altKey) {
             e.preventDefault();
             this.insertMarkup('b');
-          } else if (checkKeyChar(e, 'i') && e.altKey) {
+          } else if (Keyboard.checkKeyChar(e, 'i') && e.altKey) {
             e.preventDefault();
             this.insertMarkup('i');
-          } else if (checkKeyChar(e, 't') && e.altKey) {
+          } else if (Keyboard.checkKeyChar(e, 't') && e.altKey) {
             e.preventDefault();
             this.insertMarkup('s');
-          } else if (checkKeyChar(e, 'p') && e.altKey) {
+          } else if (Keyboard.checkKeyChar(e, 'p') && e.altKey) {
             e.preventDefault();
             this.insertMarkup('spoiler');
-          } else if (checkKeyChar(e, 'c') && e.altKey) {
+          } else if (Keyboard.checkKeyChar(e, 'c') && e.altKey) {
             e.preventDefault();
             this.insertMarkup('code');
           }

@@ -2,17 +2,17 @@
 
 namespace Imageboard\Service;
 
-class FileService implements FileServiceInterface
+class FileService
 {
   /**
-   * {@inheritDoc}
+   * Returns file extension for a path.
    */
   function getExtension(string $path): string {
     return strtolower(pathinfo($path, PATHINFO_EXTENSION));
   }
 
   /**
-   * {@inheritDoc}
+   * Returns file name without extension for a path.
    */
   function getFileName(string $path): string {
     return pathinfo($path, PATHINFO_FILENAME);

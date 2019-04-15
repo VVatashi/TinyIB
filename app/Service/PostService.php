@@ -10,43 +10,43 @@ use Imageboard\Exception\{
 use Imageboard\Cache\CacheInterface;
 use Imageboard\Model\{Ban, Post};
 
-class PostService implements PostServiceInterface
+class PostService
 {
   /** @var CacheInterface */
   protected $cache;
 
-  /** @var CryptographyServiceInterface */
+  /** @var CryptographyService */
   protected $cryptography;
 
-  /** @var FileServiceInterface */
+  /** @var FileService */
   protected $file;
 
-  /** @var ThumbnailServiceInterface */
+  /** @var ThumbnailService */
   protected $thubmnail;
 
-  /** @var SafebooruServiceInterface */
+  /** @var SafebooruService */
   protected $safebooru;
 
-  /** @var \Imageboard\Service\ConfigServiceInterface */
+  /** @var \Imageboard\Service\ConfigService */
   protected $config;
 
   /**
    * Creates a new PostService instance.
    *
-   * @param CacheInterface                                $cache
-   * @param CryptographyServiceInterface                  $cryptography
-   * @param \Imageboard\Service\FileServiceInterface      $file
-   * @param \Imageboard\Service\ThumbnailServiceInterface $thubmnail
-   * @param \Imageboard\Service\SafebooruServiceInterface $safebooru
-   * @param \Imageboard\Service\ConfigServiceInterface    $config
+   * @param CacheInterface                       $cache
+   * @param CryptographyService                  $cryptography
+   * @param \Imageboard\Service\FileService      $file
+   * @param \Imageboard\Service\ThumbnailService $thubmnail
+   * @param \Imageboard\Service\SafebooruService $safebooru
+   * @param \Imageboard\Service\ConfigService    $config
    */
   function __construct(
     CacheInterface $cache,
-    CryptographyServiceInterface $cryptography,
-    FileServiceInterface $file,
-    ThumbnailServiceInterface $thubmnail,
-    SafebooruServiceInterface $safebooru,
-    ConfigServiceInterface $config
+    CryptographyService $cryptography,
+    FileService $file,
+    ThumbnailService $thubmnail,
+    SafebooruService $safebooru,
+    ConfigService $config
   ) {
     $this->cache = $cache;
     $this->cryptography = $cryptography;
@@ -121,7 +121,15 @@ class PostService implements PostServiceInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Processes poster name.
+   *
+   * @param string $name
+   *   Poster name.
+   *
+   * @return array
+   *   Array keys:
+   *     name - processed poster name;
+   *     tripcode - processed poster tripcode.
    */
   function processName(string $name): array
   {
@@ -297,7 +305,20 @@ class PostService implements PostServiceInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Creates a post.
+   *
+   * @param string $name
+   * @param string $email
+   * @param string $subject
+   * @param string $message
+   * @param string $password
+   * @param int $parent
+   * @param bool $rawpost
+   *
+   * @return Post
+   *
+   * @throws \Exception
+   * @throws ValidationException
    */
   function create(
     string $name,
@@ -308,8 +329,7 @@ class PostService implements PostServiceInterface
     string $ip,
     int $user_id = 0,
     int $parent = 0
-  ): Post
-  {
+  ): Post {
     $ban = null;
     if (!$this->checkBanned($ip, $ban)) {
       $expire = $ban->isPermanent()
@@ -416,9 +436,9 @@ class PostService implements PostServiceInterface
         throw new ValidationException('File transfer failure. Please retry the submission.');
       }
 
-      $max = $this->config->get('MAXKB');
-      $max_desc = $this->config->get('MAXKBDESC');
+      $max = (int)$this->config->get('MAXKB', 0);
       if ($max > 0 && filesize($file['tmp_name']) > $max * 1024) {
+        $max_desc = $this->config->get('MAXKBDESC');
         throw new ValidationException("That file is larger than $max_desc.");
       }
 
@@ -439,7 +459,17 @@ class PostService implements PostServiceInterface
       }
 
       $file_name = time() . substr(microtime(), 2, 3);
-      $file_extension = $this->file->getExtension($file['name']);
+      $mime_type = $this->thubmnail->getMimeTypeByContent($file['tmp_name'])
+        ?? $this->thubmnail->getMimeTypeByExtension($file['name']);
+      if (!isset($mime_type)) {
+        throw new ValidationException('Unknown file type.');
+      }
+
+      $file_extension = $this->thubmnail->getExtensionByMimeType($mime_type);
+      if (empty($file_extension) || $file_extension === ThumbnailService::DEFAULT_EXTENSION) {
+        throw new ValidationException('Unknown file type.');
+      }
+
       $post->file = "$file_name.$file_extension";
 
       $file_path = "src/{$post->file}";
@@ -525,9 +555,13 @@ class PostService implements PostServiceInterface
   }
 
   /**
-   * {@inheritDoc}
-   * @throws \Imageboard\Exception\NotFoundException
-   * @throws \Imageboard\Exception\AccessDeniedException
+   * Deletes post by ID.
+   *
+   * @param int $id
+   * @param string $password
+   *
+   * @throws NotFoundException
+   * @throws AccessDeniedException
    */
   function delete(int $id, string $password)
   {

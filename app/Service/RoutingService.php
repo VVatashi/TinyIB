@@ -29,7 +29,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Http\Server\RequestHandlerInterface;
 
-class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
+class RoutingService implements RequestHandlerInterface
 {
   /** @var ContainerInterface */
   protected $container;
@@ -37,18 +37,18 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
   /** @var Dispatcher */
   protected $dispatcher;
 
-  /** @var \Imageboard\Service\ConfigServiceInterface */
+  /** @var \Imageboard\Service\ConfigService */
   protected $config;
 
   /**
    * Creates a new RoutingService instance.
    *
-   * @param \Psr\Container\ContainerInterface          $container
-   * @param \Imageboard\Service\ConfigServiceInterface $config
+   * @param \Psr\Container\ContainerInterface $container
+   * @param \Imageboard\Service\ConfigService $config
    */
-  public function __construct(
+  function __construct(
     ContainerInterface $container,
-    ConfigServiceInterface $config
+    ConfigService $config
   ) {
     $this->container = $container;
     $this->config = $config;
@@ -163,10 +163,15 @@ class RoutingService implements RoutingServiceInterface, RequestHandlerInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Resolves route.
+   *
+   * @param ResponseInterface $request
+   *
+   * @return ServerRequestInterface
+   *
    * @throws \Imageboard\Exception\HttpException
    */
-  public function handle(ServerRequestInterface $request): ResponseInterface
+  function handle(ServerRequestInterface $request): ResponseInterface
   {
     $uri = $request->getUri();
     $method = $request->getMethod();

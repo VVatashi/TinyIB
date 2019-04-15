@@ -25,6 +25,10 @@ export class BasePage implements Page {
         return;
       }
 
+      if (e.button !== 0) {
+        return;
+      }
+
       if (e.target.tagName === 'A'
         && (e.target.classList.contains('post-header__hide')
           || e.target.classList.contains('post-header-mobile__hide'))) {

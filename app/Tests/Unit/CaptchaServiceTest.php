@@ -2,12 +2,12 @@
 
 namespace Imageboard\Tests\Unit;
 
-use Imageboard\Service\{CaptchaServiceInterface, CaptchaService};
+use Imageboard\Service\CaptchaService;
 use PHPUnit\Framework\TestCase;
 
 final class CaptchaServiceTest extends TestCase
 {
-    /** @var CaptchaServiceInterface */
+    /** @var CaptchaService */
     protected $service;
 
     public function setUp() : void
@@ -18,7 +18,6 @@ final class CaptchaServiceTest extends TestCase
     public function testCreateSevice() : void
     {
         $this->assertNotNull($this->service);
-        $this->assertInstanceOf(CaptchaServiceInterface::class, $this->service);
         $this->assertInstanceOf(CaptchaService::class, $this->service);
     }
 

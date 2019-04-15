@@ -4,7 +4,7 @@ namespace Imageboard\Middleware;
 
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Model\{Token, CurrentUserInterface, User};
-use Imageboard\Service\RendererServiceInterface;
+use Imageboard\Service\RendererService;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
 use VVatashi\DI\Container;
@@ -17,15 +17,15 @@ use Imageboard\Service\ConfigService;
  */
 class AuthMiddleware implements MiddlewareInterface
 {
-  /** @var RendererServiceInterface */
+  /** @var Container */
   protected $container;
 
-  /** @var RendererServiceInterface */
+  /** @var RendererService */
   protected $renderer;
 
   public function __construct(
     Container $container,
-    RendererServiceInterface $renderer
+    RendererService $renderer
   ) {
     $this->container = $container;
     $this->renderer = $renderer;

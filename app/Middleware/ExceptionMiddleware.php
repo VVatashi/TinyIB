@@ -5,7 +5,7 @@ namespace Imageboard\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Exception\HttpException;
 use Imageboard\Functions;
-use Imageboard\Service\RendererServiceInterface;
+use Imageboard\Service\RendererService;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Http\Server\{RequestHandlerInterface, MiddlewareInterface};
 use Psr\Log\LoggerInterface;
@@ -18,12 +18,12 @@ class ExceptionMiddleware implements MiddlewareInterface
 	/** @var LoggerInterface */
 	protected $logger;
 
-	/** @var RendererServiceInterface */
+	/** @var RendererService */
 	protected $renderer;
 
 	public function __construct(
 		LoggerInterface $logger,
-		RendererServiceInterface $renderer
+		RendererService $renderer
 	) {
 		$this->logger = $logger;
 		$this->renderer = $renderer;

@@ -4,6 +4,7 @@ import { Events } from '../events';
 import { Thread } from '../model';
 import { DOM } from '../utils';
 import { PostView } from '../views';
+import { SettingsManager } from '../settings';
 
 const faviconSize = 16;
 
@@ -13,7 +14,9 @@ export class ThreadPage extends BasePage {
 
   protected readonly $updater: HTMLElement;
   protected readonly $status: HTMLElement;
+  protected readonly $title: HTMLElement;
   protected readonly faviconHref: string;
+  protected readonly title: string;
 
   constructor(readonly threadId: number) {
     super();
@@ -24,6 +27,9 @@ export class ThreadPage extends BasePage {
     this.$updater = DOM.qid('thread-updater');
     this.$status = this.$updater ?
       DOM.qs('.thread-updater__status', this.$updater) as HTMLElement : null;
+
+    this.$title = DOM.qs('title') as HTMLElement;
+    this.title = this.$title ? this.$title.textContent : '';
 
     const $posts = DOM.qsa('.post') as HTMLElement[];
     this.posts = $posts.map($post => new PostView($post));
@@ -73,13 +79,16 @@ export class ThreadPage extends BasePage {
         context.textBaseline = 'middle';
         context.fillStyle = '#FFFFFF';
 
-        // Draw new posts count.
-        if (unreadPosts < 10) {
-          context.font = `700 10px 'Roboto Condensed', sans-serif`;
-          context.fillText(unreadPosts.toString(), x, y + 1);
-        } else {
-          context.font = `700 8px 'Roboto Condensed', sans-serif`;
-          context.fillText(unreadPosts.toString(), x, y);
+        const settings = SettingsManager.load();
+        if (!settings.common.showUnreadCountInTitle) {
+          // Draw new posts count.
+          if (unreadPosts < 10) {
+            context.font = `700 10px 'Roboto Condensed', sans-serif`;
+            context.fillText(unreadPosts.toString(), x, y + 1);
+          } else {
+            context.font = `700 8px 'Roboto Condensed', sans-serif`;
+            context.fillText(unreadPosts.toString(), x, y);
+          }
         }
       }
 
@@ -101,6 +110,15 @@ export class ThreadPage extends BasePage {
       $canvas.remove();
       $img.remove();
     };
+  }
+
+  updateTitle(unreadPosts: number) {
+    const settings = SettingsManager.load();
+    if (settings.common.showUnreadCountInTitle && unreadPosts > 0) {
+      this.$title.textContent = `[${this.model.unreadPosts}] ${this.title}`;
+    } else {
+      this.$title.textContent = this.title;
+    }
   }
 
   protected onNewPostsLoaded(html: string) {
@@ -144,6 +162,7 @@ export class ThreadPage extends BasePage {
       const models = views.map(view => view.model);
       this.model.addPosts(models, document.hidden);
       this.updateFavicon(this.model.unreadPosts, this.model.hasReplies);
+      this.updateTitle(this.model.unreadPosts);
 
       eventBus.emit(Events.PostsInserted, $newPosts);
     }
@@ -207,6 +226,7 @@ export class ThreadPage extends BasePage {
       if (!document.hidden) {
         this.model.readAll();
         this.updateFavicon(this.model.unreadPosts, this.model.hasReplies);
+        this.updateTitle(this.model.unreadPosts);
       }
     });
 

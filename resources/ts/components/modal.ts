@@ -141,6 +141,8 @@ export class Modal {
         }
       }
 
+      e.preventDefault();
+
       const { x, y } = getEventCoords(e);
       this.dragStart = {
         x,
@@ -200,11 +202,6 @@ export class Modal {
         this.$content.style.height = `${height}px`;
       }
 
-      return false;
-    });
-
-    $modal.addEventListener('dragstart', e => {
-      e.preventDefault();
       return false;
     });
   }

@@ -12,7 +12,7 @@ use Imageboard\Middleware\{
   ExceptionMiddleware,
   RequestHandler
 };
-use Imageboard\Service\{ConfigService, ConfigServiceInterface, RoutingServiceInterface, RendererServiceInterface};
+use Imageboard\Service\{ConfigService, RoutingService, RendererService};
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
@@ -28,7 +28,7 @@ class App
   protected $container;
 
   /**
-   * @var \Imageboard\Service\ConfigServiceInterface
+   * @var ConfigService
    */
   protected $config;
 
@@ -47,7 +47,9 @@ class App
    */
   function bootstrap(bool $handleErrors = true) : self
   {
-    $this->setupErrorHandling();
+    if ($handleErrors) {
+      $this->setupErrorHandling();
+    }
 
     // Set up config
     $this->config = new ConfigService();
@@ -116,9 +118,9 @@ EOF;
 
     // Register container itself.
     $this->container->registerInstance(ContainerInterface::class, $this->container);
-    $this->container->registerInstance(ConfigServiceInterface::class , $this->config);
+    $this->container->registerInstance(ConfigService::class , $this->config);
 
-    if (!$this->config->get('ERROR_LOG')) {
+    if ($this->config->get('ERROR_LOG', true)) {
       // Lazy create logger.
       $this->container->registerCallback(LoggerInterface::class, function ($container) {
         $logger = new Logger('App');
@@ -163,31 +165,24 @@ EOF;
 
     // Register services in the IoC-container by conventions.
     $directories = [
-      'Command' => ['#$#', ''],
-      'Controller' => ['#$#', ''],
-      'Model' => ['#$#', ''],
-      'Service' => ['#Interface$#', ''],
-      'Query' => ['#$#', ''],
+      'Command',
+      'Controller',
+      'Model',
+      'Service',
+      'Query',
     ];
 
-    foreach ($directories as $directory => $regex) {
+    foreach ($directories as $directory) {
       $files = Functions::globRec(__DIR__ . '/' . $directory . '/*.php');
-      $files = array_map(function ($file) {
+      $classes = array_map(function ($file) {
         $file = str_replace(__DIR__, '', $file);
         $file = preg_replace('#^(.+)\\.php$#', 'Imageboard$1', $file);
         $file = str_replace('/', '\\', $file);
         return $file;
       }, $files);
 
-      $interfaces = array_filter($files, function ($file) use ($regex) {
-        return preg_match($regex[0], $file);
-      });
-
-      foreach ($interfaces as $interface) {
-        $class = preg_replace($regex[0], $regex[1], $interface);
-        if (in_array($class, $files)) {
-          $this->container->registerType($interface, $class);
-        }
+      foreach ($classes as $class) {
+        $this->container->registerType($class, $class);
       }
     }
   }
@@ -198,11 +193,11 @@ EOF;
   function handleRequest()
   {
     // Use routing handler.
-    /** @var RoutingServiceInterface */
-    $handler = $this->container->get(RoutingServiceInterface::class);
+    /** @var RoutingService */
+    $handler = $this->container->get(RoutingService::class);
 
-    /** @var RendererServiceInterface */
-    $renderer = $this->container->get(RendererServiceInterface::class);
+    /** @var RendererService */
+    $renderer = $this->container->get(RendererService::class);
 
     /** @var LoggerInterface */
     $logger = $this->container->get(LoggerInterface::class);

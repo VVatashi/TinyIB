@@ -4,18 +4,18 @@ namespace Imageboard\Command;
 
 use Imageboard\Command\CommandHandlerInterface;
 use Imageboard\Model\CurrentUserInterface;
-use Imageboard\Service\PostServiceInterface;
+use Imageboard\Service\PostService;
 
 class CreatePostHandler implements CommandHandlerInterface
 {
-  /** @var PostServiceInterface */
+  /** @var PostService */
   protected $post;
 
   /** @var CurrentUserInterface */
   protected $user;
 
   function __construct(
-    PostServiceInterface $post,
+    PostService $post,
     CurrentUserInterface $user
   ) {
     $this->post = $post;

@@ -9,7 +9,7 @@ use Imageboard\Exception\ConfigServiceException;
  *
  * @package Imageboard\Service
  */
-class ConfigService implements ConfigServiceInterface
+class ConfigService
 {
   const HASH_SYMBOL = '#';
 
@@ -153,8 +153,14 @@ class ConfigService implements ConfigServiceInterface
   }
 
   /**
-   * {@inheritDoc}
-   * @throws \Imageboard\Exception\ConfigServiceException
+   * Get value
+   *
+   * @param string $key
+   * @param        $default
+   *
+   * @return mixed
+   *
+   * @throws ConfigServiceException
    */
   public function get(string $key, $default = '') {
     $this->_setupConfig();

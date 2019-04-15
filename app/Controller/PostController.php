@@ -6,10 +6,12 @@ use GuzzleHttp\Psr7\Response;
 use Imageboard\Cache\CacheInterface;
 use Imageboard\Exception\{NotFoundException, ValidationException};
 use Imageboard\Model\Post;
-use Imageboard\Service\{CaptchaServiceInterface,
-  ConfigServiceInterface,
-  PostServiceInterface,
-  RendererServiceInterface};
+use Imageboard\Service\{
+  CaptchaService,
+  ConfigService,
+  PostService,
+  RendererService
+};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
 class PostController implements ControllerInterface
@@ -17,33 +19,33 @@ class PostController implements ControllerInterface
   /** @var CacheInterface */
   protected $cache;
 
-  /** @var CaptchaServiceInterface */
+  /** @var CaptchaService */
   protected $captcha;
 
-  /** @var PostServiceInterface */
+  /** @var PostService */
   protected $post;
 
-  /** @var RendererServiceInterface */
+  /** @var RendererService */
   protected $renderer;
 
-  /** @var ConfigServiceInterface  */
+  /** @var ConfigService  */
   protected $config;
 
   /**
    * PostController constructor.
    *
-   * @param \Imageboard\Cache\CacheInterface             $cache
-   * @param \Imageboard\Service\CaptchaServiceInterface  $captcha
-   * @param \Imageboard\Service\PostServiceInterface     $post
-   * @param \Imageboard\Service\RendererServiceInterface $renderer
-   * @param \Imageboard\Service\ConfigServiceInterface   $config
+   * @param \Imageboard\Cache\CacheInterface    $cache
+   * @param \Imageboard\Service\CaptchaService  $captcha
+   * @param \Imageboard\Service\PostService     $post
+   * @param \Imageboard\Service\RendererService $renderer
+   * @param \Imageboard\Service\ConfigService   $config
    */
   function __construct(
     CacheInterface $cache,
-    CaptchaServiceInterface $captcha,
-    PostServiceInterface $post,
-    RendererServiceInterface $renderer,
-    ConfigServiceInterface $config
+    CaptchaService $captcha,
+    PostService $post,
+    RendererService $renderer,
+    ConfigService $config
   ) {
     $this->cache = $cache;
     $this->captcha = $captcha;

@@ -22,7 +22,7 @@ export class VideoPlayer {
   protected playing = true;
   protected fullscreen = false;
 
-  constructor(readonly $player: Element) {
+  constructor(readonly $player: Element, autoPlay: boolean = true) {
     const controls = [
       'video', 'controls',
       'play', 'pause',
@@ -172,6 +172,8 @@ export class VideoPlayer {
         this.fullscreen = false;
       }
     });
+
+    this.setPlaying(autoPlay);
   }
 
   setPlaying(value: boolean) {

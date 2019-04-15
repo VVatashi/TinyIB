@@ -21,6 +21,8 @@ export interface CommonSettings {
   removeHiddenPosts: boolean;
 
   showPostPopups: boolean;
+  autoPlay: boolean;
+  showUnreadCountInTitle: boolean;
 }
 
 export interface Replace {
@@ -84,6 +86,8 @@ const defaultSettings: Settings = {
     removeHiddenPosts: false,
 
     showPostPopups: true,
+    autoPlay: true,
+    showUnreadCountInTitle: false,
   },
   form: {
     align: 'center',

@@ -7,18 +7,18 @@ use Twig_Environment;
 use Twig_Loader_Filesystem;
 use Twig_SimpleFunction;
 
-class RendererService implements RendererServiceInterface
+class RendererService
 {
   /** @var Twig_Environment */
   protected $twig;
 
-  /** @var \Imageboard\Service\ConfigServiceInterface */
+  /** @var \Imageboard\Service\ConfigService */
   protected $config;
 
   /**
-   * @param \Imageboard\Service\ConfigServiceInterface $config
+   * @param \Imageboard\Service\ConfigService $config
    */
-  function __construct(ConfigServiceInterface $config)
+  function __construct(ConfigService $config)
   {
     $this->config = $config;
 
@@ -60,7 +60,10 @@ class RendererService implements RendererServiceInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Register global variable for twig templates.
+   *
+   * @param string $name
+   * @param mixed $value
    */
   function registerGlobal(string $name, $value)
   {
@@ -68,7 +71,10 @@ class RendererService implements RendererServiceInterface
   }
 
   /**
-   * {@inheritDoc}
+   * @param string $template
+   * @param array $variables
+   *
+   * @return string
    */
   function render(string $template, array $variables = []): string
   {

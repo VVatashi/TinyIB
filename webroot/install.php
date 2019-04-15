@@ -8,7 +8,7 @@ use Imageboard\Service\ConfigService;
 require_once __DIR__ . '/../vendor/autoload.php';
 
 // Configure config
-/** @var \Imageboard\Service\ConfigServiceInterface $config */
+/** @var \Imageboard\Service\ConfigService $config */
 $config = new ConfigService();
 
 /** @var \Imageboard\Helper\DatabaseHelper $databaseHelper */
@@ -29,7 +29,6 @@ $capsule->addConnection([
 $capsule->setAsGlobal();
 $capsule->bootEloquent();
 
-try{
 if (!Capsule::schema()->hasTable($config->get('DBBANS'))) {
   Capsule::schema()->create($config->get('DBBANS'), function (Blueprint $table) {
     $table->increments('id');
@@ -40,9 +39,6 @@ if (!Capsule::schema()->hasTable($config->get('DBBANS'))) {
     $table->integer('updated_at')->default(0);
     $table->integer('deleted_at')->nullable();
   });
-}}catch (\Exception $ex) {
-    echo '<pre>';
-    var_dump($ex->getMessage());
 }
 
 if (!Capsule::schema()->hasTable('users')) {

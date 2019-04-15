@@ -7,7 +7,7 @@ use Imageboard\Cache\CacheInterface;
 use Imageboard\Controller\ControllerInterface;
 use Imageboard\Exception\NotFoundException;
 use Imageboard\Model\Post;
-use Imageboard\Service\{ConfigServiceInterface, PostServiceInterface, RendererServiceInterface};
+use Imageboard\Service\{ConfigService, PostService, RendererService};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
 class MobilePostController implements ControllerInterface
@@ -18,29 +18,29 @@ class MobilePostController implements ControllerInterface
   /** @var CacheInterface */
   protected $cache;
 
-  /** @var PostServiceInterface */
+  /** @var PostService */
   protected $post;
 
-  /** @var RendererServiceInterface */
+  /** @var RendererService */
   protected $renderer;
 
-  /** @var ConfigServiceInterface */
+  /** @var ConfigService */
   protected $config;
 
   /**
    * MobilePostController constructor.
    * Constructs new Mobile post controller.
    *
-   * @param \Imageboard\Cache\CacheInterface             $cache
-   * @param \Imageboard\Service\PostServiceInterface     $post
-   * @param \Imageboard\Service\RendererServiceInterface $renderer
-   * @param \Imageboard\Service\ConfigServiceInterface   $config
+   * @param \Imageboard\Cache\CacheInterface    $cache
+   * @param \Imageboard\Service\PostService     $post
+   * @param \Imageboard\Service\RendererService $renderer
+   * @param \Imageboard\Service\ConfigService   $config
    */
   function __construct(
     CacheInterface $cache,
-    PostServiceInterface $post,
-    RendererServiceInterface $renderer,
-    ConfigServiceInterface $config
+    PostService $post,
+    RendererService $renderer,
+    ConfigService $config
   ) {
     $this->cache = $cache;
     $this->post = $post;
