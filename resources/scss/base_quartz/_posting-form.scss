@@ -52,29 +52,39 @@
     display: none;
   }
 
+  &__main {
+    display: flex;
+    flex-flow: column;
+    padding-top: 4px;
+  }
+
   &__content {
     position: relative;
     padding: $form-content-padding;
   }
 
-  &__row,
-  &__markup-row {
+  &__row {
+    display: flex;
     flex-flow: row nowrap;
     align-items: stretch;
+    justify-content: space-between;
+    position: relative;
+
+    &--message {
+      order: 1;
+    }
+
+    &--markup,
+    &--bottom {
+      order: 2;
+    }
 
     &:not(:last-child) {
       margin-bottom: 9px;
     }
   }
 
-  &__row,
-  &__markup-row {
-    display: flex;
-    justify-content: space-between;
-    position: relative;
-  }
-
-  @at-root .layout:not(.layout--show-markup-mobile) &__markup-row {
+  @at-root .layout:not(.layout--show-markup-mobile) &__row--markup {
     display: none;
   }
 
@@ -100,6 +110,7 @@
 
   &__markup-button {
     flex-grow: 1;
+    min-height: 30px;
     padding: 4px 1px;
 
     &:not(:last-child) {
@@ -108,8 +119,6 @@
   }
 
   &__message {
-    margin: 0 0 4px 0;
-
     min-width: 100%;
     min-height: 100px;
 
@@ -181,27 +190,32 @@
     border: $form-border;
     border-radius: $form-border-radius;
 
+    &__main {
+      display: block;
+      max-width: 1000px;
+      padding-top: 0;
+    }
+
     &__content {
       display: flex;
     }
 
-    &__main {
-      max-width: 1000px
-    }
-
-    &__row,
-    &__markup-row {
+    &__row {
       &:not(:last-child) {
         margin-bottom: 6px;
       }
     }
 
-    @at-root .layout.layout--show-markup &__markup-row {
+    @at-root .layout.layout--show-markup &__row--markup {
       display: flex;
     }
 
-    @at-root .layout:not(.layout--show-markup) &__markup-row {
+    @at-root .layout:not(.layout--show-markup) &__row--markup {
       display: none;
+    }
+
+    &__markup-button {
+      min-height: unset;
     }
 
     &__subject,
