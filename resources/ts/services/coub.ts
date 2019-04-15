@@ -26,8 +26,9 @@ export class Coub {
     return await response.json() as CoubData;
   }
 
-  static async getHtml(coubUrl: string) {
-    const oEmbedUrl = `https://coub.com/api/oembed.json?url=${encodeURIComponent(coubUrl)}&autoplay=true`;
+  static async getHtml(coubUrl: string, autoPlay: boolean = true) {
+    const baseUrl = 'https://coub.com/api/oembed.json';
+    const oEmbedUrl = `${baseUrl}?url=${encodeURIComponent(coubUrl)}${autoPlay ? '&autoplay=true' : ''}`;
     const url = `${window.baseUrl}/api/embed?url=${encodeURIComponent(oEmbedUrl)}`;
     const response = await fetch(url, {
       credentials: 'same-origin',

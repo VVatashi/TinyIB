@@ -3,7 +3,7 @@ import { VideoPlayer } from './video-player';
 
 import { eventBus, Events, SettingsManager } from '..';
 import { Coub } from '../services';
-import { DOM } from '../utils';
+import { DOM, Keyboard } from '../utils';
 
 interface FileData {
   postId: number;
@@ -22,14 +22,6 @@ interface PostPopup {
   $parentLink: HTMLElement;
   $popup: HTMLElement;
   hover: boolean;
-}
-
-function checkKeyCode(e: KeyboardEvent, code: number) {
-  return e.keyCode === code || e.which === code;
-}
-
-function checkKeyChar(e: KeyboardEvent, char: string) {
-  return e.key === char || checkKeyCode(e, char.toUpperCase().charCodeAt(0));
 }
 
 function offset($el: HTMLElement) {
@@ -68,27 +60,13 @@ export class Post {
         return;
       }
 
-      if (checkKeyChar(e, 'b')) {
-        e.preventDefault();
-        this.toggleNsfw();
-
-        return false;
-      } else if (checkKeyChar(e, 'u')) {
-        e.preventDefault();
-
-        const settings = SettingsManager.load();
-        if (settings.common.enableThreadAutoupdate) {
-          eventBus.emit(Events.UpdateThread);
-        }
-
-        return false;
-      } else if (e.key === 'Escape' || checkKeyCode(e, 27)) {
+      if (e.key === 'Escape' || Keyboard.checkKeyCode(e, 27)) {
         e.preventDefault();
         this.closeModals();
 
         return false;
       } else if (this.modalFileIndex !== null
-        && (e.key === 'ArrowLeft' || checkKeyCode(e, 37)) && e.ctrlKey) {
+        && (e.key === 'ArrowLeft' || Keyboard.checkKeyCode(e, 37)) && e.ctrlKey) {
         e.preventDefault();
 
         const prevIndex = this.modalFileIndex > 0
@@ -103,7 +81,7 @@ export class Post {
 
         return false;
       } else if (this.modalFileIndex !== null
-        && (e.key === 'ArrowRight' || checkKeyCode(e, 39)) && e.ctrlKey) {
+        && (e.key === 'ArrowRight' || Keyboard.checkKeyCode(e, 39)) && e.ctrlKey) {
         e.preventDefault();
 
         const nextIndex = this.modalFileIndex < this.media.length - 1
@@ -456,7 +434,7 @@ export class Post {
 
             const postId = +$post.getAttribute('data-post-id');
             const html = embedInfo.html
-              .replace(/src="([^"]+)"/i, 'src="$1&autoplay=1"')
+              .replace(/src="([^"]+)"/i, 'src="$1&autoplay=0"')
               .replace(/width="\d+"/i, 'width="100%"')
               .replace(/height="\d+"/i, 'height="100%"');
             if (!this.media.find(file => file.postId === postId && file.url === url)) {
@@ -532,6 +510,9 @@ export class Post {
       }
     }
 
+    const settings = SettingsManager.load();
+    const autoPlay = settings.common.autoPlay;
+
     if (file.type === 'image') {
       this.$modal = document.createElement('div');
       this.$modal.classList.add('modal');
@@ -552,7 +533,7 @@ export class Post {
 
 <div class="modal__content modal__content--audio">
   <audio class="modal__audio" src="${file.url}"
-    autoplay="true" loop="true" preload="none" controls="true">
+    ${autoPlay ? 'autoplay="true"' : ''} loop="true" preload="metadata" controls="true">
   </audio>
 </div>`;
       this.$layout.appendChild(this.$modal);
@@ -566,7 +547,7 @@ export class Post {
 <div class="modal__content modal__content--video">
   <div class="player">
     <video class="player__video" src="${file.url}"
-      autoplay="true" loop="true" preload="none">
+      ${autoPlay ? 'autoplay="true"' : ''} loop="true" preload="metadata">
     </video>
 
     <div class="player__controls">
@@ -605,7 +586,7 @@ export class Post {
       this.$layout.appendChild(this.$modal);
 
       const $player = DOM.qs('.player', this.$modal);
-      this.player = new VideoPlayer($player);
+      this.player = new VideoPlayer($player, autoPlay);
 
       this.modal = new Modal(this.$modal);
       this.modal.show(left, top, width, height, () => {
@@ -622,7 +603,7 @@ export class Post {
 </div>
 
 <div id="embed-modal_content" class="modal__content modal__content--embed">
-  ${await Coub.getHtml(file.url)}
+  ${await Coub.getHtml(file.url, autoPlay)}
 </div>`;
       this.$layout.appendChild(this.$modal);
 
@@ -636,7 +617,7 @@ export class Post {
 </div>
 
 <div id="embed-modal_content" class="modal__content modal__content--embed">
-  ${file.data}
+  ${file.data.replace('autoplay=0', 'autoplay=' + (autoPlay ? 1 : 0))}
 </div>`;
       this.$layout.appendChild(this.$modal);
 

@@ -7,6 +7,10 @@
     display: none;
   }
 
+  &--popup {
+    z-index: 1;
+  }
+
   &__inner {
     @include clearfix;
 

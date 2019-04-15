@@ -33,6 +33,10 @@
     padding: $form-content-padding;
   }
 
+  &__row {
+    margin-bottom: 0.5em;
+  }
+
   &__option-title {
     margin: 1em 1em 0.5em;
   }
@@ -75,5 +79,11 @@
   &__save {
     min-width: 80px;
     min-height: 2em;
+  }
+
+  @include breakpoint($xs-up) {
+    &__row {
+      margin-bottom: 0.25em;
+    }
   }
 }

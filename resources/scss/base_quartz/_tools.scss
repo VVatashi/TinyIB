@@ -1,4 +1,6 @@
 .tools {
+  background: $block-background;
+
   position: fixed;
   bottom: 0;
   right: 0;
@@ -7,5 +9,21 @@
 
   @include breakpoint($xs-up) {
     font-size: 20px;
+  }
+
+  &__item:not(:first-child) &__button {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  &__item:not(:last-child) &__button {
+    border-right: 0;
+
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  &__button--active {
+    @extend .button:active;
   }
 }

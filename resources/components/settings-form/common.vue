@@ -129,6 +129,20 @@
         Show post in a popup when hovering over link
       </x-checkbox>
     </div>
+
+    <div class="settings-form__row">
+      <x-checkbox v-model="settings.common.autoPlay"
+        label-class="settings-form__label" input-class="settings-form__checkbox">
+        Autoplay audio &amp; video files
+      </x-checkbox>
+    </div>
+
+    <div class="settings-form__row">
+      <x-checkbox v-model="settings.common.showUnreadCountInTitle"
+        label-class="settings-form__label" input-class="settings-form__checkbox">
+        Show count of unread posts in title
+      </x-checkbox>
+    </div>
   </div>
 </template>
 

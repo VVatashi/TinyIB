@@ -1,7 +1,7 @@
 import { Post } from '.';
 import { API } from '../services';
 import { SettingsManager } from '../settings';
-import { EventEmitter } from '../utils';
+import { EventEmitter, Keyboard } from '../utils';
 
 const updateInterval = 10;
 
@@ -62,6 +62,24 @@ export class Thread extends EventEmitter {
     readonly posts: Post[],
   ) {
     super();
+
+    document.addEventListener('keydown', e => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        return;
+      }
+
+      if (Keyboard.checkKeyChar(e, 'u')) {
+        e.preventDefault();
+
+        const settings = SettingsManager.load();
+        if (settings.common.enableThreadAutoupdate) {
+          this.getNewPosts();
+        }
+
+        return false;
+      }
+    }, true);
   }
 
   get ownPosts() {
