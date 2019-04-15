@@ -123,7 +123,7 @@ export class PostingForm {
           v-bind:disabled="disabled">Reply</button>
       </div>
 
-      <div class="posting-form__markup-row markup">
+      <div class="posting-form__row posting-form__row--markup markup">
         <button type="button" class="button posting-form__markup-button"
           v-on:click.prevent="insertMarkup('b')">
           <strong>b</strong>
@@ -195,7 +195,7 @@ export class PostingForm {
         </button>
       </div>
 
-      <div class="posting-form__row">
+      <div class="posting-form__row posting-form__row--message">
         <textarea class="input posting-form__message" placeholder="Message"
           v-model="fields.message" v-bind:disabled="disabled"
           v-on:keydown="onMessageKeyDown"
@@ -203,10 +203,12 @@ export class PostingForm {
           ref="message"></textarea>
       </div>
 
-      <div v-if="status" class="posting-form__status">{{ status }}</div>
+      <div class="posting-form__row posting-form__row--bottom">
+        <button type="submit" class="posting-form__submit posting-form__submit--mobile"
+          v-bind:disabled="disabled">Reply</button>
 
-      <button type="submit" class="posting-form__submit posting-form__submit--mobile"
-        v-bind:disabled="disabled">Reply</button>
+        <div v-if="status" class="posting-form__status">{{ status }}</div>
+      </div>
     </div>
   </div>
 </form>`,
