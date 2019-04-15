@@ -29,8 +29,10 @@ class ThumbnailService
 
   /**
    * Returns mime-type for a file extension.
+   *
+   * @return null|string
    */
-  function getMimeTypeByExtension(string $extension): string {
+  function getMimeTypeByExtension(string $extension) {
     switch ($extension) {
       case 'jpg':
       case 'jpeg':
@@ -50,7 +52,7 @@ class ThumbnailService
       case 'mp4': return 'video/mp4';
       case 'webm': return 'video/webm';
 
-      default: return static::DEFAULT_MIME_TYPE;
+      default: return null;
     }
   }
 
@@ -86,9 +88,11 @@ class ThumbnailService
   }
 
   /**
-   * Returns mime-type for a file.
+   * Returns mime-type for a file by content.
+   *
+   * @return null|string
    */
-  function getMimeType(string $path): string {
+  function getMimeTypeByContent(string $path) {
     // Try determine mime-type from file content.
     $mime_split = explode(' ', trim(mime_content_type($path)));
     if (count($mime_split) > 0) {
@@ -96,17 +100,27 @@ class ThumbnailService
     }
 
     if (empty($mime_type) || $mime_type === static::DEFAULT_MIME_TYPE) {
-      // Try determine mime-type from file extension.
-      $extension = $this->file->getExtension($path);
-      return $this->getMimeTypeByExtension($extension);
+      return null;
     }
 
     return $mime_type;
   }
 
   /**
-   * {@inheritDoc}
+   * Returns mime-type for a file.
    */
+  function getMimeType(string $path): string {
+    // Try determine mime-type from file content.
+    $mime_type = $this->getMimeTypeByContent($path);
+    if (!isset($mime_type)) {
+      // Try determine mime-type from file extension.
+      $extension = $this->file->getExtension($path);
+      $mime_type = $this->getMimeTypeByExtension($extension);
+    }
+
+    return $mime_type ?? static::DEFAULT_MIME_TYPE;
+  }
+
   function isImage(string $mime_type): bool {
     return in_array($mime_type, [
       'image/jpeg',
@@ -117,18 +131,12 @@ class ThumbnailService
     ]);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   function isAudio(string $mime_type): bool {
     return in_array($mime_type, [
       'audio/mpeg',
     ]);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   function isVideo(string $mime_type): bool {
     return in_array($mime_type, [
       'audio/mp4',

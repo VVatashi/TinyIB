@@ -329,8 +329,7 @@ class PostService
     string $ip,
     int $user_id = 0,
     int $parent = 0
-  ): Post
-  {
+  ): Post {
     $ban = null;
     if (!$this->checkBanned($ip, $ban)) {
       $expire = $ban->isPermanent()
@@ -437,9 +436,9 @@ class PostService
         throw new ValidationException('File transfer failure. Please retry the submission.');
       }
 
-      $max = $this->config->get('MAXKB');
-      $max_desc = $this->config->get('MAXKBDESC');
+      $max = (int)$this->config->get('MAXKB', 0);
       if ($max > 0 && filesize($file['tmp_name']) > $max * 1024) {
+        $max_desc = $this->config->get('MAXKBDESC');
         throw new ValidationException("That file is larger than $max_desc.");
       }
 
@@ -460,7 +459,17 @@ class PostService
       }
 
       $file_name = time() . substr(microtime(), 2, 3);
-      $file_extension = $this->file->getExtension($file['name']);
+      $mime_type = $this->thubmnail->getMimeTypeByContent($file['tmp_name'])
+        ?? $this->thubmnail->getMimeTypeByExtension($file['name']);
+      if (!isset($mime_type)) {
+        throw new ValidationException('Unknown file type.');
+      }
+
+      $file_extension = $this->thubmnail->getExtensionByMimeType($mime_type);
+      if (empty($file_extension) || $file_extension === ThumbnailService::DEFAULT_EXTENSION) {
+        throw new ValidationException('Unknown file type.');
+      }
+
       $post->file = "$file_name.$file_extension";
 
       $file_path = "src/{$post->file}";
