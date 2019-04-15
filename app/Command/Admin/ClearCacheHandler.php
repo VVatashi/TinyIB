@@ -5,7 +5,7 @@ namespace Imageboard\Command\Admin;
 use Imageboard\Cache\CacheInterface;
 use Imageboard\Command\CommandHandlerInterface;
 use Imageboard\Model\{CurrentUserInterface, ModLog};
-use Imageboard\Service\ConfigServiceInterface;
+use Imageboard\Service\ConfigService;
 
 class ClearCacheHandler implements CommandHandlerInterface
 {
@@ -15,13 +15,13 @@ class ClearCacheHandler implements CommandHandlerInterface
   /** @var CacheInterface */
   protected $cache;
 
-  /** @var ConfigServiceInterface */
+  /** @var ConfigService */
   protected $config;
 
   function __construct(
     CurrentUserInterface $user,
     CacheInterface $cache,
-    ConfigServiceInterface $config
+    ConfigService $config
   ) {
     $this->user = $user;
     $this->cache = $cache;

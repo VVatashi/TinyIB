@@ -2,12 +2,12 @@
 
 namespace Imageboard\Tests\Unit;
 
-use Imageboard\Service\{CryptographyServiceInterface, CryptographyService};
+use Imageboard\Service\CryptographyService;
 use PHPUnit\Framework\TestCase;
 
 final class CryptographyServiceTest extends TestCase
 {
-    /** @var CryptographyServiceInterface */
+    /** @var CryptographyService */
     protected $service;
 
     public function setUp() : void
@@ -18,7 +18,6 @@ final class CryptographyServiceTest extends TestCase
     public function testCreateCryptographyService() : void
     {
         $this->assertNotNull($this->service);
-        $this->assertInstanceOf(CryptographyServiceInterface::class, $this->service);
         $this->assertInstanceOf(CryptographyService::class, $this->service);
     }
 

@@ -3,20 +3,20 @@
 namespace Imageboard\Controller;
 
 use GuzzleHttp\Psr7\Response;
-use Imageboard\Service\CaptchaServiceInterface;
+use Imageboard\Service\CaptchaService;
 use Psr\Http\Message\ResponseInterface;
 
 class CaptchaController implements ControllerInterface
 {
-  /** @var CaptchaServiceInterface */
+  /** @var CaptchaService */
   protected $captcha;
 
   /**
    * Constructs a new captcha controller.
    *
-   * @param \Imageboard\Service\CaptchaServiceInterface $captcha
+   * @param \Imageboard\Service\CaptchaService $captcha
    */
-  function __construct(CaptchaServiceInterface $captcha)
+  function __construct(CaptchaService $captcha)
   {
     $this->captcha = $captcha;
   }

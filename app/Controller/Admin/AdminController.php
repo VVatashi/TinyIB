@@ -6,16 +6,12 @@ use Imageboard\Command\CommandDispatcher;
 use Imageboard\Controller\ControllerInterface;
 use Imageboard\Model\User;
 use Imageboard\Query\QueryDispatcher;
-use Imageboard\Service\{
-  ConfigServiceInterface,
-  RendererServiceInterface,
-  RendererService
-};
+use Imageboard\Service\{ConfigService, RendererService};
 use Psr\Http\Message\ServerRequestInterface;
 
 abstract class AdminController implements ControllerInterface
 {
-  /** @var \Imageboard\Service\ConfigServiceInterface */
+  /** @var \Imageboard\Service\ConfigService */
   protected $config;
 
   /** @var CommandDispatcher */
@@ -24,7 +20,7 @@ abstract class AdminController implements ControllerInterface
   /** @var QueryDispatcher */
   protected $query_dispatcher;
 
-  /** @var RendererServiceInterface */
+  /** @var RendererService */
   protected $renderer;
 
   /** @var string */
@@ -36,16 +32,16 @@ abstract class AdminController implements ControllerInterface
    *
    * Creates a new CRUD controller instance.
    *
-   * @param \Imageboard\Service\ConfigServiceInterface   $config
-   * @param \Imageboard\Command\CommandDispatcher        $command_dispatcher
-   * @param \Imageboard\Query\QueryDispatcher            $query_dispatcher
-   * @param \Imageboard\Service\RendererServiceInterface $renderer
+   * @param \Imageboard\Service\ConfigService     $config
+   * @param \Imageboard\Command\CommandDispatcher $command_dispatcher
+   * @param \Imageboard\Query\QueryDispatcher     $query_dispatcher
+   * @param \Imageboard\Service\RendererService   $renderer
    */
   function __construct(
-    ConfigServiceInterface $config,
+    ConfigService $config,
     CommandDispatcher $command_dispatcher,
     QueryDispatcher $query_dispatcher,
-    RendererServiceInterface $renderer
+    RendererService $renderer
   ) {
     $this->config             = $config;
     $this->command_dispatcher = $command_dispatcher;

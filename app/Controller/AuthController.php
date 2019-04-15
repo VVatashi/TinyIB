@@ -5,31 +5,31 @@ namespace Imageboard\Controller;
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Exception\ValidationException;
 use Imageboard\Model\User;
-use Imageboard\Service\{CaptchaServiceInterface, ConfigServiceInterface, RendererServiceInterface};
+use Imageboard\Service\{CaptchaService, ConfigService, RendererService};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
 class AuthController implements ControllerInterface
 {
-  /** @var CaptchaServiceInterface */
+  /** @var CaptchaService */
   protected $captcha;
 
-  /** @var RendererServiceInterface */
+  /** @var RendererService */
   protected $renderer;
 
-  /** @var ConfigServiceInterface  */
+  /** @var ConfigService  */
   protected $config;
 
   /**
    * Creates a new AuthController instance.
    *
-   * @param \Imageboard\Service\CaptchaServiceInterface  $captcha
-   * @param \Imageboard\Service\RendererServiceInterface $renderer
-   * @param \Imageboard\Service\ConfigServiceInterface   $config
+   * @param \Imageboard\Service\CaptchaService  $captcha
+   * @param \Imageboard\Service\RendererService $renderer
+   * @param \Imageboard\Service\ConfigService   $config
    */
   function __construct(
-    CaptchaServiceInterface $captcha,
-    RendererServiceInterface $renderer,
-    ConfigServiceInterface $config
+    CaptchaService $captcha,
+    RendererService $renderer,
+    ConfigService $config
   ) {
     $this->captcha = $captcha;
     $this->renderer = $renderer;

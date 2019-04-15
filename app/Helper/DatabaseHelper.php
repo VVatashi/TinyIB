@@ -4,14 +4,14 @@ namespace Imageboard\Helper;
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Schema\Blueprint;
-use Imageboard\Service\ConfigServiceInterface;
+use Imageboard\Service\ConfigService;
 
 class DatabaseHelper implements HelperInterface
 {
-  protected $_configService;
+  protected $config;
 
-  public function __construct (ConfigServiceInterface $configService) {
-    $this->_configService = $configService;
+  public function __construct (ConfigService $config) {
+    $this->config = $config;
   }
 
   /**
@@ -20,7 +20,7 @@ class DatabaseHelper implements HelperInterface
    * @return bool
    */
   public function isSqlite() : bool {
-    $result = strtolower($this->_configService->get('DBDRIVER')) == 'sqlite';
+    $result = strtolower($this->config->get('DBDRIVER')) == 'sqlite';
     return $result;
   }
 
@@ -32,21 +32,21 @@ class DatabaseHelper implements HelperInterface
   public function getFullPath() : string {
     // Is full path or :memory:
     // TODO: Add fix for Windows-based OSes
-    if($this->isSqlite() && !in_array($this->_configService->get('DBNAME')[0] ?? ':', ['/', ':'])) {
-      $dbPath = $this->_configService->get('ROOT', __DIR__ . '/../..')
+    if($this->isSqlite() && !in_array($this->config->get('DBNAME')[0] ?? ':', ['/', ':'])) {
+      $dbPath = $this->config->get('ROOT', __DIR__ . '/../..')
         . DIRECTORY_SEPARATOR
-        . $this->_configService->get('DBNAME');
+        . $this->config->get('DBNAME');
 
 
       return $dbPath;
     }
 
-    return $this->_configService->get('DBNAME');
+    return $this->config->get('DBNAME');
   }
 
   public function createDatabaseStructure() {
-    if (!Capsule::schema()->hasTable($this->_configService->get('DBBANS'))) {
-      Capsule::schema()->create($this->_configService->get('DBBANS'), function (Blueprint $table) {
+    if (!Capsule::schema()->hasTable($this->config->get('DBBANS'))) {
+      Capsule::schema()->create($this->config->get('DBBANS'), function (Blueprint $table) {
         $table->increments('id');
         $table->string('ip');
         $table->string('reason')->nullable();
@@ -92,8 +92,8 @@ class DatabaseHelper implements HelperInterface
       });
     }
 
-    if (!Capsule::schema()->hasTable($this->_configService->get("DBPOSTS"))) {
-      Capsule::schema()->create($this->_configService->get("DBPOSTS"), function (Blueprint $table) {
+    if (!Capsule::schema()->hasTable($this->config->get("DBPOSTS"))) {
+      Capsule::schema()->create($this->config->get("DBPOSTS"), function (Blueprint $table) {
         $table->increments('id');
         $table->integer('parent_id')->index()->default(0);
         $table->integer('user_id')->index()->default(0);

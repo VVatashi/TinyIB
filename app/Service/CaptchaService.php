@@ -4,10 +4,12 @@ namespace Imageboard\Service;
 
 use Imageboard\SimpleCaptcha;
 
-class CaptchaService extends SimpleCaptcha implements CaptchaServiceInterface
+class CaptchaService extends SimpleCaptcha
 {
   /**
-   * {@inheritDoc}
+   * Creates a random text to use in CAPTCHA.
+   *
+   * @return string
    */
   function getText(): string
   {
@@ -15,7 +17,9 @@ class CaptchaService extends SimpleCaptcha implements CaptchaServiceInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Creates a CAPTCHA image.
+   *
+   * @return resource
    */
   function getImage(string $text)
   {
@@ -43,7 +47,9 @@ class CaptchaService extends SimpleCaptcha implements CaptchaServiceInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Checks a CAPTCHA response.
+   *
+   * @return bool
    */
   function checkCaptcha(string $captcha_response): bool
   {

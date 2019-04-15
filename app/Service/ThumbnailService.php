@@ -4,13 +4,13 @@ namespace Imageboard\Service;
 
 use Imageboard\Exception\ValidationException;
 
-class ThumbnailService implements ThumbnailServiceInterface
+class ThumbnailService
 {
   const DEFAULT_MIME_TYPE = 'application/octet-stream';
   const DEFAULT_EXTENSION = 'bin';
   const AUDIO_THUMBNAIL = 'images/audio_thumbnail.png';
 
-  /** @var FileServiceInterface */
+  /** @var FileService */
   protected $file;
 
   /** @var ConfigService */
@@ -20,15 +20,15 @@ class ThumbnailService implements ThumbnailServiceInterface
    * Creates a new ThumbnailService instance.
    */
   function __construct(
-    FileServiceInterface $file,
-    ConfigServiceInterface $config
+    FileService $file,
+    ConfigService $config
   ) {
     $this->file = $file;
     $this->config = $config;
   }
 
   /**
-   * {@inheritDoc}
+   * Returns mime-type for a file extension.
    */
   function getMimeTypeByExtension(string $extension): string {
     switch ($extension) {
@@ -55,7 +55,7 @@ class ThumbnailService implements ThumbnailServiceInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Returns file extension for a mime-type.
    */
   function getExtensionByMimeType(string $mime_type): string {
     switch ($mime_type) {
@@ -86,7 +86,7 @@ class ThumbnailService implements ThumbnailServiceInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Returns mime-type for a file.
    */
   function getMimeType(string $path): string {
     // Try determine mime-type from file content.
@@ -174,7 +174,11 @@ class ThumbnailService implements ThumbnailServiceInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Returns width and height of an image or video.
+   *
+   * @param string $path Path to the file.
+   *
+   * @return int[] Width and height of the file.
    */
   function getFileSize(string $path): array {
     $mime_type = $this->getMimeType($path);
@@ -238,7 +242,12 @@ class ThumbnailService implements ThumbnailServiceInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Creates thumbnail.
+   *
+   * @param string $path Path to the original file.
+   * @param string $output_dir Path to the output directory.
+   *
+   * @return string Path to the generated thumbnail file.
    */
   function createThumbnail(
     string $path,

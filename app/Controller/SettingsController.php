@@ -3,25 +3,25 @@
 namespace Imageboard\Controller;
 
 use Imageboard\Cache\CacheInterface;
-use Imageboard\Service\RendererServiceInterface;
+use Imageboard\Service\RendererService;
 
 class SettingsController implements ControllerInterface
 {
   /** @var CacheInterface */
   protected $cache;
 
-  /** @var RendererServiceInterface */
+  /** @var RendererService */
   protected $renderer;
 
   /**
    * Constructs new settings controller.
    *
-   * @param CacheInterface $cache
-   * @param RendererServiceInterface $renderer
+   * @param CacheInterface  $cache
+   * @param RendererService $renderer
    */
   function __construct(
     CacheInterface $cache,
-    RendererServiceInterface $renderer
+    RendererService $renderer
   ) {
     $this->cache = $cache;
     $this->renderer = $renderer;

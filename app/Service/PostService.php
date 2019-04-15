@@ -10,43 +10,43 @@ use Imageboard\Exception\{
 use Imageboard\Cache\CacheInterface;
 use Imageboard\Model\{Ban, Post};
 
-class PostService implements PostServiceInterface
+class PostService
 {
   /** @var CacheInterface */
   protected $cache;
 
-  /** @var CryptographyServiceInterface */
+  /** @var CryptographyService */
   protected $cryptography;
 
-  /** @var FileServiceInterface */
+  /** @var FileService */
   protected $file;
 
-  /** @var ThumbnailServiceInterface */
+  /** @var ThumbnailService */
   protected $thubmnail;
 
-  /** @var SafebooruServiceInterface */
+  /** @var SafebooruService */
   protected $safebooru;
 
-  /** @var \Imageboard\Service\ConfigServiceInterface */
+  /** @var \Imageboard\Service\ConfigService */
   protected $config;
 
   /**
    * Creates a new PostService instance.
    *
-   * @param CacheInterface                                $cache
-   * @param CryptographyServiceInterface                  $cryptography
-   * @param \Imageboard\Service\FileServiceInterface      $file
-   * @param \Imageboard\Service\ThumbnailServiceInterface $thubmnail
-   * @param \Imageboard\Service\SafebooruServiceInterface $safebooru
-   * @param \Imageboard\Service\ConfigServiceInterface    $config
+   * @param CacheInterface                       $cache
+   * @param CryptographyService                  $cryptography
+   * @param \Imageboard\Service\FileService      $file
+   * @param \Imageboard\Service\ThumbnailService $thubmnail
+   * @param \Imageboard\Service\SafebooruService $safebooru
+   * @param \Imageboard\Service\ConfigService    $config
    */
   function __construct(
     CacheInterface $cache,
-    CryptographyServiceInterface $cryptography,
-    FileServiceInterface $file,
-    ThumbnailServiceInterface $thubmnail,
-    SafebooruServiceInterface $safebooru,
-    ConfigServiceInterface $config
+    CryptographyService $cryptography,
+    FileService $file,
+    ThumbnailService $thubmnail,
+    SafebooruService $safebooru,
+    ConfigService $config
   ) {
     $this->cache = $cache;
     $this->cryptography = $cryptography;
@@ -121,7 +121,15 @@ class PostService implements PostServiceInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Processes poster name.
+   *
+   * @param string $name
+   *   Poster name.
+   *
+   * @return array
+   *   Array keys:
+   *     name - processed poster name;
+   *     tripcode - processed poster tripcode.
    */
   function processName(string $name): array
   {
@@ -297,7 +305,20 @@ class PostService implements PostServiceInterface
   }
 
   /**
-   * {@inheritDoc}
+   * Creates a post.
+   *
+   * @param string $name
+   * @param string $email
+   * @param string $subject
+   * @param string $message
+   * @param string $password
+   * @param int $parent
+   * @param bool $rawpost
+   *
+   * @return Post
+   *
+   * @throws \Exception
+   * @throws ValidationException
    */
   function create(
     string $name,
@@ -525,9 +546,13 @@ class PostService implements PostServiceInterface
   }
 
   /**
-   * {@inheritDoc}
-   * @throws \Imageboard\Exception\NotFoundException
-   * @throws \Imageboard\Exception\AccessDeniedException
+   * Deletes post by ID.
+   *
+   * @param int $id
+   * @param string $password
+   *
+   * @throws NotFoundException
+   * @throws AccessDeniedException
    */
   function delete(int $id, string $password)
   {
