@@ -120,7 +120,7 @@ EOF;
     $this->container->registerInstance(ContainerInterface::class, $this->container);
     $this->container->registerInstance(ConfigService::class , $this->config);
 
-    if (!$this->config->get('ERROR_LOG')) {
+    if ($this->config->get('ERROR_LOG', true)) {
       // Lazy create logger.
       $this->container->registerCallback(LoggerInterface::class, function ($container) {
         $logger = new Logger('App');
