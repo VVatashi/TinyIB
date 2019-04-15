@@ -202,6 +202,11 @@ export class Modal {
 
       return false;
     });
+
+    $modal.addEventListener('dragstart', e => {
+      e.preventDefault();
+      return false;
+    });
   }
 
   show(
