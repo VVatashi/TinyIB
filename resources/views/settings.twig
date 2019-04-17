@@ -1,5 +1,24 @@
 {% extends 'layout/_html.twig' %}
 
+{% macro radio(label, key, value, defaultValue) %}
+  <label class="settings-form__label">
+    <input type="radio" class="settings-form__radio" name="{{ key }}"
+      data-key="{{ key }}" data-default="{{ defaultValue }}"
+      value="{{ value }}" />
+    {{ label }}
+  </label>
+{% endmacro %}
+
+{% macro checkbox(label, key, defaultValue) %}
+  <label class="settings-form__label">
+    <input type="checkbox" class="settings-form__checkbox"
+      data-key="{{ key }}" data-default="{{ defaultValue }}" />
+    {{ label }}
+  </label>
+{% endmacro %}
+
+{% import _self as self %}
+
 {% block head %}
   {{ parent() }}
 
@@ -8,6 +27,275 @@
 
 {% block content %}
   <main class="{{class is defined ? class ~ ' '}}">
-    <div id="settings_form"></div>
+    <div id="settings-form" class="content__settings-form settings-form">
+      <ul class="settings-form__tabs">
+        <li class="settings-form__tab" data-tab="common">Common</li>
+        <li class="settings-form__tab" data-tab="form">Form</li>
+        <li class="settings-form__tab" data-tab="time">Time</li>
+      </ul>
+
+      <div class="settings-form__tab-content" data-tab-content="common">
+        <h3 class="settings-form__option-title">Thread Alignment</h3>
+
+        <div class="settings-form__row">
+          {{ self.radio('On the left',
+            'common.layout',
+            'left',
+            'left') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.radio('In the center',
+            'common.layout',
+            'center',
+            'left') }}
+        </div>
+
+        <h3 class="settings-form__option-title">Posts</h3>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Show reply icon in the post header',
+            'common.show-post-header-reflink-icon',
+            'true') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Show reply icon in the bottom right corner of post message',
+            'common.show-post-reflink-icon',
+            'false') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Scroll to new posts',
+            'common.scroll-to-new-posts',
+            'true') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Smooth scrolling',
+            'common.smooth-scroll',
+            'true') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Show video overlay',
+            'common.show-video-overlay',
+            'false') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Close image popup when clicking outside',
+            'common.hide-popup-on-outside-click',
+            'false') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Enable NSFW mode',
+            'common.nsfw',
+            'false') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Enable thread autoupdate',
+            'common.enable-thread-autoupdate',
+            'true') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Add names to the links',
+            'common.add-names-to-links',
+            'true') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Add \'(you)\' to the links',
+            'common.add-you-to-links',
+            'true') }}
+        </div>
+
+        <h3 class="settings-form__option-title">Hide posts</h3>
+        <ul id="hidden-posts" class="settings-form__list"></ul>
+        <button id="hidden-posts-add" class="button">Add</button>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Remove hidden posts',
+            'common.remove-hidden-posts',
+            'false') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Show post in a popup when hovering over link',
+            'common.show-post-popups',
+            'true') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Autoplay audio &amp; video files',
+            'common.auto-play',
+            'true') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Show count of unread posts in title',
+            'common.show-unread-count-in-title',
+            'false') }}
+        </div>
+      </div>
+
+      <div class="settings-form__tab-content" data-tab-content="form">
+        <h3 class="settings-form__option-title">Form Behaviour</h3>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Scroll to the bottom after posting',
+            'form.scroll-bottom',
+            'true') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Save subject after posting',
+            'form.save-subject',
+            'false') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Save name after posting',
+            'form.save-name',
+            'true') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Save form floating state on page reload',
+            'form.save-form-state',
+            'true') }}
+        </div>
+
+        <h3 class="settings-form__option-title">Form Alignment</h3>
+
+        <div class="settings-form__row">
+          {{ self.radio('On the left',
+            'form.align',
+            'left',
+            'center') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.radio('In the center',
+            'form.align',
+            'center',
+            'center') }}
+        </div>
+
+        <h3 class="settings-form__option-title">Preview Alignment</h3>
+
+        <div class="settings-form__row">
+          {{ self.radio('On the left',
+            'form.preview-align',
+            'left',
+            'right') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.radio('On the right',
+            'form.preview-align',
+            'right',
+            'right') }}
+        </div>
+
+        <h3 class="settings-form__option-title">Markup</h3>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Show markup buttons',
+            'form.show-markup',
+            'true') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Show markup buttons (mobile)',
+            'form.show-markup-mobile',
+            'false') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Insert tags in pairs',
+            'form.insert-tags-in-pairs',
+            'true') }}
+        </div>
+
+        <h3 class="settings-form__option-title">Replaces</h3>
+        <ul id="form-replaces" class="settings-form__list"></ul>
+        <button id="form-replaces-add" class="button">Add</button>
+      </div>
+
+      <div class="settings-form__tab-content" data-tab-content="time">
+        <h3 class="settings-form__option-title">Language</h3>
+
+        <div class="settings-form__row">
+          {{ self.radio('Browser default',
+            'time.locale',
+            'default',
+            'default') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.radio('Custom'
+              ~ ' <input type="text" data-key="time.locale-custom" data-default="en"'
+              ~ ' class="input settings-form__text" placeholder="en" />',
+            'time.locale',
+            'custom',
+            'default') }}
+        </div>
+
+        <h3 class="settings-form__option-title">Format</h3>
+
+        <div class="settings-form__row">
+          {{ self.radio('Browser default',
+            'time.format',
+            'default',
+            'default') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.radio('Custom'
+              ~ ' <input type="text" data-key="time.format-custom" data-default="EEE, dd MMM yyyy HH:mm:ss"'
+              ~ ' class="input settings-form__text" placeholder="EEE, dd MMM yyyy HH:mm:ss" />',
+            'time.format',
+            'custom',
+            'default') }}
+        </div>
+
+        <p>
+          See the
+          <a href="https://github.com/moment/luxon/blob/master/docs/formatting.md#table-of-tokens">
+            luxon documentation
+          </a>
+          for the custom tokens reference.
+        </p>
+
+        <h3 class="settings-form__option-title">Time zone</h3>
+
+        <div class="settings-form__row">
+          {{ self.radio('Browser default',
+            'time.zone',
+            'default',
+            'default') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.radio('Fixed UTC offset'
+              ~ ' <input type="number" data-key="time.zone-fixed" data-default="0"'
+              ~ ' class="input settings-form__text" min="-99" max="99" />',
+            'time.zone',
+            'fixed',
+            'default') }}
+        </div>
+
+        <h3 class="settings-form__option-title">Current format</h3>
+        <p id="time-preview"></p>
+      </div>
+
+      <div class="settings-form__footer">
+        <p class="settings-form__status" ></p>
+      </div>
+    </div>
   </main>
 {% endblock %}

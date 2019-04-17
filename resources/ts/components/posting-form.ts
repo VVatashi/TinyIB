@@ -424,7 +424,7 @@ export class PostingForm {
 
           let message = this.fields.message as string;
 
-          if (selection.length || Settings.get('form.insert-tags-in-pairs')) {
+          if (selection.length || Settings.get('form.insert-tags-in-pairs', true)) {
             // If text is selected, wrap it in a tag pair.
             message = [
               message.substring(0, selection.begin),
@@ -536,7 +536,7 @@ export class PostingForm {
             }
 
             if (isInThread) {
-              if (Settings.get('common.enable-thread-autoupdate')) {
+              if (Settings.get('common.enable-thread-autoupdate', true)) {
                 eventBus.emit(Events.PostCreated);
               }
             } else {
@@ -558,7 +558,7 @@ export class PostingForm {
             }
           }
 
-          if (Settings.get('form.scroll-bottom')) {
+          if (Settings.get('form.scroll-bottom', true)) {
             // Scroll to the last post.
             setTimeout(() => {
               const el = DOM.qs('.post:nth-last-of-type(1)');
@@ -660,7 +660,7 @@ export class PostingForm {
   }
 
   protected onPostsInserted(posts: HTMLElement[], initial: boolean) {
-    if (!initial && Settings.get('common.scroll-to-new-posts')) {
+    if (!initial && Settings.get('common.scroll-to-new-posts', true)) {
       const scrollingEl = document.scrollingElement || document.body;
       const postsHeight = posts.reduce((total, post) => {
         const style = document.defaultView.getComputedStyle(post, '');
@@ -712,7 +712,7 @@ export class PostingForm {
     vm.position = 'float';
     Settings.set('form.float', true);
 
-    const position = Settings.get('form.float-position');
+    const position = Settings.get('form.float-position', { x: 0, y: 0 });
     vm.setPosition(vm.checkBounds(position));
 
     this.updateReplyButton();

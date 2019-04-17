@@ -15,8 +15,7 @@ export class Time {
 
     if (Settings.get<string>('time.format', 'default') === 'custom') {
       return time.toFormat(Settings.get('time.format-custom', 'd.LL.yyyy HH:mm:ss'));
-    }
-    else {
+    } else {
       return time.toFormat('d.LL.yyyy HH:mm:ss');
     }
   }
