@@ -245,8 +245,8 @@ class ThumbnailService
       $height = $max_height;
     }
 
-    $size = max($width, $height);
-    shell_exec("ffmpegthumbnailer -s $size -t 00:00:00 -i $path -o $output_path");
+    shell_exec("ffmpeg -y -loglevel quiet -ss 00:00:01 -i $path"
+      . " -vframes 1 -vf scale=w=$width:h=$height:force_original_aspect_ratio=decrease $output_path");
   }
 
   /**
