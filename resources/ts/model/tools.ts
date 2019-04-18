@@ -1,31 +1,25 @@
-import { SettingsManager } from '../settings';
+import { Settings } from '../services';
 import { EventEmitter } from '../utils';
 
 export class Tools extends EventEmitter {
   get nsfw(): boolean {
-    const settings = SettingsManager.load();
-    return settings.common.nsfw;
+    return Settings.get('common.nsfw', false);
   }
 
   get autoPlay(): boolean {
-    const settings = SettingsManager.load();
-    return settings.common.autoPlay;
+    return Settings.get('common.auto-play', true);
   }
 
   toggleNsfw() {
-    const settings = SettingsManager.load();
-    settings.common.nsfw = !settings.common.nsfw;
-    SettingsManager.save(settings);
-
-    this.emit('toggle-nsfw', settings.common.nsfw);
+    const value = Settings.get('common.nsfw', false);
+    Settings.set('common.nsfw', !value);
+    this.emit('toggle-nsfw', !value);
   }
 
   toggleAutoPlay() {
-    const settings = SettingsManager.load();
-    settings.common.autoPlay = !settings.common.autoPlay;
-    SettingsManager.save(settings);
-
-    this.emit('toggle-autoplay', settings.common.autoPlay);
+    const value = Settings.get('common.auto-play', false);
+    Settings.set('common.auto-play', !value);
+    this.emit('toggle-autoplay', !value);
   }
 
   scrollToTop() {

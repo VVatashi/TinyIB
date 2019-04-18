@@ -3,28 +3,28 @@
     <h3 class="settings-form__option-title">Form Behaviour</h3>
 
     <div class="settings-form__row">
-      <x-checkbox v-model="settings.form.scrollBottom"
+      <x-checkbox v-model="scrollBottom"
         label-class="settings-form__label" input-class="settings-form__checkbox">
         Scroll to the bottom after posting
       </x-checkbox>
     </div>
 
     <div class="settings-form__row">
-      <x-checkbox v-model="settings.form.saveSubject"
+      <x-checkbox v-model="saveSubject"
         label-class="settings-form__label" input-class="settings-form__checkbox">
         Save subject after posting
       </x-checkbox>
     </div>
 
     <div class="settings-form__row">
-      <x-checkbox v-model="settings.form.saveName"
+      <x-checkbox v-model="saveName"
         label-class="settings-form__label" input-class="settings-form__checkbox">
         Save name after posting
       </x-checkbox>
     </div>
 
     <div class="settings-form__row">
-      <x-checkbox v-model="settings.form.saveFormState"
+      <x-checkbox v-model="saveFormState"
         label-class="settings-form__label" input-class="settings-form__checkbox">
         Save form floating state on page reload
       </x-checkbox>
@@ -33,14 +33,14 @@
     <h3 class="settings-form__option-title">Form Alignment</h3>
 
     <div class="settings-form__row">
-      <x-radio-button v-model="settings.form.align" :value="'left'"
+      <x-radio-button v-model="align" :value="'left'"
         label-class="settings-form__label" input-class="settings-form__radio">
         On the left
       </x-radio-button>
     </div>
 
     <div class="settings-form__row">
-      <x-radio-button v-model="settings.form.align" :value="'center'"
+      <x-radio-button v-model="align" :value="'center'"
         label-class="settings-form__label" input-class="settings-form__radio">
         In the center
       </x-radio-button>
@@ -49,14 +49,14 @@
     <h3 class="settings-form__option-title">Preview Alignment</h3>
 
     <div class="settings-form__row">
-      <x-radio-button v-model="settings.form.previewAlign" :value="'left'"
+      <x-radio-button v-model="previewAlign" :value="'left'"
         label-class="settings-form__label" input-class="settings-form__radio">
         On the left
       </x-radio-button>
     </div>
 
     <div class="settings-form__row">
-      <x-radio-button v-model="settings.form.previewAlign" :value="'right'"
+      <x-radio-button v-model="previewAlign" :value="'right'"
         label-class="settings-form__label" input-class="settings-form__radio">
         On the right
       </x-radio-button>
@@ -65,21 +65,21 @@
     <h3 class="settings-form__option-title">Markup</h3>
 
     <div class="settings-form__row">
-      <x-checkbox v-model="settings.form.showMarkup"
+      <x-checkbox v-model="showMarkup"
         label-class="settings-form__label" input-class="settings-form__checkbox">
         Show markup buttons
       </x-checkbox>
     </div>
 
     <div class="settings-form__row">
-      <x-checkbox v-model="settings.form.showMarkupMobile"
+      <x-checkbox v-model="showMarkupMobile"
         label-class="settings-form__label" input-class="settings-form__checkbox">
         Show markup buttons (mobile)
       </x-checkbox>
     </div>
 
     <div class="settings-form__row">
-      <x-checkbox v-model="settings.form.insertTagsInPairs"
+      <x-checkbox v-model="insertTagsInPairs"
         label-class="settings-form__label" input-class="settings-form__checkbox">
         Insert tags in pairs
       </x-checkbox>
@@ -89,7 +89,7 @@
 
     <ul class="settings-form__list">
       <li class="settings-form__list-item"
-        v-for="(item, index) in settings.form.replaces"
+        v-for="(item, index) in replaces"
         :key="index">
         <input type="text" class="input settings-form__text"
           v-model="item.pattern" placeholder="Pattern" />

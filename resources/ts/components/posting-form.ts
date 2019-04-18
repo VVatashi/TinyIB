@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import { draggable, FilePreview } from '.';
-import { eventBus, Events, SettingsManager } from '..';
+import { eventBus, Events } from '..';
 import { Api } from '../api';
 import { Coords } from './draggable';
-import { Settings } from '../settings';
+import { Settings } from '../services';
 import { DOM, Keyboard } from '../utils';
 import { HSVColorPicker } from '@vvatashi/color-picker';
 
@@ -25,7 +25,6 @@ interface ViewModel {
 export class PostingForm {
   protected isInThread: boolean = false;
   protected viewModel: Vue & ViewModel;
-  protected settings: Settings = SettingsManager.load();
 
   constructor() {
     eventBus.on(Events.Ready, this.onReady.bind(this));
@@ -84,7 +83,7 @@ export class PostingForm {
     </x-file-preview>
 
     <x-file-preview class="posting-form__preview posting-form__preview--desktop"
-      v-bind:class="{ 'posting-form__preview--right': settings.previewAlign == 'right' }"
+      v-bind:class="{ 'posting-form__preview--right': previewAlign == 'right' }"
       v-bind:file="file"
       v-on:click="showFileDialog()"
       v-on:drop="onFileDrop($event)">
@@ -216,8 +215,8 @@ export class PostingForm {
           disabled: false,
           status: '',
           hidden: true,
-          position: component.settings.form.saveFormState
-            && component.settings.form.float
+          position: Settings.get('form.save-form-state', true)
+            && Settings.get('form.float', false)
             ? 'float' : 'bottom',
           colorPopupVisible: false,
         };
@@ -226,12 +225,12 @@ export class PostingForm {
         threadId() {
           return threadId;
         },
-        settings() {
-          return component.settings.form;
+        previewAlign() {
+          return Settings.get('form.preview-align', 'right');
         },
       },
       created() {
-        if (component.settings.form.saveSubject) {
+        if (Settings.get('form.save-subject', false)) {
           // Load saved subject.
           const subject = localStorage['posting-form.subject'];
           if (subject) {
@@ -239,7 +238,7 @@ export class PostingForm {
           }
         }
 
-        if (component.settings.form.saveName) {
+        if (Settings.get('form.save-name', true)) {
           // Load saved name.
           const name = localStorage['posting-form.name'];
           if (name) {
@@ -251,7 +250,7 @@ export class PostingForm {
       },
       mounted() {
         if (this.position === 'float') {
-          const position = component.settings.form.floatPosition;
+          const position = Settings.get('form.float-position', { x: 0, y: 0 });
           this.setPosition(this.checkBounds(position));
         }
       },
@@ -288,10 +287,7 @@ export class PostingForm {
           draggable.style.left = `${coords.x}px`;
           draggable.style.top = `${coords.y}px`;
 
-          const settings = SettingsManager.load();
-          settings.form.floatPosition = coords;
-          component.settings = settings;
-          SettingsManager.save(component.settings);
+          Settings.set('form.float-position', coords);
         },
         onDraggableResize() {
           if (this.hidden) {
@@ -301,11 +297,11 @@ export class PostingForm {
           this.setPosition(this.checkBounds(this.getPosition()));
         },
         resetFields() {
-          if (!component.settings.form.saveSubject) {
+          if (!Settings.get('form.save-subject', false)) {
             this.fields.subject = '';
           }
 
-          if (!component.settings.form.saveName) {
+          if (!Settings.get('form.save-name', true)) {
             this.fields.name = '';
           }
 
@@ -428,7 +424,7 @@ export class PostingForm {
 
           let message = this.fields.message as string;
 
-          if (selection.length || component.settings.form.insertTagsInPairs) {
+          if (selection.length || Settings.get('form.insert-tags-in-pairs')) {
             // If text is selected, wrap it in a tag pair.
             message = [
               message.substring(0, selection.begin),
@@ -507,8 +503,8 @@ export class PostingForm {
           this.disabled = true;
 
           // Apply replaces to the message.
-          const replaces = component.settings.form.replaces;
-          const message = replaces.reduce((message, item) => {
+          const replaces = Settings.get('form.replaces', []) as { pattern: string, replace: string }[];
+          const message = replaces.reduce((message: string, item) => {
             const regexp = new RegExp(item.pattern, 'gm');
             return message.replace(regexp, item.replace);
           }, this.fields.message as string);
@@ -540,8 +536,7 @@ export class PostingForm {
             }
 
             if (isInThread) {
-              const settings = SettingsManager.load();
-              if (settings.common.enableThreadAutoupdate) {
+              if (Settings.get('common.enable-thread-autoupdate')) {
                 eventBus.emit(Events.PostCreated);
               }
             } else {
@@ -563,7 +558,7 @@ export class PostingForm {
             }
           }
 
-          if (component.settings.form.scrollBottom) {
+          if (Settings.get('form.scroll-bottom')) {
             // Scroll to the last post.
             setTimeout(() => {
               const el = DOM.qs('.post:nth-last-of-type(1)');
@@ -665,7 +660,7 @@ export class PostingForm {
   }
 
   protected onPostsInserted(posts: HTMLElement[], initial: boolean) {
-    if (!initial && this.settings.common.scrollToNewPosts) {
+    if (!initial && Settings.get('common.scroll-to-new-posts')) {
       const scrollingEl = document.scrollingElement || document.body;
       const postsHeight = posts.reduce((total, post) => {
         const style = document.defaultView.getComputedStyle(post, '');
@@ -715,13 +710,9 @@ export class PostingForm {
 
     const vm = this.viewModel as any;
     vm.position = 'float';
+    Settings.set('form.float', true);
 
-    const settings = SettingsManager.load();
-    settings.form.float = true;
-    this.settings = settings;
-    SettingsManager.save(this.settings);
-
-    const position = this.settings.form.floatPosition;
+    const position = Settings.get('form.float-position');
     vm.setPosition(vm.checkBounds(position));
 
     this.updateReplyButton();
@@ -737,11 +728,7 @@ export class PostingForm {
 
     const vm = this.viewModel;
     vm.position = 'post';
-
-    const settings = SettingsManager.load();
-    settings.form.float = false;
-    this.settings = settings;
-    SettingsManager.save(this.settings);
+    Settings.set('form.float', false);
 
     const showButton = DOM.qid('posting-form-show');
     if (showButton) {
@@ -771,11 +758,7 @@ export class PostingForm {
 
     const vm = this.viewModel;
     vm.position = 'bottom';
-
-    const settings = SettingsManager.load();
-    settings.form.float = false;
-    this.settings = settings;
-    SettingsManager.save(this.settings);
+    Settings.set('form.float', false);
 
     this.updateReplyButton();
 

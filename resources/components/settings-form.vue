@@ -15,23 +15,20 @@
     </ul>
 
     <x-common class="settings-form__tab-content"
-      v-show="tab === 'common'" :settings="settings">
+      v-show="tab === 'common'">
     </x-common>
 
     <x-form class="settings-form__tab-content"
-      v-show="tab === 'form'" :settings="settings">
+      v-show="tab === 'form'">
     </x-form>
 
     <x-time class="settings-form__tab-content"
-      v-show="tab === 'time'" :settings="settings">
+      v-show="tab === 'time'">
     </x-time>
 
     <div class="settings-form__footer">
       <div class="settings-form__buttons">
         <p class="settings-form__status" >{{ status }}</p>
-
-        <button type="button" class="button settings-form__save"
-          @click.prevent="saveSettings()">Save</button>
       </div>
     </div>
   </div>

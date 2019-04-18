@@ -3,9 +3,9 @@ import {
   Post,
   PostingForm,
   PostReferenceMap,
-  Settings,
+  Settings as SettingsComponent,
 } from './components';
-import { SettingsManager } from './settings';
+import { Settings } from './services';
 import { DOM } from './utils';
 import { Page, BoardPage, ThreadPage, BasePage } from './pages';
 
@@ -19,9 +19,7 @@ declare global {
 new Post();
 new PostingForm();
 new PostReferenceMap();
-new Settings();
-
-const settings = SettingsManager.load();
+new SettingsComponent();
 
 document.addEventListener('DOMContentLoaded', e => {
   eventBus.emit(Events.Ready);
@@ -29,46 +27,46 @@ document.addEventListener('DOMContentLoaded', e => {
   const posts = DOM.qsa('.post');
   eventBus.emit(Events.PostsInserted, posts, true);
 
-  if (settings.common.smoothScroll) {
+  if (Settings.get('common.smooth-scroll', true)) {
     document.body.classList.add('smooth-scroll');
   }
 
   const layout = DOM.qs('.layout');
   if (layout) {
-    layout.classList.add('layout--' + settings.common.layout);
+    layout.classList.add('layout--' + Settings.get('common.layout', 'left'));
 
-    if (!settings.common.showPostHeaderReflinkIcon) {
+    if (!Settings.get('common.show-post-header-reflink-icon', true)) {
       layout.classList.add('layout--hide-post-header-reflink-icon');
     }
 
-    if (!settings.common.showPostReflinkIcon) {
+    if (!Settings.get('common.show-post-reflink-icon', false)) {
       layout.classList.add('layout--hide-post-reflink-icon');
     }
 
-    if (settings.common.showVideoOverlay) {
+    if (Settings.get('common.show-video-overlay', false)) {
       layout.classList.add('layout--show-thumb-overlay');
     }
 
-    if (settings.common.nsfw) {
+    if (Settings.get('common.nsfw', false)) {
       layout.classList.add('layout--nsfw');
     }
 
-    if (settings.common.removeHiddenPosts) {
+    if (Settings.get('common.remove-hidden-posts', false)) {
       layout.classList.add('layout--remove-hidden');
     }
 
-    if (settings.form.showMarkup) {
+    if (Settings.get('form.show-markup', true)) {
       layout.classList.add('layout--show-markup');
     }
 
-    if (settings.form.showMarkupMobile) {
+    if (Settings.get('form.show-markup-mobile', false)) {
       layout.classList.add('layout--show-markup-mobile');
     }
   }
 
   const formWrapper = DOM.qs('.content__posting-form-wrapper');
   if (formWrapper) {
-    formWrapper.classList.add('content__posting-form-wrapper--' + settings.form.align);
+    formWrapper.classList.add('content__posting-form-wrapper--' + Settings.get('form.align', 'center'));
   }
 });
 

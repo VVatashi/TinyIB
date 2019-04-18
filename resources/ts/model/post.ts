@@ -1,5 +1,4 @@
 import { DateTime } from 'luxon';
-import { SettingsManager } from '../settings';
 import { Time } from '../utils';
 
 export class Post {
@@ -23,9 +22,8 @@ export class Post {
       return this._formattedTime;
     }
 
-    const settings = SettingsManager.load();
     const time = DateTime.fromMillis(this.createdAt);
-    return this._formattedTime = Time.format(time, settings);
+    return this._formattedTime = Time.format(time);
   }
 
   protected _isOwn: boolean = null;

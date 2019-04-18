@@ -1,6 +1,5 @@
 import { Post } from '.';
-import { API } from '../services';
-import { SettingsManager } from '../settings';
+import { API, Settings } from '../services';
 import { EventEmitter, Keyboard } from '../utils';
 
 const updateInterval = 10;
@@ -39,14 +38,11 @@ export class Thread extends EventEmitter {
   }
 
   get isUpdateEnabled() {
-    const settings = SettingsManager.load();
-    return settings.common.enableThreadAutoupdate;
+    return Settings.get('common.enable-thread-autoupdate', true);
   }
 
   set isUpdateEnabled(value: boolean) {
-    const settings = SettingsManager.load();
-    settings.common.enableThreadAutoupdate = value;
-    SettingsManager.save(settings);
+    Settings.set('common.enable-thread-autoupdate', value);
   }
 
   get hasReplies() {
@@ -72,8 +68,7 @@ export class Thread extends EventEmitter {
       if (Keyboard.checkKeyChar(e, 'u')) {
         e.preventDefault();
 
-        const settings = SettingsManager.load();
-        if (settings.common.enableThreadAutoupdate) {
+        if (Settings.get('common.enable-thread-autoupdate', true)) {
           this.getNewPosts();
         }
 
