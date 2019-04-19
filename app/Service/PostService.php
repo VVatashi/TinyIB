@@ -467,7 +467,7 @@ class PostService
 
       $file_extension = $this->thubmnail->getExtensionByMimeType($mime_type);
       if (empty($file_extension) || $file_extension === ThumbnailService::DEFAULT_EXTENSION) {
-        throw new ValidationException('Unknown file type.');
+        throw new ValidationException("Unknown file type: $mime_type.");
       }
 
       $post->file = "$file_name.$file_extension";
