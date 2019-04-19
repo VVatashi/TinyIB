@@ -46,11 +46,24 @@ class ThumbnailService
       case 'apng':
         return 'image/png';
 
-      case 'gif': return 'image/gif';
-      case 'webp': return 'image/webp';
-      case 'mp3': return 'audio/mpeg';
-      case 'mp4': return 'video/mp4';
-      case 'webm': return 'video/webm';
+      case 'gif':
+        return 'image/gif';
+
+      case 'webp':
+        return 'image/webp';
+
+      case 'mp3':
+        return 'audio/mpeg';
+
+      case 'm4a':
+        return 'audio/mp4';
+
+      case 'mp4':
+      case 'm4v':
+        return 'video/mp4';
+
+      case 'webm':
+        return 'video/webm';
 
       default: return null;
     }
@@ -65,18 +78,34 @@ class ThumbnailService
       case 'image/pjpeg':
         return 'jpg';
 
-      case 'image/png': return 'png';
-      case 'image/gif': return 'gif';
-      case 'image/webp': return 'webp';
+      case 'image/png':
+      case 'image/x-png':
+        return 'png';
 
-      case 'audio/mpeg':
+      case 'image/gif':
+        return 'gif';
+
+      case 'image/webp':
+        return 'webp';
+
       case 'audio/mp3':
+      case 'audio/mpeg':
+      case 'audio/mpeg3':
+      case 'audio/mpeg-3':
+      case 'audio/mpg':
+      case 'audio/x-mp3':
       case 'audio/x-mpeg':
+      case 'audio/x-mpeg3':
       case 'audio/x-mpeg-3':
+      case 'audio/x-mpg':
         return 'mp3';
 
       case 'audio/mp4':
+      case 'audio/m4a':
+      case 'audio/x-m4a':
       case 'video/mp4':
+      case 'video/mpeg4':
+      case 'video/x-m4v':
         return 'mp4';
 
       case 'audio/webm':
@@ -126,6 +155,7 @@ class ThumbnailService
       'image/jpeg',
       'image/pjpeg',
       'image/png',
+      'image/x-png',
       'image/gif',
       'image/webp',
     ]);
@@ -133,15 +163,28 @@ class ThumbnailService
 
   function isAudio(string $mime_type): bool {
     return in_array($mime_type, [
+      'audio/mp3',
       'audio/mpeg',
+      'audio/mpeg3',
+      'audio/mpeg-3',
+      'audio/mpg',
+      'audio/x-mp3',
+      'audio/x-mpeg',
+      'audio/x-mpeg3',
+      'audio/x-mpeg-3',
+      'audio/x-mpg',
     ]);
   }
 
   function isVideo(string $mime_type): bool {
     return in_array($mime_type, [
       'audio/mp4',
+      'audio/m4a',
+      'audio/x-m4a',
       'audio/webm',
       'video/mp4',
+      'video/mpeg4',
+      'video/x-m4v',
       'video/webm',
     ]);
   }
