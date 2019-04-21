@@ -38,11 +38,11 @@ export class Thread extends EventEmitter {
   }
 
   get isUpdateEnabled() {
-    return Settings.get('common.enable-thread-autoupdate', true);
+    return Settings.get('post.enable-thread-autoupdate', true);
   }
 
   set isUpdateEnabled(value: boolean) {
-    Settings.set('common.enable-thread-autoupdate', value);
+    Settings.set('post.enable-thread-autoupdate', value);
   }
 
   get hasReplies() {
@@ -68,7 +68,7 @@ export class Thread extends EventEmitter {
       if (Keyboard.checkKeyChar(e, 'u')) {
         e.preventDefault();
 
-        if (Settings.get('common.enable-thread-autoupdate', true)) {
+        if (Settings.get('post.enable-thread-autoupdate', true)) {
           this.getNewPosts();
         }
 

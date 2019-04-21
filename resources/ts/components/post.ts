@@ -130,7 +130,7 @@ export class Post {
         }
 
         return false;
-      } else if (Settings.get('common.hide-popup-on-outside-click', false)) {
+      } else if (Settings.get('image.hide-popup-on-outside-click', false)) {
         if (this.modal && !this.modal.isDragging) {
           this.modal.hide();
         }
@@ -195,7 +195,7 @@ export class Post {
       }
     });
 
-    if (Settings.get('common.show-post-popups', true)) {
+    if (Settings.get('link.show-post-popups', true)) {
       document.addEventListener('mouseover', e => {
         const $target = e.target as HTMLElement;
         if ($target.tagName === 'A'
@@ -283,7 +283,7 @@ export class Post {
     links.forEach(link => {
       const targetId = +link.getAttribute('data-target-post-id');
       if (this.ownPostIds.indexOf(targetId) !== -1) {
-        if (Settings.get('common.add-you-to-links', true)) {
+        if (Settings.get('link.add-you-to-links', true)) {
           const youEl = document.createElement('span');
           youEl.classList.add('post__reference-link-author');
           youEl.innerHTML = '(You)';
@@ -455,8 +455,8 @@ export class Post {
   }
 
   protected toggleNsfw() {
-    const value = Settings.get('common.nsfw', false);
-    Settings.set('common.nsfw', !value);
+    const value = Settings.get('image.nsfw', false);
+    Settings.set('image.nsfw', !value);
     const nsfwClass = 'layout--nsfw';
     if (!value) {
       this.$layout.classList.add(nsfwClass);
@@ -505,7 +505,7 @@ export class Post {
       }
     }
 
-    const autoPlay = Settings.get('common.auto-play', true);
+    const autoPlay = Settings.get('image.auto-play', true);
 
     if (file.type === 'image') {
       this.$modal = document.createElement('div');

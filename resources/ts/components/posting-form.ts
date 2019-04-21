@@ -536,7 +536,7 @@ export class PostingForm {
             }
 
             if (isInThread) {
-              if (Settings.get('common.enable-thread-autoupdate', true)) {
+              if (Settings.get('post.enable-thread-autoupdate', true)) {
                 eventBus.emit(Events.PostCreated);
               }
             } else {
@@ -660,7 +660,7 @@ export class PostingForm {
   }
 
   protected onPostsInserted(posts: HTMLElement[], initial: boolean) {
-    if (!initial && Settings.get('common.scroll-to-new-posts', true)) {
+    if (!initial && Settings.get('post.scroll-to-new-posts', true)) {
       const scrollingEl = document.scrollingElement || document.body;
       const postsHeight = posts.reduce((total, post) => {
         const style = document.defaultView.getComputedStyle(post, '');

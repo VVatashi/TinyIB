@@ -29,122 +29,104 @@
   <main class="{{class is defined ? class ~ ' '}}">
     <div id="settings-form" class="content__settings-form settings-form">
       <ul class="settings-form__tabs">
-        <li class="settings-form__tab" data-tab="common">Common</li>
+        <li class="settings-form__tab" data-tab="filter">Filter</li>
+        <li class="settings-form__tab" data-tab="post">Posts</li>
+        <li class="settings-form__tab" data-tab="image">Images</li>
+        <li class="settings-form__tab" data-tab="link">Links</li>
         <li class="settings-form__tab" data-tab="form">Form</li>
         <li class="settings-form__tab" data-tab="time">Time</li>
+        <li class="settings-form__tab" data-tab="common">Common</li>
       </ul>
 
-      <div class="settings-form__tab-content" data-tab-content="common">
-        <h3 class="settings-form__option-title">Thread Alignment</h3>
-
+      <div class="settings-form__tab-content" data-tab-content="filter">
         <div class="settings-form__row">
-          {{ self.radio('On the left',
-            'common.layout',
-            'left',
-            'left') }}
-        </div>
-
-        <div class="settings-form__row">
-          {{ self.radio('In the center',
-            'common.layout',
-            'center',
-            'left') }}
-        </div>
-
-        <h3 class="settings-form__option-title">Posts</h3>
-
-        <div class="settings-form__row">
-          {{ self.checkbox('Show reply icon in the post header',
-            'common.show-post-header-reflink-icon',
-            'true') }}
-        </div>
-
-        <div class="settings-form__row">
-          {{ self.checkbox('Show reply icon in the bottom right corner of post message',
-            'common.show-post-reflink-icon',
+          {{ self.checkbox('Remove hidden posts',
+            'filter.remove-hidden-posts',
             'false') }}
+        </div>
+
+        <h3 class="settings-form__option-title">Hide posts by author</h3>
+        <ul id="hidden-posts" class="settings-form__list"></ul>
+        <button id="hidden-posts-add" class="button">Add</button>
+      </div>
+
+      <div class="settings-form__tab-content" data-tab-content="post">
+        <div class="settings-form__row">
+          {{ self.checkbox('Enable thread autoupdate',
+            'post.enable-thread-autoupdate',
+            'true') }}
         </div>
 
         <div class="settings-form__row">
           {{ self.checkbox('Scroll to new posts',
-            'common.scroll-to-new-posts',
+            'post.scroll-to-new-posts',
             'true') }}
         </div>
 
+        <h3 class="settings-form__option-title">Reply icon position</h3>
+
         <div class="settings-form__row">
-          {{ self.checkbox('Smooth scrolling',
-            'common.smooth-scroll',
-            'true') }}
+          {{ self.radio('In the post header',
+            'post.reflink-icon-position',
+            'header',
+            'header') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.radio('In the right bottom corner',
+            'post.reflink-icon-position',
+            'message',
+            'header') }}
+        </div>
+      </div>
+
+      <div class="settings-form__tab-content" data-tab-content="image">
+        <div class="settings-form__row">
+          {{ self.checkbox('Enable NSFW mode',
+            'image.nsfw',
+            'false') }}
         </div>
 
         <div class="settings-form__row">
           {{ self.checkbox('Show video overlay',
-            'common.show-video-overlay',
+            'image.show-video-overlay',
             'false') }}
         </div>
 
         <div class="settings-form__row">
           {{ self.checkbox('Close image popup when clicking outside',
-            'common.hide-popup-on-outside-click',
+            'image.hide-popup-on-outside-click',
             'false') }}
         </div>
 
         <div class="settings-form__row">
-          {{ self.checkbox('Enable NSFW mode',
-            'common.nsfw',
-            'false') }}
-        </div>
-
-        <div class="settings-form__row">
-          {{ self.checkbox('Enable thread autoupdate',
-            'common.enable-thread-autoupdate',
+          {{ self.checkbox('Autoplay audio &amp; video files',
+            'image.auto-play',
             'true') }}
         </div>
+      </div>
 
+      <div class="settings-form__tab-content" data-tab-content="link">
         <div class="settings-form__row">
           {{ self.checkbox('Add names to the links',
-            'common.add-names-to-links',
+            'link.add-names-to-links',
             'true') }}
         </div>
 
         <div class="settings-form__row">
           {{ self.checkbox('Add \'(you)\' to the links',
-            'common.add-you-to-links',
-            'true') }}
-        </div>
-
-        <h3 class="settings-form__option-title">Hide posts</h3>
-        <ul id="hidden-posts" class="settings-form__list"></ul>
-        <button id="hidden-posts-add" class="button">Add</button>
-
-        <div class="settings-form__row">
-          {{ self.checkbox('Remove hidden posts',
-            'common.remove-hidden-posts',
-            'false') }}
-        </div>
-
-        <div class="settings-form__row">
-          {{ self.checkbox('Show post in a popup when hovering over link',
-            'common.show-post-popups',
+            'link.add-you-to-links',
             'true') }}
         </div>
 
         <div class="settings-form__row">
-          {{ self.checkbox('Autoplay audio &amp; video files',
-            'common.auto-play',
+          {{ self.checkbox('Show post in a popup when hovering over a link',
+            'link.show-post-popups',
             'true') }}
-        </div>
-
-        <div class="settings-form__row">
-          {{ self.checkbox('Show count of unread posts in title',
-            'common.show-unread-count-in-title',
-            'false') }}
         </div>
       </div>
 
       <div class="settings-form__tab-content" data-tab-content="form">
-        <h3 class="settings-form__option-title">Form Behaviour</h3>
-
         <div class="settings-form__row">
           {{ self.checkbox('Scroll to the bottom after posting',
             'form.scroll-bottom',
@@ -161,6 +143,18 @@
           {{ self.checkbox('Save name after posting',
             'form.save-name',
             'true') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Show markup buttons',
+            'form.show-markup',
+            'true') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Show markup buttons (mobile)',
+            'form.show-markup-mobile',
+            'false') }}
         </div>
 
         <div class="settings-form__row">
@@ -199,20 +193,6 @@
             'form.preview-align',
             'right',
             'right') }}
-        </div>
-
-        <h3 class="settings-form__option-title">Markup</h3>
-
-        <div class="settings-form__row">
-          {{ self.checkbox('Show markup buttons',
-            'form.show-markup',
-            'true') }}
-        </div>
-
-        <div class="settings-form__row">
-          {{ self.checkbox('Show markup buttons (mobile)',
-            'form.show-markup-mobile',
-            'false') }}
         </div>
 
         <div class="settings-form__row">
@@ -290,12 +270,40 @@
         </div>
 
         <h3 class="settings-form__option-title">Current format</h3>
-        <p id="time-preview"></p>
+        <p id="time-preview" class="settings-form__row"></p>
       </div>
 
-      <div class="settings-form__footer">
-        <p class="settings-form__status" ></p>
+      <div class="settings-form__tab-content" data-tab-content="common">
+        <div class="settings-form__row">
+          {{ self.checkbox('Smooth scrolling',
+            'common.smooth-scroll',
+            'true') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.checkbox('Show count of unread posts in title',
+            'common.show-unread-count-in-title',
+            'false') }}
+        </div>
+
+        <h3 class="settings-form__option-title">Thread Alignment</h3>
+
+        <div class="settings-form__row">
+          {{ self.radio('On the left',
+            'common.layout',
+            'left',
+            'left') }}
+        </div>
+
+        <div class="settings-form__row">
+          {{ self.radio('In the center',
+            'common.layout',
+            'center',
+            'left') }}
+        </div>
       </div>
+
+      <div class="settings-form__footer"></div>
     </div>
   </main>
 {% endblock %}

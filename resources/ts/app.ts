@@ -33,23 +33,23 @@ document.addEventListener('DOMContentLoaded', e => {
   if ($layout) {
     $layout.classList.add('layout--' + Settings.get('common.layout', 'left'));
 
-    if (!Settings.get('common.show-post-header-reflink-icon', true)) {
+    const reflinkPosition = Settings.get<string>('post.reflink-icon-position', 'header');
+    if (reflinkPosition !== 'header') {
       $layout.classList.add('layout--hide-post-header-reflink-icon');
     }
-
-    if (!Settings.get('common.show-post-reflink-icon', false)) {
+    if (reflinkPosition !== 'post') {
       $layout.classList.add('layout--hide-post-reflink-icon');
     }
 
-    if (Settings.get('common.show-video-overlay', false)) {
+    if (Settings.get('image.show-video-overlay', false)) {
       $layout.classList.add('layout--show-thumb-overlay');
     }
 
-    if (Settings.get('common.nsfw', false)) {
+    if (Settings.get('image.nsfw', false)) {
       $layout.classList.add('layout--nsfw');
     }
 
-    if (Settings.get('common.remove-hidden-posts', false)) {
+    if (Settings.get('filter.remove-hidden-posts', false)) {
       $layout.classList.add('layout--remove-hidden');
     }
 
