@@ -25,15 +25,15 @@ document.addEventListener('DOMContentLoaded', e => {
   const posts = DOM.qsa('.post');
   eventBus.emit(Events.PostsInserted, posts, true);
 
-  if (Settings.get('common.smooth-scroll', true)) {
+  if (Settings.get('common.smooth-scroll')) {
     document.body.classList.add('smooth-scroll');
   }
 
   const $layout = DOM.qs('.layout');
   if ($layout) {
-    $layout.classList.add('layout--' + Settings.get('common.layout', 'left'));
+    $layout.classList.add('layout--' + Settings.get('common.layout'));
 
-    const reflinkPosition = Settings.get<string>('post.reflink-icon-position', 'header');
+    const reflinkPosition = Settings.get<string>('post.reflink-icon-position');
     if (reflinkPosition !== 'header') {
       $layout.classList.add('layout--hide-post-header-reflink-icon');
     }
@@ -41,30 +41,30 @@ document.addEventListener('DOMContentLoaded', e => {
       $layout.classList.add('layout--hide-post-reflink-icon');
     }
 
-    if (Settings.get('image.show-video-overlay', false)) {
+    if (Settings.get('image.show-video-overlay')) {
       $layout.classList.add('layout--show-thumb-overlay');
     }
 
-    if (Settings.get('image.nsfw', false)) {
+    if (Settings.get('image.nsfw')) {
       $layout.classList.add('layout--nsfw');
     }
 
-    if (Settings.get('filter.remove-hidden-posts', false)) {
+    if (Settings.get('filter.remove-hidden-posts')) {
       $layout.classList.add('layout--remove-hidden');
     }
 
-    if (Settings.get('form.show-markup', true)) {
+    if (Settings.get('form.show-markup')) {
       $layout.classList.add('layout--show-markup');
     }
 
-    if (Settings.get('form.show-markup-mobile', false)) {
+    if (Settings.get('form.show-markup-mobile')) {
       $layout.classList.add('layout--show-markup-mobile');
     }
   }
 
   const $formWrapper = DOM.qs('.content__posting-form-wrapper');
   if ($formWrapper) {
-    $formWrapper.classList.add('content__posting-form-wrapper--' + Settings.get('form.align', 'center'));
+    $formWrapper.classList.add('content__posting-form-wrapper--' + Settings.get('form.align'));
   }
 });
 

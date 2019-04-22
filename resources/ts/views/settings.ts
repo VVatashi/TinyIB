@@ -101,8 +101,7 @@ export class SettingsView implements View {
     const $inputs = DOM.qsa('[data-key]', this.$form);
     $inputs.forEach($input => {
       const key = $input.getAttribute('data-key');
-      const defaultValue = $input.getAttribute('data-default');
-      const value = Settings.get(key, defaultValue).toString();
+      const value = Settings.get(key).toString();
       if ($input instanceof HTMLInputElement) {
         if ($input.type === 'checkbox') {
           $input.checked = value === 'true';
@@ -115,11 +114,11 @@ export class SettingsView implements View {
     });
 
     // Bind hidden post authors.
-    const hidden = Settings.get('common.hidden-posts', []) as PostAuthor[];
+    const hidden = Settings.get('filter.hidden-authors') as PostAuthor[];
     this.updateHiddenPosts(hidden);
 
     // Bind replaces list.
-    const replaces = Settings.get('form.replaces', []) as Replace[];
+    const replaces = Settings.get('form.replaces') as Replace[];
     this.updateReplaces(replaces);
 
     // Display current time format.
@@ -193,9 +192,9 @@ export class SettingsView implements View {
     if (e.target instanceof HTMLButtonElement && e.target.hasAttribute('data-remove-index')) {
       e.preventDefault();
       const index = +e.target.getAttribute('data-remove-index');
-      const hidden = Settings.get('common.hidden-posts', []) as PostAuthor[];
+      const hidden = Settings.get('filter.hidden-authors') as PostAuthor[];
       hidden.splice(index, 1);
-      Settings.set('common.hidden-posts', hidden);
+      Settings.set('filter.hidden-authors', hidden);
       this.updateHiddenPosts(hidden);
       return false;
     }
@@ -205,25 +204,25 @@ export class SettingsView implements View {
     if (e.target instanceof HTMLInputElement) {
       if (e.target.hasAttribute('data-name-index')) {
         const index = +e.target.getAttribute('data-name-index');
-        const hidden = Settings.get('common.hidden-posts', []) as PostAuthor[];
+        const hidden = Settings.get('filter.hidden-authors') as PostAuthor[];
         hidden[index].name = e.target.value;
-        Settings.set('common.hidden-posts', hidden);
+        Settings.set('filter.hidden-authors', hidden);
       }
 
       if (e.target.hasAttribute('data-tripcode-index')) {
         const index = +e.target.getAttribute('data-tripcode-index');
-        const hidden = Settings.get('common.hidden-posts', []) as PostAuthor[];
+        const hidden = Settings.get('filter.hidden-authors') as PostAuthor[];
         hidden[index].tripcode = e.target.value;
-        Settings.set('common.hidden-posts', hidden);
+        Settings.set('filter.hidden-authors', hidden);
       }
     }
   }
 
   protected onAddHiddenClick(e: Event) {
     e.preventDefault();
-    const hidden = Settings.get('common.hidden-posts', []) as PostAuthor[];
+    const hidden = Settings.get('filter.hidden-authors') as PostAuthor[];
     hidden.push({ name: '', tripcode: '' });
-    Settings.set('common.hidden-posts', hidden);
+    Settings.set('filter.hidden-authors', hidden);
     this.updateHiddenPosts(hidden);
     return false;
   }
@@ -272,7 +271,7 @@ export class SettingsView implements View {
     if (e.target instanceof HTMLButtonElement && e.target.hasAttribute('data-remove-index')) {
       e.preventDefault();
       const index = +e.target.getAttribute('data-remove-index');
-      const replaces = Settings.get('form.replaces', []) as Replace[];
+      const replaces = Settings.get('form.replaces') as Replace[];
       replaces.splice(index, 1);
       Settings.set('form.replaces', replaces);
       this.updateReplaces(replaces);
@@ -284,14 +283,14 @@ export class SettingsView implements View {
     if (e.target instanceof HTMLInputElement) {
       if (e.target.hasAttribute('data-pattern-index')) {
         const index = +e.target.getAttribute('data-pattern-index');
-        const replaces = Settings.get('form.replaces', []) as Replace[];
+        const replaces = Settings.get('form.replaces') as Replace[];
         replaces[index].pattern = e.target.value;
         Settings.set('form.replaces', replaces);
       }
 
       if (e.target.hasAttribute('data-replace-index')) {
         const index = +e.target.getAttribute('data-replace-index');
-        const replaces = Settings.get('form.replaces', []) as Replace[];
+        const replaces = Settings.get('form.replaces') as Replace[];
         replaces[index].replace = e.target.value;
         Settings.set('form.replaces', replaces);
       }
@@ -300,7 +299,7 @@ export class SettingsView implements View {
 
   protected onAddReplaceClick(e: Event) {
     e.preventDefault();
-    const replaces = Settings.get('form.replaces', []) as Replace[];
+    const replaces = Settings.get('form.replaces') as Replace[];
     replaces.push({ pattern: '', replace: '' });
     Settings.set('form.replaces', replaces);
     this.updateReplaces(replaces);

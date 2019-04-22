@@ -3,7 +3,7 @@ import { draggable, FilePreview } from '.';
 import { eventBus, Events } from '..';
 import { Api } from '../api';
 import { Coords } from './draggable';
-import { Settings } from '../services';
+import { LocalStorage, Settings } from '../services';
 import { DOM, Keyboard } from '../utils';
 import { HSVColorPicker } from '@vvatashi/color-picker';
 
@@ -215,8 +215,8 @@ export class PostingForm {
           disabled: false,
           status: '',
           hidden: true,
-          position: Settings.get('form.save-form-state', true)
-            && Settings.get('form.float', false)
+          position: Settings.get('form.save-form-state')
+            && Settings.get('form.float')
             ? 'float' : 'bottom',
           colorPopupVisible: false,
         };
@@ -226,21 +226,21 @@ export class PostingForm {
           return threadId;
         },
         previewAlign() {
-          return Settings.get('form.preview-align', 'right');
+          return Settings.get('form.preview-align');
         },
       },
       created() {
-        if (Settings.get('form.save-subject', false)) {
+        if (Settings.get('form.save-subject')) {
           // Load saved subject.
-          const subject = localStorage['posting-form.subject'];
+          const subject = LocalStorage.get('posting-form.subject', '');
           if (subject) {
             this.fields.subject = subject;
           }
         }
 
-        if (Settings.get('form.save-name', true)) {
+        if (Settings.get('form.save-name')) {
           // Load saved name.
-          const name = localStorage['posting-form.name'];
+          const name = LocalStorage.get('posting-form.name', '');
           if (name) {
             this.fields.name = name;
           }
@@ -250,7 +250,7 @@ export class PostingForm {
       },
       mounted() {
         if (this.position === 'float') {
-          const position = Settings.get('form.float-position', { x: 0, y: 0 });
+          const position = Settings.get('form.float-position') || { x: 0, y: 0 };
           this.setPosition(this.checkBounds(position));
         }
       },
@@ -297,11 +297,11 @@ export class PostingForm {
           this.setPosition(this.checkBounds(this.getPosition()));
         },
         resetFields() {
-          if (!Settings.get('form.save-subject', false)) {
+          if (!Settings.get('form.save-subject')) {
             this.fields.subject = '';
           }
 
-          if (!Settings.get('form.save-name', true)) {
+          if (!Settings.get('form.save-name')) {
             this.fields.name = '';
           }
 
@@ -325,12 +325,10 @@ export class PostingForm {
           component.updateReplyButton();
         },
         onSubjectChange() {
-          // Save subject.
-          localStorage['posting-form.subject'] = this.fields.subject;
+          LocalStorage.set('posting-form.subject', this.fields.subject);
         },
         onNameChange() {
-          // Save name.
-          localStorage['posting-form.name'] = this.fields.name;
+          LocalStorage.set('posting-form.name', this.fields.name);
         },
         async onFileDrop(e: DragEvent) {
           const file = e.dataTransfer.files[0];
@@ -424,7 +422,7 @@ export class PostingForm {
 
           let message = this.fields.message as string;
 
-          if (selection.length || Settings.get('form.insert-tags-in-pairs', true)) {
+          if (selection.length || Settings.get('form.insert-tags-in-pairs')) {
             // If text is selected, wrap it in a tag pair.
             message = [
               message.substring(0, selection.begin),
@@ -503,7 +501,7 @@ export class PostingForm {
           this.disabled = true;
 
           // Apply replaces to the message.
-          const replaces = Settings.get('form.replaces', []) as { pattern: string, replace: string }[];
+          const replaces = Settings.get('form.replaces') as { pattern: string, replace: string }[];
           const message = replaces.reduce((message: string, item) => {
             const regexp = new RegExp(item.pattern, 'gm');
             return message.replace(regexp, item.replace);
@@ -524,8 +522,8 @@ export class PostingForm {
               this.status = `Uploading... ${progressPercent}%`;
             });
 
-            localStorage.setItem('user.name', post.name);
-            localStorage.setItem('user.tripcode', post.tripcode.length ? '!' + post.tripcode : '');
+            LocalStorage.set('user.name', post.name);
+            LocalStorage.set('user.tripcode', post.tripcode.length ? '!' + post.tripcode : '');
 
             this.resetFields();
             this.status = '';
@@ -536,7 +534,7 @@ export class PostingForm {
             }
 
             if (isInThread) {
-              if (Settings.get('post.enable-thread-autoupdate', true)) {
+              if (Settings.get('post.enable-thread-autoupdate')) {
                 eventBus.emit(Events.PostCreated);
               }
             } else {
@@ -558,7 +556,7 @@ export class PostingForm {
             }
           }
 
-          if (Settings.get('form.scroll-bottom', true)) {
+          if (Settings.get('form.scroll-bottom')) {
             // Scroll to the last post.
             setTimeout(() => {
               const el = DOM.qs('.post:nth-last-of-type(1)');
@@ -660,7 +658,7 @@ export class PostingForm {
   }
 
   protected onPostsInserted(posts: HTMLElement[], initial: boolean) {
-    if (!initial && Settings.get('post.scroll-to-new-posts', true)) {
+    if (!initial && Settings.get('post.scroll-to-new-posts')) {
       const scrollingEl = document.scrollingElement || document.body;
       const postsHeight = posts.reduce((total, post) => {
         const style = document.defaultView.getComputedStyle(post, '');
@@ -712,7 +710,7 @@ export class PostingForm {
     vm.position = 'float';
     Settings.set('form.float', true);
 
-    const position = Settings.get('form.float-position', { x: 0, y: 0 });
+    const position = Settings.get('form.float-position') || { x: 0, y: 0 };
     vm.setPosition(vm.checkBounds(position));
 
     this.updateReplyButton();

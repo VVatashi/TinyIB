@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon';
+import { LocalStorage } from '../services';
 import { Time } from '../utils';
 
 export class Post {
@@ -33,8 +34,8 @@ export class Post {
       return this._isOwn;
     }
 
-    const name = localStorage.getItem('user.name') || '';
-    const tripcode = localStorage.getItem('user.tripcode') || '';
+    const name = LocalStorage.get('user.name', '');
+    const tripcode = LocalStorage.get('user.tripcode', '');
     const authorName = name + tripcode;
     const postAuthorName = this.name + this.tripcode;
     return this._isOwn = authorName.length && postAuthorName.indexOf(authorName) === 0;

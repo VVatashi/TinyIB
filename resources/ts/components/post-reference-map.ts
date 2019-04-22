@@ -7,7 +7,7 @@ export class PostReferenceMap {
 
   constructor() {
     eventBus.on(Events.PostsInserted, (posts: Element[]) => {
-      if (!Settings.get('link.add-names-to-links', true)) {
+      if (!Settings.get('link.add-names-to-links')) {
         return;
       }
 

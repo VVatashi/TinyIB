@@ -38,7 +38,7 @@ export class Thread extends EventEmitter {
   }
 
   get isUpdateEnabled() {
-    return Settings.get('post.enable-thread-autoupdate', true);
+    return Settings.get('post.enable-thread-autoupdate');
   }
 
   set isUpdateEnabled(value: boolean) {
@@ -68,7 +68,7 @@ export class Thread extends EventEmitter {
       if (Keyboard.checkKeyChar(e, 'u')) {
         e.preventDefault();
 
-        if (Settings.get('post.enable-thread-autoupdate', true)) {
+        if (Settings.get('post.enable-thread-autoupdate')) {
           this.getNewPosts();
         }
 

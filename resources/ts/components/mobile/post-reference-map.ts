@@ -1,4 +1,5 @@
 import { eventBus, Events } from '../..';
+import { LocalStorage } from '../../services';
 import { DOM } from '../../utils';
 
 export class PostReferenceMap {
@@ -6,8 +7,8 @@ export class PostReferenceMap {
   protected readonly posts: { [id: number]: Element } = {};
 
   constructor() {
-    this.user.name = localStorage.getItem('user.name');
-    this.user.tripcode = localStorage.getItem('user.tripcode');
+    this.user.name = LocalStorage.get('user.name', '');
+    this.user.tripcode = LocalStorage.get('user.tripcode', '');
 
     eventBus.on(Events.PostsInserted, (posts: Element[]) =>
       posts.forEach(this.onPostInsert.bind(this)));

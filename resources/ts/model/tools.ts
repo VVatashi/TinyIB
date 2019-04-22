@@ -19,11 +19,11 @@ export class Tools extends EventEmitter {
   }
 
   get nsfw(): boolean {
-    return Settings.get('image.nsfw', false);
+    return Settings.get('image.nsfw');
   }
 
   get autoPlay(): boolean {
-    return Settings.get('image.auto-play', true);
+    return Settings.get('image.auto-play');
   }
 
   toggleSettings() {
@@ -31,13 +31,13 @@ export class Tools extends EventEmitter {
   }
 
   toggleNsfw() {
-    const value = Settings.get('image.nsfw', false);
+    const value = Settings.get('image.nsfw');
     Settings.set('image.nsfw', !value);
     this.emit('toggle-nsfw', !value);
   }
 
   toggleAutoPlay() {
-    const value = Settings.get('image.auto-play', true);
+    const value = Settings.get('image.auto-play');
     Settings.set('image.auto-play', !value);
     this.emit('toggle-autoplay', !value);
   }

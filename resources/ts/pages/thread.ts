@@ -79,7 +79,7 @@ export class ThreadPage extends BasePage {
         context.textBaseline = 'middle';
         context.fillStyle = '#FFFFFF';
 
-        if (!Settings.get('common.show-unread-count-in-title', false)) {
+        if (!Settings.get('common.show-unread-count-in-title')) {
           // Draw new posts count.
           if (unreadPosts < 10) {
             context.font = `700 10px 'Roboto Condensed', sans-serif`;
@@ -112,7 +112,7 @@ export class ThreadPage extends BasePage {
   }
 
   updateTitle(unreadPosts: number) {
-    if (Settings.get('common.show-unread-count-in-title', false) && unreadPosts > 0) {
+    if (Settings.get('common.show-unread-count-in-title') && unreadPosts > 0) {
       this.$title.textContent = `[${this.model.unreadPosts}] ${this.title}`;
     } else {
       this.$title.textContent = this.title;

@@ -2,7 +2,7 @@ import { Modal } from './modal';
 import { VideoPlayer } from './video-player';
 
 import { eventBus, Events } from '..';
-import { Coub, Settings } from '../services';
+import { Coub, LocalStorage, Settings } from '../services';
 import { DOM, Keyboard } from '../utils';
 
 interface FileData {
@@ -130,7 +130,7 @@ export class Post {
         }
 
         return false;
-      } else if (Settings.get('image.hide-popup-on-outside-click', false)) {
+      } else if (Settings.get('image.hide-popup-on-outside-click')) {
         if (this.modal && !this.modal.isDragging) {
           this.modal.hide();
         }
@@ -195,7 +195,7 @@ export class Post {
       }
     });
 
-    if (Settings.get('link.show-post-popups', true)) {
+    if (Settings.get('link.show-post-popups')) {
       document.addEventListener('mouseover', e => {
         const $target = e.target as HTMLElement;
         if ($target.tagName === 'A'
@@ -220,7 +220,7 @@ export class Post {
   }
 
   protected checkHidden($post: HTMLElement) {
-    const hidden = Settings.get('common.hidden-posts', []);
+    const hidden = Settings.get<[]>('filter.hidden-authors');
 
     const $name = DOM.qs('.post-header__name', $post);
     const $tripcode = DOM.qs('.post-header__tripcode', $post);
@@ -266,8 +266,8 @@ export class Post {
   }
 
   protected processReplies(post: HTMLElement) {
-    const name = (localStorage.getItem('user.name') || '')
-      + (localStorage.getItem('user.tripcode') || '');
+    const name = LocalStorage.get('user.name', '')
+      + LocalStorage.get('user.tripcode', '');
 
     const postNameEl = DOM.qs('.post-header__name', post);
     const postTripcodeEl = DOM.qs('.post-header__tripcode', post);
@@ -283,7 +283,7 @@ export class Post {
     links.forEach(link => {
       const targetId = +link.getAttribute('data-target-post-id');
       if (this.ownPostIds.indexOf(targetId) !== -1) {
-        if (Settings.get('link.add-you-to-links', true)) {
+        if (Settings.get('link.add-you-to-links')) {
           const youEl = document.createElement('span');
           youEl.classList.add('post__reference-link-author');
           youEl.innerHTML = '(You)';
@@ -313,7 +313,7 @@ export class Post {
         const name = $name ? $name.textContent : '';
         const tripcode = $tripcode ? $tripcode.textContent : '';
 
-        const hidden = Settings.get('common.hidden-posts', []);
+        const hidden = Settings.get<[]>('filter.hidden-authors');
         if (hidden.some((author: { name: string, tripcode: string }) =>
           author.name === name && author.tripcode === tripcode)) {
           $reflink.classList.add('post__refmap-link--hidden');
@@ -455,7 +455,7 @@ export class Post {
   }
 
   protected toggleNsfw() {
-    const value = Settings.get('image.nsfw', false);
+    const value = Settings.get('image.nsfw');
     Settings.set('image.nsfw', !value);
     const nsfwClass = 'layout--nsfw';
     if (!value) {
@@ -505,7 +505,7 @@ export class Post {
       }
     }
 
-    const autoPlay = Settings.get('image.auto-play', true);
+    const autoPlay = Settings.get<boolean>('image.auto-play');
 
     if (file.type === 'image') {
       this.$modal = document.createElement('div');

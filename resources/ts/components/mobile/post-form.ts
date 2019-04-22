@@ -1,4 +1,5 @@
 import { eventBus, Events } from '../..';
+import { LocalStorage } from '../../services';
 import { DOM } from '../../utils';
 
 export class PostForm {
@@ -31,37 +32,37 @@ export class PostForm {
 
     const subject = DOM.qs('#subject', form) as HTMLInputElement;
     if (subject) {
-      const value = localStorage.getItem('postform.subject');
+      const value = LocalStorage.get('postform.subject', '');
       if (value) {
         subject.value = value;
       }
 
       subject.addEventListener('change', e => {
-        localStorage.setItem('postform.subject', subject.value)
+        LocalStorage.set('postform.subject', subject.value)
       });
     }
 
     const name = DOM.qs('#name', form) as HTMLInputElement;
     if (name) {
-      const value = localStorage.getItem('postform.name');
+      const value = LocalStorage.get('postform.name', '');
       if (value) {
         name.value = value;
       }
 
       name.addEventListener('change', e => {
-        localStorage.setItem('postform.name', name.value);
+        LocalStorage.set('postform.name', name.value);
       });
     }
 
     const email = DOM.qs('#email', form) as HTMLInputElement;
     if (email) {
-      const value = localStorage.getItem('postform.email');
+      const value = LocalStorage.get('postform.email', '');
       if (value) {
         email.value = value;
       }
 
       email.addEventListener('change', e => {
-        localStorage.setItem('postform.email', email.value);
+        LocalStorage.set('postform.email', email.value);
       });
     }
 
