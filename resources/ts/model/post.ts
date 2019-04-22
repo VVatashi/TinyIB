@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { SettingsManager } from '../settings';
+import { LocalStorage } from '../services';
 import { Time } from '../utils';
 
 export class Post {
@@ -23,9 +23,8 @@ export class Post {
       return this._formattedTime;
     }
 
-    const settings = SettingsManager.load();
     const time = DateTime.fromMillis(this.createdAt);
-    return this._formattedTime = Time.format(time, settings);
+    return this._formattedTime = Time.format(time);
   }
 
   protected _isOwn: boolean = null;
@@ -35,8 +34,8 @@ export class Post {
       return this._isOwn;
     }
 
-    const name = localStorage.getItem('user.name') || '';
-    const tripcode = localStorage.getItem('user.tripcode') || '';
+    const name = LocalStorage.get('user.name', '');
+    const tripcode = LocalStorage.get('user.tripcode', '');
     const authorName = name + tripcode;
     const postAuthorName = this.name + this.tripcode;
     return this._isOwn = authorName.length && postAuthorName.indexOf(authorName) === 0;

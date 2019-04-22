@@ -1,5 +1,6 @@
 .settings-form {
   &__tabs {
+    flex-flow: row wrap;
     padding: 0 2px;
   }
 
@@ -13,7 +14,7 @@
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
 
-    padding: 0.5em 1em;
+    padding: 0.25em;
 
     &--active {
       @extend .button:active;
@@ -34,7 +35,7 @@
   }
 
   &__row {
-    margin-bottom: 0.5em;
+    margin: 0.5em 0;
   }
 
   &__option-title {
@@ -48,10 +49,17 @@
 
   &__list {
     flex-flow: column;
+    margin-bottom: 0.5em;
   }
 
-  &__list-item:not(:last-child) {
-    margin-bottom: 0.5em;
+  &__list-item {
+    display: flex;
+    flex-flow: row wrap;
+  }
+
+  &__list .input,
+  &__list .button {
+    margin: 0 0.5em 0.5em 0;
   }
 
   &__footer {
@@ -63,7 +71,9 @@
     border-radius: $form-border-radius;
     border-top-right-radius: 0;
     border-top-left-radius: 0;
+  }
 
+  &__footer:not(:empty) {
     padding: $form-content-padding;
   }
 
@@ -83,7 +93,7 @@
 
   @include breakpoint($xs-up) {
     &__row {
-      margin-bottom: 0.25em;
+      margin: 0.25em 0;
     }
   }
 }

@@ -10,7 +10,26 @@
 
   display: inline-block;
 
-  z-index: 10000;
+  z-index: 100;
+
+  &--settings {
+    top: unset;
+    left: unset;
+
+    bottom: 36px;
+    right: 0;
+
+    @include breakpoint($xs-up) {
+      bottom: 30px;
+    }
+  }
+
+  &--settings &__body {
+    min-width: 40vw;
+    height: 40vh;
+
+    overflow-y: auto;
+  }
 
   &__header {
     border-bottom: $post-header-border;

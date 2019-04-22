@@ -1,0 +1,219 @@
+{% macro radio(label, key, value) %}
+  <label class="settings-form__label">
+    <input type="radio" class="settings-form__radio" name="{{ key }}"
+      data-key="{{ key }}" value="{{ value }}" />
+    {{ label }}
+  </label>
+{% endmacro %}
+
+{% macro checkbox(label, key) %}
+  <label class="settings-form__label">
+    <input type="checkbox" class="settings-form__checkbox"
+      data-key="{{ key }}" />
+    {{ label }}
+  </label>
+{% endmacro %}
+
+{% import _self as self %}
+
+<div id="settings-form" class="content__settings-form settings-form">
+  <ul class="settings-form__tabs">
+    <li class="settings-form__tab" data-tab="filter">Filter</li>
+    <li class="settings-form__tab" data-tab="post">Posts</li>
+    <li class="settings-form__tab" data-tab="image">Images</li>
+    <li class="settings-form__tab" data-tab="link">Links</li>
+    <li class="settings-form__tab" data-tab="form">Form</li>
+    <li class="settings-form__tab" data-tab="time">Time</li>
+    <li class="settings-form__tab" data-tab="common">Common</li>
+  </ul>
+
+  <div class="settings-form__tab-content" data-tab-content="filter">
+    <div class="settings-form__row">
+      {{ self.checkbox('Remove hidden posts', 'filter.remove-hidden-posts') }}
+    </div>
+
+    <h3 class="settings-form__option-title">Hide posts by author</h3>
+    <ul id="hidden-posts" class="settings-form__list"></ul>
+    <button id="hidden-posts-add" class="button">Add</button>
+  </div>
+
+  <div class="settings-form__tab-content" data-tab-content="post">
+    <div class="settings-form__row">
+      {{ self.checkbox('Enable thread autoupdate', 'post.enable-thread-autoupdate') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.checkbox('Scroll to new posts', 'post.scroll-to-new-posts') }}
+    </div>
+
+    <h3 class="settings-form__option-title">Reply icon position</h3>
+
+    <div class="settings-form__row">
+      {{ self.radio('In the post header', 'post.reflink-icon-position', 'header') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.radio('In the right bottom corner', 'post.reflink-icon-position', 'message') }}
+    </div>
+  </div>
+
+  <div class="settings-form__tab-content" data-tab-content="image">
+    <div class="settings-form__row">
+      {{ self.checkbox('Enable NSFW mode', 'image.nsfw') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.checkbox('Show video overlay', 'image.show-video-overlay') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.checkbox('Close image popup when clicking outside', 'image.hide-popup-on-outside-click') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.checkbox('Autoplay audio &amp; video files', 'image.auto-play') }}
+    </div>
+  </div>
+
+  <div class="settings-form__tab-content" data-tab-content="link">
+    <div class="settings-form__row">
+      {{ self.checkbox('Add names to the links', 'link.add-names-to-links') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.checkbox('Add \'(you)\' to the links', 'link.add-you-to-links') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.checkbox('Show post in a popup when hovering over a link', 'link.show-post-popups') }}
+    </div>
+  </div>
+
+  <div class="settings-form__tab-content" data-tab-content="form">
+    <div class="settings-form__row">
+      {{ self.checkbox('Scroll to the bottom after posting', 'form.scroll-bottom') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.checkbox('Save subject after posting', 'form.save-subject') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.checkbox('Save name after posting', 'form.save-name') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.checkbox('Show markup buttons', 'form.show-markup') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.checkbox('Show markup buttons (mobile)', 'form.show-markup-mobile') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.checkbox('Save form floating state on page reload', 'form.save-form-state') }}
+    </div>
+
+    <h3 class="settings-form__option-title">Form Alignment</h3>
+
+    <div class="settings-form__row">
+      {{ self.radio('On the left', 'form.align', 'left') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.radio('In the center', 'form.align', 'center') }}
+    </div>
+
+    <h3 class="settings-form__option-title">Preview Alignment</h3>
+
+    <div class="settings-form__row">
+      {{ self.radio('On the left', 'form.preview-align', 'left') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.radio('On the right', 'form.preview-align', 'right') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.checkbox('Insert tags in pairs', 'form.insert-tags-in-pairs') }}
+    </div>
+
+    <h3 class="settings-form__option-title">Replaces</h3>
+    <ul id="form-replaces" class="settings-form__list"></ul>
+    <button id="form-replaces-add" class="button">Add</button>
+  </div>
+
+  <div class="settings-form__tab-content" data-tab-content="time">
+    <h3 class="settings-form__option-title">Language</h3>
+
+    <div class="settings-form__row">
+      {{ self.radio('Browser default', 'time.locale', 'default') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.radio('Custom'
+          ~ ' <input type="text" data-key="time.locale-custom"'
+          ~ ' class="input settings-form__text" placeholder="en" />',
+        'time.locale', 'custom') }}
+    </div>
+
+    <h3 class="settings-form__option-title">Format</h3>
+
+    <div class="settings-form__row">
+      {{ self.radio('Browser default', 'time.format', 'default') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.radio('Custom'
+          ~ ' <input type="text" data-key="time.format-custom"'
+          ~ ' class="input settings-form__text" placeholder="EEE, dd MMM yyyy HH:mm:ss" />',
+        'time.format', 'custom') }}
+    </div>
+
+    <p>
+      See the
+      <a href="https://github.com/moment/luxon/blob/master/docs/formatting.md#table-of-tokens">
+        luxon documentation
+      </a>
+      for the custom tokens reference.
+    </p>
+
+    <h3 class="settings-form__option-title">Time zone</h3>
+
+    <div class="settings-form__row">
+      {{ self.radio('Browser default', 'time.zone', 'default') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.radio('Fixed UTC offset'
+          ~ ' <input type="number" data-key="time.zone-fixed"'
+          ~ ' class="input settings-form__text" min="-99" max="99" />',
+        'time.zone', 'fixed') }}
+    </div>
+
+    <h3 class="settings-form__option-title">Current format</h3>
+    <p id="time-preview" class="settings-form__row"></p>
+  </div>
+
+  <div class="settings-form__tab-content" data-tab-content="common">
+    <div class="settings-form__row">
+      {{ self.checkbox('Smooth scrolling', 'common.smooth-scroll') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.checkbox('Show count of unread posts in title', 'common.show-unread-count-in-title') }}
+    </div>
+
+    <h3 class="settings-form__option-title">Thread Alignment</h3>
+
+    <div class="settings-form__row">
+      {{ self.radio('On the left',  'common.layout', 'left') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.radio('In the center', 'common.layout', 'center') }}
+    </div>
+  </div>
+
+  <div class="settings-form__footer"></div>
+</div>

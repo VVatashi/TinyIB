@@ -8,6 +8,6 @@
 
 {% block content %}
   <main class="{{class is defined ? class ~ ' '}}">
-    <div id="settings_form"></div>
+    {% include 'components/_settings.twig' %}
   </main>
 {% endblock %}

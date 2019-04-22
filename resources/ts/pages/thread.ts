@@ -2,9 +2,9 @@ import { BasePage } from './base';
 import { eventBus } from '../event-bus';
 import { Events } from '../events';
 import { Thread } from '../model';
+import { Settings } from '../services';
 import { DOM } from '../utils';
 import { PostView } from '../views';
-import { SettingsManager } from '../settings';
 
 const faviconSize = 16;
 
@@ -79,8 +79,7 @@ export class ThreadPage extends BasePage {
         context.textBaseline = 'middle';
         context.fillStyle = '#FFFFFF';
 
-        const settings = SettingsManager.load();
-        if (!settings.common.showUnreadCountInTitle) {
+        if (!Settings.get('common.show-unread-count-in-title')) {
           // Draw new posts count.
           if (unreadPosts < 10) {
             context.font = `700 10px 'Roboto Condensed', sans-serif`;
@@ -113,8 +112,7 @@ export class ThreadPage extends BasePage {
   }
 
   updateTitle(unreadPosts: number) {
-    const settings = SettingsManager.load();
-    if (settings.common.showUnreadCountInTitle && unreadPosts > 0) {
+    if (Settings.get('common.show-unread-count-in-title') && unreadPosts > 0) {
       this.$title.textContent = `[${this.model.unreadPosts}] ${this.title}`;
     } else {
       this.$title.textContent = this.title;

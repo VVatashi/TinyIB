@@ -1,31 +1,45 @@
-import { SettingsManager } from '../settings';
+import { Settings } from '../services';
 import { EventEmitter } from '../utils';
 
 export class Tools extends EventEmitter {
+  protected _isSettingsOpened = false;
+
+  get isSettingsOpened(): boolean {
+    return this._isSettingsOpened;
+  }
+
+  set isSettingsOpened(value: boolean) {
+    this._isSettingsOpened = value;
+
+    if (value) {
+      this.emit('settings-opened');
+    } else {
+      this.emit('settings-closed');
+    }
+  }
+
   get nsfw(): boolean {
-    const settings = SettingsManager.load();
-    return settings.common.nsfw;
+    return Settings.get('image.nsfw');
   }
 
   get autoPlay(): boolean {
-    const settings = SettingsManager.load();
-    return settings.common.autoPlay;
+    return Settings.get('image.auto-play');
+  }
+
+  toggleSettings() {
+    this.isSettingsOpened = !this.isSettingsOpened;
   }
 
   toggleNsfw() {
-    const settings = SettingsManager.load();
-    settings.common.nsfw = !settings.common.nsfw;
-    SettingsManager.save(settings);
-
-    this.emit('toggle-nsfw', settings.common.nsfw);
+    const value = Settings.get('image.nsfw');
+    Settings.set('image.nsfw', !value);
+    this.emit('toggle-nsfw', !value);
   }
 
   toggleAutoPlay() {
-    const settings = SettingsManager.load();
-    settings.common.autoPlay = !settings.common.autoPlay;
-    SettingsManager.save(settings);
-
-    this.emit('toggle-autoplay', settings.common.autoPlay);
+    const value = Settings.get('image.auto-play');
+    Settings.set('image.auto-play', !value);
+    this.emit('toggle-autoplay', !value);
   }
 
   scrollToTop() {
