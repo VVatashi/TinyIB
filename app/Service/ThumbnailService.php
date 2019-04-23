@@ -288,7 +288,7 @@ class ThumbnailService
       $height = $max_height;
     }
 
-    shell_exec("ffmpeg -y -loglevel quiet -ss 00:00:01 -i $path"
+    shell_exec("ffmpeg -y -loglevel quiet -i $path"
       . " -vframes 1 -vf scale=w=$width:h=$height:force_original_aspect_ratio=decrease $output_path");
   }
 
