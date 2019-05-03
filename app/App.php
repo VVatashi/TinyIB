@@ -208,7 +208,8 @@ EOF;
 
     // Use CORS handler.
     $allowed_methods = ['OPTIONS', 'GET', 'POST'];
-    $cors_middleware = new CorsMiddleware('*', $allowed_methods, [], []);
+    $allowed_headers = ['Content-Type', 'X-Token'];
+    $cors_middleware = new CorsMiddleware('*', $allowed_methods, $allowed_headers, []);
     $handler = new RequestHandler($cors_middleware, $handler);
 
     // Use exception handler.
