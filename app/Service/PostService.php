@@ -391,9 +391,11 @@ class PostService
 
     // Detect spam.
     if ($this->config->get('DETECT_SPAM', '') === 'same_message') {
-      $last = Post::getLastPostByIP($post->ip);
-      if (isset($last) && $message === $last->message) {
-        throw new ValidationException('Spam detected');
+      if (!empty($message) && !isset($_FILES['file']) && !isset($_FILES['file_mobile'])) {
+        $last = Post::getLastPostByIP($post->ip);
+        if (isset($last) && $message === $last->message) {
+          throw new ValidationException('Spam detected');
+        }
       }
     }
 
