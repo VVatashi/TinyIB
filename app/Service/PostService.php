@@ -388,6 +388,15 @@ class PostService
     }
 
     $post->message = $message;
+
+    // Detect spam.
+    if ($this->config->get('DETECT_SPAM', '') === 'same_message') {
+      $last = Post::getLastPostByIP($post->ip);
+      if ($message === $last->message) {
+        throw new ValidationException('Spam detected');
+      }
+    }
+
     $post->password = !empty($password) ? md5(md5($password)) : '';
 
     if (isset($_FILES['file']) && !empty($_FILES['file']['name'])) {
