@@ -5,6 +5,7 @@ namespace Imageboard\Controller;
 use Imageboard\Cache\CacheInterface;
 use Imageboard\Service\{ConfigService, RendererService};
 use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ServerRequestInterface;
 
 class SettingsController implements ControllerInterface
 {
@@ -39,12 +40,14 @@ class SettingsController implements ControllerInterface
   /**
    * Shows settings form.
    */
-  function settings(): Response
+  function settings(ServerRequestInterface $request): Response
   {
-    $key = $this->config->get('BOARD') . ':settings';
+    /** @var \Imageboard\Model\User $user */
+    $user = $request->getAttribute('user');
+    $key = $this->config->get('BOARD') . ':settings:user:' . $user->id;
     $data = $this->cache->get($key);
     $headers = [];
-    if (isset($data)) {
+    if (!$user->isAnonymous() && isset($data)) {
       $headers['X-Cached'] = 'true';
     } else {
       $headers['X-Cached'] = 'false';
@@ -58,12 +61,14 @@ class SettingsController implements ControllerInterface
   /**
    * Returns partial HTML of settings form.
    */
-  function ajaxSettings(): Response
+  function ajaxSettings(ServerRequestInterface $request): Response
   {
-    $key = $this->config->get('BOARD') . ':ajax_settings';
+    /** @var \Imageboard\Model\User $user */
+    $user = $request->getAttribute('user');
+    $key = $this->config->get('BOARD') . ':ajax_settings:user:' . $user->id;
     $data = $this->cache->get($key);
     $headers = [];
-    if (isset($data)) {
+    if (!$user->isAnonymous() && isset($data)) {
       $headers['X-Cached'] = 'true';
     } else {
       $headers['X-Cached'] = 'false';

@@ -21,13 +21,6 @@ export class StyleSelectorView implements View {
         return styles;
       }, this.styles);
 
-    // Remove styles which is not selected.
-    $styles.forEach($style => {
-      if (!$style.hasAttribute('data-selected')) {
-        $style.remove();
-      }
-    });
-
     // Populate style selector.
     const styles = Object.keys(this.styles);
     for (let i = 0; i < styles.length; ++i) {
@@ -40,6 +33,12 @@ export class StyleSelectorView implements View {
 
     this.model = new StyleSelector();
     this.bindModel();
+
+    const style = this.model.style;
+    const $style = DOM.qs('link[title][rel="stylesheet"]') as HTMLElement;
+    if ($style && style !== $style.title) {
+      this.onStyleChanged(style);
+    }
   }
 
   protected onStyleChanged(style: string) {
