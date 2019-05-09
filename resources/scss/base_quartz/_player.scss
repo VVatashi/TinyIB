@@ -65,6 +65,12 @@
     cursor: pointer;
   }
 
+  &__time {
+    align-self: center;
+    margin-right: 0.5em;
+    white-space: nowrap;
+  }
+
   &__volume {
     min-width: 20px;
     max-width: 60px;

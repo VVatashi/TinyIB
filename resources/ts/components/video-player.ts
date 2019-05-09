@@ -1,4 +1,5 @@
 import { DOM } from '../utils';
+import { LocalStorage } from '../services';
 
 const pointerEvents = 'PointerEvent' in window;
 const touchEvents = 'ontouchstart' in window;
@@ -11,6 +12,7 @@ export class VideoPlayer {
   protected readonly $pause: HTMLButtonElement;
 
   protected readonly $seek: HTMLInputElement;
+  protected readonly $time: HTMLSpanElement;
   protected readonly $volume: HTMLInputElement;
 
   protected readonly $mute: HTMLButtonElement;
@@ -26,7 +28,7 @@ export class VideoPlayer {
     const controls = [
       'video', 'controls',
       'play', 'pause',
-      'seek', 'volume',
+      'seek', 'time', 'volume',
       'mute', 'unmute',
       'expand', 'compress',
     ];
@@ -87,21 +89,43 @@ export class VideoPlayer {
       return false;
     });
 
+    function formatTime(value: number) {
+      const hours = Math.floor(value / 3600);
+      const minutes = Math.floor(value % 3600 / 60);
+      const seconds = Math.floor(value % 60);
+      const secondsFormatted = seconds < 10 ? `0${seconds}` : seconds.toString();
+      if (hours > 0) {
+        const minutesFormatted = minutes < 10 ? `0${minutes}` : minutes.toString();
+        return `${hours}:${minutesFormatted}:${secondsFormatted}`;
+      } else {
+        return `${minutes}:${secondsFormatted}`;
+      }
+    }
+
     const timeUpdate = (e: Event) => {
-      const value = this.$video.currentTime / this.$video.duration;
+      const current = this.$video.currentTime;
+      const total = this.$video.duration;
+      const value = current / total;
       this.$seek.value = value.toString();
+      this.$time.textContent = `${formatTime(current)} / ${formatTime(total)}`;
     };
     this.$video.addEventListener('timeupdate', timeUpdate);
 
-    this.$seek.addEventListener('change', e => {
-      const time = +this.$seek.value * this.$video.duration;
+    const seek = (e: Event) => {
+      const total = this.$video.duration;
+      const time = +this.$seek.value * total;
 
       if ((this.$video as any).fastSeek) {
         (this.$video as any).fastSeek(time);
       } else {
         this.$video.currentTime = time;
       }
-    });
+
+      this.$time.textContent = `${formatTime(time)} / ${formatTime(total)}`;
+    }
+
+    this.$seek.addEventListener('change', seek);
+    this.$seek.addEventListener('input', seek);
 
     this.$seek.addEventListener('mousedown', e => {
       if (this.playing) {
@@ -132,15 +156,7 @@ export class VideoPlayer {
     });
 
     const volumeChange = (e: Event) => {
-      if (+this.$volume.value === 0) {
-        this.$mute.classList.add('hidden');
-        this.$unmute.classList.remove('hidden');
-      } else {
-        this.$mute.classList.remove('hidden');
-        this.$unmute.classList.add('hidden');
-      }
-
-      this.$video.volume = +this.$volume.value;
+      this.setVolume(+this.$volume.value);
     };
 
     this.$volume.addEventListener('input', volumeChange);
@@ -174,6 +190,9 @@ export class VideoPlayer {
     });
 
     this.setPlaying(autoPlay);
+
+    const volume = LocalStorage.get('player.volume', 1);
+    this.setVolume(volume);
   }
 
   setPlaying(value: boolean) {
@@ -192,6 +211,20 @@ export class VideoPlayer {
 
       this.playing = false;
     }
+  }
+
+  setVolume(value: number) {
+    if (value === 0) {
+      this.$mute.classList.add('hidden');
+      this.$unmute.classList.remove('hidden');
+    } else {
+      this.$mute.classList.remove('hidden');
+      this.$unmute.classList.add('hidden');
+    }
+
+    this.$video.volume = value;
+    this.$volume.value = value.toString();
+    LocalStorage.set('player.volume', value);
   }
 
   setMute(value: boolean) {
