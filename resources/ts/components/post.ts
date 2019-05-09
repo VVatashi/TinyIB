@@ -220,7 +220,7 @@ export class Post {
   }
 
   protected checkHidden($post: HTMLElement) {
-    const hidden = Settings.get<[]>('filter.hidden-authors');
+    const hidden = Settings.get<[]>('filter.hidden-authors') || [];
 
     const $name = DOM.qs('.post-header__name', $post);
     const $tripcode = DOM.qs('.post-header__tripcode', $post);
@@ -313,7 +313,7 @@ export class Post {
         const name = $name ? $name.textContent : '';
         const tripcode = $tripcode ? $tripcode.textContent : '';
 
-        const hidden = Settings.get<[]>('filter.hidden-authors');
+        const hidden = Settings.get<[]>('filter.hidden-authors') || [];
         if (hidden.some((author: { name: string, tripcode: string }) =>
           author.name === name && author.tripcode === tripcode)) {
           $reflink.classList.add('post__refmap-link--hidden');
@@ -532,6 +532,13 @@ export class Post {
 </div>`;
       this.$layout.appendChild(this.$modal);
 
+      const $audio = DOM.qs('.modal__audio', this.$modal) as HTMLAudioElement;
+      $audio.volume = LocalStorage.get('player.volume', 1);
+
+      $audio.addEventListener('volumechange', e => {
+        LocalStorage.set('player.volume', $audio.volume);
+      });
+
       this.modal = new Modal(this.$modal);
       this.modal.show(left - 150, top - 25, 300, 50, onModalHide.bind(this));
     } else if (file.type === 'video') {
@@ -555,6 +562,8 @@ export class Post {
 
       <input type="range" class="player__seek"
         value="0" min="0" max="1" step="0.001" />
+
+      <span class="player__time"></span>
 
       <button class="player__mute">
         <span class="fas fa-volume-up"></span>

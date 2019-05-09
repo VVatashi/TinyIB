@@ -249,11 +249,12 @@ class PostController implements ControllerInterface
   function board(ServerRequestInterface $request, array $args): ResponseInterface
   {
     $page = (int)($args['page'] ?? 0);
+    /** @var \Imageboard\Model\User $user */
     $user = $request->getAttribute('user');
     $key = $this->config->get("BOARD") . ':page:' . $page . ':user:' . $user->id;
     $headers = [];
     $data = $this->cache->get($key);
-    if (isset($data)) {
+    if (!$user->isAnonymous() && isset($data)) {
       $headers['X-Cached'] = 'true';
     } else {
       $headers['X-Cached'] = 'false';
@@ -275,11 +276,12 @@ class PostController implements ControllerInterface
   function thread(ServerRequestInterface $request, array $args): ResponseInterface
   {
     $id = (int)$args['id'];
+    /** @var \Imageboard\Model\User $user */
     $user = $request->getAttribute('user');
     $key = $this->config->get("BOARD") . ':thread:' . $id . ':user:' . $user->id;
     $headers = [];
     $data = $this->cache->get($key);
-    if (isset($data)) {
+    if (!$user->isAnonymous() && isset($data)) {
       $headers['X-Cached'] = 'true';
     } else {
       $headers['X-Cached'] = 'false';
