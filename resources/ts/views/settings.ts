@@ -101,14 +101,14 @@ export class SettingsView implements View {
     const $inputs = DOM.qsa('[data-key]', this.$form);
     $inputs.forEach($input => {
       const key = $input.getAttribute('data-key');
-      const value = Settings.get(key) as string;
+      const value = Settings.get(key);
       if ($input instanceof HTMLInputElement) {
         if ($input.type === 'checkbox') {
-          $input.checked = value === 'true';
+          $input.checked = value === 'true' || value === true;
         } else if ($input.type === 'radio') {
           $input.checked = value === $input.value;
         } else {
-          $input.value = value;
+          $input.value = value as string;
         }
       }
     });

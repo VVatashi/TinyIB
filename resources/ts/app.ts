@@ -53,6 +53,10 @@ document.addEventListener('DOMContentLoaded', e => {
       $layout.classList.add('layout--remove-hidden');
     }
 
+    if (Settings.get('filter.hide-threads')) {
+      $layout.classList.add('layout--hide-threads');
+    }
+
     if (Settings.get('form.show-markup')) {
       $layout.classList.add('layout--show-markup');
     }

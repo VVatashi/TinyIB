@@ -1,4 +1,9 @@
 .content {
+  &__auth-form {
+    margin: 0 auto;
+    max-width: 530px;
+  }
+
   &__oppost,
   &__post {
     @include clearfix;

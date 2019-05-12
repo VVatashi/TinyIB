@@ -30,6 +30,8 @@ class RendererService
       'debug' => true,
     ]);
 
+    $this->twig->addGlobal('protocol', $_SERVER['REQUEST_SCHEME'] ?? 'https');
+    $this->twig->addGlobal('hostname', $_SERVER['HTTP_HOST'] ?? 'localhost');
     $this->twig->addGlobal('base_url', $this->config->get('BASE_PATH'));
     $this->twig->addGlobal('content_url', $this->config->get('CONTENT_PATH'));
     $this->twig->addGlobal('style', $_COOKIE['style'] ?? 'Synthwave');
