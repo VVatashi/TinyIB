@@ -34,13 +34,5 @@ class ClearCacheHandler implements CommandHandlerInterface
   function handle($command)
   {
     $this->cache->deletePattern($this->config->get('BOARD') . ':*');
-
-    // Add entry to the modlog.
-    $id = $this->user->id;
-    $email = $this->user->email;
-    ModLog::create([
-      'message' => "User $email has cleared the cache.",
-      'user_id' => $id,
-    ]);
   }
 }

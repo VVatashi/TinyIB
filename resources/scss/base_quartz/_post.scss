@@ -1,10 +1,23 @@
 .post {
-  &--hidden &__inner:not(:hover) &__content {
-    display: none;
+  &_oppost {
+    @at-root .layout--hide-threads &.post--hidden .post__inner:not(:hover) .post__content {
+      display: none;
+    }
+
+    @at-root .layout--remove-hidden.layout--hide-threads &.post--hidden {
+      display: none;
+    }
+
   }
 
-  @at-root .layout--remove-hidden &--hidden {
-    display: none;
+  &_reply {
+    &.post--hidden .post__inner:not(:hover) .post__content {
+      display: none;
+    }
+
+    @at-root .layout--remove-hidden &.post--hidden {
+      display: none;
+    }
   }
 
   &--popup {

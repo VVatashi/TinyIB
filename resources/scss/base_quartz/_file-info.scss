@@ -1,0 +1,32 @@
+.file-info {
+  &__search {
+    margin-right: 0.5em;
+
+    cursor: pointer;
+    pointer-events: initial;
+  }
+
+  &__search-menu {
+    display: none;
+
+    position: absolute;
+    left: 0;
+    top: 1em;
+    padding: 0.25em;
+
+    z-index: 1;
+
+    background: $block-background;
+    text-shadow: none;
+    pointer-events: initial;
+  }
+
+  &__search:hover + &__search-menu,
+  &__search-menu:hover {
+    display: block;
+  }
+
+  &__search-menu-list {
+    flex-flow: column;
+  }
+}

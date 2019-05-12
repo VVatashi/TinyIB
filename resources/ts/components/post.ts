@@ -6,6 +6,8 @@ import { Coub, LocalStorage, Settings } from '../services';
 import { DOM, Keyboard } from '../utils';
 
 interface FileData {
+  $post: HTMLElement;
+  $link: HTMLAnchorElement;
   postId: number;
   type: 'image' | 'audio' | 'video' | 'coub' | 'youtube';
   url: string;
@@ -22,6 +24,7 @@ interface PostPopup {
   $parentLink: HTMLElement;
   $popup: HTMLElement;
   hover: boolean;
+  pinned: boolean;
 }
 
 function offset($el: HTMLElement) {
@@ -51,6 +54,54 @@ export class Post {
     eventBus.on(Events.PostsInserted, this.onPostsInserted.bind(this));
   }
 
+  protected hideFile($file: HTMLElement) {
+    $file.classList.add('file--hidden');
+
+    const $info = DOM.qs('.post__file-info', $file);
+    if ($info) {
+      $info.classList.add('hidden');
+    }
+
+    const $hide = DOM.qs('.file__hide', $file);
+    if ($hide) {
+      $hide.classList.add('hidden');
+    }
+
+    const $show = DOM.qs('.file__show', $file);
+    if ($show) {
+      $show.classList.remove('hidden');
+    }
+
+    const $thumbnail = DOM.qs('.file__thumbnail', $file);
+    if ($thumbnail) {
+      $thumbnail.classList.add('hidden');
+    }
+  }
+
+  protected showFile($file: HTMLElement) {
+    $file.classList.remove('file--hidden');
+
+    const $info = DOM.qs('.post__file-info', $file);
+    if ($info) {
+      $info.classList.remove('hidden');
+    }
+
+    const $hide = DOM.qs('.file__hide', $file);
+    if ($hide) {
+      $hide.classList.remove('hidden');
+    }
+
+    const $show = DOM.qs('.file__show', $file);
+    if ($show) {
+      $show.classList.add('hidden');
+    }
+
+    const $thumbnail = DOM.qs('.file__thumbnail', $file);
+    if ($thumbnail) {
+      $thumbnail.classList.remove('hidden');
+    }
+  }
+
   protected onReady() {
     this.$layout = DOM.qs('.layout') as HTMLElement;
 
@@ -74,7 +125,7 @@ export class Post {
 
         const $post = DOM.qid(`reply_${this.media[prevIndex].postId}`);
         if ($post) {
-          $post.scrollIntoView(true);
+          DOM.scrollToMiddle($post);
         }
 
         this.showMediaModal(prevIndex);
@@ -89,7 +140,7 @@ export class Post {
 
         const $post = DOM.qid(`reply_${this.media[nextIndex].postId}`);
         if ($post) {
-          $post.scrollIntoView(true);
+          DOM.scrollToMiddle($post);
         }
 
         this.showMediaModal(nextIndex);
@@ -111,13 +162,23 @@ export class Post {
 
       if (e.target.tagName === 'A' && e.target.classList.contains('thumbnail')
         || e.target.tagName === 'IMG' && e.target.classList.contains('thumbnail__content')) {
+        const expandMode = Settings.get<string>('image.expand-images');
+        if (expandMode === 'tab') {
+          return;
+        }
+
         e.preventDefault();
 
-        const $link = e.target.tagName === 'A' ? e.target : e.target.parentElement;
+        const $link = (e.target.tagName === 'A' ? e.target : e.target.parentElement) as HTMLAnchorElement;
         const link = $link.getAttribute('href');
         if (this.modalFileIndex !== null && this.media[this.modalFileIndex].url === link) {
           this.closeModals();
-        } else {
+        } else if (expandMode === 'post') {
+          const index = this.media.findIndex(file => file.url === link);
+          if (index !== -1) {
+            this.showFileInPost(index);
+          }
+        } else if (expandMode === 'popup') {
           const $post = $link.closest('.post');
           if ($post.hasAttribute('data-popup-id')) {
             this.modalParentPopupId = +$post.getAttribute('data-popup-id');
@@ -137,61 +198,35 @@ export class Post {
       }
 
       if (e.target.classList.contains('file__hide')) {
-        const $file = e.target.closest('.file');
+        const $file = e.target.closest('.file') as HTMLElement;
         if (!$file) {
           return;
         }
 
-        $file.classList.add('file--hidden');
-
-        const $info = DOM.qs('.post__file-info', $file);
-        if ($info) {
-          $info.classList.add('hidden');
+        const hash = $file.getAttribute('data-hash');
+        if (hash) {
+          const hiddenFiles = Settings.get<string[]>('filter.hidden-files') || [];
+          hiddenFiles.push(hash);
+          Settings.set('filter.hidden-files', hiddenFiles);
         }
 
-        const $hide = DOM.qs('.file__hide', $file);
-        if ($hide) {
-          $hide.classList.add('hidden');
-        }
-
-        const $show = DOM.qs('.file__show', $file);
-        if ($show) {
-          $show.classList.remove('hidden');
-        }
-
-        const $thumbnail = DOM.qs('.file__thumbnail', $file);
-        if ($thumbnail) {
-          $thumbnail.classList.add('hidden');
-        }
+        this.hideFile($file);
       }
 
       if (e.target.classList.contains('file__show')) {
-        const $file = e.target.closest('.file');
+        const $file = e.target.closest('.file') as HTMLElement;
         if (!$file) {
           return;
         }
 
-        $file.classList.remove('file--hidden');
-
-        const $info = DOM.qs('.post__file-info', $file);
-        if ($info) {
-          $info.classList.remove('hidden');
+        const hash = $file.getAttribute('data-hash');
+        if (hash) {
+          let hiddenFiles = Settings.get<string[]>('filter.hidden-files') || [];
+          hiddenFiles = hiddenFiles.filter(h => h !== hash);
+          Settings.set('filter.hidden-files', hiddenFiles);
         }
 
-        const $hide = DOM.qs('.file__hide', $file);
-        if ($hide) {
-          $hide.classList.remove('hidden');
-        }
-
-        const $show = DOM.qs('.file__show', $file);
-        if ($show) {
-          $show.classList.add('hidden');
-        }
-
-        const $thumbnail = DOM.qs('.file__thumbnail', $file);
-        if ($thumbnail) {
-          $thumbnail.classList.remove('hidden');
-        }
+        this.showFile($file);
       }
     });
 
@@ -220,23 +255,30 @@ export class Post {
   }
 
   protected checkHidden($post: HTMLElement) {
-    const hidden = Settings.get<[]>('filter.hidden-authors') || [];
-
-    const $name = DOM.qs('.post-header__name', $post);
-    const $tripcode = DOM.qs('.post-header__tripcode', $post);
-
-    const name = $name ? $name.textContent : '';
-    const tripcode = $tripcode ? $tripcode.textContent : '';
-
-    if (hidden.some((author: { name: string, tripcode: string }) =>
-      author.name === name && author.tripcode === tripcode)) {
+    const hiddenPosts = Settings.get<number[]>('filter.hidden-posts') || [];
+    const id = +$post.getAttribute('data-post-id');
+    if (hiddenPosts.indexOf(id) !== -1) {
       $post.classList.add('post--hidden');
+    } else {
+      const hidden = Settings.get<[]>('filter.hidden-authors') || [];
+
+      const $name = DOM.qs('.post-header__name', $post);
+      const $tripcode = DOM.qs('.post-header__tripcode', $post);
+
+      const name = $name ? $name.textContent : '';
+      const tripcode = $tripcode ? $tripcode.textContent : '';
+
+      if (hidden.some((author: { name: string, tripcode: string }) =>
+        author.name === name && author.tripcode === tripcode)) {
+        $post.classList.add('post--hidden');
+      }
     }
   }
 
   protected onPostsInserted(posts: HTMLElement[]) {
+    const hiddenFiles = Settings.get<string[]>('filter.hidden-files') || [];
     posts.forEach($post => {
-      const $fileLink = DOM.qs('.thumbnail', $post);
+      const $fileLink = DOM.qs('.thumbnail', $post) as HTMLAnchorElement;
       if ($fileLink) {
         const url = $fileLink.getAttribute('href');
 
@@ -250,12 +292,32 @@ export class Post {
         const postId = +$post.getAttribute('data-post-id');
         if (!this.media.find(file => file.postId === postId && file.url === url)) {
           this.media.push({
+            $post,
+            $link: $fileLink,
             postId,
             type,
             url,
             width: +$fileLink.getAttribute('data-width'),
             height: +$fileLink.getAttribute('data-height'),
           } as FileData);
+        }
+
+        const $file = DOM.qs('.file', $post) as HTMLElement;
+        if ($file) {
+          const hash = $file.getAttribute('data-hash');
+          if (hash && hiddenFiles.indexOf(hash) !== -1) {
+            this.hideFile($file);
+          }
+        }
+
+        // Replace thumbnail with original.
+        if (type === 'image') {
+          const $thumbnail = DOM.qs('.thumbnail__content', $fileLink) as HTMLImageElement;
+          if (!url.endsWith('.gif') && Settings.get('image.replace-thumbnail')) {
+            $thumbnail.src = $fileLink.href;
+          } else if (url.endsWith('.gif') && Settings.get('image.replace-thumbnail-gif')) {
+            $thumbnail.src = $fileLink.href;
+          }
         }
       }
 
@@ -334,27 +396,29 @@ export class Post {
       return;
     }
 
+    const hiddenFiles = Settings.get<string[]>('filter.hidden-files') || [];
     const postMessage = DOM.qs('.post__message', $post);
-    const links = DOM.qsa('a[href]', postMessage);
+    const links = DOM.qsa('a[href]', postMessage) as HTMLAnchorElement[];
     links.filter(link => !link.hasAttribute('data-processed'))
-      .map(link => {
-        link.setAttribute('data-processed', 'true');
-        return link.getAttribute('href');
+      .map($link => {
+        $link.setAttribute('data-processed', 'true');
+
+        const url = $link.getAttribute('href');
+        const matches = url.match(/^https?:\/\/(?:www\.)?(coub\.com)\/view\/([0-9a-z]+)$/i)
+          || url.match(/^https?:\/\/(?:www\.)?(youtube\.com)\/watch\?v=([0-9a-z_-]+)/i)
+          || url.match(/^https?:\/\/(?:www\.)?(youtu\.be)\/([0-9a-z_-]+)/i);
+        return { $link, url, matches };
       })
-      .map(url => {
-        return url.match(/^https?:\/\/(?:www\.)?(coub\.com)\/view\/([0-9a-z]+)$/i)
-          || url.match(/^https?:\/\/(?:www\.)?(youtube\.com)\/watch\?v=([0-9a-z_-]+)$/i)
-          || url.match(/^https?:\/\/(?:www\.)?(youtu\.be)\/([0-9a-z_-]+)$/i);
-      })
-      .filter(matches => matches && matches.length >= 1)
-      .forEach(async matches => {
+      .filter(({ $link, url, matches }) => matches && matches.length >= 1)
+      .forEach(async ({ $link, url, matches }) => {
         if (matches[1] === 'coub.com') {
           try {
             const coub = await Coub.getData(matches[2]);
             const thumbnailUrl = coub.image_versions.template.replace('%{version}', 'small');
-            const thumbnail = document.createElement('div');
-            thumbnail.classList.add('post__file-preview', 'file');
-            thumbnail.innerHTML = `
+            const $thumbnail = document.createElement('div');
+            $thumbnail.classList.add('post__file-preview', 'file');
+            $thumbnail.setAttribute('data-hash', coub.permalink);
+            $thumbnail.innerHTML = `
 <div class="post__file-info file-info">
   <a class="file-info__link" href="https://coub.com/view/${coub.permalink}" target="_blank">Coub</a>
   <span class="file-info__size"></span>
@@ -364,11 +428,16 @@ export class Post {
 <span class="file__show far fa-plus-square hidden" title="Show hidden preview"></span>
 
 <a class="file__thumbnail thumbnail thumbnail--embed" href="https://coub.com/view/${coub.permalink}" target="_blank">
-  <img class="thumbnail__content thumbnail__content--embed" src="${thumbnailUrl}" />
+  <img class="thumbnail__content thumbnail__content--embed"
+    style="max-width: 250px; max-height: 250px;"
+    src="${thumbnailUrl}" />
 </a>`;
-            thumbnail.style.maxHeight = '250px';
-            thumbnail.style.maxWidth = '250px';
-            postContent.insertBefore(thumbnail, postMessage);
+            postContent.insertBefore($thumbnail, postMessage);
+            $link.innerHTML = `<span class="fas fa-cube"></span> ${coub.title}`;
+
+            if (hiddenFiles.indexOf(coub.permalink) !== -1) {
+              this.hideFile($thumbnail);
+            }
 
             if (DOM.qsa('.post__file-preview', postContent).length > 1) {
               const message = DOM.qs('.post__message', postContent) as HTMLElement;
@@ -379,6 +448,8 @@ export class Post {
             const url = `https://coub.com/view/${coub.permalink}`;
             if (!this.media.find(file => file.postId === postId && file.url === url)) {
               this.media.push({
+                $post,
+                $link: DOM.qs('.thumbnail', $thumbnail) as HTMLAnchorElement,
                 postId,
                 type: 'coub',
                 url,
@@ -407,9 +478,10 @@ export class Post {
             const url = `https://www.youtube.com/watch?v=${id}`;
             const embedInfo = await response.json();
             const thumbnailUrl = embedInfo.thumbnail_url;
-            const thumbnail = document.createElement('div');
-            thumbnail.classList.add('post__file-preview', 'file');
-            thumbnail.innerHTML = `
+            const $thumbnail = document.createElement('div');
+            $thumbnail.classList.add('post__file-preview', 'file');
+            $thumbnail.setAttribute('data-hash', id);
+            $thumbnail.innerHTML = `
 <div class="post__file-info file-info">
   <a class="file-info__link" href="${url}" target="_blank">YouTube</a>
   <span class="file-info__size"></span>
@@ -419,11 +491,16 @@ export class Post {
 <span class="file__show far fa-plus-square hidden" title="Show hidden preview"></span>
 
 <a class="file__thumbnail thumbnail thumbnail--embed" href="${url}" target="_blank">
-  <img class="thumbnail__content thumbnail__content--embed" src="${thumbnailUrl}" />
+  <img class="thumbnail__content thumbnail__content--embed"
+    style="max-width: 250px; max-height: 250px;"
+    src="${thumbnailUrl}" />
 </a>`;
-            thumbnail.style.maxHeight = '250px';
-            thumbnail.style.maxWidth = '250px';
-            postContent.insertBefore(thumbnail, postMessage);
+            postContent.insertBefore($thumbnail, postMessage);
+            $link.innerHTML = `<span class="fab fa-youtube"></span> ${embedInfo.title}`;
+
+            if (hiddenFiles.indexOf(id) !== -1) {
+              this.hideFile($thumbnail);
+            }
 
             if (DOM.qsa('.post__file-preview', postContent).length > 1) {
               const message = DOM.qs('.post__message', postContent) as HTMLElement;
@@ -437,6 +514,8 @@ export class Post {
               .replace(/height="\d+"/i, 'height="100%"');
             if (!this.media.find(file => file.postId === postId && file.url === url)) {
               this.media.push({
+                $post,
+                $link: DOM.qs('.thumbnail', $thumbnail) as HTMLAnchorElement,
                 postId,
                 type: 'youtube',
                 url,
@@ -688,6 +767,14 @@ export class Post {
     const $postContentCopy = $postContent.cloneNode(true);
     $popup.appendChild($postContentCopy);
 
+    const $buttonsWrapper = DOM.qs('.post-header__reflink-wrapper', $popup);
+    const $postNo = DOM.qs('.post-header__post-no', $buttonsWrapper);
+    const $pinButton = document.createElement('a');
+    $pinButton.classList.add('post-header__pin', 'fas', 'fa-thumbtack');
+    $pinButton.href = '#';
+    $pinButton.title = 'Pin popup';
+    $buttonsWrapper.insertBefore($pinButton, $postNo);
+
     this.$layout.appendChild($popup);
 
     const backLinks = DOM.qsa(`a[data-target-post-id="${parentPostId}"]`, $popup) as HTMLElement[];
@@ -726,6 +813,23 @@ export class Post {
     const popupId = this.nextPopupId;
     this.nextPopupId++;
 
+    $pinButton.addEventListener('click', e => {
+      e.preventDefault();
+
+      if (!this.popups[popupId]) {
+        return;
+      }
+
+      const popup = this.popups[popupId];
+      const $popup = popup.$popup;
+      popup.pinned = !popup.pinned;
+      if (popup.pinned) {
+        $popup.classList.add('post--pinned');
+      } else {
+        $popup.classList.remove('post--pinned');
+      }
+    });
+
     const parent = this.popups[parentId];
     if (parent) {
       parent.childrenIds.push(popupId);
@@ -741,6 +845,7 @@ export class Post {
       $parentLink: $link,
       $popup,
       hover: true,
+      pinned: false,
     };
 
     const popupCloseTimeout = 1000;
@@ -796,6 +901,11 @@ export class Post {
       return false;
     }
 
+    // Do not close post popup if it is pinned.
+    if (popup.pinned) {
+      return false;
+    }
+
     // Do not close post popup if file modal is open.
     if (this.modalParentPopupId === popup.id) {
       return false;
@@ -811,6 +921,11 @@ export class Post {
       }
 
       if (child.hover) {
+        return false;
+      }
+
+      // Do not close post popup if any of it's children is pinned.
+      if (child.pinned) {
         return false;
       }
 
@@ -844,5 +959,88 @@ export class Post {
     }
 
     return true;
+  }
+
+  async showFileInPost(mediaIndex: number) {
+    const file = this.media[mediaIndex];
+
+    const $thumbnail = DOM.qs('.thumbnail__content', file.$link);
+    $thumbnail.classList.add('hidden');
+
+    const autoPlay = Settings.get<boolean>('image.auto-play');
+    let $original: HTMLElement;
+    if (file.type === 'video') {
+      $original = document.createElement('video');
+      ($original as HTMLVideoElement).src = file.url;
+      $original.setAttribute('autoplay', '');
+      $original.setAttribute('controls', '');
+      $original.setAttribute('width', $thumbnail.getAttribute('data-width'));
+      $original.setAttribute('height', $thumbnail.getAttribute('data-height'));
+    } else if (file.type === 'audio') {
+      $original = document.createElement('audio');
+      ($original as HTMLAudioElement).src = file.url;
+      $original.setAttribute('autoplay', '');
+      $original.setAttribute('controls', '');
+    } else if (file.type === 'image') {
+      $original = document.createElement('img');
+      ($original as HTMLImageElement).src = file.url;
+      $original.setAttribute('width', $thumbnail.getAttribute('data-width'));
+      $original.setAttribute('height', $thumbnail.getAttribute('data-height'));
+    } else if (file.type === 'coub') {
+      $original = document.createElement('div');
+      $original.innerHTML = await Coub.getHtml(file.url, autoPlay);
+    } else if (file.type === 'youtube') {
+      $original = document.createElement('div');
+      $original.innerHTML = file.data.replace('autoplay=0', 'autoplay=' + (autoPlay ? 1 : 0));
+    }
+
+    if (file.type !== 'audio') {
+      const maxWidth = Math.min(window.innerWidth, 900, file.width);
+      const maxHeight = file.height * maxWidth / file.width;
+
+      $original.style.width = `${maxWidth}px`;
+      $original.style.height = `${maxHeight}px`;
+    }
+
+    file.$link.appendChild($original);
+
+    if (file.type === 'image') {
+      $original.addEventListener('click', e => {
+        e.preventDefault();
+
+        $thumbnail.classList.remove('hidden');
+        $original.remove();
+
+        setTimeout(() => {
+          DOM.scrollToMiddle($thumbnail);
+        });
+
+        return false;
+      });
+    } else {
+      const $close = document.createElement('a');
+      $close.href = '#';
+      $close.textContent = '(Close)';
+
+      file.$link.parentElement.appendChild($close);
+
+      $close.addEventListener('click', e => {
+        e.preventDefault();
+
+        $thumbnail.classList.remove('hidden');
+        $original.remove();
+        $close.remove();
+
+        setTimeout(() => {
+          DOM.scrollToMiddle($thumbnail);
+        });
+
+        return false;
+      });
+    }
+
+    setTimeout(() => {
+      DOM.scrollToMiddle($original);
+    });
   }
 }

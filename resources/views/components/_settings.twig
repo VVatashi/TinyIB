@@ -32,6 +32,10 @@
       {{ self.checkbox('Remove hidden posts', 'filter.remove-hidden-posts') }}
     </div>
 
+    <div class="settings-form__row">
+      {{ self.checkbox('Hide threads', 'filter.hide-threads') }}
+    </div>
+
     <h3 class="settings-form__option-title">Hide posts by author</h3>
     <ul id="hidden-posts" class="settings-form__list"></ul>
     <button id="hidden-posts-add" class="button">Add</button>
@@ -72,6 +76,28 @@
 
     <div class="settings-form__row">
       {{ self.checkbox('Autoplay audio &amp; video files', 'image.auto-play') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.checkbox('Replace image thumbnails with original', 'image.replace-thumbnail') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.checkbox("Replace GIF thumbnails with original", 'image.replace-thumbnail-gif') }}
+    </div>
+
+    <h3 class="settings-form__option-title">Expand images</h3>
+
+    <div class="settings-form__row">
+      {{ self.radio('In a new tab', 'image.expand-images', 'tab') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.radio('In post', 'image.expand-images', 'post') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.radio('In popup', 'image.expand-images', 'popup') }}
     </div>
   </div>
 

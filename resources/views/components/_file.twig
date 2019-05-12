@@ -2,11 +2,7 @@
   {% set direct_link = content_url ~ '/src/' ~ post.file %}
 {% endif %}
 
-<div class="{{ class is defined ? class ~ ' ' }}file"
-  {% if post.thumbHeight > 0 %}
-    style="min-height: {{ post.thumbHeight }}px;"
-  {% endif %}
->
+<div class="{{ class is defined ? class ~ ' ' }}file" data-hash="{{ post.file_hex }}">
   {% include 'components/_file_info.twig' with {'class': 'post__file-info'} %}
 
   <span class="file__hide fas fa-window-close" title="Hide preview"></span>
@@ -16,7 +12,8 @@
     <a class="file__thumbnail thumbnail thumbnail--{{ post.fileType }}" id="thumbnail_wrapper_{{ post.id }}"
       href="{{ direct_link }}" data-width="{{ post.imageWidth }}" data-height="{{ post.imageHeight }}" target="_blank">
       <img src="{{ content_url }}/thumb/{{ post.thumb }}" alt="{{ post.id }}"
-        class="thumbnail__content thumbnail__content--{{ post.fileType }}" id="thumbnail_{{ post.id }}" />
+        class="thumbnail__content thumbnail__content--{{ post.fileType }}" id="thumbnail_{{ post.id }}"
+        width="{{ post.thumbWidth }}" height="{{ post.thumbHeight }}" />
     </a>
   {% endif %}
 </div>
