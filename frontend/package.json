@@ -1,0 +1,19 @@
+{
+  "name": "@vvatashi/imageboard-frontend",
+  "version": "1.0.0",
+  "description": "Frontend support server",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ."
+  },
+  "author": "Nina Lisitsinskaya <vvatashi4259@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "redis": "^2.8.0",
+    "ws": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/redis": "^2.8.12",
+    "@types/ws": "^6.0.1"
+  }
+}

@@ -11,7 +11,10 @@ import { Page, BasePage, BoardPage, ThreadPage, SettingsPage } from './pages';
 declare global {
   interface Window {
     baseUrl: string;
+    websocketUrl: string;
+    board: string;
     app: App;
+    WebSocket?: any;
   }
 }
 

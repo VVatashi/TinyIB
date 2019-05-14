@@ -52,6 +52,10 @@
 {{ self.script('vendor/luxon.min') }}
 {{ self.script('vendor/vue.min') }}
 
-<script>window.baseUrl = '{{ base_url|raw }}';</script>
+<script>
+  window.baseUrl = '{{ base_url|raw }}';
+  window.websocketUrl = '{{ websocket_url|raw }}';
+  window.board = '{{ board|raw }}';
+</script>
 
 {{ self.script('index') }}
