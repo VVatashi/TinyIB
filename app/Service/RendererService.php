@@ -35,6 +35,8 @@ class RendererService
     $this->twig->addGlobal('base_url', $this->config->get('BASE_PATH'));
     $this->twig->addGlobal('content_url', $this->config->get('CONTENT_PATH'));
     $this->twig->addGlobal('style', $_COOKIE['style'] ?? 'Synthwave');
+    $this->twig->addGlobal('websocket_url', $this->config->get('WEBSOCKET_URL'));
+    $this->twig->addGlobal('board', $this->config->get('BOARD'));
 
     $this->twig->addFunction(new Twig_SimpleFunction('mtime', function ($path) {
       $filename = basename($path);

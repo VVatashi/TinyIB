@@ -1,16 +1,42 @@
 import { BasePage } from './base';
 import { eventBus } from '../event-bus';
 import { Events } from '../events';
-import { Thread } from '../model';
+import { Thread, ThreadUpdater } from '../model';
 import { Settings } from '../services';
 import { DOM } from '../utils';
 import { PostView } from '../views';
 
 const faviconSize = 16;
 
+interface WSPostData {
+  id: number;
+  created_at: number;
+  message: string;
+  subject: string;
+  name: string;
+  tripcode: string;
+  file: string;
+  file_size: number;
+  file_type: string;
+  image_height: number;
+  image_width: number;
+  thumb: string;
+  thumb_height: number;
+  thumb_width: number;
+  html: string;
+}
+
+interface WSAddPost {
+  type: 'add_post';
+  data: WSPostData;
+}
+
+type WSCommand = WSAddPost;
+
 export class ThreadPage extends BasePage {
   readonly posts: PostView[];
   readonly model: Thread;
+  readonly updaterModel: ThreadUpdater;
 
   protected readonly $updater: HTMLElement;
   protected readonly $status: HTMLElement;
@@ -36,12 +62,13 @@ export class ThreadPage extends BasePage {
 
     const posts = this.posts.map(view => view.model);
     this.model = new Thread(threadId, posts);
+    this.updaterModel = new ThreadUpdater(this.model);
     this.bindModel();
   }
 
   async updateCounter() {
     try {
-      await this.model.updateCounter();
+      await this.updaterModel.updateCounter();
     } catch (e) {
       console.error(e);
 
@@ -119,24 +146,12 @@ export class ThreadPage extends BasePage {
     }
   }
 
-  protected onNewPostsLoaded(html: string) {
-    // Reset error message if have updated thread successfully.
-    if (this.$status) {
-      this.$status.textContent = '';
-    }
-
-    const $wrapper = DOM.qs('.post').parentElement;
-    if (!$wrapper) {
-      return;
-    }
-
-    const latestPostId = this.model.latestPostId;
-    $wrapper.insertAdjacentHTML('beforeend', html);
+  protected processNewPosts($wrapper: Element) {
     const $posts = DOM.qsa('.post', $wrapper);
     const $newPosts = $posts
       .filter($post => {
         const id = +$post.getAttribute('data-post-id');
-        return id > latestPostId;
+        return id > this.model.latestPostId;
       });
 
     if ($newPosts.length) {
@@ -166,15 +181,42 @@ export class ThreadPage extends BasePage {
     }
   }
 
-  protected bindModel() {
+  protected onNewPostsLoaded(html: string) {
+    // Reset error message if have updated thread successfully.
+    if (this.$status) {
+      this.$status.textContent = '';
+    }
+
+    const $wrapper = DOM.qs('.post').parentElement;
+    if (!$wrapper) {
+      return;
+    }
+
+    $wrapper.insertAdjacentHTML('beforeend', html);
+    this.processNewPosts($wrapper);
+  }
+
+  protected onNewWSPostDataLoaded(data: WSPostData) {
+    const $wrapper = DOM.qs('.post').parentElement;
+    if (!$wrapper) {
+      return;
+    }
+
+    $wrapper.insertAdjacentHTML('beforeend', data.html);
+    this.processNewPosts($wrapper);
+  }
+
+  protected bindThreadUpdater() {
     if (this.$updater) {
+      this.$updater.classList.remove('hidden');
+
       const $update = DOM.qs('.thread-updater__update', this.$updater);
       if ($update) {
         $update.addEventListener('click', async e => {
           e.preventDefault();
 
           try {
-            await this.model.getNewPosts();
+            await this.updaterModel.getNewPosts();
           } catch (e) {
             console.error(e);
 
@@ -189,23 +231,23 @@ export class ThreadPage extends BasePage {
 
       const $enabled = DOM.qs('.thread-updater__auto-checkbox', this.$updater) as HTMLInputElement;
       if ($enabled) {
-        $enabled.checked = this.model.isUpdateEnabled;
+        $enabled.checked = this.updaterModel.isUpdateEnabled;
 
         $enabled.addEventListener('change', () => {
-          this.model.isUpdateEnabled = $enabled.checked;
+          this.updaterModel.isUpdateEnabled = $enabled.checked;
         });
       }
 
       const $count = DOM.qs('.thread-updater__count', this.$updater);
       if ($count) {
-        this.model.on('counter-changed', count => {
-          $count.textContent = this.model.isUpdateEnabled ? `Autoupdate in ${count}` : 'Autoupdate';
+        this.updaterModel.on('counter-changed', count => {
+          $count.textContent = this.updaterModel.isUpdateEnabled ? `Autoupdate in ${count}` : 'Autoupdate';
         });
       }
 
       const $loader = DOM.qs('.thread-updater__loader', this.$updater);
       if ($loader) {
-        this.model.on('loading-changed', loading => {
+        this.updaterModel.on('loading-changed', loading => {
           if (loading) {
             $loader.classList.remove('hidden');
           } else {
@@ -217,7 +259,46 @@ export class ThreadPage extends BasePage {
       setTimeout(this.updateCounter.bind(this), 1000);
     }
 
-    this.model.on('new-posts-loaded', this.onNewPostsLoaded.bind(this));
+    this.updaterModel.on('new-posts-loaded', this.onNewPostsLoaded.bind(this));
+    eventBus.on(Events.PostCreated, this.updaterModel.getNewPosts.bind(this.updaterModel));
+  }
+
+  protected bindWSThreadUpdater() {
+    if (this.$updater) {
+      this.$updater.classList.add('hidden');
+    }
+
+    const socket = new WebSocket(window.websocketUrl);
+    socket.addEventListener('open', e => {
+      const board = window.board;
+      const threadId = this.threadId;
+      const channel = `${board}:thread:${threadId}`;
+      socket.send(JSON.stringify({
+        command: 'listen',
+        channel,
+      }));
+    });
+
+    socket.addEventListener('message', e => {
+      const message = JSON.parse(e.data) as WSCommand;
+      if (message.type === 'add_post') {
+        this.onNewWSPostDataLoaded(message.data);
+      }
+    });
+
+    socket.addEventListener('error', e => {
+      console.error('WebSocket error: ', e);
+      console.log('Fallback to legacy thread updater.');
+      this.bindThreadUpdater();
+    });
+  }
+
+  protected bindModel() {
+    if ('WebSocket' in window && window.websocketUrl && window.websocketUrl.length) {
+      this.bindWSThreadUpdater();
+    } else {
+      this.bindThreadUpdater();
+    }
 
     document.addEventListener('visibilitychange', () => {
       // Update unread posts count.
@@ -227,7 +308,5 @@ export class ThreadPage extends BasePage {
         this.updateTitle(this.model.unreadPosts);
       }
     });
-
-    eventBus.on(Events.PostCreated, this.model.getNewPosts.bind(this.model));
   }
 }

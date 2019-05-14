@@ -9,6 +9,7 @@ use Imageboard\Exception\{
 };
 use Imageboard\Cache\CacheInterface;
 use Imageboard\Model\{Ban, Post};
+use Predis\Client as Redis;
 
 class PostService
 {
@@ -30,6 +31,9 @@ class PostService
   /** @var \Imageboard\Service\ConfigService */
   protected $config;
 
+  /** @var \Imageboard\Service\RendererService */
+  protected $renderer;
+
   /**
    * Creates a new PostService instance.
    *
@@ -39,6 +43,7 @@ class PostService
    * @param \Imageboard\Service\ThumbnailService $thubmnail
    * @param \Imageboard\Service\SafebooruService $safebooru
    * @param \Imageboard\Service\ConfigService    $config
+   * @param \Imageboard\Service\RendererService  $renderer
    */
   function __construct(
     CacheInterface $cache,
@@ -46,7 +51,8 @@ class PostService
     FileService $file,
     ThumbnailService $thubmnail,
     SafebooruService $safebooru,
-    ConfigService $config
+    ConfigService $config,
+    RendererService $renderer
   ) {
     $this->cache = $cache;
     $this->cryptography = $cryptography;
@@ -54,6 +60,7 @@ class PostService
     $this->thubmnail = $thubmnail;
     $this->safebooru = $safebooru;
     $this->config = $config;
+    $this->renderer = $renderer;
   }
 
   /**
@@ -560,6 +567,40 @@ class PostService
 
       $this->cache->deletePattern($board . ':page:*');
       $this->cache->deletePattern($board . ':mobile:page:*');
+
+      $redis_host = $this->config->get('REDIS_HOST', '');
+      if (!empty($redis_host)) {
+        // Send post to the redis queue.
+        $board = $this->config->get('BOARD');
+        $channel = "$board:thread:$parent";
+        $message = json_encode([
+          'type' => 'add_post',
+          'data' => [
+            'id'             => $post->id,
+            'created_at'     => $post->getCreatedTimestamp(),
+            'subject'        => $post->subject,
+            'name'           => $post->name,
+            'tripcode'       => $post->tripcode,
+            'message'        => $post->message,
+            'file'           => $post->file,
+            'file_type'      => $post->getFileType(),
+            'image_width'    => $post->image_width,
+            'image_height'   => $post->image_height,
+            'file_size'      => $post->file_size,
+            'thumb'          => $post->thumb,
+            'thumb_width'    => $post->thumb_width,
+            'thumb_height'   => $post->thumb_height,
+            'html'           => $this->renderer->render('ajax/post.twig', [
+              'post'  => $post,
+              'res'   => RESPAGE,
+            ]),
+          ],
+        ]);
+
+        $redis = new Redis($redis_host);
+        $redis->publish($channel, $message);
+        $redis->quit();
+      }
     }
 
     return $post;
