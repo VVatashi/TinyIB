@@ -31,7 +31,12 @@ interface WSAddPost {
   data: WSPostData;
 }
 
-type WSCommand = WSAddPost;
+interface WSLatency {
+  type: 'latency';
+  timestamp: number;
+}
+
+type WSCommand = WSAddPost | WSLatency;
 
 export class ThreadPage extends BasePage {
   readonly posts: PostView[];
@@ -39,7 +44,9 @@ export class ThreadPage extends BasePage {
   readonly updaterModel: ThreadUpdater;
 
   protected readonly $updater: HTMLElement;
+  protected readonly $updaterWS: HTMLElement;
   protected readonly $status: HTMLElement;
+  protected readonly $statusWS: HTMLElement;
   protected readonly $title: HTMLElement;
   protected readonly faviconHref: string;
   protected readonly title: string;
@@ -50,9 +57,14 @@ export class ThreadPage extends BasePage {
     const $favicon = DOM.qid('favicon');
     this.faviconHref = $favicon.getAttribute('href');
 
+    this.checkLatensy = this.checkLatensy.bind(this);
+
     this.$updater = DOM.qid('thread-updater');
     this.$status = this.$updater ?
       DOM.qs('.thread-updater__status', this.$updater) as HTMLElement : null;
+    this.$updaterWS = DOM.qid('thread-updater-ws');
+    this.$statusWS = this.$updaterWS ?
+      DOM.qs('.thread-updater__status', this.$updaterWS) as HTMLElement : null;
 
     this.$title = DOM.qs('title') as HTMLElement;
     this.title = this.$title ? this.$title.textContent : '';
@@ -259,8 +271,28 @@ export class ThreadPage extends BasePage {
       setTimeout(this.updateCounter.bind(this), 1000);
     }
 
+    if (this.$updaterWS) {
+      this.$updaterWS.classList.add('hidden');
+    }
+
     this.updaterModel.on('new-posts-loaded', this.onNewPostsLoaded.bind(this));
     eventBus.on(Events.PostCreated, this.updaterModel.getNewPosts.bind(this.updaterModel));
+  }
+
+  protected socket: WebSocket;
+  protected readonly checkLatencyInterval = 10000;
+  protected latencyTimeout: number;
+
+  protected checkLatensy() {
+    this.socket.send(JSON.stringify({
+      command: 'latency',
+      timestamp: Date.now(),
+    }));
+
+    this.latencyTimeout = setTimeout(() => {
+      console.warn('WebSocket timeout');
+      this.socket.close();
+    }, this.checkLatencyInterval);
   }
 
   protected bindWSThreadUpdater() {
@@ -268,29 +300,66 @@ export class ThreadPage extends BasePage {
       this.$updater.classList.add('hidden');
     }
 
-    const socket = new WebSocket(window.websocketUrl);
-    socket.addEventListener('open', e => {
+    if (this.$updaterWS) {
+      this.$updaterWS.classList.remove('hidden');
+    }
+
+    if (this.$statusWS) {
+      this.$statusWS.textContent = 'WebSocket connecting...';
+    }
+
+    this.socket = new WebSocket(window.websocketUrl);
+    this.socket.addEventListener('open', e => {
       const board = window.board;
       const threadId = this.threadId;
       const channel = `${board}:thread:${threadId}`;
-      socket.send(JSON.stringify({
+      this.socket.send(JSON.stringify({
         command: 'listen',
         channel,
       }));
-    });
 
-    socket.addEventListener('message', e => {
-      const message = JSON.parse(e.data) as WSCommand;
-      if (message.type === 'add_post') {
-        this.onNewWSPostDataLoaded(message.data);
+      if (this.$statusWS) {
+        this.$statusWS.textContent = 'WebSocket connected';
       }
     });
 
-    socket.addEventListener('error', e => {
+    this.socket.addEventListener('message', e => {
+      const message = JSON.parse(e.data) as WSCommand;
+      if (message.type === 'add_post') {
+        this.onNewWSPostDataLoaded(message.data);
+      } else if (message.type === 'latency') {
+        const latency = Date.now() - message.timestamp;
+        this.$statusWS.textContent = `WebSocket connected: latency ${latency} ms`;
+
+        if (this.latencyTimeout) {
+          clearTimeout(this.latencyTimeout);
+          this.latencyTimeout = null;
+        }
+
+        setTimeout(this.checkLatensy, this.checkLatencyInterval);
+      }
+    });
+
+    this.socket.addEventListener('error', e => {
       console.error('WebSocket error: ', e);
-      console.log('Fallback to legacy thread updater.');
+
+      if (this.$statusWS) {
+        this.$statusWS.textContent = 'WebSocket error';
+      }
+    });
+
+    this.socket.addEventListener('close', e => {
+      console.warn('WebSocket closed: ', e);
+
+      if (this.$statusWS) {
+        this.$statusWS.textContent = `WebSocket closed: ${e.reason} (${e.code})`;
+      }
+
+      console.warn('Fallback to legacy thread updater.');
       this.bindThreadUpdater();
     });
+
+    setTimeout(this.checkLatensy, this.checkLatencyInterval);
   }
 
   protected bindModel() {
