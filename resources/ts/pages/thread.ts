@@ -281,7 +281,8 @@ export class ThreadPage extends BasePage {
 
   protected socket: WebSocket;
   protected readonly checkLatencyInterval = 10000;
-  protected latencyTimeout: number;
+  protected readonly latencyTimeout = 60000;
+  protected latencyTimer: number;
 
   protected checkLatensy() {
     this.socket.send(JSON.stringify({
@@ -289,10 +290,10 @@ export class ThreadPage extends BasePage {
       timestamp: Date.now(),
     }));
 
-    this.latencyTimeout = setTimeout(() => {
+    this.latencyTimer = setTimeout(() => {
       console.warn('WebSocket timeout');
       this.socket.close();
-    }, this.checkLatencyInterval);
+    }, this.latencyTimeout);
   }
 
   protected bindWSThreadUpdater() {
@@ -321,6 +322,8 @@ export class ThreadPage extends BasePage {
       if (this.$statusWS) {
         this.$statusWS.textContent = 'WebSocket connected';
       }
+
+      this.checkLatensy();
     });
 
     this.socket.addEventListener('message', e => {
@@ -331,9 +334,9 @@ export class ThreadPage extends BasePage {
         const latency = Date.now() - message.timestamp;
         this.$statusWS.textContent = `WebSocket connected: latency ${latency} ms`;
 
-        if (this.latencyTimeout) {
-          clearTimeout(this.latencyTimeout);
-          this.latencyTimeout = null;
+        if (this.latencyTimer) {
+          clearTimeout(this.latencyTimer);
+          this.latencyTimer = null;
         }
 
         setTimeout(this.checkLatensy, this.checkLatencyInterval);
@@ -358,8 +361,6 @@ export class ThreadPage extends BasePage {
       console.warn('Fallback to legacy thread updater.');
       this.bindThreadUpdater();
     });
-
-    setTimeout(this.checkLatensy, this.checkLatencyInterval);
   }
 
   protected bindModel() {
