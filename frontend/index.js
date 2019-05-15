@@ -21,6 +21,11 @@ wss.on('connection', ws => {
         ws.send(message);
       });
       ws.redis.subscribe(data.channel);
+    } else if (data.command === 'latency') {
+      ws.send(JSON.stringify({
+        type: 'latency',
+        timestamp: data.timestamp,
+      }));
     }
   });
 
