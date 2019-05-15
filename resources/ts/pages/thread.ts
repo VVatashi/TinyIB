@@ -292,7 +292,10 @@ export class ThreadPage extends BasePage {
 
     this.latencyTimer = setTimeout(() => {
       console.warn('WebSocket timeout');
-      this.socket.close();
+      const state = this.socket.readyState;
+      if (state !== WebSocket.CLOSED && state !== WebSocket.CLOSING) {
+        this.socket.close();
+      }
     }, this.latencyTimeout);
   }
 
