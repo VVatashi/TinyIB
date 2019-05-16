@@ -544,7 +544,6 @@ class PostService
       if ($post->isReply()) {
         $parent = $post->parent_id;
         $this->cache->deletePattern($board . ":thread:$parent:*");
-        $this->cache->deletePattern($board . ":mobile:thread:$parent:page:*");
 
         if (strtolower($post->email) !== 'sage') {
           $max_replies = $this->config->get("MAXREPLIES");
@@ -562,11 +561,9 @@ class PostService
       } else {
         $id = $post->id;
         $this->cache->deletePattern($board . ":thread:$id:*");
-        $this->cache->deletePattern($board . ":mobile:thread:$id:page:*");
       }
 
       $this->cache->deletePattern($board . ':page:*');
-      $this->cache->deletePattern($board . ':mobile:page:*');
 
       $redis_host = $this->config->get('REDIS_HOST', '');
       if (!empty($redis_host)) {
@@ -635,6 +632,5 @@ class PostService
     $thread_id = $post->isThread() ? $id : $post->parent_id;
     $this->cache->deletePattern($board . ":thread:$thread_id:*");
     $this->cache->deletePattern($board . ':page:*');
-    $this->cache->deletePattern($board . ':mobile:page:*');
   }
 }

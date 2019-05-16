@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "node-sass resources/scss -o webroot/css && webpack --progress --hide-modules --config resources/build/admin.dev.js && webpack --progress --hide-modules --config resources/build/app.dev.js && webpack --progress --hide-modules --config resources/build/mobile.dev.js",
-    "build-prod": "node-sass --output-style compressed resources/scss -o webroot/css && webpack --progress --hide-modules --config resources/build/admin.prod.js && webpack --progress --hide-modules --config resources/build/app.prod.js && webpack --progress --hide-modules --config resources/build/mobile.prod.js"
+    "build": "node-sass resources/scss -o webroot/css && webpack --progress --hide-modules --config resources/build/admin.dev.js && webpack --progress --hide-modules --config resources/build/app.dev.js",
+    "build-prod": "node-sass --output-style compressed resources/scss -o webroot/css && webpack --progress --hide-modules --config resources/build/admin.prod.js && webpack --progress --hide-modules --config resources/build/app.prod.js"
   },
   "repository": {
     "type": "git",
