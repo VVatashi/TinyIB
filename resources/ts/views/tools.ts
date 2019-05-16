@@ -146,15 +146,12 @@ export class ToolsView implements View {
       }
     });
 
-    const $container = document.documentElement || document.body;
-    if ($container) {
-      this.model.on('scroll-top', () => {
-        $container.scrollTop = 0;
-      });
+    this.model.on('scroll-top', () => {
+      window.location.hash = 'header';
+    });
 
-      this.model.on('scroll-bottom', () => {
-        $container.scrollTop = document.body.scrollHeight;
-      });
-    }
+    this.model.on('scroll-bottom', () => {
+      window.location.hash = 'footer';
+    });
   }
 }

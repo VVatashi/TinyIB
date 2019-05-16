@@ -30,12 +30,6 @@
     max-width: 100%;
   }
 
-  @include breakpoint($xs-up) {
-    &__posting-form {
-      width: unset;
-    }
-  }
-
   &__reply-button {
     min-width: 80px;
     height: 31px;
@@ -57,5 +51,60 @@
   &__settings-form {
     max-width: 600px;
     margin: 0 auto;
+  }
+
+  &__tools {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+
+    z-index: 12;
+  }
+
+  &__navigation-left {
+    background: $block-background;
+
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+
+    font-size: 24px;
+
+    z-index: 12;
+
+    .button {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+  }
+
+  &__navigation-right {
+    background: $block-background;
+
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+
+    font-size: 24px;
+
+    z-index: 12;
+
+    .button {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  }
+
+  @include breakpoint($xs-up) {
+    &__posting-form {
+      width: unset;
+    }
+
+    &__navigation-left,
+    &__navigation-right {
+      font-size: 20px;
+    }
   }
 }

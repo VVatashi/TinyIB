@@ -102,6 +102,30 @@ export class Post {
     }
   }
 
+  protected showPrevMedia() {
+    const prevIndex = this.modalFileIndex > 0
+      ? this.modalFileIndex - 1 : this.media.length - 1;
+
+    const $post = DOM.qid(`reply_${this.media[prevIndex].postId}`);
+    if ($post) {
+      DOM.scrollToMiddle($post);
+    }
+
+    this.showMediaModal(prevIndex);
+  }
+
+  protected showNextMedia() {
+    const nextIndex = this.modalFileIndex < this.media.length - 1
+      ? this.modalFileIndex + 1 : 0;
+
+    const $post = DOM.qid(`reply_${this.media[nextIndex].postId}`);
+    if ($post) {
+      DOM.scrollToMiddle($post);
+    }
+
+    this.showMediaModal(nextIndex);
+  }
+
   protected onReady() {
     this.$layout = DOM.qs('.layout') as HTMLElement;
 
@@ -114,42 +138,35 @@ export class Post {
       if (e.key === 'Escape' || Keyboard.checkKeyCode(e, 27)) {
         e.preventDefault();
         this.closeModals();
-
         return false;
       } else if (this.modalFileIndex !== null
         && (e.key === 'ArrowLeft' || Keyboard.checkKeyCode(e, 37)) && e.ctrlKey) {
         e.preventDefault();
-
-        const prevIndex = this.modalFileIndex > 0
-          ? this.modalFileIndex - 1 : this.media.length - 1;
-
-        const $post = DOM.qid(`reply_${this.media[prevIndex].postId}`);
-        if ($post) {
-          DOM.scrollToMiddle($post);
-        }
-
-        this.showMediaModal(prevIndex);
-
+        this.showPrevMedia();
         return false;
       } else if (this.modalFileIndex !== null
         && (e.key === 'ArrowRight' || Keyboard.checkKeyCode(e, 39)) && e.ctrlKey) {
         e.preventDefault();
-
-        const nextIndex = this.modalFileIndex < this.media.length - 1
-          ? this.modalFileIndex + 1 : 0;
-
-        const $post = DOM.qid(`reply_${this.media[nextIndex].postId}`);
-        if ($post) {
-          DOM.scrollToMiddle($post);
-        }
-
-        this.showMediaModal(nextIndex);
-
+        this.showNextMedia();
         return false;
       }
     };
 
     document.addEventListener('keydown', onKeyDown, true);
+
+    const $navigateLeft = DOM.qid('navigation-left');
+    $navigateLeft.addEventListener('click', e => {
+      e.preventDefault();
+      this.showPrevMedia();
+      return false;
+    });
+
+    const $navigateRight = DOM.qid('navigation-right');
+    $navigateRight.addEventListener('click', e => {
+      e.preventDefault();
+      this.showNextMedia();
+      return false;
+    });
 
     document.addEventListener('click', (e: MouseEvent) => {
       if (e.button !== 0) {
@@ -554,6 +571,9 @@ export class Post {
 
     this.modalFileIndex = mediaIndex;
 
+    const $navigationButtons = DOM.qsa('.navigation');
+    $navigationButtons.forEach($button => $button.classList.remove('hidden'));
+
     const file = this.media[mediaIndex];
 
     const scale = Math.max(
@@ -582,6 +602,9 @@ export class Post {
 
         this.modalParentPopupId = null;
       }
+
+      const $navigationButtons = DOM.qsa('.navigation');
+      $navigationButtons.forEach($button => $button.classList.add('hidden'));
     }
 
     const autoPlay = Settings.get<boolean>('image.auto-play');
