@@ -17,7 +17,6 @@ use Imageboard\Controller\Api\{
   PostController as PostApi,
   TokenController as TokenApi
 };
-use Imageboard\Controller\Mobile\MobilePostController as MobilePosts;
 use Imageboard\Controller\{
   AuthController as Auth,
   CaptchaController as Captcha,
@@ -135,22 +134,11 @@ class RoutingService implements RequestHandlerInterface
           });
         });
 
-        $routes->addGroup('/mobile', function (RouteCollector $routes) {
-          $routes->addRoute('GET',  '/thread/{id:\d+}', [MobilePosts::class, 'ajaxThread']);
-          $routes->addRoute('POST', '/post/create',     [MobilePosts::class, 'ajaxCreatePost']);
-        });
-
         $routes->addRoute('GET', '/settings', [Settings::class, 'ajaxSettings']);
 
         $routes->addRoute('GET',  '/post/{id:\d+}',   [Posts::class, 'ajaxPost']);
         $routes->addRoute('GET',  '/thread/{id:\d+}', [Posts::class, 'ajaxThread']);
         $routes->addRoute('POST', '/post/create',     [Posts::class, 'ajaxCreatePost']);
-      });
-
-      $routes->addGroup('/mobile', function (RouteCollector $routes) {
-        $routes->addRoute('GET',  '',                 [MobilePosts::class, 'index']);
-        $routes->addRoute('GET',  '/thread/{id:\d+}', [MobilePosts::class, 'thread']);
-        $routes->addRoute('POST', '/post/create',     [MobilePosts::class, 'createPost']);
       });
 
       $routes->addRoute('GET', '/captcha',  [Captcha::class,  'captcha']);
