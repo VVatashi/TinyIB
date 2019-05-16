@@ -155,18 +155,22 @@ export class Post {
     document.addEventListener('keydown', onKeyDown, true);
 
     const $navigateLeft = DOM.qid('navigation-left');
-    $navigateLeft.addEventListener('click', e => {
-      e.preventDefault();
-      this.showPrevMedia();
-      return false;
-    });
+    if ($navigateLeft) {
+      $navigateLeft.addEventListener('click', e => {
+        e.preventDefault();
+        this.showPrevMedia();
+        return false;
+      });
+    }
 
     const $navigateRight = DOM.qid('navigation-right');
-    $navigateRight.addEventListener('click', e => {
-      e.preventDefault();
-      this.showNextMedia();
-      return false;
-    });
+    if ($navigateRight) {
+      $navigateRight.addEventListener('click', e => {
+        e.preventDefault();
+        this.showNextMedia();
+        return false;
+      });
+    }
 
     document.addEventListener('click', (e: MouseEvent) => {
       if (e.button !== 0) {
