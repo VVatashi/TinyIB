@@ -280,9 +280,15 @@ export class ThreadPage extends BasePage {
   }
 
   protected socket: WebSocket;
+
   protected readonly checkLatencyInterval = 10000;
-  protected readonly latencyTimeout = 60000;
+
+  protected readonly latencyTimeout = 20000;
   protected latencyTimer: number;
+
+  protected readonly retryInterval = 1000;
+  protected readonly maxRetries = 3;
+  protected retries = 0;
 
   protected checkLatensy() {
     this.socket.send(JSON.stringify({
@@ -291,8 +297,11 @@ export class ThreadPage extends BasePage {
     }));
 
     this.latencyTimer = setTimeout(() => {
-      console.warn('WebSocket timeout');
-      this.socket.close();
+      console.warn('WebSocket timed out');
+      const state = this.socket.readyState;
+      if (state !== WebSocket.CLOSED && state !== WebSocket.CLOSING) {
+        this.socket.close();
+      }
     }, this.latencyTimeout);
   }
 
@@ -323,6 +332,7 @@ export class ThreadPage extends BasePage {
         this.$statusWS.textContent = 'WebSocket connected';
       }
 
+      this.retries = 0;
       this.checkLatensy();
     });
 
@@ -358,13 +368,37 @@ export class ThreadPage extends BasePage {
         this.$statusWS.textContent = `WebSocket closed: ${e.reason} (${e.code})`;
       }
 
-      console.warn('Fallback to legacy thread updater.');
-      this.bindThreadUpdater();
+      if (this.retries < this.maxRetries) {
+        setTimeout(() => {
+          this.retries++;
+          console.info(`Retrying connect to websocket (${this.retries}/${this.maxRetries}).`);
+          this.bindWSThreadUpdater();
+        }, this.retryInterval);
+      } else {
+        console.warn('Fallback to legacy thread updater.');
+        this.bindThreadUpdater();
+      }
     });
   }
 
+  protected checkWebSocketSupport() {
+    if (!('WebSocket' in window) && !('MozWebSocket' in window)) {
+      return false;
+    }
+
+    try {
+      new WebSocket('wss://echo.websocket.org');
+      return true;
+    } catch {
+    }
+
+    return false;
+  }
+
   protected bindModel() {
-    if ('WebSocket' in window && window.websocketUrl && window.websocketUrl.length) {
+    if (window.websocketUrl && window.websocketUrl.length
+      && !Settings.get('post.disable-web-sockets')
+      && this.checkWebSocketSupport()) {
       this.bindWSThreadUpdater();
     } else {
       this.bindThreadUpdater();

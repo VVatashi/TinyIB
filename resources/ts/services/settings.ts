@@ -11,6 +11,7 @@ const defaultSettings: SettingsData = {
   'filter.hidden-files': [],
   'filter.hide-threads': false,
   'post.enable-thread-autoupdate': true,
+  'post.disable-web-sockets': false,
   'post.scroll-to-new-posts': true,
   'post.reflink-icon-position': 'header',
   'image.nsfw': false,
