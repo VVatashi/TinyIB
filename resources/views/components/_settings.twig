@@ -47,6 +47,10 @@
     </div>
 
     <div class="settings-form__row">
+      {{ self.checkbox('Disable web sockets', 'post.disable-web-sockets') }}
+    </div>
+
+    <div class="settings-form__row">
       {{ self.checkbox('Scroll to new posts', 'post.scroll-to-new-posts') }}
     </div>
 
