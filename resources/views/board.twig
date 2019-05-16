@@ -26,6 +26,18 @@
 
     {% include 'components/_pager.twig' with {'class': 'content__pager'} %}
     {% include 'components/_tools.twig' with {'class': 'content__tools'} %}
+
+    <div class="content__navigation-left navigation hidden">
+      <button class="navigation__button button" id="navigation-left" title="Show previous file">
+        <span class="fas fa-arrow-left"></span>
+      </button>
+    </div>
+
+    <div class="content__navigation-right navigation hidden">
+      <button class="navigation__button button" id="navigation-right" title="Show next file">
+        <span class="fas fa-arrow-right"></span>
+      </button>
+    </div>
   </main>
 {% endblock %}
 
