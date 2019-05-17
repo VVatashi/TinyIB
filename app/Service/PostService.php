@@ -28,6 +28,9 @@ class PostService
   /** @var SafebooruService */
   protected $safebooru;
 
+  /** @var E621Service */
+  protected $e621;
+
   /** @var \Imageboard\Service\ConfigService */
   protected $config;
 
@@ -42,6 +45,7 @@ class PostService
    * @param \Imageboard\Service\FileService      $file
    * @param \Imageboard\Service\ThumbnailService $thubmnail
    * @param \Imageboard\Service\SafebooruService $safebooru
+   * @param \Imageboard\Service\E621Service      $e621
    * @param \Imageboard\Service\ConfigService    $config
    * @param \Imageboard\Service\RendererService  $renderer
    */
@@ -51,6 +55,7 @@ class PostService
     FileService $file,
     ThumbnailService $thubmnail,
     SafebooruService $safebooru,
+    E621Service $e621,
     ConfigService $config,
     RendererService $renderer
   ) {
@@ -59,6 +64,7 @@ class PostService
     $this->file = $file;
     $this->thubmnail = $thubmnail;
     $this->safebooru = $safebooru;
+    $this->e621 = $e621;
     $this->config = $config;
     $this->renderer = $renderer;
   }
@@ -423,6 +429,34 @@ class PostService
 
       // Try get & download a random image from the safebooru for the specified tags.
       $url = $this->safebooru->getRandomImageUrl($matches[1]);
+      if (!isset($url)) {
+        return '';
+      }
+
+      $path = tempnam(sys_get_temp_dir(), '');
+      unlink($path);
+
+      $size = file_put_contents($path, file_get_contents($url));
+      if ($size === false) {
+        return '';
+      }
+
+      $file = [
+        'name' => basename($url),
+        'tmp_name' => $path,
+        'size' => $size,
+        'error' => UPLOAD_ERR_OK,
+      ];
+
+      return '';
+    }, $subject);
+
+    $subject = preg_replace_callback('#\[e621=([^]]+)\]#', function (array $matches) use (&$file) {
+      if (isset($file)) {
+        return '';
+      }
+
+      $url = $this->e621->getRandomImageUrl($matches[1]);
       if (!isset($url)) {
         return '';
       }
