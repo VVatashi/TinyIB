@@ -1,10 +1,10 @@
-import { DOM } from '../utils';
+import { DOM, EventEmitter } from '../utils';
 import { LocalStorage } from '../services';
 
 const pointerEvents = 'PointerEvent' in window;
 const touchEvents = 'ontouchstart' in window;
 
-export class VideoPlayer {
+export class VideoPlayer extends EventEmitter {
   protected readonly $video: HTMLVideoElement;
   protected readonly $controls: HTMLElement;
 
@@ -25,6 +25,8 @@ export class VideoPlayer {
   protected fullscreen = false;
 
   constructor(readonly $player: Element, autoPlay: boolean = true) {
+    super();
+
     const controls = [
       'video', 'controls',
       'play', 'pause',
@@ -38,6 +40,13 @@ export class VideoPlayer {
       const $control = DOM.qs(controlClass, $player) as HTMLElement;
       const property = `$${control}`;
       (this as any)[property] = $control;
+    });
+
+    this.$video.addEventListener('ended', e => {
+      this.emit('ended');
+
+      // Loop video.
+      this.$video.play();
     });
 
     const events = ['click'];

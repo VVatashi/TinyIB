@@ -49,6 +49,8 @@ export class Post {
   protected nextPopupId = 0;
   protected popups: { [key: number]: PostPopup } = {};
 
+  protected autoPlayNextVideo = false;
+
   constructor() {
     eventBus.on(Events.Ready, this.onReady.bind(this));
     eventBus.on(Events.PostsInserted, this.onPostsInserted.bind(this));
@@ -126,6 +128,34 @@ export class Post {
     this.showMediaModal(nextIndex);
   }
 
+  protected showNextVideo() {
+    // Search after current file
+    let index = this.modalFileIndex;
+    for (let i = this.modalFileIndex + 1; i < this.media.length; ++i) {
+      if (this.media[i].type === 'video') {
+        index = i;
+        break;
+      }
+    }
+
+    if (index === this.modalFileIndex) {
+      // Search before current file
+      for (let i = 0; i < this.modalFileIndex; ++i) {
+        if (this.media[i].type === 'video') {
+          index = i;
+          break;
+        }
+      }
+    }
+
+    const $post = DOM.qid(`reply_${this.media[index].postId}`);
+    if ($post) {
+      DOM.scrollToMiddle($post);
+    }
+
+    this.showMediaModal(index);
+  }
+
   protected onReady() {
     this.$layout = DOM.qs('.layout') as HTMLElement;
 
@@ -168,6 +198,22 @@ export class Post {
       $navigateRight.addEventListener('click', e => {
         e.preventDefault();
         this.showNextMedia();
+        return false;
+      });
+    }
+
+    const $autoplay = DOM.qid('navigation-autoplay');
+    if ($autoplay) {
+      $autoplay.addEventListener('click', e => {
+        e.preventDefault();
+
+        this.autoPlayNextVideo = !this.autoPlayNextVideo;
+        if (this.autoPlayNextVideo) {
+          $autoplay.classList.add('button--active');
+        } else {
+          $autoplay.classList.remove('button--active');
+        }
+
         return false;
       });
     }
@@ -574,11 +620,19 @@ export class Post {
     }
 
     this.modalFileIndex = mediaIndex;
-
-    const $navigationButtons = DOM.qsa('.navigation');
-    $navigationButtons.forEach($button => $button.classList.remove('hidden'));
-
     const file = this.media[mediaIndex];
+
+    const $navigationPanels = DOM.qsa('.navigation');
+    $navigationPanels.forEach($panel => $panel.classList.remove('hidden'));
+
+    const $autoplay = DOM.qid('navigation-autoplay');
+    if ($autoplay) {
+      if (file.type === 'video') {
+        $autoplay.classList.remove('hidden');
+      } else {
+        $autoplay.classList.add('hidden');
+      }
+    }
 
     const scale = Math.max(
       file.width / window.innerWidth,
@@ -607,8 +661,8 @@ export class Post {
         this.modalParentPopupId = null;
       }
 
-      const $navigationButtons = DOM.qsa('.navigation');
-      $navigationButtons.forEach($button => $button.classList.add('hidden'));
+      const $navigationPanels = DOM.qsa('.navigation');
+      $navigationPanels.forEach($panel => $panel.classList.add('hidden'));
     }
 
     const autoPlay = Settings.get<boolean>('image.auto-play');
@@ -654,7 +708,7 @@ export class Post {
 <div class="modal__content modal__content--video">
   <div class="player">
     <video class="player__video" src="${file.url}"
-      ${autoPlay ? 'autoplay="true"' : ''} loop="true" preload="metadata">
+      ${autoPlay ? 'autoplay="true"' : ''} preload="metadata">
     </video>
 
     <div class="player__controls">
@@ -696,6 +750,12 @@ export class Post {
 
       const $player = DOM.qs('.player', this.$modal);
       this.player = new VideoPlayer($player, autoPlay);
+
+      this.player.on('ended', () => {
+        if (this.autoPlayNextVideo) {
+          this.showNextVideo();
+        }
+      });
 
       this.modal = new Modal(this.$modal);
       this.modal.show(left, top, width, height, () => {
