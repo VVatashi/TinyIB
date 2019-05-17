@@ -62,14 +62,10 @@
   }
 
   &__navigation-left {
-    background: $block-background;
-
     position: fixed;
     left: 0;
     top: 50%;
-    transform: translateY(-50%);
-
-    font-size: 24px;
+    transform: translateY(-20px);
 
     z-index: 12;
 
@@ -80,31 +76,33 @@
   }
 
   &__navigation-right {
-    background: $block-background;
-
     position: fixed;
     right: 0;
     top: 50%;
-    transform: translateY(-50%);
-
-    font-size: 24px;
+    transform: translateY(-20px);
+    display: flex;
+    flex-flow: column;
 
     z-index: 12;
 
     .button {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
+
+      &--active {
+        position: relative;
+        top: 0;
+        left: 1px;
+
+        background: $btn-active-background;
+        text-decoration: none;
+      }
     }
   }
 
   @include breakpoint($xs-up) {
     &__posting-form {
       width: unset;
-    }
-
-    &__navigation-left,
-    &__navigation-right {
-      font-size: 20px;
     }
   }
 }
