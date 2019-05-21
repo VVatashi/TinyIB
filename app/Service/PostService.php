@@ -281,8 +281,8 @@ class PostService
     }
 
     return preg_replace_callback('#(?:^|<br>)\s*/postcount\s*<br>#si', function ($matches) use ($user_id) {
-      $post_count = Post::where('user_id', $user_id)->count();
-      $thread_count = Post::where(['user_id' => $user_id, 'parent_id' => 0])->count();
+      $post_count = Post::withTrashed()->where('user_id', $user_id)->count();
+      $thread_count = Post::withTrashed()->where(['user_id' => $user_id, 'parent_id' => 0])->count();
       return "<span class=\"dice\">{$matches[0]}Posts created: $post_count<br>Threads: $thread_count<br></span>";
     }, $message);
   }
