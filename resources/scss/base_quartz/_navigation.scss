@@ -1,0 +1,9 @@
+.navigation {
+  background: $block-background;
+
+  font-size: 24px;
+
+  @include breakpoint($xs-up) {
+    font-size: 20px;
+  }
+}
