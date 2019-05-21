@@ -268,6 +268,19 @@ class PostService
     }, $message);
   }
 
+  protected function postCount($user_id, $message)
+  {
+    if (!isset($user_id) || $user_id === 0) {
+      return $message;
+    }
+
+    return preg_replace_callback('#(?:^|<br>)\s*/postcount\s*<br>#si', function ($matches) use ($user_id) {
+      $post_count = Post::where('user_id', $user_id)->count();
+      $thread_count = Post::where(['user_id' => $user_id, 'parent_id' => 0])->count();
+      return "<span class=\"dice\">{$matches[0]}Posts created: $post_count<br>Threads: $thread_count<br></span>";
+    }, $message);
+  }
+
   /**
    * Checks duplicate file.
    *
@@ -393,6 +406,8 @@ class PostService
     if ($this->config->get("DICE_ENABLED")) {
       $message = $this->dice($message);
     }
+
+    $message = $this->postCount($post->user_id, $message);
 
     $post->message = $message;
 
