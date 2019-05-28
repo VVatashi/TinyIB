@@ -21,7 +21,8 @@ use Imageboard\Controller\{
   AuthController as Auth,
   CaptchaController as Captcha,
   PostController as Posts,
-  SettingsController as Settings
+  SettingsController as Settings,
+  SitemapController as Sitemap
 };
 use Imageboard\Exception\{HttpException, NotFoundException};
 use Psr\Container\ContainerInterface;
@@ -141,8 +142,9 @@ class RoutingService implements RequestHandlerInterface
         $routes->addRoute('POST', '/post/create',     [Posts::class, 'ajaxCreatePost']);
       });
 
-      $routes->addRoute('GET', '/captcha',  [Captcha::class,  'captcha']);
-      $routes->addRoute('GET', '/settings', [Settings::class, 'settings']);
+      $routes->addRoute('GET', '/captcha',     [Captcha::class,  'captcha']);
+      $routes->addRoute('GET', '/settings',    [Settings::class, 'settings']);
+      $routes->addRoute('GET', '/sitemap.xml', [Sitemap::class,  'sitemap']);
 
       $routes->addRoute('GET',  '/',             [Posts::class, 'board']);
       $routes->addRoute('GET',  '/{page:\d+}',   [Posts::class, 'board']);
