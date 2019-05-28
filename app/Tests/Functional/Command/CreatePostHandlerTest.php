@@ -12,6 +12,7 @@ use Imageboard\Service\{
   CryptographyService,
   FileService,
   SafebooruService,
+  E621Service,
   ThumbnailService,
   RendererService
 };
@@ -35,6 +36,7 @@ final class CreatePostHandlerTest extends TestCase
     $config = new ConfigService();
     $thumbnail = new ThumbnailService($file, $config);
     $safebooru = new SafebooruService();
+    $e621 = new E621Service();
     $renderer = new RendererService($config);
 
     $post = new PostService(
@@ -43,6 +45,7 @@ final class CreatePostHandlerTest extends TestCase
       $file,
       $thumbnail,
       $safebooru,
+      $e621,
       $config,
       $renderer
     );
