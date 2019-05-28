@@ -147,10 +147,12 @@ export class ToolsView implements View {
     });
 
     this.model.on('scroll-top', () => {
+      window.location.hash = '';
       window.location.hash = 'header';
     });
 
     this.model.on('scroll-bottom', () => {
+      window.location.hash = '';
       window.location.hash = 'footer';
     });
   }
