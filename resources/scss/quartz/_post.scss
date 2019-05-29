@@ -1,4 +1,8 @@
 .post {
+  &--current &__inner {
+    outline: 1px dashed #333;
+  }
+
   @include breakpoint($xs-up) {
     &__inner {
       &#{&} {
