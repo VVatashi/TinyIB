@@ -1,0 +1,5 @@
+.post {
+  &--current &__inner {
+    outline: 1px dashed #333;
+  }
+}

@@ -49,6 +49,8 @@ export class Post {
   protected nextPopupId = 0;
   protected popups: { [key: number]: PostPopup } = {};
 
+  protected currentPostId = 0;
+
   protected autoPlayNextVideo = false;
 
   constructor() {
@@ -178,6 +180,34 @@ export class Post {
         && (e.key === 'ArrowRight' || Keyboard.checkKeyCode(e, 39)) && e.ctrlKey) {
         e.preventDefault();
         this.showNextMedia();
+        return false;
+      } else if ((e.key === 'k' || Keyboard.checkKeyCode(e, 75)) && !e.ctrlKey) {
+        e.preventDefault();
+        this.selectPrevPost();
+        return false;
+      } else if ((e.key === 'j' || Keyboard.checkKeyCode(e, 74)) && !e.ctrlKey) {
+        e.preventDefault();
+        this.selectNextPost();
+        return false;
+      } else if ((e.key === 'r' || Keyboard.checkKeyCode(e, 82)) && !e.ctrlKey) {
+        e.preventDefault();
+        const $post = this.getCurrentPost();
+        if ($post) {
+          const $reflink = DOM.qs('[data-reflink]', $post) as HTMLElement;
+          if ($reflink) {
+            $reflink.click();
+          }
+        }
+        return false;
+      } else if ((e.key === 'h' || Keyboard.checkKeyCode(e, 72)) && !e.ctrlKey) {
+        e.preventDefault();
+        const $post = this.getCurrentPost();
+        if ($post) {
+          const $hide = DOM.qs('.post-header__hide', $post) as HTMLElement;
+          if ($hide) {
+            $hide.click();
+          }
+        }
         return false;
       }
     };
@@ -1129,5 +1159,75 @@ export class Post {
     setTimeout(() => {
       DOM.scrollToMiddle($original);
     });
+  }
+
+  protected isInView($el: Element) {
+    const rect = $el.getBoundingClientRect();
+    const width = window.innerWidth || document.documentElement.clientWidth;
+    const height = window.innerHeight || document.documentElement.clientHeight;
+    return rect.top > 0 && rect.top < width && rect.left > 0 && rect.left < height;
+  }
+
+  protected findPostInView() {
+    const $posts = DOM.qsa('.post');
+    for (let i = 0; i < $posts.length; ++i) {
+      if (this.isInView($posts[i])) {
+        return $posts[i];
+      }
+    }
+
+    return null;
+  }
+
+  protected getCurrentPost() {
+    if (this.currentPostId) {
+      return DOM.qs(`[data-post-id="${this.currentPostId}"]`);
+    }
+
+    return null;
+  }
+
+  protected markCurrentPost() {
+    DOM.qsa('.post--current').forEach($post => $post.classList.remove('post--current'));
+    const $currentPost = this.getCurrentPost();
+    if ($currentPost) {
+      $currentPost.classList.add('post--current');
+    }
+  }
+
+  protected selectPrevPost() {
+    let $currentPost = this.getCurrentPost();
+    if (!$currentPost || !this.isInView($currentPost)) {
+      $currentPost = this.findPostInView();
+      if ($currentPost) {
+        this.currentPostId = +$currentPost.getAttribute('data-post-id');
+      }
+    }
+
+    const $posts = DOM.qsa('.post');
+    const currentPostIndex = $posts.findIndex($post => $post === $currentPost);
+    const prevPostIndex = currentPostIndex > 0 ? currentPostIndex - 1 : $posts.length - 1;
+    const $prevPost = $posts[prevPostIndex];
+    this.currentPostId = +$prevPost.getAttribute('data-post-id');
+    this.markCurrentPost();
+    DOM.scrollToMiddle($prevPost);
+  }
+
+  protected selectNextPost() {
+    let $currentPost = this.getCurrentPost();
+    if (!$currentPost || !this.isInView($currentPost)) {
+      $currentPost = this.findPostInView();
+      if ($currentPost) {
+        this.currentPostId = +$currentPost.getAttribute('data-post-id');
+      }
+    }
+
+    const $posts = DOM.qsa('.post');
+    const currentPostIndex = $posts.findIndex($post => $post === $currentPost);
+    const nextPostIndex = currentPostIndex < $posts.length - 1 ? currentPostIndex + 1 : 0;
+    const $nextPost = $posts[nextPostIndex];
+    this.currentPostId = +$nextPost.getAttribute('data-post-id');
+    this.markCurrentPost();
+    DOM.scrollToMiddle($nextPost);
   }
 }
