@@ -181,17 +181,33 @@ export class Post {
         e.preventDefault();
         this.showNextMedia();
         return false;
-      } else if (e.key === 'k' || Keyboard.checkKeyCode(e, 75)) {
+      } else if ((e.key === 'k' || Keyboard.checkKeyCode(e, 75)) && !e.ctrlKey) {
         e.preventDefault();
         this.selectPrevPost();
         return false;
-      } else if (e.key === 'j' || Keyboard.checkKeyCode(e, 74)) {
+      } else if ((e.key === 'j' || Keyboard.checkKeyCode(e, 74)) && !e.ctrlKey) {
         e.preventDefault();
         this.selectNextPost();
         return false;
-      } else if (e.key === 'r' || Keyboard.checkKeyCode(e, 82)) {
+      } else if ((e.key === 'r' || Keyboard.checkKeyCode(e, 82)) && !e.ctrlKey) {
         e.preventDefault();
-        // TODO
+        const $post = this.getCurrentPost();
+        if ($post) {
+          const $reflink = DOM.qs('[data-reflink]', $post) as HTMLElement;
+          if ($reflink) {
+            $reflink.click();
+          }
+        }
+        return false;
+      } else if ((e.key === 'h' || Keyboard.checkKeyCode(e, 72)) && !e.ctrlKey) {
+        e.preventDefault();
+        const $post = this.getCurrentPost();
+        if ($post) {
+          const $hide = DOM.qs('.post-header__hide', $post) as HTMLElement;
+          if ($hide) {
+            $hide.click();
+          }
+        }
         return false;
       }
     };
