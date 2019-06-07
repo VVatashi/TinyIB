@@ -2,6 +2,10 @@
   position: fixed;
   z-index: 11;
 
+  @at-root .layout--modal-at-top & {
+    z-index: 15;
+  }
+
   box-sizing: border-box;
   border: 1px solid #333;
   background: $block-background;

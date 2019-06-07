@@ -37,6 +37,14 @@ ul, ol {
   list-style: none;
 }
 
+.layout--disable-sub {
+  sub, sup {
+    font-size: 1em;
+    top: 0;
+    bottom: 0;
+  }
+}
+
 .hidden {
   &#{&} {
     display: none;

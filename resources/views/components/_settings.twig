@@ -54,6 +54,14 @@
       {{ self.checkbox('Scroll to new posts', 'post.scroll-to-new-posts') }}
     </div>
 
+    <div class="settings-form__row">
+      {{ self.checkbox('Show spoilers', 'post.show-spoilers') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.checkbox('Disable subscript and superscript', 'post.disable-sub') }}
+    </div>
+
     <h3 class="settings-form__option-title">Reply icon position</h3>
 
     <div class="settings-form__row">
@@ -88,6 +96,10 @@
 
     <div class="settings-form__row">
       {{ self.checkbox("Replace GIF thumbnails with original", 'image.replace-thumbnail-gif') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.checkbox("Show modal over controls", 'image.modal-at-top') }}
     </div>
 
     <h3 class="settings-form__option-title">Expand images</h3>
