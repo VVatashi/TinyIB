@@ -209,6 +209,13 @@ export class Post {
           }
         }
         return false;
+      } else if ((e.key === 's' || Keyboard.checkKeyCode(e, 83)) && !e.ctrlKey && e.altKey) {
+        e.preventDefault();
+        const $settings = DOM.qid('tools-toggle-settings');
+        if ($settings) {
+          $settings.click();
+        }
+        return false;
       }
     };
 

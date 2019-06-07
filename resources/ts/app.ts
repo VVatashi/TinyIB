@@ -67,6 +67,18 @@ document.addEventListener('DOMContentLoaded', e => {
     if (Settings.get('form.show-markup-mobile')) {
       $layout.classList.add('layout--show-markup-mobile');
     }
+
+    if (Settings.get('post.show-spoilers')) {
+      $layout.classList.add('layout--show-spoilers');
+    }
+
+    if (Settings.get('post.disable-sub')) {
+      $layout.classList.add('layout--disable-sub');
+    }
+
+    if (Settings.get('image.modal-at-top')) {
+      $layout.classList.add('layout--modal-at-top');
+    }
   }
 
   const $formWrapper = DOM.qs('.content__posting-form-wrapper');
