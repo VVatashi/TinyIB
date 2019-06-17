@@ -31,23 +31,27 @@ class PostService
   /** @var E621Service */
   protected $e621;
 
-  /** @var \Imageboard\Service\ConfigService */
+  /** @var SankakuService */
+  protected $sankaku;
+
+  /** @var ConfigService */
   protected $config;
 
-  /** @var \Imageboard\Service\RendererService */
+  /** @var RendererService */
   protected $renderer;
 
   /**
    * Creates a new PostService instance.
    *
-   * @param CacheInterface                       $cache
-   * @param CryptographyService                  $cryptography
-   * @param \Imageboard\Service\FileService      $file
-   * @param \Imageboard\Service\ThumbnailService $thubmnail
-   * @param \Imageboard\Service\SafebooruService $safebooru
-   * @param \Imageboard\Service\E621Service      $e621
-   * @param \Imageboard\Service\ConfigService    $config
-   * @param \Imageboard\Service\RendererService  $renderer
+   * @param CacheInterface      $cache
+   * @param CryptographyService $cryptography
+   * @param FileService         $file
+   * @param ThumbnailService    $thubmnail
+   * @param SafebooruService    $safebooru
+   * @param E621Service         $e621
+   * @param SankakuService      $sankaku
+   * @param ConfigService       $config
+   * @param RendererService     $renderer
    */
   function __construct(
     CacheInterface $cache,
@@ -56,6 +60,7 @@ class PostService
     ThumbnailService $thubmnail,
     SafebooruService $safebooru,
     E621Service $e621,
+    SankakuService $sankaku,
     ConfigService $config,
     RendererService $renderer
   ) {
@@ -65,6 +70,7 @@ class PostService
     $this->thubmnail = $thubmnail;
     $this->safebooru = $safebooru;
     $this->e621 = $e621;
+    $this->sankaku = $sankaku;
     $this->config = $config;
     $this->renderer = $renderer;
   }
@@ -437,62 +443,50 @@ class PostService
       $file = null;
     }
 
-    $subject = preg_replace_callback('#\[safebooru=([^]]+)\]#', function (array $matches) use (&$file) {
-      if (isset($file)) {
-        return '';
-      }
+    /** @var BooruService[] $booru */
+    $booru = [
+      '#\[safebooru=([^]]+)\]#' => $this->safebooru,
+      '#\[e621=([^]]+)\]#'      => $this->e621,
+      '#\[sankaku=([^]]+)\]#'   => $this->sankaku,
+    ];
 
-      // Try get & download a random image from the safebooru for the specified tags.
-      $url = $this->safebooru->getRandomImageUrl($matches[1]);
-      if (!isset($url)) {
-        return '';
-      }
+    foreach ($booru as $tag_pattern => $service) {
+      $subject = preg_replace_callback($tag_pattern, function (array $matches) use ($service, &$file) {
+        if (isset($file)) {
+          return '';
+        }
 
-      $path = tempnam(sys_get_temp_dir(), '');
-      unlink($path);
+        // Try get & download a random image for the specified tags.
+        $url = $service->getRandomImageUrl($matches[1]);
+        if (!isset($url)) {
+          return '';
+        }
 
-      $size = file_put_contents($path, file_get_contents($url));
-      if ($size === false) {
-        return '';
-      }
+        $path = tempnam(sys_get_temp_dir(), '');
+        unlink($path);
 
-      $file = [
-        'name' => basename($url),
-        'tmp_name' => $path,
-        'size' => $size,
-        'error' => UPLOAD_ERR_OK,
+      $options = [
+        'http' => [
+          'method' => 'GET',
+          'header' => 'User-Agent: lewd.site/1.0\r\n',
+        ]
       ];
+      $context = stream_context_create($options);
+        $size = file_put_contents($path, file_get_contents($url, false, $context));
+        if ($size === false) {
+          return '';
+        }
 
-      return '';
-    }, $subject);
+        $file = [
+          'name' => basename($url),
+          'tmp_name' => $path,
+          'size' => $size,
+          'error' => UPLOAD_ERR_OK,
+        ];
 
-    $subject = preg_replace_callback('#\[e621=([^]]+)\]#', function (array $matches) use (&$file) {
-      if (isset($file)) {
         return '';
-      }
-
-      $url = $this->e621->getRandomImageUrl($matches[1]);
-      if (!isset($url)) {
-        return '';
-      }
-
-      $path = tempnam(sys_get_temp_dir(), '');
-      unlink($path);
-
-      $size = file_put_contents($path, file_get_contents($url));
-      if ($size === false) {
-        return '';
-      }
-
-      $file = [
-        'name' => basename($url),
-        'tmp_name' => $path,
-        'size' => $size,
-        'error' => UPLOAD_ERR_OK,
-      ];
-
-      return '';
-    }, $subject);
+      }, $subject);
+    }
 
     $post->subject = $this->cleanString(substr($subject, 0, 75));
 
