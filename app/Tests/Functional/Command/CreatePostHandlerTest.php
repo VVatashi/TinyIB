@@ -14,7 +14,8 @@ use Imageboard\Service\{
   SafebooruService,
   E621Service,
   ThumbnailService,
-  RendererService
+  RendererService,
+  SankakuService
 };
 
 final class CreatePostHandlerTest extends TestCase
@@ -37,6 +38,7 @@ final class CreatePostHandlerTest extends TestCase
     $thumbnail = new ThumbnailService($file, $config);
     $safebooru = new SafebooruService();
     $e621 = new E621Service();
+    $sankaku = new SankakuService();
     $renderer = new RendererService($config);
 
     $post = new PostService(
@@ -46,6 +48,7 @@ final class CreatePostHandlerTest extends TestCase
       $thumbnail,
       $safebooru,
       $e621,
+      $sankaku,
       $config,
       $renderer
     );

@@ -4,7 +4,7 @@ namespace Imageboard\Service;
 
 use Predis\Client as Redis;
 
-class E621Service
+class E621Service implements BooruService
 {
   const LOAD_PER_REQUEST = 20;
 
@@ -37,11 +37,7 @@ class E621Service
   }
 
   /**
-   * Returns URL of a random image. Null if nothing found.
-   *
-   * @param string $tags E621 search query.
-   *
-   * @return null|string Image URL.
+   * {@inheritdoc}
    */
   function getRandomImageUrl(string $tags)
   {

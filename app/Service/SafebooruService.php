@@ -2,7 +2,7 @@
 
 namespace Imageboard\Service;
 
-class SafebooruService
+class SafebooruService implements BooruService
 {
   /**
    * Returns count of found images.
@@ -19,11 +19,7 @@ class SafebooruService
   }
 
   /**
-   * Returns URL of a random image. Null if nothing found.
-   *
-   * @param $tags Safebooru search query.
-   *
-   * @return null|string Image URL.
+   * {@inheritdoc}
    */
   function getRandomImageUrl(string $tags)
   {
