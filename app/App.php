@@ -5,14 +5,18 @@ namespace Imageboard;
 use GuzzleHttp\Psr7\{ServerRequest, Response};
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Imageboard\Cache\{CacheInterface, NoCache, RedisCache};
-use Imageboard\Helper\DatabaseHelper;
 use Imageboard\Middleware\{
   AuthMiddleware,
   CorsMiddleware,
   ExceptionMiddleware,
   RequestHandler
 };
-use Imageboard\Service\{ConfigService, RoutingService, RendererService};
+use Imageboard\Service\{
+  ConfigService,
+  DatabaseService,
+  RoutingService,
+  RendererService
+};
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
@@ -33,13 +37,18 @@ class App
   protected $config;
 
   /**
-   * @var \Imageboard\Helper\DatabaseHelper
+   * @var DatabaseService
    */
-  protected $databaseHelper;
+  protected $database;
 
   function getContainer() : ContainerInterface
   {
     return $this->container;
+  }
+
+  function getDatabase() : DatabaseService
+  {
+    return $this->database;
   }
 
   /**
@@ -53,7 +62,7 @@ class App
 
     // Set up config
     $this->config = new ConfigService();
-    $this->databaseHelper = new DatabaseHelper($this->config);
+    $this->database = new DatabaseService($this->config);
 
     // Set default constants.
     defined('NEWTHREAD') || define('NEWTHREAD', 0);
@@ -149,7 +158,7 @@ EOF;
     $capsule->addConnection([
       'driver'    => $this->config->get('DBDRIVER'),
       'host'      => $this->config->get('DBHOST'),
-      'database'  => $this->databaseHelper->getFullPath(),
+      'database'  => $this->database->getFullPath(),
       'username'  => $this->config->get('DBUSERNAME'),
       'password'  => $this->config->get('DBPASSWORD'),
       'charset'   => 'utf8',
@@ -162,6 +171,10 @@ EOF;
 
     $pdo = $capsule->getConnection()->getReadPdo();
     $this->container->registerInstance(\PDO::class, $pdo);
+
+    // Set PDO.
+    /** @todo Refactor later to not modify connection on get */
+    $this->database->getConnection($pdo);
 
     // Register services in the IoC-container by conventions.
     $directories = [
