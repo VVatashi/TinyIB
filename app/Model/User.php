@@ -94,14 +94,6 @@ class User extends Model implements CurrentUserInterface
   }
 
   /**
-   * Returns mod log entries related to this user.
-   */
-  function modlog()
-  {
-    return $this->hasMany(ModLog::class);
-  }
-
-  /**
    * Returns anonymous user instance.
    *
    * @return User

@@ -6,10 +6,10 @@ use GuzzleHttp\Psr7\ServerRequest;
 use Imageboard\Command\CommandDispatcher;
 use Imageboard\Controller\Admin\ModLogController;
 use Imageboard\Exception\AccessDeniedException;
-use Imageboard\Model\{ModLog, User};
-use Imageboard\Service\ConfigService;
-use Imageboard\Service\RendererService;
+use Imageboard\Model\User;
 use Imageboard\Query\QueryDispatcher;
+use Imageboard\Repositories\ModLogRepository;
+use Imageboard\Service\{ConfigService, RendererService};
 use PHPUnit\Framework\TestCase;
 
 final class ModLogControllerTest extends TestCase
@@ -19,21 +19,26 @@ final class ModLogControllerTest extends TestCase
 
   function setUp() : void
   {
-    global $container;
+    global $container, $database;
 
-    ModLog::truncate();
+    $connection = $database->getConnection();
+    $builder = $connection->createQueryBuilder();
+    $builder->delete('mod_log');
+
     User::truncate();
 
     $config = new ConfigService();
     $command_dispatcher = new CommandDispatcher($container);
     $query_dispatcher = new QueryDispatcher($container);
+    $modlog_repository = new ModLogRepository($database);
 
     $renderer = new RendererService($config);
     $this->controller = new ModLogController(
       $config,
       $command_dispatcher,
       $query_dispatcher,
-      $renderer
+      $renderer,
+      $modlog_repository
     );
   }
 

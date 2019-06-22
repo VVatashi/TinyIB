@@ -5,6 +5,8 @@ namespace Imageboard\Tests\Unit\Command\Admin;
 use Imageboard\Command\Admin\{DeleteUser, DeleteUserHandler};
 use Imageboard\Exception\NotFoundException;
 use Imageboard\Model\User;
+use Imageboard\Repositories\ModLogRepository;
+use Imageboard\Service\ModLogService;
 use PHPUnit\Framework\TestCase;
 
 final class DeleteUserHandlerTest extends TestCase
@@ -14,10 +16,14 @@ final class DeleteUserHandlerTest extends TestCase
 
   function setUp(): void
   {
+    global $database;
+
     User::truncate();
 
     $user = User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
-    $this->handler = new DeleteUserHandler($user);
+    $modlog_repository = new ModLogRepository($database);
+    $modlog_service = new ModLogService($modlog_repository);
+    $this->handler = new DeleteUserHandler($modlog_service, $user);
   }
 
   protected function createItem(): User {

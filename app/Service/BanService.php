@@ -3,7 +3,7 @@
 namespace Imageboard\Service;
 
 use Imageboard\Exception\NotFoundException;
-use Imageboard\Model\{Ban, ModLog, CurrentUserInterface};
+use Imageboard\Model\{Ban, CurrentUserInterface};
 use Imageboard\Repositories\BanRepository;
 
 class BanService
@@ -11,14 +11,19 @@ class BanService
   /** @var BanRepository */
   protected $repository;
 
+  /** @var ModLogService */
+  protected $modlog_service;
+
   /** @var CurrentUserInterface */
   protected $user;
 
   function __construct(
     BanRepository $repository,
+    ModLogService $modlog_service,
     CurrentUserInterface $user
   ) {
     $this->repository = $repository;
+    $this->modlog_service = $modlog_service;
     $this->user = $user;
   }
 
@@ -38,10 +43,7 @@ class BanService
     // Add entry to the modlog.
     $id = $this->user->id;
     $email = $this->user->email;
-    ModLog::create([
-      'message' => "User $email has banned $ip.",
-      'user_id' => $id,
-    ]);
+    $this->modlog_service->create("User $email has banned $ip.", $id);
 
     return $ban;
   }
@@ -59,10 +61,7 @@ class BanService
     // Add entry to the modlog.
     $id = $this->user->id;
     $email = $this->user->email;
-    ModLog::create([
-      'message' => "User $email has lifted ban for $ip.",
-      'user_id' => $id,
-    ]);
+    $this->modlog_service->create("User $email has lifted ban for $ip.", $id);
 
     return $ban;
   }

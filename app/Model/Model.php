@@ -8,9 +8,8 @@ abstract class Model
    * Model constructor.
    *
    * @param array $attributes
-   * @param bool  $validate
    */
-  function __construct(array $attributes = [], bool $validate = true)
+  function __construct(array $attributes = [])
   {
     foreach ($attributes as $key => $value) {
       $this->$key = $value;

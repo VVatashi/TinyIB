@@ -6,18 +6,19 @@ use GuzzleHttp\Psr7\Response;
 use Imageboard\Exception\AccessDeniedException;
 use Imageboard\Command\CommandDispatcher;
 use Imageboard\Query\QueryDispatcher;
-use Imageboard\Repositories\BanRepository;
+use Imageboard\Repositories\{Repository, BanRepository};
 use Imageboard\Service\{ConfigService, RendererService, BanService};
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 
 class BanController extends AdminController
 {
+  use CrudListTrait;
+
   /** @var BanRepository */
-  protected $ban_repository;
+  protected $repository;
 
   /** @var BanService */
-  protected $ban_service;
+  protected $service;
 
   /**
    * BanController constructor.
@@ -26,16 +27,16 @@ class BanController extends AdminController
    * @param CommandDispatcher $command_dispatcher
    * @param QueryDispatcher   $query_dispatcher
    * @param RendererService   $renderer
-   * @param BanRepository     $ban_repository
-   * @param BanService        $ban_service
+   * @param BanRepository     $repository
+   * @param BanService        $service
    */
   function __construct(
     ConfigService     $config,
     CommandDispatcher $command_dispatcher,
     QueryDispatcher   $query_dispatcher,
     RendererService   $renderer,
-    BanRepository     $ban_repository,
-    BanService        $ban_service
+    BanRepository     $repository,
+    BanService        $service
   ) {
     parent::__construct(
       $config,
@@ -44,9 +45,8 @@ class BanController extends AdminController
       $renderer
     );
 
-    $this->ban_repository = $ban_repository;
-    $this->ban_service = $ban_service;
-    $this->base_path = $this->config->get('BASE_PATH', '');
+    $this->repository = $repository;
+    $this->service = $service;
   }
 
   protected function getCreateUrl(): string {
@@ -55,6 +55,10 @@ class BanController extends AdminController
 
   protected function getListUrl(): string {
     return "{$this->base_path}/admin/bans";
+  }
+
+  protected function getRepository(): Repository {
+    return $this->repository;
   }
 
   protected function getFormTemplate(): string {
@@ -79,103 +83,6 @@ class BanController extends AdminController
 
   protected function getItemsPerPage(): int {
     return 100;
-  }
-
-  /**
-   * Returns the list of items.
-   *
-   * @param ServerRequestInterface $request
-   *
-   * @return string Response HTML.
-   *
-   * @throws AccessDeniedException
-   *   If current user is not an admin.
-   */
-  function list(ServerRequestInterface $request): string
-  {
-    if (!$this->checkAccess($request)) {
-      throw new AccessDeniedException('You are not allowed to access this page');
-    }
-
-    $params = $request->getQueryParams();
-    $page = (int)($params['page'] ?? 0);
-    $per_page = $this->getItemsPerPage();
-
-    if (!empty($params['date_from'])) {
-      $date_from = (new \DateTime($params['date_from']))->getTimestamp();
-    } else {
-      $date_from = 0;
-    }
-
-    if (!empty($params['date_to'])) {
-      $date_to = (new \DateTime($params['date_to']))->getTimestamp();
-    } else {
-      $date_to = (1 << 31) - 1;
-    }
-
-    $total_count = $this->ban_repository->getCount($date_from, $date_to);
-    $items = $this->ban_repository->getAll($date_from, $date_to, $page * $per_page, $per_page);
-
-    $renderer = $this->getRenderer();
-    return $renderer->render($this->getListTemplate(), [
-      'items' => $items,
-      'filter' => [
-        'date_from' => $params['date_from'] ?? '',
-        'date_to'   => $params['date_to']   ?? '',
-      ],
-      'pager' => [
-        'current_page' => $page,
-        'total_pages'  => ceil($total_count / $per_page),
-      ],
-    ]);
-  }
-
-  /**
-   * Returns partial HTML of the item list.
-   *
-   * @param ServerRequestInterface $request
-   *
-   * @return string Response HTML.
-   *
-   * @throws AccessDeniedException
-   *   If current user is not an admin.
-   */
-  function ajaxList(ServerRequestInterface $request): string
-  {
-    if (!$this->checkAccess($request)) {
-      throw new AccessDeniedException('You are not allowed to access this page');
-    }
-
-    $params = $request->getQueryParams();
-    $page = (int)($params['page'] ?? 0);
-    $per_page = $this->getItemsPerPage();
-
-    if (!empty($params['date_from'])) {
-      $date_from = (new \DateTime($params['date_from']))->getTimestamp();
-    } else {
-      $date_from = 0;
-    }
-
-    if (!empty($params['date_to'])) {
-      $date_to = (new \DateTime($params['date_to']))->getTimestamp();
-    } else {
-      $date_to = (1 << 31) - 1;
-    }
-
-    $total_count = $this->ban_repository->getCount($date_from, $date_to);
-    $items = $this->ban_repository->getAll($date_from, $date_to, $page * $per_page, $per_page);
-    $renderer = $this->getRenderer();
-    return $renderer->render($this->getAjaxListTemplate(), [
-      'items' => $items,
-      'filter' => [
-        'date_from' => $params['date_from'] ?? '',
-        'date_to'   => $params['date_to']   ?? '',
-      ],
-      'pager' => [
-        'current_page' => $page,
-        'total_pages'  => ceil($total_count / $per_page),
-      ],
-    ]);
   }
 
   /**
@@ -233,7 +140,7 @@ class BanController extends AdminController
     $reason = $data['reason'] ?? '';
 
     try {
-      $this->ban_service->create($ip, $expires_in, $reason);
+      $this->service->create($ip, $expires_in, $reason);
     } catch (Exception $exception) {
       // Store form data in a session.
       $key = $this->getCreateUrl() . ':item';
@@ -273,7 +180,7 @@ class BanController extends AdminController
     }
 
     $id = (int)$args['id'];
-    $this->ban_service->delete($id);
+    $this->service->delete($id);
 
     $query = $request->getQueryParams();
     $back  = $query['back'] ?? $this->getListUrl();

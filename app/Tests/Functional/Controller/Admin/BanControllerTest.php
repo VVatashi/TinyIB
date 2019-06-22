@@ -8,8 +8,8 @@ use Imageboard\Controller\Admin\BanController;
 use Imageboard\Exception\{AccessDeniedException, NotFoundException};
 use Imageboard\Model\{Ban, CurrentUserInterface, User};
 use Imageboard\Query\QueryDispatcher;
-use Imageboard\Repositories\BanRepository;
-use Imageboard\Service\{ConfigService, RendererService, BanService};
+use Imageboard\Repositories\{BanRepository, ModLogRepository};
+use Imageboard\Service\{ConfigService, RendererService, BanService, ModLogService};
 use PHPUnit\Framework\TestCase;
 
 final class BanControllerTest extends TestCase
@@ -29,7 +29,9 @@ final class BanControllerTest extends TestCase
     $query_dispatcher = new QueryDispatcher($container);
     $renderer = new RendererService($config);
     $repository = new BanRepository($database);
-    $this->service = new BanService($repository, User::anonymous());
+    $modlog_repository = new ModLogRepository($database);
+    $modlog_service = new ModLogService($modlog_repository);
+    $this->service = new BanService($repository, $modlog_service, User::anonymous());
 
     $connection = $database->getConnection();
     $builder = $connection->createQueryBuilder();

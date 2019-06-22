@@ -2,14 +2,20 @@
 
 namespace Imageboard\Controller\Admin;
 
-use Imageboard\Query\Admin\ListModLog;
+use Imageboard\Command\CommandDispatcher;
+use Imageboard\Query\QueryDispatcher;
+use Imageboard\Repositories\{Repository, ModLogRepository};
+use Imageboard\Service\{ConfigService, RendererService};
 
 class ModLogController extends AdminController
 {
-  use ListTrait;
+  use CrudListTrait;
 
-  protected function getListQuery(): string {
-    return ListModLog::class;
+  /** @var ModLogRepository */
+  protected $repository;
+
+  protected function getRepository(): Repository {
+    return $this->repository;
   }
 
   protected function getListTemplate(): string {
@@ -22,5 +28,31 @@ class ModLogController extends AdminController
 
   protected function getItemsPerPage(): int {
     return 100;
+  }
+
+  /**
+   * ModLogController constructor.
+   *
+   * @param ConfigService     $config
+   * @param CommandDispatcher $command_dispatcher
+   * @param QueryDispatcher   $query_dispatcher
+   * @param RendererService   $renderer
+   * @param ModLogRepository  $repository
+   */
+  function __construct(
+    ConfigService     $config,
+    CommandDispatcher $command_dispatcher,
+    QueryDispatcher   $query_dispatcher,
+    RendererService   $renderer,
+    ModLogRepository  $repository
+  ) {
+    parent::__construct(
+      $config,
+      $command_dispatcher,
+      $query_dispatcher,
+      $renderer
+    );
+
+    $this->repository = $repository;
   }
 }

@@ -7,6 +7,8 @@ use Imageboard\Service\DatabaseService;
 
 class BanRepository implements Repository
 {
+  const TABLE = 'bans';
+
   /** @var DatabaseService */
   protected $database;
 
@@ -24,7 +26,7 @@ class BanRepository implements Repository
   {
     $connection = $this->database->getConnection();
     $builder = $connection->createQueryBuilder();
-    $builder->insert('bans')
+    $builder->insert(static::TABLE)
       ->values([
         'created_at' => $builder->createNamedParameter($ban->created_at),
         'updated_at' => $builder->createNamedParameter($ban->updated_at),
@@ -43,7 +45,7 @@ class BanRepository implements Repository
   {
     $connection = $this->database->getConnection();
     $builder = $connection->createQueryBuilder();
-    $builder->delete('bans')
+    $builder->delete(static::TABLE)
       ->where('id = ' . $builder->createNamedParameter($ban->id))
       ->execute();
 
@@ -59,7 +61,7 @@ class BanRepository implements Repository
     $connection = $this->database->getConnection();
     $builder = $connection->createQueryBuilder();
     $query = $builder->select('COUNT(b.id)')
-      ->from('bans', 'b')
+      ->from(static::TABLE, 'b')
       ->where('b.deleted_at IS NULL')
       ->andWhere('b.created_at >= ' . $builder->createNamedParameter($date_from))
       ->andWhere('b.created_at < ' . $builder->createNamedParameter($date_to));
@@ -82,10 +84,11 @@ class BanRepository implements Repository
       'b.ip',
       'b.reason'
       )
-      ->from('bans', 'b')
+      ->from(static::TABLE, 'b')
       ->where('b.deleted_at IS NULL')
       ->andWhere('b.created_at >= ' . $builder->createNamedParameter($date_from))
-      ->andWhere('b.created_at < ' . $builder->createNamedParameter($date_to));
+      ->andWhere('b.created_at < ' . $builder->createNamedParameter($date_to))
+      ->orderBy('b.id', 'desc');
 
     if (isset($skip)) {
       $query = $query->setFirstResult($skip);
@@ -116,7 +119,7 @@ class BanRepository implements Repository
       'b.ip',
       'b.reason'
       )
-      ->from('bans', 'b')
+      ->from(static::TABLE, 'b')
       ->where('b.deleted_at IS NULL')
       ->andWhere('b.id = ' . $builder->createNamedParameter($id));
     $row = $query->execute()->fetch();
@@ -144,7 +147,7 @@ class BanRepository implements Repository
       'b.ip',
       'b.reason'
       )
-      ->from('bans', 'b')
+      ->from(static::TABLE, 'b')
       ->where('b.deleted_at IS NULL')
       ->andWhere('b.ip = ' . $builder->createNamedParameter($ip));
     $row = $query->execute()->fetch();

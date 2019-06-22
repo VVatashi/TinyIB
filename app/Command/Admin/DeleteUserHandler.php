@@ -4,15 +4,22 @@ namespace Imageboard\Command\Admin;
 
 use Imageboard\Command\CommandHandlerInterface;
 use Imageboard\Exception\NotFoundException;
-use Imageboard\Model\{ModLog, CurrentUserInterface, User};
+use Imageboard\Model\{CurrentUserInterface, User};
+use Imageboard\Service\ModLogService;
 
 class DeleteUserHandler implements CommandHandlerInterface
 {
+  /** @var ModLogService */
+  protected $modlog_service;
+
   /** @var CurrentUserInterface */
   protected $user;
 
-  function __construct(CurrentUserInterface $user)
-  {
+  function __construct(
+    ModLogService $modlog_service,
+    CurrentUserInterface $user
+  ) {
+    $this->modlog_service = $modlog_service;
     $this->user = $user;
   }
 
@@ -34,9 +41,6 @@ class DeleteUserHandler implements CommandHandlerInterface
     // Add entry to the modlog.
     $id = $this->user->id;
     $email = $this->user->email;
-    ModLog::create([
-      'message' => "User $email has deleted user $deleted_email.",
-      'user_id' => $id,
-    ]);
+    $this->modlog_service->create("User $email has deleted user $deleted_email.", $id);
   }
 }

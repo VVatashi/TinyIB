@@ -5,6 +5,8 @@ namespace Imageboard\Tests\Unit\Command\Admin;
 use Imageboard\Command\Admin\{DeletePost, DeletePostHandler};
 use Imageboard\Exception\NotFoundException;
 use Imageboard\Model\{Post, User};
+use Imageboard\Repositories\ModLogRepository;
+use Imageboard\Service\ModLogService;
 use PHPUnit\Framework\TestCase;
 
 final class DeletePostHandlerTest extends TestCase
@@ -14,11 +16,15 @@ final class DeletePostHandlerTest extends TestCase
 
   function setUp(): void
   {
+    global $database;
+
     Post::truncate();
     User::truncate();
 
     $user = User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
-    $this->handler = new DeletePostHandler($user);
+    $modlog_repository = new ModLogRepository($database);
+    $modlog_service = new ModLogService($modlog_repository);
+    $this->handler = new DeletePostHandler($modlog_service, $user);
   }
 
   protected function createItem(): Post {
