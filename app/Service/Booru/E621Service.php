@@ -1,6 +1,6 @@
 <?php
 
-namespace Imageboard\Service;
+namespace Imageboard\Service\Booru;
 
 use Predis\Client as Redis;
 

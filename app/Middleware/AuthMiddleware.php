@@ -3,7 +3,7 @@
 namespace Imageboard\Middleware;
 
 use Imageboard\Model\{Token, CurrentUserInterface, User};
-use Imageboard\Service\RendererService;
+use Imageboard\Service\{RendererService, TokenService};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
 use VVatashi\DI\Container;
@@ -18,14 +18,19 @@ class AuthMiddleware implements MiddlewareInterface
   /** @var Container */
   protected $container;
 
+  /** @var TokenService */
+  protected $token_service;
+
   /** @var RendererService */
   protected $renderer;
 
   public function __construct(
     Container $container,
+    TokenService $token_service,
     RendererService $renderer
   ) {
     $this->container = $container;
+    $this->token_service = $token_service;
     $this->renderer = $renderer;
   }
 
@@ -41,8 +46,8 @@ class AuthMiddleware implements MiddlewareInterface
       $user = User::find($_SESSION['user']);
     } elseif ($request->hasHeader('X-Token')) {
       // Try to auth with a token.
-      $token = $request->getHeaderLine('X-Token');
-      $token = Token::checkToken($token);
+      $token_str = $request->getHeaderLine('X-Token');
+      $token = $this->token_service->getByToken($token_str);
       if (isset($token)) {
         $user = $token->user;
       }

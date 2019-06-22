@@ -11,6 +11,11 @@ use Imageboard\Cache\CacheInterface;
 use Imageboard\Model\{Ban, Post};
 use Imageboard\Repositories\BanRepository;
 use Predis\Client as Redis;
+use Imageboard\Service\Booru\{
+  SafebooruService,
+  E621Service,
+  SankakuService
+};
 
 class PostService
 {

@@ -11,10 +11,12 @@ use Imageboard\Service\{
   ConfigService,
   CryptographyService,
   FileService,
+  ThumbnailService,
+  RendererService
+};
+use Imageboard\Service\Booru\{
   SafebooruService,
   E621Service,
-  ThumbnailService,
-  RendererService,
   SankakuService
 };
 use Imageboard\Repositories\BanRepository;

@@ -15,7 +15,8 @@ use Imageboard\Service\{
   ConfigService,
   DatabaseService,
   RoutingService,
-  RendererService
+  RendererService,
+  TokenService
 };
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
@@ -208,17 +209,20 @@ EOF;
   function handleRequest()
   {
     // Use routing handler.
-    /** @var RoutingService */
+    /** @var RoutingService $handler */
     $handler = $this->container->get(RoutingService::class);
 
-    /** @var RendererService */
+    /** @var TokenService $token_service */
+    $token_service = $this->container->get(TokenService::class);
+
+    /** @var RendererService $renderer */
     $renderer = $this->container->get(RendererService::class);
 
-    /** @var LoggerInterface */
+    /** @var LoggerInterface $logger */
     $logger = $this->container->get(LoggerInterface::class);
 
     // Use auth middleware.
-    $auth_middleware = new AuthMiddleware($this->container, $renderer);
+    $auth_middleware = new AuthMiddleware($this->container, $token_service, $renderer);
     $handler = new RequestHandler($auth_middleware, $handler);
 
     // Use CORS handler.
