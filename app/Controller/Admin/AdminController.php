@@ -26,7 +26,6 @@ abstract class AdminController implements ControllerInterface
   /** @var string */
   protected $base_path;
 
-
   /**
    * CrudController constructor.
    *

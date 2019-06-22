@@ -17,6 +17,7 @@ use Imageboard\Service\{
   RendererService,
   SankakuService
 };
+use Imageboard\Repositories\BanRepository;
 
 final class CreatePostHandlerTest extends TestCase
 {
@@ -28,11 +29,14 @@ final class CreatePostHandlerTest extends TestCase
    */
   function setUp(): void
   {
+    global $database;
+
     Post::truncate();
     User::truncate();
 
     $cache = new NoCache();
     $cryptography = new CryptographyService();
+    $ban_repository = new BanRepository($database);
     $file = new FileService();
     $config = new ConfigService();
     $thumbnail = new ThumbnailService($file, $config);
@@ -44,6 +48,7 @@ final class CreatePostHandlerTest extends TestCase
     $post = new PostService(
       $cache,
       $cryptography,
+      $ban_repository,
       $file,
       $thumbnail,
       $safebooru,

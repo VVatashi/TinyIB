@@ -9,6 +9,7 @@ use Imageboard\Exception\{
 };
 use Imageboard\Cache\CacheInterface;
 use Imageboard\Model\{Ban, Post};
+use Imageboard\Repositories\BanRepository;
 use Predis\Client as Redis;
 
 class PostService
@@ -18,6 +19,9 @@ class PostService
 
   /** @var CryptographyService */
   protected $cryptography;
+
+  /** @var BanRepository */
+  protected $ban_repository;
 
   /** @var FileService */
   protected $file;
@@ -45,6 +49,7 @@ class PostService
    *
    * @param CacheInterface      $cache
    * @param CryptographyService $cryptography
+   * @param BanRepository       $ban_repository
    * @param FileService         $file
    * @param ThumbnailService    $thubmnail
    * @param SafebooruService    $safebooru
@@ -56,6 +61,7 @@ class PostService
   function __construct(
     CacheInterface $cache,
     CryptographyService $cryptography,
+    BanRepository $ban_repository,
     FileService $file,
     ThumbnailService $thubmnail,
     SafebooruService $safebooru,
@@ -66,6 +72,7 @@ class PostService
   ) {
     $this->cache = $cache;
     $this->cryptography = $cryptography;
+    $this->ban_repository = $ban_repository;
     $this->file = $file;
     $this->thubmnail = $thubmnail;
     $this->safebooru = $safebooru;
@@ -86,7 +93,7 @@ class PostService
    */
   protected function checkBanned(string $ip, &$ban): bool
   {
-    $ban = Ban::where('ip', $ip)->first();
+    $ban = $this->ban_repository->getByIp($ip);
     if (!isset($ban)) {
       return true;
     }
@@ -366,7 +373,7 @@ class PostService
     if (!$this->checkBanned($ip, $ban)) {
       $expire = $ban->isPermanent()
         ? '<br>This ban is permanent and will not expire.'
-        : '<br>This ban will expire ' . date('y/m/d(D)H:i:s', $ban->getExpiresTimestamp());
+        : '<br>This ban will expire ' . date('y/m/d(D)H:i:s', $ban->expires_at);
       $reason = $ban->hasReason() ? '<br>Reason: ' . $ban->reason : '';
       throw new ValidationException('Your IP address ' . $ban->ip
         . ' has been banned from posting on this image board.  ' . $expire . $reason);

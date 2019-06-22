@@ -8,8 +8,8 @@ use Imageboard\Controller\Admin\BanController;
 use Imageboard\Exception\{AccessDeniedException, NotFoundException};
 use Imageboard\Model\{Ban, CurrentUserInterface, User};
 use Imageboard\Query\QueryDispatcher;
-use Imageboard\Service\ConfigService;
-use Imageboard\Service\RendererService;
+use Imageboard\Repositories\BanRepository;
+use Imageboard\Service\{ConfigService, RendererService, BanService};
 use PHPUnit\Framework\TestCase;
 
 final class BanControllerTest extends TestCase
@@ -17,24 +17,33 @@ final class BanControllerTest extends TestCase
   /** @var BanController */
   protected $controller;
 
+  /** @var BanService */
+  protected $service;
+
   function setUp(): void
   {
-    global $container;
-
-    Ban::truncate();
-    User::truncate();
+    global $container, $database;
 
     $config = new ConfigService();
     $command_dispatcher = new CommandDispatcher($container);
     $query_dispatcher = new QueryDispatcher($container);
     $renderer = new RendererService($config);
+    $repository = new BanRepository($database);
+    $this->service = new BanService($repository, User::anonymous());
 
+    $connection = $database->getConnection();
+    $builder = $connection->createQueryBuilder();
+    $bans = ConfigService::getInstance()->get('DBBANS');
+    $builder->delete($bans)->execute();
+    $builder->delete('users')->execute();
 
     $this->controller = new BanController(
       $config,
       $command_dispatcher,
       $query_dispatcher,
-      $renderer
+      $renderer,
+      $repository,
+      $this->service
     );
   }
 
@@ -70,7 +79,7 @@ final class BanControllerTest extends TestCase
 
   protected function createBan(): Ban
   {
-    return Ban::createBan('123.0.0.1', 60 * 60, 'Test');
+    return $this->service->create('123.0.0.1', 60 * 60, 'Test');
   }
 
   function test_list_asAnonymous_shouldThrow(): void
@@ -189,9 +198,6 @@ final class BanControllerTest extends TestCase
 
     $response = $this->controller->create($request);
 
-    $item = Ban::where('ip', $data['ip'])->first();
-    $this->assertNotNull($item);
-
     $status = $response->getStatusCode();
     $this->assertEquals(302, $status);
   }
@@ -228,9 +234,6 @@ final class BanControllerTest extends TestCase
       ->withAttribute('user', $user);
 
     $response = $this->controller->delete($request, ['id' => $item->id]);
-
-    $item = Ban::find($item->id);
-    $this->assertNull($item);
 
     $status = $response->getStatusCode();
     $this->assertEquals(302, $status);

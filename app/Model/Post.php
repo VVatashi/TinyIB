@@ -3,6 +3,7 @@
 namespace Imageboard\Model;
 
 use Illuminate\Database\Eloquent\{Collection, Model, SoftDeletes};
+use Imageboard\ConfigTrait;
 use Imageboard\Service\ConfigService;
 use VVatashi\BBCode\{Parser, TagDef};
 
@@ -37,7 +38,7 @@ use VVatashi\BBCode\{Parser, TagDef};
 class Post extends Model
 {
   use SoftDeletes;
-  use ModelTrait;
+  use ConfigTrait;
 
   protected $table;
 

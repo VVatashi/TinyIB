@@ -128,6 +128,7 @@ EOF;
     // Register container itself.
     $this->container->registerInstance(ContainerInterface::class, $this->container);
     $this->container->registerInstance(ConfigService::class , $this->config);
+    $this->container->registerInstance(DatabaseService::class, $this->database);
 
     if ($this->config->get('ERROR_LOG', true)) {
       // Lazy create logger.
@@ -183,6 +184,7 @@ EOF;
       'Model',
       'Service',
       'Query',
+      'Repositories',
     ];
 
     foreach ($directories as $directory) {

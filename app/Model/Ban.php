@@ -2,67 +2,137 @@
 
 namespace Imageboard\Model;
 
-use Illuminate\Database\Eloquent\{Model, SoftDeletes};
 use Imageboard\Exception\ValidationException;
 
 /**
- * @property int $id
- * @property int $created_at
- * @property int $updated_at
- * @property int $deleted_at
- * @property int $expires_at
- * @property string $ip
- * @property string $reason
+ * @property-read int $id
+ * @property-read int $created_at
+ * @property-read int $updated_at
+ * @property-read int $deleted_at
+ * @property-read int $expires_at
+ * @property-read string $ip
+ * @property-read string $reason
  */
 class Ban extends Model
 {
-  use SoftDeletes;
-  use ModelTrait;
+  /** @var null|int */
+  protected $id = null;
 
-  protected $table;
+  /** @var int */
+  protected $created_at = 0;
 
-  protected $fillable = [
-    'ip',
-    'expires_at',
-    'reason',
-  ];
+  /** @var int */
+  protected $updated_at = 0;
 
-  protected $dates = [
-    'created_at',
-    'updated_at',
-    'deleted_at',
-    'expires_at',
-  ];
+  /** @var int */
+  protected $deleted_at = 0;
 
-  protected $dateFormat = 'U';
+  /** @var int */
+  protected $expires_at = 0;
+
+  /** @var string */
+  protected $ip = '';
+
+  /** @var string */
+  protected $reason = '';
 
   /**
    * Ban constructor.
    *
    * @param array $attributes
-   *
-   * @throws \Imageboard\Exception\ConfigServiceException
    */
-  public function __construct (array $attributes = [])
+  function __construct(array $attributes = [], bool $validate = true)
   {
     parent::__construct($attributes);
 
-    $this->table = $this->config('DBBANS');
+    if ($validate) {
+      $this->setId($attributes['id'] ?? null);
+      $this->setCreatedAt($attributes['created_at'] ?? 0);
+      $this->setUpdatedAt($attributes['updated_at'] ?? 0);
+      $this->setDeletedAt($attributes['deleted_at'] ?? null);
+      $this->setExpiresAt($attributes['expires_at'] ?? 0);
+      $this->setIp($attributes['ip'] ?? '');
+      $this->setReason($attributes['reason'] ?? '');
+    }
+  }
+
+  /**
+   * @param null|int $id
+   *
+   * @throws ValidationException
+   */
+  function setId($id)
+  {
+    if (isset($id) && $id <= 0) {
+      throw new ValidationException('ID should be NULL or positive integer');
+    }
+
+    $this->id = $id;
+  }
+
+  /**
+   * @param int $created_at
+   *
+   * @throws ValidationException
+   */
+  function setCreatedAt(int $created_at)
+  {
+    if ($created_at < 0) {
+      throw new ValidationException('Created at should not be less than zero');
+    }
+
+    $this->created_at = $created_at;
+  }
+
+  /**
+   * @param int $created_at
+   *
+   * @throws ValidationException
+   */
+  function setUpdatedAt(int $updated_at)
+  {
+    if ($updated_at < 0) {
+      throw new ValidationException('Updated at should not be less than zero');
+    }
+
+    $this->updated_at = $updated_at;
+  }
+
+  /**
+   * @param null|int $deleted_at
+   *
+   * @throws ValidationException
+   */
+  function setDeletedAt($deleted_at)
+  {
+    if (isset($deleted_at) && $deleted_at <= 0) {
+      throw new ValidationException('Deleted at should be NULL or positive integer');
+    }
+
+    $this->deleted_at = $deleted_at;
+  }
+
+  /**
+   * @param int $expires_at
+   *
+   * @throws ValidationException
+   */
+  function setExpiresAt(int $expires_at)
+  {
+    if ($expires_at < 0) {
+      throw new ValidationException('Expires at should not be less than zero');
+    }
+
+    $this->expires_at = $expires_at;
   }
 
   /**
    * @param string $ip
-   * @param int    $expires_in
-   * @param string $reason
    *
-   * @return \Imageboard\Model\Ban
-   * @throws \Imageboard\Exception\ValidationException
+   * @throws ValidationException
    */
-  static function createBan(string $ip, int $expires_in, string $reason) : Ban
+  function setIp(string $ip)
   {
-    $errors = [];
-
-    // Validate IP-address.
     if (!preg_match('
 /^
   (?:
@@ -79,46 +149,18 @@ class Ban extends Model
     1?[0-9][0-9]?
   )
 $/x', $ip)) {
-      $errors[] = 'Invalid IP';
+      throw new ValidationException('IP is invalid');
     }
 
-    if ($expires_in < 0) {
-      $errors[] = 'Expiration time should be positive';
-    }
-
-    if (!empty($errors)) {
-      throw new ValidationException(implode('\n', $errors));
-    }
-
-    $expires_at = $expires_in ? $expires_in + time() : 0;
-
-    return Ban::create([
-      'ip' => $ip,
-      'expires_at' => $expires_at,
-      'reason' => $reason,
-    ]);
+    $this->ip = $ip;
   }
 
   /**
-   * Returns created timestamp of the ban.
-   *
-   * @return int
-   *   Ban created timestamp.
+   * @param string $reason
    */
-  function getCreatedTimestamp() : int
+  function setReason(string $reason)
   {
-    return $this->created_at->getTimestamp();
-  }
-
-  /**
-   * Returns expires timestamp of the ban.
-   *
-   * @return int
-   *   Ban expires timestamp.
-   */
-  function getExpiresTimestamp() : int
-  {
-    return $this->expires_at->getTimestamp();
+    $this->reason = $reason;
   }
 
   /**
@@ -128,7 +170,7 @@ $/x', $ip)) {
    */
   function isPermanent() : bool
   {
-    return $this->getExpiresTimestamp() === 0;
+    return $this->expires_at === 0;
   }
 
   /**
@@ -138,7 +180,7 @@ $/x', $ip)) {
    */
   function isExpired() : bool
   {
-    return !$this->isPermanent() && $this->getExpiresTimestamp() < time();
+    return !$this->isPermanent() && $this->expires_at < time();
   }
 
   /**
@@ -149,16 +191,5 @@ $/x', $ip)) {
   function hasReason() : bool
   {
     return !empty($this->reason);
-  }
-
-  /**
-   * Removes expired bans.
-   */
-  static function removeExpired() : void
-  {
-    Ban::where([
-      ['expires_at', '>', 0],
-      ['expires_at', '<=', time()],
-    ])->delete();
   }
 }
