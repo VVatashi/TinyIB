@@ -37,14 +37,14 @@ class RoutingService implements RequestHandlerInterface
   /** @var Dispatcher */
   protected $dispatcher;
 
-  /** @var \Imageboard\Service\ConfigService */
+  /** @var ConfigService */
   protected $config;
 
   /**
    * Creates a new RoutingService instance.
    *
-   * @param \Psr\Container\ContainerInterface $container
-   * @param \Imageboard\Service\ConfigService $config
+   * @param ContainerInterface $container
+   * @param ConfigService $config
    */
   function __construct(
     ContainerInterface $container,

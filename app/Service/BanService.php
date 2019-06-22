@@ -3,8 +3,9 @@
 namespace Imageboard\Service;
 
 use Imageboard\Exception\NotFoundException;
-use Imageboard\Model\{Ban, CurrentUserInterface};
+use Imageboard\Model\Ban;
 use Imageboard\Repositories\BanRepository;
+use Imageboard\Service\UserService;
 
 class BanService
 {
@@ -14,17 +15,17 @@ class BanService
   /** @var ModLogService */
   protected $modlog_service;
 
-  /** @var CurrentUserInterface */
-  protected $user;
+  /** @var UserService */
+  protected $user_service;
 
   function __construct(
     BanRepository $repository,
     ModLogService $modlog_service,
-    CurrentUserInterface $user
+    UserService $user_service
   ) {
     $this->repository = $repository;
     $this->modlog_service = $modlog_service;
-    $this->user = $user;
+    $this->user_service = $user_service;
   }
 
   function create(string $ip, int $expires_in = 0, string $reason = ''): Ban
@@ -41,9 +42,8 @@ class BanService
     $ban = $this->repository->add($ban);
 
     // Add entry to the modlog.
-    $id = $this->user->id;
-    $email = $this->user->email;
-    $this->modlog_service->create("User $email has banned $ip.", $id);
+    $user = $this->user_service->getCurrentUser();
+    $this->modlog_service->create("User {$user->email} has banned $ip.", $user->id);
 
     return $ban;
   }
@@ -56,12 +56,11 @@ class BanService
     }
 
     $ip = $ban->ip;
-    $this->repository->remove($ban);
+    $ban = $this->repository->remove($ban);
 
     // Add entry to the modlog.
-    $id = $this->user->id;
-    $email = $this->user->email;
-    $this->modlog_service->create("User $email has lifted ban for $ip.", $id);
+    $user = $this->user_service->getCurrentUser();
+    $this->modlog_service->create("User {$user->email} has lifted ban for $ip.", $user->id);
 
     return $ban;
   }

@@ -3,8 +3,6 @@
 namespace Imageboard\Tests\Functional\Command;
 
 use Imageboard\Command\{CreatePost, CreatePostHandler};
-use Imageboard\Model\{Post, User};
-use PHPUnit\Framework\TestCase;
 use Imageboard\Service\PostService;
 use Imageboard\Cache\NoCache;
 use Imageboard\Service\{
@@ -14,14 +12,15 @@ use Imageboard\Service\{
   ThumbnailService,
   RendererService
 };
+use Imageboard\Repositories\BanRepository;
 use Imageboard\Service\Booru\{
   SafebooruService,
   E621Service,
   SankakuService
 };
-use Imageboard\Repositories\BanRepository;
+use Imageboard\Tests\Functional\TestWithUsers;
 
-final class CreatePostHandlerTest extends TestCase
+final class CreatePostHandlerTest extends TestWithUsers
 {
   /** @var CreatePostHandler */
   protected $handler;
@@ -31,20 +30,28 @@ final class CreatePostHandlerTest extends TestCase
    */
   function setUp(): void
   {
+    parent::setUp();
+
     global $database;
 
-    Post::truncate();
-    User::truncate();
+    $connection = $database->getConnection();
+    $builder = $connection->createQueryBuilder();
+    $builder->delete('users')->execute();
+    $builder->delete('posts')->execute();
 
     $cache = new NoCache();
-    $cryptography = new CryptographyService();
-    $ban_repository = new BanRepository($database);
-    $file = new FileService();
     $config = new ConfigService();
+    $cryptography = new CryptographyService();
+
+    $ban_repository = new BanRepository($database);
+
+    $file = new FileService();
     $thumbnail = new ThumbnailService($file, $config);
+
     $safebooru = new SafebooruService();
     $e621 = new E621Service();
     $sankaku = new SankakuService();
+
     $renderer = new RendererService($config);
 
     $post = new PostService(
@@ -60,8 +67,8 @@ final class CreatePostHandlerTest extends TestCase
       $renderer
     );
 
-    $user = User::createUser('test@example.com', 'test');
-    $this->handler = new CreatePostHandler($post, $user);
+    $this->user_service->create('test@example.com', 'test');
+    $this->handler = new CreatePostHandler($post, $this->user_service);
   }
 
   function test_handle_shouldCreate(): void

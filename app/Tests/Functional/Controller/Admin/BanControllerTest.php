@@ -6,13 +6,17 @@ use GuzzleHttp\Psr7\ServerRequest;
 use Imageboard\Command\CommandDispatcher;
 use Imageboard\Controller\Admin\BanController;
 use Imageboard\Exception\{AccessDeniedException, NotFoundException};
-use Imageboard\Model\{Ban, CurrentUserInterface, User};
+use Imageboard\Model\Ban;
 use Imageboard\Query\QueryDispatcher;
-use Imageboard\Repositories\{BanRepository, ModLogRepository};
-use Imageboard\Service\{ConfigService, RendererService, BanService, ModLogService};
-use PHPUnit\Framework\TestCase;
+use Imageboard\Repositories\{BanRepository};
+use Imageboard\Service\{
+  ConfigService,
+  BanService,
+  RendererService
+};
+use Imageboard\Tests\Functional\TestWithUsers;
 
-final class BanControllerTest extends TestCase
+final class BanControllerTest extends TestWithUsers
 {
   /** @var BanController */
   protected $controller;
@@ -22,22 +26,25 @@ final class BanControllerTest extends TestCase
 
   function setUp(): void
   {
-    global $container, $database;
+    parent::setUp();
 
-    $config = new ConfigService();
-    $command_dispatcher = new CommandDispatcher($container);
-    $query_dispatcher = new QueryDispatcher($container);
-    $renderer = new RendererService($config);
-    $repository = new BanRepository($database);
-    $modlog_repository = new ModLogRepository($database);
-    $modlog_service = new ModLogService($modlog_repository);
-    $this->service = new BanService($repository, $modlog_service, User::anonymous());
+    global $container, $database;
 
     $connection = $database->getConnection();
     $builder = $connection->createQueryBuilder();
-    $bans = ConfigService::getInstance()->get('DBBANS');
-    $builder->delete($bans)->execute();
     $builder->delete('users')->execute();
+
+    $config = new ConfigService();
+    $bans = $config->get('DBBANS', 'bans');
+    $builder->delete($bans)->execute();
+
+    $command_dispatcher = new CommandDispatcher($container);
+    $query_dispatcher = new QueryDispatcher($container);
+
+    $repository = new BanRepository($database);
+    $this->service = new BanService($repository, $this->modlog_service, $this->user_service);
+
+    $renderer = new RendererService($config);
 
     $this->controller = new BanController(
       $config,
@@ -47,36 +54,6 @@ final class BanControllerTest extends TestCase
       $repository,
       $this->service
     );
-  }
-
-  protected function createAnonymous(): User
-  {
-    global $container;
-
-    $user = User::anonymous();
-    $container->registerInstance(CurrentUserInterface::class, $user);
-
-    return $user;
-  }
-
-  protected function createUser(): User
-  {
-    global $container;
-
-    $user = User::createUser('user@example.com', 'user@example.com', User::ROLE_USER);
-    $container->registerInstance(CurrentUserInterface::class, $user);
-
-    return $user;
-  }
-
-  protected function createAdmin(): User
-  {
-    global $container;
-
-    $user = User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
-    $container->registerInstance(CurrentUserInterface::class, $user);
-
-    return $user;
   }
 
   protected function createBan(): Ban

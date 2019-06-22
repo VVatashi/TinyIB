@@ -12,11 +12,11 @@ class RendererService
   /** @var Twig_Environment */
   protected $twig;
 
-  /** @var \Imageboard\Service\ConfigService */
+  /** @var ConfigService */
   protected $config;
 
   /**
-   * @param \Imageboard\Service\ConfigService $config
+   * @param ConfigService $config
    */
   function __construct(ConfigService $config)
   {

@@ -2,11 +2,10 @@
 
 namespace Imageboard\Middleware;
 
-use Imageboard\Model\{Token, CurrentUserInterface, User};
-use Imageboard\Service\{RendererService, TokenService};
+use Imageboard\Repositories\UserRepository;
+use Imageboard\Service\{RendererService, TokenService, UserService};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
-use VVatashi\DI\Container;
 
 /**
  * Auth middleware.
@@ -15,8 +14,11 @@ use VVatashi\DI\Container;
  */
 class AuthMiddleware implements MiddlewareInterface
 {
-  /** @var Container */
-  protected $container;
+  /** @var UserRepository */
+  protected $user_repository;
+
+  /** @var UserService */
+  protected $user_service;
 
   /** @var TokenService */
   protected $token_service;
@@ -25,11 +27,13 @@ class AuthMiddleware implements MiddlewareInterface
   protected $renderer;
 
   public function __construct(
-    Container $container,
+    UserRepository $user_repository,
+    UserService $user_service,
     TokenService $token_service,
     RendererService $renderer
   ) {
-    $this->container = $container;
+    $this->user_repository = $user_repository;
+    $this->user_service = $user_service;
     $this->token_service = $token_service;
     $this->renderer = $renderer;
   }
@@ -43,7 +47,7 @@ class AuthMiddleware implements MiddlewareInterface
   ): ResponseInterface {
     if (isset($_SESSION['user'])) {
       // Try to load user.
-      $user = User::find($_SESSION['user']);
+      $user = $this->user_service->getCurrentUser();
     } elseif ($request->hasHeader('X-Token')) {
       // Try to auth with a token.
       $token_str = $request->getHeaderLine('X-Token');
@@ -56,14 +60,11 @@ class AuthMiddleware implements MiddlewareInterface
     // If there is no user ID in the session,
     // store anonymous user instance in the request.
     if (!isset($user)) {
-      $user = User::anonymous();
+      $user = $this->user_service->getAnonymous();
     }
 
     // Store current user to a Twig global variable.
     $this->renderer->registerGlobal('user', $user);
-
-    // Store current user to a container.
-    $this->container->registerInstance(CurrentUserInterface::class, $user);
 
     // Store current user to the request object.
     $request = $request->withAttribute('user', $user);

@@ -142,7 +142,7 @@ class PostService
 
     $post = Post::getLastPostByIP($ip);
     if (isset($post)) {
-      /** @var Post */
+      /** @var Post $post */
       $timestamp = $post->getCreatedTimestamp();
       $remains_time = $delay - (time() - $timestamp);
       return $remains_time < 0;
@@ -218,7 +218,7 @@ class PostService
       $id = (int)$matches[1];
       $post = Post::find($id);
       if ($post !== null) {
-        /** @var Post */
+        /** @var Post $post */
         $thread_id = $post->isThread() ? $post->id : $post->parent_id;
         return '<a href="/' . $board . "/res/$thread_id#$id\">" . $matches[0] . '</a>';
       }
@@ -671,7 +671,7 @@ class PostService
   {
     $board = $this->config->get("BOARD");
 
-    /** @var Post */
+    /** @var Post $post */
     $post = Post::find($id);
     if ($post === null) {
       throw new NotFoundException("Post #$id not found.");

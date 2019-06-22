@@ -3,12 +3,34 @@
 namespace Imageboard\Controller\Admin;
 
 use GuzzleHttp\Psr7\Response;
-use Imageboard\Command\Admin\ClearCache;
+use Imageboard\Command\CommandDispatcher;
 use Imageboard\Exception\AccessDeniedException;
+use Imageboard\Query\QueryDispatcher;
+use Imageboard\Service\{ConfigService, SystemService, RendererService};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
 class SystemController extends AdminController
 {
+  /** @var SystemService */
+  protected $service;
+
+  function __construct(
+    ConfigService $config,
+    CommandDispatcher $command_dispatcher,
+    QueryDispatcher $query_dispatcher,
+    SystemService $service,
+    RendererService $renderer
+  ) {
+    parent::__construct(
+      $config,
+      $command_dispatcher,
+      $query_dispatcher,
+      $renderer
+    );
+
+    $this->service = $service;
+  }
+
   /**
    * Returns the admin system page.
    *
@@ -55,11 +77,8 @@ class SystemController extends AdminController
     $back_url = $this->config->get('BASE_PATH', '') . '/admin/system';
     $message_key = "$back_url:message";
 
-    $command = new ClearCache();
-    $handler = $this->command_dispatcher->getHandler($command);
-
     try {
-      $handler->handle($command);
+      $this->service->clearCache();
 
       // Store status message in a session.
       $_SESSION[$message_key] = 'Cache cleared.';

@@ -11,12 +11,14 @@ use Imageboard\Middleware\{
   ExceptionMiddleware,
   RequestHandler
 };
+use Imageboard\Repositories\UserRepository;
 use Imageboard\Service\{
   ConfigService,
   DatabaseService,
   RoutingService,
   RendererService,
-  TokenService
+  TokenService,
+  UserService
 };
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
@@ -212,6 +214,12 @@ EOF;
     /** @var RoutingService $handler */
     $handler = $this->container->get(RoutingService::class);
 
+    /** @var UserRepository $user_repository */
+    $user_repository = $this->container->get(UserRepository::class);
+
+    /** @var UserService $user_service */
+    $user_service = $this->container->get(UserService::class);
+
     /** @var TokenService $token_service */
     $token_service = $this->container->get(TokenService::class);
 
@@ -222,7 +230,12 @@ EOF;
     $logger = $this->container->get(LoggerInterface::class);
 
     // Use auth middleware.
-    $auth_middleware = new AuthMiddleware($this->container, $token_service, $renderer);
+    $auth_middleware = new AuthMiddleware(
+      $user_repository,
+      $user_service,
+      $token_service,
+      $renderer
+    );
     $handler = new RequestHandler($auth_middleware, $handler);
 
     // Use CORS handler.

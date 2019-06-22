@@ -3,23 +3,22 @@
 namespace Imageboard\Command;
 
 use Imageboard\Command\CommandHandlerInterface;
-use Imageboard\Model\CurrentUserInterface;
-use Imageboard\Service\PostService;
+use Imageboard\Service\{PostService, UserService};
 
 class CreatePostHandler implements CommandHandlerInterface
 {
   /** @var PostService */
   protected $post;
 
-  /** @var CurrentUserInterface */
-  protected $user;
+  /** @var UserService */
+  protected $user_service;
 
   function __construct(
     PostService $post,
-    CurrentUserInterface $user
+    UserService $user_service
   ) {
     $this->post = $post;
-    $this->user = $user;
+    $this->user_service = $user_service;
   }
 
   /**
@@ -27,6 +26,8 @@ class CreatePostHandler implements CommandHandlerInterface
    */
   function handle($command)
   {
+    $user_id = $this->user_service->getCurrentUserId();
+
     return $this->post->create(
       $command->name,
       '',
@@ -34,7 +35,7 @@ class CreatePostHandler implements CommandHandlerInterface
       $command->message,
       '',
       $_SERVER['REMOTE_ADDR'] ?? '',
-      $this->user->id,
+      $user_id,
       $command->parent_id
     );
   }

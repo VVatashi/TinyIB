@@ -11,7 +11,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 abstract class AdminController implements ControllerInterface
 {
-  /** @var \Imageboard\Service\ConfigService */
+  /** @var ConfigService */
   protected $config;
 
   /** @var CommandDispatcher */
@@ -31,10 +31,10 @@ abstract class AdminController implements ControllerInterface
    *
    * Creates a new CRUD controller instance.
    *
-   * @param \Imageboard\Service\ConfigService     $config
-   * @param \Imageboard\Command\CommandDispatcher $command_dispatcher
-   * @param \Imageboard\Query\QueryDispatcher     $query_dispatcher
-   * @param \Imageboard\Service\RendererService   $renderer
+   * @param ConfigService     $config
+   * @param CommandDispatcher $command_dispatcher
+   * @param QueryDispatcher   $query_dispatcher
+   * @param RendererService   $renderer
    */
   function __construct(
     ConfigService $config,
@@ -59,7 +59,7 @@ abstract class AdminController implements ControllerInterface
    */
   protected function checkAccess(ServerRequestInterface $request): bool
   {
-    /** @var User */
+    /** @var User $current_user */
     $current_user = $request->getAttribute('user');
     return $current_user->isMod();
   }

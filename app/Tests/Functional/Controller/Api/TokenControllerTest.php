@@ -8,9 +8,9 @@ use Imageboard\Exception\NotFoundException;
 use Imageboard\Model\User;
 use Imageboard\Repositories\TokenRepository;
 use Imageboard\Service\TokenService;
-use PHPUnit\Framework\TestCase;
+use Imageboard\Tests\Functional\TestWithUsers;
 
-final class TokenControllerTest extends TestCase
+final class TokenControllerTest extends TestWithUsers
 {
   /** @var TokenController */
   protected $controller;
@@ -20,17 +20,22 @@ final class TokenControllerTest extends TestCase
 
   function setUp(): void
   {
+    parent::setUp();
+
     global $database;
 
     $connection = $database->getConnection();
     $builder = $connection->createQueryBuilder();
     $builder->delete('tokens')->execute();
-
-    User::truncate();
+    $builder->delete('users')->execute();
 
     $repository = new TokenRepository($database);
     $this->service = new TokenService($repository);
-    $this->controller = new TokenController($this->service);
+    $this->controller = new TokenController(
+      $this->user_repository,
+      $this->user_service,
+      $this->service
+    );
   }
 
   function test_createToken_shouldCreateItem(): void
@@ -39,7 +44,7 @@ final class TokenControllerTest extends TestCase
       'email' => 'test@example.com',
       'password' => 'test',
     ];
-    User::createUser($data['email'], $data['password']);
+    $this->user_service->create($data['email'], $data['password']);
     $request = (new ServerRequest('POST', '/api/auth'))
       ->withParsedBody($data);
 
@@ -51,8 +56,8 @@ final class TokenControllerTest extends TestCase
 
   function test_token_shouldReturnItem(): void
   {
-    $user = User::createUser('test@example.com', 'test');
-    $token = $this->service->createToken($user->id);
+    $user = $this->user_service->create('test@example.com', 'test');
+    $token = $this->service->create($user->id);
     $request = (new ServerRequest('GET', '/api/auth'))
       ->withHeader('X-Token', $token->token);
 
@@ -63,8 +68,8 @@ final class TokenControllerTest extends TestCase
 
   function test_token_revoked_shouldThrow(): void
   {
-    $user = User::createUser('test@example.com', 'test');
-    $token = $this->service->createToken($user->id);
+    $user = $this->user_service->create('test@example.com', 'test');
+    $token = $this->service->create($user->id);
     $this->service->revokeToken($token->token);
     $request = (new ServerRequest('GET', '/api/auth'))
       ->withHeader('X-Token', $token->token);

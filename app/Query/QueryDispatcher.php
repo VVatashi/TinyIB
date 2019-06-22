@@ -11,7 +11,7 @@ use Psr\Container\ContainerInterface;
  */
 class QueryDispatcher
 {
-  /** @var ContainerInterface $container */
+  /** @var ContainerInterface */
   protected $container;
 
   function __construct(ContainerInterface $container)

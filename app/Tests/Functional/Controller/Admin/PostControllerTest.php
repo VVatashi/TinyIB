@@ -6,28 +6,33 @@ use GuzzleHttp\Psr7\ServerRequest;
 use Imageboard\Command\CommandDispatcher;
 use Imageboard\Controller\Admin\PostController;
 use Imageboard\Exception\{AccessDeniedException, NotFoundException};
-use Imageboard\Model\{Post, User};
+use Imageboard\Model\Post;
 use Imageboard\Query\QueryDispatcher;
-use Imageboard\Service\ConfigService;
-use Imageboard\Service\RendererService;
-use PHPUnit\Framework\TestCase;
+use Imageboard\Service\{ConfigService, RendererService};
+use Imageboard\Tests\Functional\TestWithUsers;
 
-final class PostControllerTest extends TestCase
+final class PostControllerTest extends TestWithUsers
 {
   /** @var PostController */
   protected $controller;
 
   function setUp(): void
   {
+    parent::setUp();
+
     $this->markTestSkipped();
     return;
 
-    global $container;
+    global $container, $database;
 
-    Post::truncate();
-    User::truncate();
+    $connection = $database->getConnection();
+    $builder = $connection->createQueryBuilder();
+    $builder->delete('users')->execute();
 
     $config = new ConfigService();
+    $posts = $config->get('DBPOSTS', 'posts');
+    $builder->delete($posts)->execute();
+
     $command_dispatcher = new CommandDispatcher($container);
     $query_dispatcher = new QueryDispatcher($container);
     $renderer = new RendererService($config);
@@ -37,36 +42,6 @@ final class PostControllerTest extends TestCase
       $query_dispatcher,
       $renderer
     );
-  }
-
-  protected function createAnonymous(): User
-  {
-    global $container;
-
-    $user = User::anonymous();
-    $container->registerInstance(CurrentUserInterface::class, $user);
-
-    return $user;
-  }
-
-  protected function createUser(): User
-  {
-    global $container;
-
-    $user = User::createUser('user@example.com', 'user@example.com', User::ROLE_USER);
-    $container->registerInstance(CurrentUserInterface::class, $user);
-
-    return $user;
-  }
-
-  protected function createAdmin(): User
-  {
-    global $container;
-
-    $user = User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
-    $container->registerInstance(CurrentUserInterface::class, $user);
-
-    return $user;
   }
 
   protected function createPost(): Post {

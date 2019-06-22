@@ -249,7 +249,7 @@ class PostController implements ControllerInterface
   function board(ServerRequestInterface $request, array $args): ResponseInterface
   {
     $page = (int)($args['page'] ?? 0);
-    /** @var \Imageboard\Model\User $user */
+    /** @var User $user */
     $user = $request->getAttribute('user');
     $key = $this->config->get("BOARD") . ':page:' . $page . ':user:' . $user->id;
     $headers = [];
@@ -276,7 +276,7 @@ class PostController implements ControllerInterface
   function thread(ServerRequestInterface $request, array $args): ResponseInterface
   {
     $id = (int)$args['id'];
-    /** @var \Imageboard\Model\User $user */
+    /** @var User $user */
     $user = $request->getAttribute('user');
     $key = $this->config->get("BOARD") . ':thread:' . $id . ':user:' . $user->id;
     $headers = [];

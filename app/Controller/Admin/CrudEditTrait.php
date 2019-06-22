@@ -3,51 +3,52 @@
 namespace Imageboard\Controller\Admin;
 
 use GuzzleHttp\Psr7\Response;
-use Imageboard\Command\CommandDispatcher;
 use Imageboard\Exception\AccessDeniedException;
 use Imageboard\Service\RendererService;
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 
-trait CreateTrait {
+trait CrudEditTrait {
   abstract protected function checkAccess(ServerRequestInterface $request): bool;
 
-  abstract protected function getCreateCommand(): string;
+  abstract protected function editModel(array $data);
 
   abstract protected function getListUrl(): string;
 
-  abstract protected function getCreateUrl(): string;
+  abstract protected function getEditUrl(): string;
 
   abstract protected function getFormTemplate(): string;
 
-  abstract protected function getNewItem(): array;
-
-  abstract protected function getCommandDispatcher(): CommandDispatcher;
+  abstract protected function loadItem(int $id): array;
 
   abstract protected function getRenderer(): RendererService;
 
   /**
-   * Returns item create form.
+   * Returns item edit form.
    *
    * @param ServerRequestInterface $request
+   * @param array Path arguments.
    *
    * @return string Response HTML.
    *
    * @throws AccessDeniedException
    *   If current user is not an admin.
+   * @throws NotFoundException
+   *   If item with the specified ID is not found.
    */
-  function createForm(ServerRequestInterface $request): string
+  function editForm(ServerRequestInterface $request, array $args): string
   {
     if (!$this->checkAccess($request)) {
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 
     // Restore form data from a session.
-    $key = $this->getCreateUrl() . ':item';
-    $item = $_SESSION[$key] ?? $this->getNewItem();
+    $id = (int)($args['id'] ?? 0);
+    $key = $this->getEditUrl() . ':item';
+    $item = $_SESSION[$key] ?? $this->loadItem($id);
     unset($_SESSION[$key]);
 
     // Show error message from a session.
-    $key = $this->getCreateUrl() . ':error';
+    $key = $this->getEditUrl() . ':error';
     $error = $_SESSION[$key] ?? null;
     unset($_SESSION[$key]);
 
@@ -59,40 +60,40 @@ trait CreateTrait {
   }
 
   /**
-   * Creates new item from a form data.
+   * Updates item.
    *
    * @param ServerRequestInterface $request
+   * @param array Path arguments.
    *
-   * @return ResponseInterface
+   * @return ResponseInterface Response.
    *
    * @throws AccessDeniedException
    *   If current user is not an admin.
+   * @throws NotFoundException
+   *   If item with the specified ID is not found.
    */
-  function create(ServerRequestInterface $request): ResponseInterface
+  function edit(ServerRequestInterface $request, array $args): ResponseInterface
   {
     if (!$this->checkAccess($request)) {
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 
     $data = $request->getParsedBody();
-    $command_type = $this->getCreateCommand();
-    $command = new $command_type($data);
-    $command_dispatcher = $this->getCommandDispatcher();
-    $handler = $command_dispatcher->getHandler($command);
 
     try {
-      $handler->handle($command);
+      $this->editModel($data);
     } catch (Exception $exception) {
       // Store form data in a session.
-      $key = $this->getCreateUrl() . ':item';
+      $key = $this->getEditUrl() . ':item';
       $_SESSION[$key] = $data;
 
       // Store error message in a session.
-      $key = $this->getCreateUrl() . ':error';
+      $key = $this->getEditUrl() . ':error';
       $_SESSION[$key] = $exception->getMessage();
 
+      $id = (int)($args['id'] ?? 0);
       return new Response(302, [
-        'Location' => $this->getCreateUrl(),
+        'Location' => str_replace(':id', $id, $this->getEditUrl()),
       ]);
     }
 

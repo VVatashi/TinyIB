@@ -6,70 +6,39 @@ use GuzzleHttp\Psr7\ServerRequest;
 use Imageboard\Command\CommandDispatcher;
 use Imageboard\Controller\Admin\ModLogController;
 use Imageboard\Exception\AccessDeniedException;
-use Imageboard\Model\User;
 use Imageboard\Query\QueryDispatcher;
-use Imageboard\Repositories\ModLogRepository;
 use Imageboard\Service\{ConfigService, RendererService};
-use PHPUnit\Framework\TestCase;
+use Imageboard\Tests\Functional\TestWithUsers;
 
-final class ModLogControllerTest extends TestCase
+final class ModLogControllerTest extends TestWithUsers
 {
   /** @var ModLogController */
   protected $controller;
 
   function setUp() : void
   {
+    parent::setUp();
+
     global $container, $database;
 
     $connection = $database->getConnection();
     $builder = $connection->createQueryBuilder();
-    $builder->delete('mod_log');
-
-    User::truncate();
+    $builder->delete('mod_log')->execute();
+    $builder->delete('users')->execute();
 
     $config = new ConfigService();
     $command_dispatcher = new CommandDispatcher($container);
     $query_dispatcher = new QueryDispatcher($container);
-    $modlog_repository = new ModLogRepository($database);
 
     $renderer = new RendererService($config);
+
     $this->controller = new ModLogController(
       $config,
       $command_dispatcher,
       $query_dispatcher,
       $renderer,
-      $modlog_repository
+      $this->modlog_repository
     );
-  }
-
-  protected function createAnonymous(): User
-  {
-    global $container;
-
-    $user = User::anonymous();
-    $container->registerInstance(CurrentUserInterface::class, $user);
-
-    return $user;
-  }
-
-  protected function createUser(): User
-  {
-    global $container;
-
-    $user = User::createUser('user@example.com', 'user@example.com', User::ROLE_USER);
-    $container->registerInstance(CurrentUserInterface::class, $user);
-
-    return $user;
-  }
-
-  protected function createAdmin(): User
-  {
-    global $container;
-
-    $user = User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
-    $container->registerInstance(CurrentUserInterface::class, $user);
-
-    return $user;
   }
 
   function test_list_asAnonymous_shouldThrow() : void

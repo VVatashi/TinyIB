@@ -2,32 +2,57 @@
 
 namespace Imageboard\Controller\Admin;
 
-use Imageboard\Command\Admin\{CreateUser, EditUser, DeleteUser};
+use Imageboard\Command\CommandDispatcher;
 use Imageboard\Exception\NotFoundException;
-use Imageboard\Model\User;
-use Imageboard\Query\Admin\ListUsers;
+use Imageboard\Query\QueryDispatcher;
+use Imageboard\Repositories\Repository;
+use Imageboard\Service\{ConfigService, RendererService, UserService};
+use Imageboard\Repositories\UserRepository;
 
 class UserController extends AdminController
 {
-  use ListTrait;
-  use CreateTrait;
-  use EditTrait;
-  use DeleteTrait;
+  use CrudListTrait;
+  use CrudCreateTrait;
+  use CrudEditTrait;
+  use CrudDeleteTrait;
 
-  protected function getCreateCommand(): string {
-    return CreateUser::class;
+  /** @var UserRepository */
+  protected $repository;
+
+  /** @var UserService */
+  protected $service;
+
+  /**
+   * UserController constructor.
+   *
+   * @param ConfigService     $config
+   * @param CommandDispatcher $command_dispatcher
+   * @param QueryDispatcher   $query_dispatcher
+   * @param RendererService   $renderer
+   * @param UserRepository    $repository
+   * @param UserService       $service
+   */
+  function __construct(
+    ConfigService     $config,
+    CommandDispatcher $command_dispatcher,
+    QueryDispatcher   $query_dispatcher,
+    RendererService   $renderer,
+    UserRepository    $repository,
+    UserService       $service
+  ) {
+    parent::__construct(
+      $config,
+      $command_dispatcher,
+      $query_dispatcher,
+      $renderer
+    );
+
+    $this->repository = $repository;
+    $this->service = $service;
   }
 
-  protected function getEditCommand(): string {
-    return EditUser::class;
-  }
-
-  protected function getDeleteCommand(): string {
-    return DeleteUser::class;
-  }
-
-  protected function getListQuery(): string {
-    return ListUsers::class;
+  protected function getRepository(): Repository {
+    return $this->repository;
   }
 
   protected function getCreateUrl(): string {
@@ -69,8 +94,7 @@ class UserController extends AdminController
 
   protected function loadItem(int $id): array
   {
-    /** @var User $user */
-    $user = User::find($id);
+    $user = $this->repository->getById($id);
     if (!isset($user)) {
       throw new NotFoundException();
     }
@@ -81,5 +105,26 @@ class UserController extends AdminController
       'password'  => '',
       'role'      => $user->role,
     ];
+  }
+
+  protected function createModel(array $data) {
+    $email = $data['email'] ?? '';
+    $password = $data['password'] ?? '';
+    $role = $data['role'] ?? 0;
+
+    return $this->service->create($email, $password, $role);
+  }
+
+  protected function editModel(array $data) {
+    $id = (int)($data['id'] ?? 0);
+    $email = $data['email'] ?? '';
+    $password = $data['password'] ?? '';
+    $role = $data['role'] ?? 0;
+
+    return $this->service->edit($id, $email, $password, $role);
+  }
+
+  protected function deleteModel(int $id) {
+    return $this->service->delete($id);
   }
 }

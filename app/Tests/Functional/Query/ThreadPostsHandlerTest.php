@@ -4,6 +4,7 @@ namespace Imageboard\Tests\Functional\Query\Admin;
 
 use Imageboard\Model\Post;
 use Imageboard\Query\{ThreadPosts, ThreadPostsHandler};
+use Imageboard\Service\ConfigService;
 use PHPUnit\Framework\TestCase;
 
 final class ThreadPostsHandlerTest extends TestCase
@@ -13,9 +14,12 @@ final class ThreadPostsHandlerTest extends TestCase
 
   function setUp(): void
   {
-    global $container;
+    global $container, $database;
 
-    Post::truncate();
+    $connection = $database->getConnection();
+    $builder = $connection->createQueryBuilder();
+    $posts = ConfigService::getInstance()->get('DBPOSTS');
+    $builder->delete($posts)->execute();
 
     $pdo = $container->get(\PDO::class);
     $this->handler = new ThreadPostsHandler($pdo);

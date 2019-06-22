@@ -8,6 +8,7 @@ use Imageboard\Controller\Api\PostController;
 use Imageboard\Exception\NotFoundException;
 use Imageboard\Model\Post;
 use Imageboard\Query\QueryDispatcher;
+use Imageboard\Service\ConfigService;
 use PHPUnit\Framework\TestCase;
 
 final class PostControllerTest extends TestCase
@@ -20,12 +21,17 @@ final class PostControllerTest extends TestCase
     $this->markTestSkipped();
     return;
 
-    global $container;
+    global $container, $database;
 
-    Post::truncate();
+    $connection = $database->getConnection();
+    $builder = $connection->createQueryBuilder();
+    $config = new ConfigService();
+    $posts = $config->get('DBPOSTS', 'posts');
+    $builder->delete($posts)->execute();
 
     $command_dispatcher = new CommandDispatcher($container);
     $query_dispatcher = new QueryDispatcher($container);
+
     $this->controller = new PostController(
       $command_dispatcher,
       $query_dispatcher

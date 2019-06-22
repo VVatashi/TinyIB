@@ -19,7 +19,7 @@ class TokenService
     $this->repository = $repository;
   }
 
-  function createToken(int $user_id): Token
+  function create(int $user_id): Token
   {
     $token = base64_encode(random_bytes(12));
     $now = time();
@@ -55,6 +55,11 @@ class TokenService
    */
   function getByToken(string $token)
   {
-    return $this->repository->getByToken($token);
+    $token = $this->repository->getByToken($token);
+    if (isset($token) && $token->expires_at < time()) {
+      return null;
+    }
+
+    return $token;
   }
 }
