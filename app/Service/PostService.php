@@ -34,6 +34,9 @@ class PostService
   /** @var SankakuService */
   protected $sankaku;
 
+  /** @var WebmbotService */
+  protected $webmbot;
+
   /** @var ConfigService */
   protected $config;
 
@@ -51,6 +54,7 @@ class PostService
    * @param E621Service         $e621
    * @param SankakuService      $sankaku
    * @param GelbooruService     $gelbooru
+   * @param WebmbotService      $webmbot
    * @param ConfigService       $config
    * @param RendererService     $renderer
    */
@@ -63,6 +67,7 @@ class PostService
     E621Service $e621,
     SankakuService $sankaku,
     GelbooruService $gelbooru,
+    WebmbotService $webmbot,
     ConfigService $config,
     RendererService $renderer
   ) {
@@ -74,6 +79,7 @@ class PostService
     $this->e621 = $e621;
     $this->sankaku = $sankaku;
     $this->gelbooru = $gelbooru;
+    $this->webmbot = $webmbot;
     $this->config = $config;
     $this->renderer = $renderer;
   }
@@ -448,10 +454,11 @@ class PostService
 
     /** @var BooruService[] $booru */
     $booru = [
-      '#\[\s*safebooru\s*=\s*([^]]+)\]#' => $this->safebooru,
-      '#\[\s*e621\s*=\s*([^]]+)\]#'      => $this->e621,
-      '#\[\s*sankaku\s*=\s*([^]]+)\]#'   => $this->sankaku,
-      '#\[\s*gelbooru\s*=\s*([^]]+)\]#'  => $this->gelbooru,
+      '#\[\s*safebooru\s*=\s*([^]]+)\s*\]#' => $this->safebooru,
+      '#\[\s*e621\s*=\s*([^]]+)\s*\]#'      => $this->e621,
+      '#\[\s*sankaku\s*=\s*([^]]+)\s*\]#'   => $this->sankaku,
+      '#\[\s*gelbooru\s*=\s*([^]]+)\s*\]#'  => $this->gelbooru,
+      '#\[\s*webmbot\s*\]#'                 => $this->webmbot,
     ];
 
     foreach ($booru as $tag_pattern => $service) {
@@ -461,7 +468,8 @@ class PostService
         }
 
         // Try get & download a random image for the specified tags.
-        $url = $service->getRandomImageUrl($matches[1]);
+        $tags = $matches[1] ?? '';
+        $url = $service->getRandomImageUrl($tags);
         if (!isset($url)) {
           return '';
         }
@@ -469,13 +477,13 @@ class PostService
         $path = tempnam(sys_get_temp_dir(), '');
         unlink($path);
 
-      $options = [
-        'http' => [
-          'method' => 'GET',
-          'header' => 'User-Agent: lewd.site/1.0\r\n',
-        ]
-      ];
-      $context = stream_context_create($options);
+        $options = [
+          'http' => [
+            'method' => 'GET',
+            'header' => 'User-Agent: lewd.site/1.0\r\n',
+          ]
+        ];
+        $context = stream_context_create($options);
         $size = file_put_contents($path, file_get_contents($url, false, $context));
         if ($size === false) {
           return '';
