@@ -50,6 +50,7 @@ class PostService
    * @param SafebooruService    $safebooru
    * @param E621Service         $e621
    * @param SankakuService      $sankaku
+   * @param GelbooruService     $gelbooru
    * @param ConfigService       $config
    * @param RendererService     $renderer
    */
@@ -61,6 +62,7 @@ class PostService
     SafebooruService $safebooru,
     E621Service $e621,
     SankakuService $sankaku,
+    GelbooruService $gelbooru,
     ConfigService $config,
     RendererService $renderer
   ) {
@@ -71,6 +73,7 @@ class PostService
     $this->safebooru = $safebooru;
     $this->e621 = $e621;
     $this->sankaku = $sankaku;
+    $this->gelbooru = $gelbooru;
     $this->config = $config;
     $this->renderer = $renderer;
   }
@@ -445,9 +448,10 @@ class PostService
 
     /** @var BooruService[] $booru */
     $booru = [
-      '#\[safebooru=([^]]+)\]#' => $this->safebooru,
-      '#\[e621=([^]]+)\]#'      => $this->e621,
-      '#\[sankaku=([^]]+)\]#'   => $this->sankaku,
+      '#\[\s*safebooru\s*=\s*([^]]+)\]#' => $this->safebooru,
+      '#\[\s*e621\s*=\s*([^]]+)\]#'      => $this->e621,
+      '#\[\s*sankaku\s*=\s*([^]]+)\]#'   => $this->sankaku,
+      '#\[\s*gelbooru\s*=\s*([^]]+)\]#'  => $this->gelbooru,
     ];
 
     foreach ($booru as $tag_pattern => $service) {
