@@ -16,7 +16,8 @@ use Imageboard\Service\{
   ThumbnailService,
   RendererService,
   SankakuService,
-  GelbooruService
+  GelbooruService,
+  WebmbotService
 };
 
 final class CreatePostHandlerTest extends TestCase
@@ -41,6 +42,7 @@ final class CreatePostHandlerTest extends TestCase
     $e621 = new E621Service();
     $sankaku = new SankakuService();
     $gelbooru = new GelbooruService();
+    $webmbot = new WebmbotService();
     $renderer = new RendererService($config);
 
     $post = new PostService(
@@ -52,6 +54,7 @@ final class CreatePostHandlerTest extends TestCase
       $e621,
       $sankaku,
       $gelbooru,
+      $webmbot,
       $config,
       $renderer
     );
