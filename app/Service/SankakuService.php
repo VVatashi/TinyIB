@@ -9,8 +9,8 @@ class SankakuService implements BooruService
    */
   function getRandomImageUrl(string $tags)
   {
-    $tags = urlencode($tags . ' order:random');
-    $url = "https://capi-beta.sankakucomplex.com/post/index.json?limit=1&tags=" . $tags;
+    $tags = urlencode("order:random $tags");
+    $url = "https://capi-v2.sankakucomplex.com/posts?lang=english&page=1&limit=1&tags=" . $tags;
     $client = new \GuzzleHttp\Client();
     $response = $client->request('GET', $url, [
       'headers' => [

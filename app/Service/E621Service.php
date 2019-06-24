@@ -18,7 +18,7 @@ class E621Service implements BooruService
    */
   protected function loadRandomImageUrls(string $tags, int $count)
   {
-    $tags = urlencode($tags . ' order:random');
+    $tags = urlencode("order:random $tags");
     $url = "https://e621.net/post/index.json?tags=$tags&limit=$count";
     $client = new \GuzzleHttp\Client();
     $response = $client->request('GET', $url, [
