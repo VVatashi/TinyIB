@@ -447,6 +447,10 @@ class PostService
     $post->ip = $ip;
     $post->user_id = $user_id;
 
+    $now = time();
+    $post->created_at = $now;
+    $post->updated_at = $now;
+
     $nameAndTripcode = $this->processName($name);
     $post->name = $this->cleanString(substr($nameAndTripcode['name'], 0, 75));
     $post->tripcode = $nameAndTripcode['tripcode'];
