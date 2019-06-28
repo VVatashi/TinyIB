@@ -25,7 +25,7 @@ class RendererService
 
     $this->twig = new Environment($loader, [
       'autoescape' => false,
-      'cache' => $this->config->get('TWIG_CACHE'),
+      'cache' => $this->config->get('TWIG_CACHE') ? __DIR__ . '/../../storage/twig-cache' : false,
       'debug' => true,
     ]);
 
