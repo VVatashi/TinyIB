@@ -44,7 +44,8 @@ $commands['help'] = function() use ($color) {
   $write_command("serve", "Start PHP web server", 4);
   $write_command("migration:list", "Show all migrations status", 3);
   $write_command("migration:migrate <name>", "Apply migration by name", 1);
-  $write_command("migration:apply","Apply migrations", 2);
+  $write_command("migration:revert  <name>", "Revert migration by name", 1);
+  $write_command("migration:apply", "Apply migrations", 2);
 };
 
 $commands['migration:list'] = function (array $args) use ($color) {
