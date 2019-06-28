@@ -21,25 +21,18 @@ class DatabaseService
   }
 
   /**
-   * @param null|PDO $existing_pdo
-   *
    * @return Connection
    */
-  function getConnection($existing_pdo = null)
+  function getConnection()
   {
     if (!isset($this->connection)) {
       $params = [
+        'driver'   => 'pdo_' . $this->config->get('DBDRIVER'),
         'host'     => $this->config->get('DBHOST'),
         'dbname'   => $this->config->get('DBNAME'),
         'user'     => $this->config->get('DBUSERNAME'),
         'password' => $this->config->get('DBPASSWORD'),
       ];
-
-      if (isset($existing_pdo)) {
-        $params['pdo'] = $existing_pdo;
-      } else {
-        $params['driver'] = 'pdo_' . $this->config->get('DBDRIVER');
-      }
 
       $config = new Configuration();
       $this->connection = DriverManager::getConnection($params, $config);

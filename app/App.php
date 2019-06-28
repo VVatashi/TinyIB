@@ -3,7 +3,6 @@
 namespace Imageboard;
 
 use GuzzleHttp\Psr7\{ServerRequest, Response};
-use Illuminate\Database\Capsule\Manager as Capsule;
 use Imageboard\Cache\{CacheInterface, NoCache, RedisCache};
 use Imageboard\Middleware\{
   AuthMiddleware,
@@ -155,30 +154,6 @@ EOF;
       // Disable cache.
       $this->container->registerType(CacheInterface::class, NoCache::class);
     }
-
-    // Create database connection and ORM.
-    $capsule = new Capsule();
-
-    $capsule->addConnection([
-      'driver'    => $this->config->get('DBDRIVER'),
-      'host'      => $this->config->get('DBHOST'),
-      'database'  => $this->database->getFullPath(),
-      'username'  => $this->config->get('DBUSERNAME'),
-      'password'  => $this->config->get('DBPASSWORD'),
-      'charset'   => 'utf8',
-      'collation' => 'utf8_unicode_ci',
-      'prefix'    => '',
-    ]);
-    $capsule->setAsGlobal();
-    $capsule->bootEloquent();
-    $this->container->registerInstance(Capsule::class, $capsule);
-
-    $pdo = $capsule->getConnection()->getReadPdo();
-    $this->container->registerInstance(\PDO::class, $pdo);
-
-    // Set PDO.
-    /** @todo Refactor later to not modify connection on get */
-    $this->database->getConnection($pdo);
 
     // Register services in the IoC-container by conventions.
     $directories = [
