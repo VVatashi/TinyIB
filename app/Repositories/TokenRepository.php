@@ -2,6 +2,7 @@
 
 namespace Imageboard\Repositories;
 
+use Doctrine\DBAL\Query\QueryBuilder;
 use Imageboard\Model\Token;
 use Imageboard\Service\DatabaseService;
 
@@ -52,16 +53,10 @@ class TokenRepository implements Repository
     return $token;
   }
 
-  /**
-   * @param string $token
-   *
-   * @return null|Token
-   */
-  function getByToken(string $token)
-  {
+  protected function getBaseQuery(): QueryBuilder {
     $connection = $this->database->getConnection();
     $builder = $connection->createQueryBuilder();
-    $query = $builder->select(
+    return $builder->select(
       't.id',
       't.created_at',
       't.updated_at',
@@ -69,8 +64,19 @@ class TokenRepository implements Repository
       't.token',
       't.user_id'
       )
-      ->from(static::TABLE, 't')
-      ->where('t.token = ' . $builder->createNamedParameter($token));
+      ->from(static::TABLE, 't');
+  }
+
+  /**
+   * @param string $token
+   *
+   * @return null|Token
+   */
+  function getByToken(string $token)
+  {
+    $query = $this->getBaseQuery();
+    $query = $query->where('t.token = ' . $query->createNamedParameter($token));
+
     $row = $query->execute()->fetch();
     if ($row === false) {
       return null;

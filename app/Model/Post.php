@@ -2,132 +2,329 @@
 
 namespace Imageboard\Model;
 
-use Illuminate\Database\Eloquent\{Collection, Model, SoftDeletes};
-use Imageboard\ConfigTrait;
+use Imageboard\Exception\ValidationException;
 use Imageboard\Service\ConfigService;
 use VVatashi\BBCode\{Parser, TagDef};
 
 /**
- * @property int    $id
- * @property int    $created_at
- * @property int    $updated_at
- * @property int    $deleted_at
- * @property int    $parent_id
- * @property int    $bumped_at
- * @property string $ip
- * @property int    $user_id
- * @property string $name
- * @property string $tripcode
- * @property string $email
- * @property string $subject
- * @property string $message
- * @property string $password
- * @property string $file
- * @property string $file_hex
- * @property string $file_original
- * @property int    $file_size
- * @property int    $image_width
- * @property int    $image_height
- * @property string $thumb
- * @property int    $thumb_width
- * @property int    $thumb_height
- * @property bool   $stickied
- * @property bool   $moderated
- * @method static where(array $array)
+ * @property-read int    $id
+ * @property-read int    $created_at
+ * @property-read int    $updated_at
+ * @property-read int    $deleted_at
+ * @property-read int    $parent_id
+ * @property-read int    $bumped_at
+ * @property-read string $ip
+ * @property-read int    $user_id
+ * @property-read string $name
+ * @property-read string $tripcode
+ * @property-read string $subject
+ * @property-read string $message
+ * @property-read string $file
+ * @property-read string $file_hex
+ * @property-read string $file_original
+ * @property-read int    $file_size
+ * @property-read int    $image_width
+ * @property-read int    $image_height
+ * @property-read string $thumb
+ * @property-read int    $thumb_width
+ * @property-read int    $thumb_height
  */
 class Post extends Model
 {
-  use SoftDeletes;
-  use ConfigTrait;
-
-  protected $table;
-
-  protected $fillable = [
-    'parent_id',
-    'bumped_at',
-    'ip',
-    'user_id',
-    'name',
-    'tripcode',
-    'email',
-    'subject',
-    'message',
-    'password',
-    'file',
-    'file_hex',
-    'file_original',
-    'file_size',
-    'image_width',
-    'image_height',
-    'thumb',
-    'thumb_width',
-    'thumb_height',
-    'stickied',
-    'moderated',
-  ];
-
-  protected $dates = [
-    'created_at',
-    'updated_at',
-    'deleted_at',
-    'bumped_at',
-  ];
-
-  protected $dateFormat = 'U';
-
   /**
    * Post constructor.
    *
    * @param array $attributes
-   *
-   * @throws \Imageboard\Exception\ConfigServiceException
+   * @param bool  $validate
    */
-  public function __construct (array $attributes = [])
+  public function __construct(array $attributes = [], bool $validate = true)
   {
     parent::__construct($attributes);
 
-    $this->table = $this->config('DBPOSTS');
-  }
-
-  function replies()
-  {
-    return $this->hasMany(static::class, 'parent_id');
-  }
-
-  function thread()
-  {
-    return $this->belongsTo(static::class, 'parent_id');
-  }
-
-  function getImageWidth()
-  {
-    return $this->image_width;
-  }
-
-  function getImageHeight()
-  {
-    return $this->image_height;
-  }
-
-  function getThumbWidth()
-  {
-    return $this->thumb_width;
-  }
-
-  function getThumbHeight()
-  {
-    return $this->thumb_height;
+    if ($validate) {
+      $this->setId($attributes['id'] ?? null);
+      $this->setCreatedAt($attributes['created_at'] ?? 0);
+      $this->setUpdatedAt($attributes['updated_at'] ?? 0);
+      $this->setDeletedAt($attributes['deleted_at'] ?? null);
+      $this->setParentId($attributes['parent_id'] ?? 0);
+      $this->setBumpedAt($attributes['bumped_at'] ?? 0);
+      $this->setIp($attributes['ip'] ?? '');
+      $this->setUserId($attributes['user_id'] ?? 0);
+      $this->setName($attributes['name'] ?? '');
+      $this->setTripcode($attributes['tripcode'] ?? '');
+      $this->setSubject($attributes['subject'] ?? '');
+      $this->setMessage($attributes['message'] ?? '');
+      $this->setFile($attributes['file'] ?? '');
+      $this->setFileHex($attributes['file_hex'] ?? '');
+      $this->setFileOriginal($attributes['file_original'] ?? '');
+      $this->setFileSize($attributes['file_size'] ?? 0);
+      $this->setImageWidth($attributes['image_width'] ?? 0);
+      $this->setImageHeight($attributes['image_height'] ?? 0);
+      $this->setThumb($attributes['thumb'] ?? '');
+      $this->setThumbWidth($attributes['thumb_width'] ?? 0);
+      $this->setThumbHeight($attributes['thumb_height'] ?? 0);
+    }
   }
 
   /**
-   * Checks if post instance is not saved to the database.
+   * @param null|int $id
    *
-   * @return bool
-   *   Post atatus.
+   * @return Post
+   *
+   * @throws ValidationException
    */
-  function isNew(): bool
+  function setId($id): self
   {
-    return $this->id === 0;
+    if (isset($id) && $id <= 0) {
+      throw new ValidationException('ID should be NULL or positive integer');
+    }
+
+    $this->id = $id;
+    return $this;
+  }
+
+  /**
+   * @param int $created_at
+   *
+   * @return Post
+   *
+   * @throws ValidationException
+   */
+  function setCreatedAt(int $created_at): self
+  {
+    if ($created_at < 0) {
+      throw new ValidationException('Created at should not be less than zero');
+    }
+
+    $this->created_at = $created_at;
+    return $this;
+  }
+
+  /**
+   * @param int $updated_at
+   *
+   * @return Post
+   *
+   * @throws ValidationException
+   */
+  function setUpdatedAt(int $updated_at): self
+  {
+    if ($updated_at < 0) {
+      throw new ValidationException('Updated at should not be less than zero');
+    }
+
+    $this->updated_at = $updated_at;
+    return $this;
+  }
+
+  /**
+   * @param null|int $deleted_at
+   *
+   * @return Post
+   *
+   * @throws ValidationException
+   */
+  function setDeletedAt($deleted_at): self
+  {
+    if (isset($deleted_at) && $deleted_at <= 0) {
+      throw new ValidationException('Deleted at should be NULL or positive integer');
+    }
+
+    $this->deleted_at = $deleted_at;
+    return $this;
+  }
+
+  /**
+   * @param int $parent_id
+   *
+   * @return Post
+   */
+  function setParentId(int $parent_id): self
+  {
+    $this->parent_id = $parent_id;
+    return $this;
+  }
+
+  /**
+   * @param int $bumped_at
+   *
+   * @return Post
+   *
+   * @throws ValidationException
+   */
+  function setBumpedAt(int $bumped_at): self
+  {
+    if ($bumped_at < 0) {
+      throw new ValidationException('Bumped at should not be less than zero');
+    }
+
+    $this->bumped_at = $bumped_at;
+    return $this;
+  }
+
+  /**
+   * @param string $ip
+   *
+   * @return Post
+   */
+  function setIp(string $ip): self
+  {
+    $this->ip = $ip;
+    return $this;
+  }
+
+  /**
+   * @param int $user_id
+   *
+   * @return Post
+   */
+  function setUserId(int $user_id): self
+  {
+    $this->user_id = $user_id;
+    return $this;
+  }
+
+  /**
+   * @param string $name
+   *
+   * @return Post
+   */
+  function setName(string $name): self
+  {
+    $this->name = $name;
+    return $this;
+  }
+
+  /**
+   * @param string $tripcode
+   *
+   * @return Post
+   */
+  function setTripcode(string $tripcode): self
+  {
+    $this->tripcode = $tripcode;
+    return $this;
+  }
+
+  /**
+   * @param string $subject
+   *
+   * @return Post
+   */
+  function setSubject(string $subject): self
+  {
+    $this->subject = $subject;
+    return $this;
+  }
+
+  /**
+   * @param string $message
+   *
+   * @return Post
+   */
+  function setMessage(string $message): self
+  {
+    $this->message = $message;
+    return $this;
+  }
+
+  /**
+   * @param string $file
+   *
+   * @return Post
+   */
+  function setFile(string $file): self
+  {
+    $this->file = $file;
+    return $this;
+  }
+
+  /**
+   * @param string $file_hex
+   *
+   * @return Post
+   */
+  function setFileHex(string $file_hex): self
+  {
+    $this->file_hex = $file_hex;
+    return $this;
+  }
+
+  /**
+   * @param string $password
+   *
+   * @return Post
+   */
+  function setFileOriginal(string $file_original): self
+  {
+    $this->file_original = $file_original;
+    return $this;
+  }
+
+  /**
+   * @param int $file_size
+   *
+   * @return Post
+   */
+  function setFileSize(int $file_size): self
+  {
+    $this->file_size = $file_size;
+    return $this;
+  }
+
+  /**
+   * @param int $image_width
+   *
+   * @return Post
+   */
+  function setImageWidth(int $image_width): self
+  {
+    $this->image_width = $image_width;
+    return $this;
+  }
+
+  /**
+   * @param int $image_height
+   *
+   * @return Post
+   */
+  function setImageHeight(int $image_height): self
+  {
+    $this->image_height = $image_height;
+    return $this;
+  }
+
+  /**
+   * @param string $thumb
+   *
+   * @return Post
+   */
+  function setThumb(string $thumb): self
+  {
+    $this->thumb = $thumb;
+    return $this;
+  }
+
+  /**
+   * @param int $thumb_width
+   *
+   * @return Post
+   */
+  function setThumbWidth(int $thumb_width): self
+  {
+    $this->thumb_width = $thumb_width;
+    return $this;
+  }
+
+  /**
+   * @param int $thumb_height
+   *
+   * @return Post
+   */
+  function setThumbHeight(int $thumb_height): self
+  {
+    $this->thumb_height = $thumb_height;
+    return $this;
   }
 
   /**
@@ -153,28 +350,6 @@ class Post extends Model
   }
 
   /**
-   * Returns create time of the post.
-   *
-   * @return int
-   *   The create time of the post.
-   */
-  function getCreatedTimestamp(): int
-  {
-    return $this->created_at->getTimestamp();
-  }
-
-  /**
-   * Returns bump time of the post.
-   *
-   * @return int
-   *   The bump time of the post.
-   */
-  function getBumpedTimestamp(): int
-  {
-    return $this->bumped_at->getTimestamp();
-  }
-
-  /**
    * Returns the size of the file attached to the post.
    *
    * @return string
@@ -191,28 +366,6 @@ class Post extends Model
     $size = round($size, 2, PHP_ROUND_HALF_DOWN);
     $unit = $units[$i];
     return "$size&nbsp;$unit";
-  }
-
-  /**
-   * Checks if post is sticky.
-   *
-   * @return bool
-   *   Is post sticky.
-   */
-  function isSticky(): bool
-  {
-    return $this->stickied === true;
-  }
-
-  /**
-   * Returns the moderation status of the post.
-   *
-   * @return bool
-   *   Is post moderated.
-   */
-  function isModerated(): bool
-  {
-    return $this->moderated === true;
   }
 
   /**
@@ -278,9 +431,9 @@ class Post extends Model
     // Convert Wakabamark to BBCodes.
     $patterns = [
       '/\*\*(.*?)\*\*/si' => '[b]\\1[/b]',
-      '/\*(.*?)\*/si' => '[i]\\1[/i]',
-      '/~~(.*?)~~/si' => '[s]\\1[/s]',
-      '/%%(.*?)%%/si' => '[spoiler]\\1[/spoiler]',
+      '/\*(.*?)\*/si'     => '[i]\\1[/i]',
+      '/~~(.*?)~~/si'     => '[s]\\1[/s]',
+      '/%%(.*?)%%/si'     => '[spoiler]\\1[/spoiler]',
     ];
 
     $flags = PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE;
@@ -326,214 +479,5 @@ class Post extends Model
     $message = $parser->parse($message);
 
     return static::fixLinks($message);
-  }
-
-  /**
-   * Returns the thread count.
-   *
-   * @return int
-   */
-  static function getThreadCount(): int
-  {
-    return Post::where([
-      ['parent_id', 0],
-      ['moderated', true],
-    ])
-      ->count();
-  }
-
-  /**
-   * Returns threads by a board page.
-   *
-   * @param int $page
-   *
-   * @return Collection
-   * @throws \Imageboard\Exception\ConfigServiceException
-   */
-  static function getThreadsByPage(int $page): Collection
-  {
-    $threads_per_page = (int)ConfigService::getInstance()->get("THREADSPERPAGE");
-    $skip = $page * $threads_per_page;
-    $take = $threads_per_page;
-
-    return Post::where([
-      ['parent_id', 0],
-      ['moderated', true],
-    ])
-      ->orderBy('stickied', 'desc')
-      ->orderBy('bumped_at', 'desc')
-      ->skip($skip)
-      ->take($take)
-      ->get();
-  }
-
-  /**
-   * Returns the thread reply count by thread ID.
-   *
-   * @param int $id
-   *   Thread ID.
-   *
-   * @return int
-   */
-  static function getReplyCountByThreadID(int $id): int
-  {
-    return Post::where([
-      ['parent_id', $id],
-      ['moderated', true],
-    ])
-      ->count();
-  }
-
-  /**
-   * Returns posts by thread ID.
-   *
-   * @param int $id
-   *   Thread ID.
-   * @param bool $moderated_only
-   *
-   * @return Collection
-   */
-  static function getPostsByThreadID(
-    int $id,
-    bool $moderated_only = true,
-    $take = null,
-    $skip = 0
-  ): Collection {
-    $query = Post::where(function ($query) use ($id) {
-      $query->where('id', $id);
-      $query->orWhere('parent_id', $id);
-    })
-      ->orderBy('id', 'desc');
-
-    if ($moderated_only) {
-      $query = $query->where('moderated', true);
-    }
-
-    if (isset($take)) {
-      $query->skip($skip)->take($take);
-    }
-
-    return $query->get()->reverse();
-  }
-
-  /**
-   * Returns posts by the hash of the attached file.
-   *
-   * @param string $hash
-   *
-   * @return Collection
-   */
-  static function getPostsByHex(string $hash): Collection
-  {
-    return Post::where([
-      ['file_hex', $hash],
-      ['moderated', true],
-    ])->get();
-  }
-
-  /**
-   * Returns latest posts.
-   *
-   * @param bool $moderated
-   *
-   * @return Collection
-   */
-  static function getLatestPosts(bool $moderated = true): Collection
-  {
-    $count = 10;
-
-    return Post::where('moderated', $moderated)
-      ->orderBy('created_at', 'desc')
-      ->take($count)
-      ->get();
-  }
-
-  /**
-   * Deletes image & thumbnail of the post.
-   *
-   * @param Post $post
-   */
-  function deletePostImages()
-  {
-    // TODO: Exception handling & logging.
-
-    if (!empty($this->file)) {
-      $path = 'src/' . $this->file;
-      if (file_exists($path)) {
-        unlink($path);
-      }
-    }
-
-    if (!empty($this->thumb)) {
-      $path = 'thumb/' . $this->thumb;
-      if (file_exists($path)) {
-        unlink($path);
-      }
-    }
-  }
-
-  /**
-   * Deletes a post.
-   *
-   * @param Post $post
-   */
-  static function deletePost(Post $post)
-  {
-    static::deletePostByID($post->id);
-  }
-
-  /**
-   * Deletes a post by ID.
-   *
-   * @param int $id
-   *   Post ID.
-   */
-  static function deletePostByID(int $id)
-  {
-    $posts = static::getPostsByThreadID($id, false);
-
-    foreach ($posts as $post) {
-      $post->deletePostImages();
-      $post->delete();
-    }
-  }
-
-  /**
-   * Removes old threads.
-   *
-   * @throws \Imageboard\Exception\ConfigServiceException
-   */
-  static function trimThreads()
-  {
-    $limit = (int)ConfigService::getInstance()->get('MAXTHREADS');
-
-    if ($limit > 0) {
-      /** @var Post[] */
-      $threads = Post::where([
-        ['parent_id', 0],
-        ['moderated', true],
-      ])
-        ->orderBy('stickied', 'desc')
-        ->orderBy('bumped_at', 'desc')
-        ->skip($limit)
-        ->take(100)
-        ->get();
-
-      foreach ($threads as $thread) {
-        static::deletePostByID($thread->id);
-      }
-    }
-  }
-
-  /**
-   * Returns the last post by the poster IP.
-   *
-   * @return null|Post
-   */
-  static function getLastPostByIP(string $ip)
-  {
-    return Post::where('ip', $ip)
-      ->orderBy('id', 'desc')
-      ->first();
   }
 }

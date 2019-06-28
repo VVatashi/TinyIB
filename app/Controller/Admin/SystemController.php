@@ -3,11 +3,17 @@
 namespace Imageboard\Controller\Admin;
 
 use GuzzleHttp\Psr7\Response;
-use Imageboard\Command\CommandDispatcher;
 use Imageboard\Exception\AccessDeniedException;
-use Imageboard\Query\QueryDispatcher;
-use Imageboard\Service\{ConfigService, SystemService, RendererService};
-use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
+use Imageboard\Service\{
+  ConfigService,
+  SystemService,
+  UserService,
+  RendererService
+};
+use Psr\Http\Message\{
+  ServerRequestInterface,
+  ResponseInterface
+};
 
 class SystemController extends AdminController
 {
@@ -15,16 +21,14 @@ class SystemController extends AdminController
   protected $service;
 
   function __construct(
-    ConfigService $config,
-    CommandDispatcher $command_dispatcher,
-    QueryDispatcher $query_dispatcher,
-    SystemService $service,
+    ConfigService   $config,
+    SystemService   $service,
+    UserService     $user_service,
     RendererService $renderer
   ) {
     parent::__construct(
       $config,
-      $command_dispatcher,
-      $query_dispatcher,
+      $user_service,
       $renderer
     );
 

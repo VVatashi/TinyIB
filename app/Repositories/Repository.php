@@ -2,6 +2,4 @@
 
 namespace Imageboard\Repositories;
 
-interface Repository
-{
-}
+interface Repository { }

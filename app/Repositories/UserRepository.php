@@ -2,10 +2,11 @@
 
 namespace Imageboard\Repositories;
 
+use Doctrine\DBAL\Query\QueryBuilder;
 use Imageboard\Model\User;
 use Imageboard\Service\DatabaseService;
 
-class UserRepository implements Repository
+class UserRepository implements CrudRepository
 {
   const TABLE = 'users';
 
@@ -86,14 +87,10 @@ class UserRepository implements Repository
     return (int)$query->execute()->fetchColumn();
   }
 
-  /**
-   * @return User[]
-   */
-  function getAll(int $date_from = 0, int $date_to = (1 << 31) - 1, $skip = null, $take = null): array
-  {
+  protected function getBaseQuery(): QueryBuilder {
     $connection = $this->database->getConnection();
     $builder = $connection->createQueryBuilder();
-    $query = $builder->select(
+    return $builder->select(
       'u.id',
       'u.created_at',
       'u.updated_at',
@@ -102,10 +99,18 @@ class UserRepository implements Repository
       'u.password_hash',
       'u.role'
       )
-      ->from(static::TABLE, 'u')
-      ->where('u.deleted_at IS NULL')
-      ->andWhere('u.created_at >= ' . $builder->createNamedParameter($date_from))
-      ->andWhere('u.created_at < ' . $builder->createNamedParameter($date_to))
+      ->from(static::TABLE, 'u');
+  }
+
+  /**
+   * @return User[]
+   */
+  function getAll(int $date_from = 0, int $date_to = (1 << 31) - 1, $skip = null, $take = null): array
+  {
+    $query = $this->getBaseQuery();
+    $query = $query->where('u.deleted_at IS NULL')
+      ->andWhere('u.created_at >= ' . $query->createNamedParameter($date_from))
+      ->andWhere('u.created_at < ' . $query->createNamedParameter($date_to))
       ->orderBy('u.id', 'desc');
 
     if (isset($skip)) {
@@ -127,20 +132,10 @@ class UserRepository implements Repository
    */
   function getById(int $id)
   {
-    $connection = $this->database->getConnection();
-    $builder = $connection->createQueryBuilder();
-    $query = $builder->select(
-      'u.id',
-      'u.created_at',
-      'u.updated_at',
-      'u.deleted_at',
-      'u.email',
-      'u.password_hash',
-      'u.role'
-      )
-      ->from(static::TABLE, 'u')
-      ->where('u.deleted_at IS NULL')
-      ->andWhere('u.id = ' . $builder->createNamedParameter($id));
+    $query = $this->getBaseQuery();
+    $query = $query->where('u.deleted_at IS NULL')
+      ->andWhere('u.id = ' . $query->createNamedParameter($id));
+
     $row = $query->execute()->fetch();
     if ($row === false) {
       return null;
@@ -156,20 +151,10 @@ class UserRepository implements Repository
    */
   function getByEmail(string $email)
   {
-    $connection = $this->database->getConnection();
-    $builder = $connection->createQueryBuilder();
-    $query = $builder->select(
-      'u.id',
-      'u.created_at',
-      'u.updated_at',
-      'u.deleted_at',
-      'u.email',
-      'u.password_hash',
-      'u.role'
-      )
-      ->from(static::TABLE, 'u')
-      ->where('u.deleted_at IS NULL')
-      ->andWhere('u.email = ' . $builder->createNamedParameter($email));
+    $query = $this->getBaseQuery();
+    $query = $query->where('u.deleted_at IS NULL')
+      ->andWhere('u.email = ' . $query->createNamedParameter($email));
+
     $row = $query->execute()->fetch();
     if ($row === false) {
       return null;

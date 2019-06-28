@@ -2,23 +2,21 @@
 
 namespace Imageboard\Controller\Admin;
 
-use Imageboard\Command\CommandDispatcher;
 use Imageboard\Controller\ControllerInterface;
 use Imageboard\Model\User;
-use Imageboard\Query\QueryDispatcher;
-use Imageboard\Service\{ConfigService, RendererService};
-use Psr\Http\Message\ServerRequestInterface;
+use Imageboard\Service\{
+  ConfigService,
+  UserService,
+  RendererService
+};
 
 abstract class AdminController implements ControllerInterface
 {
   /** @var ConfigService */
   protected $config;
 
-  /** @var CommandDispatcher */
-  protected $command_dispatcher;
-
-  /** @var QueryDispatcher */
-  protected $query_dispatcher;
+  /** @var UserService */
+  protected $user_service;
 
   /** @var RendererService */
   protected $renderer;
@@ -31,21 +29,18 @@ abstract class AdminController implements ControllerInterface
    *
    * Creates a new CRUD controller instance.
    *
-   * @param ConfigService     $config
-   * @param CommandDispatcher $command_dispatcher
-   * @param QueryDispatcher   $query_dispatcher
-   * @param RendererService   $renderer
+   * @param ConfigService   $config
+   * @param UserService     $user_service
+   * @param RendererService $renderer
    */
   function __construct(
-    ConfigService $config,
-    CommandDispatcher $command_dispatcher,
-    QueryDispatcher $query_dispatcher,
+    ConfigService   $config,
+    UserService     $user_service,
     RendererService $renderer
   ) {
-    $this->config             = $config;
-    $this->command_dispatcher = $command_dispatcher;
-    $this->query_dispatcher   = $query_dispatcher;
-    $this->renderer           = $renderer;
+    $this->config       = $config;
+    $this->user_service = $user_service;
+    $this->renderer     = $renderer;
 
     $this->base_path = $this->config->get('BASE_PATH', '');
   }
@@ -53,23 +48,12 @@ abstract class AdminController implements ControllerInterface
   /**
    * Checks user access.
    *
-   * @param ServerRequestInterface $request
-   *
    * @return bool
    */
-  protected function checkAccess(ServerRequestInterface $request): bool
-  {
+  protected function checkAccess(): bool {
     /** @var User $current_user */
-    $current_user = $request->getAttribute('user');
+    $current_user = $this->user_service->getCurrentUser();
     return $current_user->isMod();
-  }
-
-  protected function getCommandDispatcher(): CommandDispatcher {
-    return $this->command_dispatcher;
-  }
-
-  protected function getQueryDispatcher(): QueryDispatcher {
-    return $this->query_dispatcher;
   }
 
   protected function getRenderer(): RendererService {

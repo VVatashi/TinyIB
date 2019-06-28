@@ -2,19 +2,28 @@
 
 namespace Imageboard\Repositories;
 
+use Doctrine\DBAL\Query\QueryBuilder;
 use Imageboard\Model\Ban;
-use Imageboard\Service\DatabaseService;
+use Imageboard\Service\{ConfigService, DatabaseService};
 
-class BanRepository implements Repository
+class BanRepository implements CrudRepository
 {
-  const TABLE = 'bans';
+  /** @var ConfigService */
+  protected $config;
 
   /** @var DatabaseService */
   protected $database;
 
-  function __construct(DatabaseService $database)
-  {
+  /** @var string */
+  protected $table;
+
+  function __construct(
+    ConfigService $config,
+    DatabaseService $database
+  ) {
+    $this->config = $config;
     $this->database = $database;
+    $this->table = $config->get('DBBANS', 'bans');
   }
 
   protected function mapToModel(array $row): Ban
@@ -26,7 +35,7 @@ class BanRepository implements Repository
   {
     $connection = $this->database->getConnection();
     $builder = $connection->createQueryBuilder();
-    $builder->insert(static::TABLE)
+    $builder->insert($this->table)
       ->values([
         'created_at' => $builder->createNamedParameter($ban->created_at),
         'updated_at' => $builder->createNamedParameter($ban->updated_at),
@@ -45,7 +54,7 @@ class BanRepository implements Repository
   {
     $connection = $this->database->getConnection();
     $builder = $connection->createQueryBuilder();
-    $builder->delete(static::TABLE)
+    $builder->delete($this->table)
       ->where('id = ' . $builder->createNamedParameter($ban->id))
       ->execute();
 
@@ -61,7 +70,7 @@ class BanRepository implements Repository
     $connection = $this->database->getConnection();
     $builder = $connection->createQueryBuilder();
     $query = $builder->select('COUNT(b.id)')
-      ->from(static::TABLE, 'b')
+      ->from($this->table, 'b')
       ->where('b.deleted_at IS NULL')
       ->andWhere('b.created_at >= ' . $builder->createNamedParameter($date_from))
       ->andWhere('b.created_at < ' . $builder->createNamedParameter($date_to));
@@ -69,14 +78,10 @@ class BanRepository implements Repository
     return (int)$query->execute()->fetchColumn();
   }
 
-  /**
-   * @return Ban[]
-   */
-  function getAll(int $date_from = 0, int $date_to = (1 << 31) - 1, $skip = null, $take = null): array
-  {
+  protected function getBaseQuery(): QueryBuilder {
     $connection = $this->database->getConnection();
     $builder = $connection->createQueryBuilder();
-    $query = $builder->select(
+    return $builder->select(
       'b.id',
       'b.created_at',
       'b.updated_at',
@@ -84,10 +89,18 @@ class BanRepository implements Repository
       'b.ip',
       'b.reason'
       )
-      ->from(static::TABLE, 'b')
-      ->where('b.deleted_at IS NULL')
-      ->andWhere('b.created_at >= ' . $builder->createNamedParameter($date_from))
-      ->andWhere('b.created_at < ' . $builder->createNamedParameter($date_to))
+      ->from($this->table, 'b');
+  }
+
+  /**
+   * @return Ban[]
+   */
+  function getAll(int $date_from = 0, int $date_to = (1 << 31) - 1, $skip = null, $take = null): array
+  {
+    $query = $this->getBaseQuery();
+    $query = $query->where('b.deleted_at IS NULL')
+      ->andWhere('b.created_at >= ' . $query->createNamedParameter($date_from))
+      ->andWhere('b.created_at < ' . $query->createNamedParameter($date_to))
       ->orderBy('b.id', 'desc');
 
     if (isset($skip)) {
@@ -109,19 +122,10 @@ class BanRepository implements Repository
    */
   function getById(int $id)
   {
-    $connection = $this->database->getConnection();
-    $builder = $connection->createQueryBuilder();
-    $query = $builder->select(
-      'b.id',
-      'b.created_at',
-      'b.updated_at',
-      'b.expires_at',
-      'b.ip',
-      'b.reason'
-      )
-      ->from(static::TABLE, 'b')
-      ->where('b.deleted_at IS NULL')
-      ->andWhere('b.id = ' . $builder->createNamedParameter($id));
+    $query = $this->getBaseQuery();
+    $query = $query->where('b.deleted_at IS NULL')
+      ->andWhere('b.id = ' . $query->createNamedParameter($id));
+
     $row = $query->execute()->fetch();
     if ($row === false) {
       return null;
@@ -137,19 +141,10 @@ class BanRepository implements Repository
    */
   function getByIp(string $ip)
   {
-    $connection = $this->database->getConnection();
-    $builder = $connection->createQueryBuilder();
-    $query = $builder->select(
-      'b.id',
-      'b.created_at',
-      'b.updated_at',
-      'b.expires_at',
-      'b.ip',
-      'b.reason'
-      )
-      ->from(static::TABLE, 'b')
-      ->where('b.deleted_at IS NULL')
-      ->andWhere('b.ip = ' . $builder->createNamedParameter($ip));
+    $query = $this->getBaseQuery();
+    $query = $query->where('b.deleted_at IS NULL')
+      ->andWhere('b.ip = ' . $query->createNamedParameter($ip));
+
     $row = $query->execute()->fetch();
     if ($row === false) {
       return null;

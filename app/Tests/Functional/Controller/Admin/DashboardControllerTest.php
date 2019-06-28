@@ -3,10 +3,8 @@
 namespace Imageboard\Tests\Functional\Controller\Admin;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Command\CommandDispatcher;
 use Imageboard\Controller\Admin\DashboardController;
 use Imageboard\Exception\AccessDeniedException;
-use Imageboard\Query\QueryDispatcher;
 use Imageboard\Service\{ConfigService, RendererService};
 use Imageboard\Tests\Functional\TestWithUsers;
 
@@ -19,19 +17,20 @@ final class DashboardControllerTest extends TestWithUsers
   {
     parent::setUp();
 
-    global $container, $database;
+    global $database;
 
     $connection = $database->getConnection();
     $builder = $connection->createQueryBuilder();
     $builder->delete('users')->execute();
 
     $config = new ConfigService();
-    $command_dispatcher = new CommandDispatcher($container);
-    $query_dispatcher = new QueryDispatcher($container);
-
     $renderer = new RendererService($config);
 
-    $this->controller = new DashboardController($config, $command_dispatcher, $query_dispatcher, $renderer);
+    $this->controller = new DashboardController(
+      $config,
+      $this->user_service,
+      $renderer
+    );
   }
 
   function test_index_asAnonymous_shouldThrow() : void
@@ -48,6 +47,7 @@ final class DashboardControllerTest extends TestWithUsers
   function test_index_asUser_shouldThrow() : void
   {
     $user = $this->createUser();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin'))
       ->withAttribute('user', $user);
 
@@ -59,6 +59,7 @@ final class DashboardControllerTest extends TestWithUsers
   function test_index_asAdmin_shouldReturnContent() : void
   {
     $user = $this->createAdmin();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin'))
       ->withAttribute('user', $user);
 

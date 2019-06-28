@@ -8,12 +8,12 @@
   <span class="file__hide fas fa-window-close" title="Hide preview"></span>
   <span class="file__show far fa-plus-square hidden" title="Show hidden preview"></span>
 
-  {% if post.thumbWidth > 0 and post.thumbHeight > 0 %}
+  {% if post.thumb_width > 0 and post.thumb_height > 0 %}
     <a class="file__thumbnail thumbnail thumbnail--{{ post.fileType }}" id="thumbnail_wrapper_{{ post.id }}"
-      href="{{ direct_link }}" data-width="{{ post.imageWidth }}" data-height="{{ post.imageHeight }}" target="_blank">
-      <img style="height: {{ post.thumbHeight }}px;" src="{{ content_url }}/thumb/{{ post.thumb }}" alt="{{ post.id }}"
+      href="{{ direct_link }}" data-width="{{ post.image_width }}" data-height="{{ post.image_height }}" target="_blank">
+      <img style="height: {{ post.thumb_height }}px;" src="{{ content_url }}/thumb/{{ post.thumb }}" alt="{{ post.id }}"
         class="thumbnail__content thumbnail__content--{{ post.fileType }}" id="thumbnail_{{ post.id }}"
-        width="{{ post.thumbWidth }}" height="{{ post.thumbHeight }}" />
+        width="{{ post.thumb_width }}" height="{{ post.thumb_height }}" />
     </a>
   {% endif %}
 </div>

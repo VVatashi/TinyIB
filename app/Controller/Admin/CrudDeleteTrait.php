@@ -7,7 +7,7 @@ use Imageboard\Exception\AccessDeniedException;
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 
 trait CrudDeleteTrait {
-  abstract protected function checkAccess(ServerRequestInterface $request): bool;
+  abstract protected function checkAccess(): bool;
 
   abstract protected function deleteModel(int $id);
 
@@ -25,7 +25,7 @@ trait CrudDeleteTrait {
    */
   function delete(ServerRequestInterface $request, array $args): ResponseInterface
   {
-    if (!$this->checkAccess($request)) {
+    if (!$this->checkAccess()) {
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 

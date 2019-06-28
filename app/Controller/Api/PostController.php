@@ -3,25 +3,25 @@
 namespace Imageboard\Controller\Api;
 
 use GuzzleHttp\Psr7\Response;
-use Imageboard\Command\{CommandDispatcher, CreatePost};
 use Imageboard\Controller\ControllerInterface;
-use Imageboard\Query\{QueryDispatcher, BoardThreads, ThreadPosts, Post};
+use Imageboard\Repositories\PostRepository;
+use Imageboard\Service\{PostService, UserService};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
 class PostController implements ControllerInterface
 {
-  /** @var CommandDispatcher */
-  protected $command_dispatcher;
+  /** @var PostService */
+  protected $post_service;
 
-  /** @var QueryDispatcher */
-  protected $query_dispatcher;
+  /** @var UserService */
+  protected $user_service;
 
   function __construct(
-    CommandDispatcher $command_dispatcher,
-    QueryDispatcher $query_dispatcher
+    PostService $post_service,
+    UserService $user_service
   ) {
-    $this->command_dispatcher = $command_dispatcher;
-    $this->query_dispatcher = $query_dispatcher;
+    $this->post_service = $post_service;
+    $this->user_service = $user_service;
   }
 
   /**
@@ -31,19 +31,31 @@ class PostController implements ControllerInterface
    *
    * @return ResponseInterface
    */
-  function createThread(ServerRequestInterface $request) : ResponseInterface
-  {
+  function createThread(ServerRequestInterface $request): ResponseInterface {
     if ($request->getHeaderLine('Content-Type') === 'application/json') {
       $data = json_decode((string)$request->getBody(), true);
     } else {
       $data = $request->getParsedBody();
     }
 
-    $command = new CreatePost($data);
-    $handler = $this->command_dispatcher->getHandler($command);
+    $name      = $data['name'] ?? '';
+    $subject   = $data['subject'] ?? '';
+    $message   = $data['message'] ?? '';
+    $ip        = $_SERVER['REMOTE_ADDR'] ?? '';
+    $user_id   = $this->user_service->getCurrentUserId();
+    $parent_id = (int)($data['parent_id'] ?? 0);
 
     try {
-      $post = $handler->handle($command);
+      $post = $this->post_service->create(
+        $name,
+        '',
+        $subject,
+        $message,
+        '',
+        $ip,
+        $user_id,
+        $parent_id
+      );
     } catch (\Exception $exception) {
       return new Response(400, [], json_encode([
         'error' => $exception->getMessage(),
@@ -63,20 +75,31 @@ class PostController implements ControllerInterface
    *
    * @return ResponseInterface
    */
-  function createPost(ServerRequestInterface $request, array $args) : ResponseInterface
-  {
+  function createPost(ServerRequestInterface $request, array $args): ResponseInterface {
     if ($request->getHeaderLine('Content-Type') === 'application/json') {
       $data = json_decode((string)$request->getBody(), true);
     } else {
       $data = $request->getParsedBody();
     }
 
-    $data['parent_id'] = (int)$args['id'];
-    $command = new CreatePost($data);
-    $handler = $this->command_dispatcher->getHandler($command);
+    $name      = $data['name'] ?? '';
+    $subject   = $data['subject'] ?? '';
+    $message   = $data['message'] ?? '';
+    $ip        = $_SERVER['REMOTE_ADDR'] ?? '';
+    $user_id   = $this->user_service->getCurrentUserId();
+    $parent_id = (int)($args['parent_id'] ?? 0);
 
     try {
-      $post = $handler->handle($command);
+      $post = $this->post_service->create(
+        $name,
+        '',
+        $subject,
+        $message,
+        '',
+        $ip,
+        $user_id,
+        $parent_id
+      );
     } catch (\Exception $exception) {
       return new Response(400, [], json_encode([
         'error' => $exception->getMessage(),
@@ -93,12 +116,8 @@ class PostController implements ControllerInterface
    *
    * @return array Array of thread view models.
    */
-  function threads() : array
-  {
-    $query = new BoardThreads();
-    $handler = $this->query_dispatcher->getHandler($query);
-
-    return $handler->handle($query);
+  function threads(): array {
+    return $this->post_service->getThreads();
   }
 
   /**
@@ -109,15 +128,11 @@ class PostController implements ControllerInterface
    *
    * @return array Array of post view models.
    */
-  function threadPosts(ServerRequestInterface $request, array $args) : array
-  {
-    $id = (int)$args['id'];
+  function threadPosts(ServerRequestInterface $request, array $args): array {
+    $thread_id = (int)$args['id'];
     $params = $request->getQueryParams();
-    $after = (int)($params['after'] ?? 0);
-    $query = new ThreadPosts($id, $after);
-    $handler = $this->query_dispatcher->getHandler($query);
-
-    return $handler->handle($query);
+    $after_id = (int)($params['after'] ?? 0);
+    return $this->post_service->getThreadPosts($thread_id, $after_id);
   }
 
   /**
@@ -127,12 +142,8 @@ class PostController implements ControllerInterface
    *
    * @return array Post view models.
    */
-  function post(array $args) : array
-  {
+  function post(array $args): array {
     $id = (int)$args['id'];
-    $query = new Post($id);
-    $handler = $this->query_dispatcher->getHandler($query);
-
-    return $handler->handle($query);
+    return $this->post_service->getById($id);
   }
 }

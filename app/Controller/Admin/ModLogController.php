@@ -2,10 +2,8 @@
 
 namespace Imageboard\Controller\Admin;
 
-use Imageboard\Command\CommandDispatcher;
-use Imageboard\Query\QueryDispatcher;
 use Imageboard\Repositories\{Repository, ModLogRepository};
-use Imageboard\Service\{ConfigService, RendererService};
+use Imageboard\Service\{ConfigService, UserService, RendererService};
 
 class ModLogController extends AdminController
 {
@@ -33,23 +31,20 @@ class ModLogController extends AdminController
   /**
    * ModLogController constructor.
    *
-   * @param ConfigService     $config
-   * @param CommandDispatcher $command_dispatcher
-   * @param QueryDispatcher   $query_dispatcher
-   * @param RendererService   $renderer
-   * @param ModLogRepository  $repository
+   * @param ConfigService    $config
+   * @param ModLogRepository $repository
+   * @param UserService      $user_service
+   * @param RendererService  $renderer
    */
   function __construct(
-    ConfigService     $config,
-    CommandDispatcher $command_dispatcher,
-    QueryDispatcher   $query_dispatcher,
-    RendererService   $renderer,
-    ModLogRepository  $repository
+    ConfigService    $config,
+    ModLogRepository $repository,
+    UserService      $user_service,
+    RendererService  $renderer
   ) {
     parent::__construct(
       $config,
-      $command_dispatcher,
-      $query_dispatcher,
+      $user_service,
       $renderer
     );
 

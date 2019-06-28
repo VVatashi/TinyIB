@@ -1,4 +1,4 @@
-{% set has_size = post.imageWidth > 0 and post.imageHeight > 0 %}
+{% set has_size = post.image_width > 0 and post.image_height > 0 %}
 {% set show_name = config('FILE_SHOW_ORIG_NAME') and post.fileOriginal %}
 
 {% if post.fileType %}
@@ -58,7 +58,7 @@
 
       <span class="file-info__size">
         {{ post.fileSizeFormatted }}{% if has_size %},
-        {{ post.imageWidth }}x{{ post.imageHeight }}{% endif %}{% if show_name %},
+        {{ post.image_width }}x{{ post.image_height }}{% endif %}{% if show_name %},
         {{ post.fileOriginal }}{% endif %}
       </span>
     {% endif %}

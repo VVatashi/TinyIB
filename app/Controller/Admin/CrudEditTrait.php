@@ -8,7 +8,7 @@ use Imageboard\Service\RendererService;
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 
 trait CrudEditTrait {
-  abstract protected function checkAccess(ServerRequestInterface $request): bool;
+  abstract protected function checkAccess(): bool;
 
   abstract protected function editModel(array $data);
 
@@ -25,7 +25,6 @@ trait CrudEditTrait {
   /**
    * Returns item edit form.
    *
-   * @param ServerRequestInterface $request
    * @param array Path arguments.
    *
    * @return string Response HTML.
@@ -35,9 +34,9 @@ trait CrudEditTrait {
    * @throws NotFoundException
    *   If item with the specified ID is not found.
    */
-  function editForm(ServerRequestInterface $request, array $args): string
+  function editForm(array $args): string
   {
-    if (!$this->checkAccess($request)) {
+    if (!$this->checkAccess()) {
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 
@@ -74,7 +73,7 @@ trait CrudEditTrait {
    */
   function edit(ServerRequestInterface $request, array $args): ResponseInterface
   {
-    if (!$this->checkAccess($request)) {
+    if (!$this->checkAccess()) {
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 

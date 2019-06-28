@@ -3,10 +3,8 @@
 namespace Imageboard\Tests\Functional\Controller\Admin;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Command\CommandDispatcher;
 use Imageboard\Controller\Admin\ModLogController;
 use Imageboard\Exception\AccessDeniedException;
-use Imageboard\Query\QueryDispatcher;
 use Imageboard\Service\{ConfigService, RendererService};
 use Imageboard\Tests\Functional\TestWithUsers;
 
@@ -19,7 +17,7 @@ final class ModLogControllerTest extends TestWithUsers
   {
     parent::setUp();
 
-    global $container, $database;
+    global $database;
 
     $connection = $database->getConnection();
     $builder = $connection->createQueryBuilder();
@@ -27,17 +25,13 @@ final class ModLogControllerTest extends TestWithUsers
     $builder->delete('users')->execute();
 
     $config = new ConfigService();
-    $command_dispatcher = new CommandDispatcher($container);
-    $query_dispatcher = new QueryDispatcher($container);
-
     $renderer = new RendererService($config);
 
     $this->controller = new ModLogController(
       $config,
-      $command_dispatcher,
-      $query_dispatcher,
-      $renderer,
-      $this->modlog_repository
+      $this->modlog_repository,
+      $this->user_service,
+      $renderer
     );
   }
 
@@ -55,6 +49,7 @@ final class ModLogControllerTest extends TestWithUsers
   function test_list_asUser_shouldThrow() : void
   {
     $user = $this->createUser();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/modlog'))
       ->withAttribute('user', $user);
 
@@ -66,6 +61,7 @@ final class ModLogControllerTest extends TestWithUsers
   function test_list_asAdmin_shouldReturnContent() : void
   {
     $user = $this->createAdmin();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/modlog'))
       ->withAttribute('user', $user);
 

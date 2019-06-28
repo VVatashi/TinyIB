@@ -2,6 +2,7 @@
 
 namespace Imageboard\Repositories;
 
+use Doctrine\DBAL\Query\QueryBuilder;
 use Imageboard\Model\ModLog;
 use Imageboard\Service\DatabaseService;
 
@@ -54,23 +55,27 @@ class ModLogRepository implements Repository
     return (int)$query->execute()->fetchColumn();
   }
 
-  /**
-   * @return ModLog[]
-   */
-  function getAll(int $date_from = 0, int $date_to = (1 << 31) - 1, $skip = null, $take = null): array
-  {
+  protected function getBaseQuery(): QueryBuilder {
     $connection = $this->database->getConnection();
     $builder = $connection->createQueryBuilder();
-    $query = $builder->select(
+    return $builder->select(
       'l.id',
       'l.created_at',
       'l.updated_at',
       'l.message',
       'l.user_id'
       )
-      ->from(static::TABLE, 'l')
-      ->where('l.created_at >= ' . $builder->createNamedParameter($date_from))
-      ->andWhere('l.created_at < ' . $builder->createNamedParameter($date_to))
+      ->from(static::TABLE, 'l');
+  }
+
+  /**
+   * @return ModLog[]
+   */
+  function getAll(int $date_from = 0, int $date_to = (1 << 31) - 1, $skip = null, $take = null): array
+  {
+    $query = $this->getBaseQuery();
+    $query = $query->where('l.created_at >= ' . $query->createNamedParameter($date_from))
+      ->andWhere('l.created_at < ' . $query->createNamedParameter($date_to))
       ->orderBy('l.id', 'desc');
 
     if (isset($skip)) {

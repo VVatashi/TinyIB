@@ -3,11 +3,9 @@
 namespace Imageboard\Tests\Functional\Controller\Admin;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Command\CommandDispatcher;
 use Imageboard\Controller\Admin\BanController;
 use Imageboard\Exception\{AccessDeniedException, NotFoundException};
 use Imageboard\Model\Ban;
-use Imageboard\Query\QueryDispatcher;
 use Imageboard\Repositories\{BanRepository};
 use Imageboard\Service\{
   ConfigService,
@@ -28,7 +26,7 @@ final class BanControllerTest extends TestWithUsers
   {
     parent::setUp();
 
-    global $container, $database;
+    global $database;
 
     $connection = $database->getConnection();
     $builder = $connection->createQueryBuilder();
@@ -38,21 +36,21 @@ final class BanControllerTest extends TestWithUsers
     $bans = $config->get('DBBANS', 'bans');
     $builder->delete($bans)->execute();
 
-    $command_dispatcher = new CommandDispatcher($container);
-    $query_dispatcher = new QueryDispatcher($container);
-
-    $repository = new BanRepository($database);
-    $this->service = new BanService($repository, $this->modlog_service, $this->user_service);
+    $repository = new BanRepository($config, $database);
+    $this->service = new BanService(
+      $repository,
+      $this->modlog_service,
+      $this->user_service
+    );
 
     $renderer = new RendererService($config);
 
     $this->controller = new BanController(
       $config,
-      $command_dispatcher,
-      $query_dispatcher,
-      $renderer,
       $repository,
-      $this->service
+      $this->service,
+      $this->user_service,
+      $renderer
     );
   }
 
@@ -75,6 +73,7 @@ final class BanControllerTest extends TestWithUsers
   function test_list_asUser_shouldThrow(): void
   {
     $user = $this->createUser();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/bans'))
       ->withAttribute('user', $user);
 
@@ -86,6 +85,7 @@ final class BanControllerTest extends TestWithUsers
   function test_list_asAdmin_shouldReturnContent(): void
   {
     $user = $this->createAdmin();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/bans'))
       ->withAttribute('user', $user);
 
@@ -109,6 +109,7 @@ final class BanControllerTest extends TestWithUsers
   function test_createForm_asUser_shouldThrow(): void
   {
     $user = $this->createUser();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/bans/create'))
       ->withAttribute('user', $user);
 
@@ -120,6 +121,7 @@ final class BanControllerTest extends TestWithUsers
   function test_createForm_asAdmin_shouldReturnContent(): void
   {
     $user = $this->createAdmin();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/bans/create'))
       ->withAttribute('user', $user);
 
@@ -149,6 +151,7 @@ final class BanControllerTest extends TestWithUsers
   function test_create_asUser_shouldThrow(): void
   {
     $user = $this->createUser();
+    $_SESSION['user'] = $user->id;
     $data = [
       'ip' => '123.0.0.1',
       'expires_in' => 60 * 60,
@@ -166,6 +169,7 @@ final class BanControllerTest extends TestWithUsers
   function test_create_asAdmin_shouldCreateAndReturnRedirect(): void
   {
     $user = $this->createAdmin();
+    $_SESSION['user'] = $user->id;
     $data = [
       'ip' => '123.0.0.1',
       'expires_in' => 60 * 60,
@@ -197,6 +201,7 @@ final class BanControllerTest extends TestWithUsers
   {
     $item = $this->createBan();
     $user = $this->createUser();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', "/admin/bans/{$item->id}/delete"))
       ->withAttribute('user', $user);
 
@@ -209,6 +214,7 @@ final class BanControllerTest extends TestWithUsers
   {
     $item = $this->createBan();
     $user = $this->createAdmin();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', "/admin/bans/{$item->id}/delete"))
       ->withAttribute('user', $user);
 
@@ -222,6 +228,7 @@ final class BanControllerTest extends TestWithUsers
   {
     $item_id = 1;
     $user = $this->createAdmin();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', "/admin/bans/$item_id/delete"))
       ->withAttribute('user', $user);
 

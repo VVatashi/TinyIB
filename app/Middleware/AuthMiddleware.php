@@ -71,9 +71,7 @@ class AuthMiddleware implements MiddlewareInterface
     $response = $handler->handle($request);
 
     if (isset($token)) {
-      $timestamp = is_int($token->expires_at)
-        ? $token->expires_at
-        : $token->expires_at->timestamp;
+      $timestamp = $token->expires_at;
       $response = $response->withHeader('X-Token-Expires-At', $timestamp);
       $response = $response->withHeader('X-Token-Expires-In', $timestamp - time());
     }

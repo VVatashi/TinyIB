@@ -2,13 +2,13 @@
 
 namespace Imageboard\Controller\Admin;
 
-use GuzzleHttp\Psr7\Response;
-use Imageboard\Exception\AccessDeniedException;
-use Imageboard\Command\CommandDispatcher;
-use Imageboard\Query\QueryDispatcher;
 use Imageboard\Repositories\{Repository, BanRepository};
-use Imageboard\Service\{ConfigService, RendererService, BanService};
-use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
+use Imageboard\Service\{
+  ConfigService,
+  BanService,
+  UserService,
+  RendererService
+};
 
 class BanController extends AdminController
 {
@@ -25,25 +25,22 @@ class BanController extends AdminController
   /**
    * BanController constructor.
    *
-   * @param ConfigService     $config
-   * @param CommandDispatcher $command_dispatcher
-   * @param QueryDispatcher   $query_dispatcher
-   * @param RendererService   $renderer
-   * @param BanRepository     $repository
-   * @param BanService        $service
+   * @param ConfigService   $config
+   * @param BanRepository   $repository
+   * @param BanService      $service
+   * @param UserService     $user_service
+   * @param RendererService $renderer
    */
   function __construct(
-    ConfigService     $config,
-    CommandDispatcher $command_dispatcher,
-    QueryDispatcher   $query_dispatcher,
-    RendererService   $renderer,
-    BanRepository     $repository,
-    BanService        $service
+    ConfigService   $config,
+    BanRepository   $repository,
+    BanService      $service,
+    UserService     $user_service,
+    RendererService $renderer
   ) {
     parent::__construct(
       $config,
-      $command_dispatcher,
-      $query_dispatcher,
+      $user_service,
       $renderer
     );
 

@@ -4,17 +4,46 @@ namespace Imageboard\Controller;
 
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Model\Post;
-use Imageboard\Service\ConfigService;
+use Imageboard\Repositories\PostRepository;
+use Imageboard\Service\{ConfigService, PostService};
 use Psr\Http\Message\ResponseInterface;
-use SimpleXMLElement;
+use SimpleXMLElement as XML;
 
 class SitemapController implements ControllerInterface
 {
-  protected function addURL(SimpleXMLElement $xml, string $path, int $modified, string $changefreq, float $priority)
-  {
+  /** @var ConfigService */
+  protected $config;
+
+  /** @var PostRepository */
+  protected $repository;
+
+  /** @var PostService */
+  protected $service;
+
+  /**
+   * @param ConfigService $config
+   * @param PostService   $service
+   */
+  function __construct(
+    ConfigService  $config,
+    PostRepository $repository,
+    PostService    $service
+  ) {
+    $this->config     = $config;
+    $this->repository = $repository;
+    $this->service    = $service;
+  }
+
+  protected function addURL(
+    XML    $xml,
+    string $path,
+    int    $modified,
+    string $changefreq,
+    float  $priority
+  ) {
     $protocol = $_SERVER['REQUEST_SCHEME'] ?? 'https';
     $hostname = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    $basePath = ConfigService::getInstance()->get('BASE_PATH', '/');
+    $basePath = $this->config->get('BASE_PATH', '/');
 
     $url = $xml->addChild('url');
     $url->addChild('loc', $protocol . '://' . $hostname . $basePath . $path);
@@ -36,13 +65,12 @@ class SitemapController implements ControllerInterface
    */
   function sitemap(): ResponseInterface
   {
-    $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?>
+    $xml = new XML('<?xml version="1.0" encoding="UTF-8"?>
     <urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9"></urlset>');
 
-    /** @var Post $latest */
-    $latest = Post::orderBy('created_at', 'desc')->first();
+    $latest = $this->repository->getLatestPost();
     if (isset($latest)) {
-      $latestUpdate = $latest->getCreatedTimestamp();
+      $latestUpdate = $latest->created_at;
     } else {
       $latestUpdate = time();
     }
@@ -50,7 +78,7 @@ class SitemapController implements ControllerInterface
     $this->addURL($xml, '', $latestUpdate, 'daily', 1.0);
 
     for ($page = 0;; $page++) {
-      $threads = Post::getThreadsByPage($page);
+      $threads = $this->repository->getThreadsByPage($page);
       if ($threads->isEmpty()) {
         break;
       }
@@ -58,12 +86,12 @@ class SitemapController implements ControllerInterface
       if ($page > 0) {
         /** @var Post $latestThread */
         $latestThread = $threads->first();
-        $this->addURL($xml, "/$page", $latestThread->getBumpedTimestamp(), 'daily', 0.75);
+        $this->addURL($xml, "/$page", $latestThread->bumped_at, 'daily', 0.75);
       }
 
       foreach ($threads as $thread) {
         /** @var Post $thread */
-        $this->addURL($xml, "/res/{$thread->id}", $thread->getBumpedTimestamp(), 'daily', 0.5);
+        $this->addURL($xml, "/res/{$thread->id}", $thread->bumped_at, 'daily', 0.5);
       }
     }
 

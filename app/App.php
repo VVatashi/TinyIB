@@ -182,11 +182,9 @@ EOF;
 
     // Register services in the IoC-container by conventions.
     $directories = [
-      'Command',
       'Controller',
       'Model',
       'Service',
-      'Query',
       'Repositories',
     ];
 

@@ -3,16 +3,37 @@
 namespace Imageboard\Tests\Functional\Controller\Admin;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Command\CommandDispatcher;
+use Imageboard\Cache\NoCache;
 use Imageboard\Controller\Admin\PostController;
-use Imageboard\Exception\{AccessDeniedException, NotFoundException};
+use Imageboard\Exception\{
+  AccessDeniedException,
+  NotFoundException
+};
 use Imageboard\Model\Post;
-use Imageboard\Query\QueryDispatcher;
-use Imageboard\Service\{ConfigService, RendererService};
+use Imageboard\Repositories\{
+  BanRepository,
+  PostRepository
+};
+use Imageboard\Service\{
+  ConfigService,
+  PostService,
+  RendererService,
+  CryptographyService,
+  FileService,
+  ThumbnailService
+};
+use Imageboard\Service\Booru\{
+  E621Service,
+  SafebooruService,
+  SankakuService
+};
 use Imageboard\Tests\Functional\TestWithUsers;
 
 final class PostControllerTest extends TestWithUsers
 {
+  /** @var PostRepository */
+  protected $post_repository;
+
   /** @var PostController */
   protected $controller;
 
@@ -20,10 +41,7 @@ final class PostControllerTest extends TestWithUsers
   {
     parent::setUp();
 
-    $this->markTestSkipped();
-    return;
-
-    global $container, $database;
+    global $database;
 
     $connection = $database->getConnection();
     $builder = $connection->createQueryBuilder();
@@ -33,27 +51,67 @@ final class PostControllerTest extends TestWithUsers
     $posts = $config->get('DBPOSTS', 'posts');
     $builder->delete($posts)->execute();
 
-    $command_dispatcher = new CommandDispatcher($container);
-    $query_dispatcher = new QueryDispatcher($container);
+    $cache = new NoCache();
+
+    $ban_repository = new BanRepository($config, $database);
+    $this->post_repository = new PostRepository($config, $database);
+
+    $cryptography = new CryptographyService();
+    $file = new FileService();
+    $thumbnail = new ThumbnailService($file, $config);
+
+    $safebooru = new SafebooruService();
+    $e621 = new E621Service();
+    $sankaku = new SankakuService();
+
+    $renderer = new RendererService($config);
+
+    $post_service = new PostService(
+      $config,
+      $cache,
+      $ban_repository,
+      $this->post_repository,
+      $this->modlog_service,
+      $this->user_service,
+      $cryptography,
+      $file,
+      $thumbnail,
+      $safebooru,
+      $e621,
+      $sankaku,
+      $renderer
+    );
+
     $renderer = new RendererService($config);
     $this->controller = new PostController(
       $config,
-      $command_dispatcher,
-      $query_dispatcher,
+      $this->post_repository,
+      $post_service,
+      $this->user_service,
       $renderer
     );
   }
 
   protected function createPost(): Post {
-    return Post::create([
-      'ip' => '',
-      'name' => '',
-      'tripcode' => '',
-      'email' => '',
-      'subject' => '',
-      'message' => '',
-      'password' => '',
-    ]);
+    $now = time();
+    $post = new Post([
+      'created_at'   => $now,
+      'updated_at'   => $now,
+      'bumped_at'    => $now,
+      'parent_id'    => 0,
+      'user_id'      => 0,
+      'ip'           => '',
+      'name'         => '',
+      'tripcode'     => '',
+      'subject'      => '',
+      'message'      => '',
+      'file_size'    => 0,
+      'image_width'  => 0,
+      'image_height' => 0,
+      'thumb_width'  => 0,
+      'thumb_height' => 0,
+    ], false);
+    return $this->post_repository->add($post);
   }
 
   function test_list_asAnonymous_shouldThrow(): void
@@ -70,6 +128,7 @@ final class PostControllerTest extends TestWithUsers
   function test_list_asUser_shouldThrow(): void
   {
     $user = $this->createUser();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/posts'))
       ->withAttribute('user', $user);
 
@@ -81,6 +140,7 @@ final class PostControllerTest extends TestWithUsers
   function test_list_asAdmin_shouldReturnContent(): void
   {
     $user = $this->createAdmin();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/posts'))
       ->withAttribute('user', $user);
 
@@ -93,35 +153,30 @@ final class PostControllerTest extends TestWithUsers
   function test_show_asAnonymous_shouldThrow(): void
   {
     $item = $this->createPost();
-    $user = $this->createAnonymous();
-    $request = (new ServerRequest('GET', "/admin/posts/{$item->id}"))
-      ->withAttribute('user', $user);
 
     $this->expectException(AccessDeniedException::class);
 
-    $this->controller->show($request, ['id' => $item->id]);
+    $this->controller->show(['id' => $item->id]);
   }
 
   function test_show_asUser_shouldThrow(): void
   {
     $item = $this->createPost();
     $user = $this->createUser();
-    $request = (new ServerRequest('GET', "/admin/posts/{$item->id}"))
-      ->withAttribute('user', $user);
+    $_SESSION['user'] = $user->id;
 
     $this->expectException(AccessDeniedException::class);
 
-    $this->controller->show($request, ['id' => $item->id]);
+    $this->controller->show(['id' => $item->id]);
   }
 
   function test_show_asAdmin_shouldReturnContent(): void
   {
     $item = $this->createPost();
     $user = $this->createAdmin();
-    $request = (new ServerRequest('GET', "/admin/posts/{$item->id}"))
-      ->withAttribute('user', $user);
+    $_SESSION['user'] = $user->id;
 
-    $content = $this->controller->show($request, ['id' => $item->id]);
+    $content = $this->controller->show(['id' => $item->id]);
 
     $this->assertIsString($content);
     $this->assertNotEmpty($content);
@@ -131,12 +186,11 @@ final class PostControllerTest extends TestWithUsers
   {
     $item_id = 1;
     $user = $this->createAdmin();
-    $request = (new ServerRequest('GET', "/admin/posts/$item_id"))
-      ->withAttribute('user', $user);
+    $_SESSION['user'] = $user->id;
 
     $this->expectException(NotFoundException::class);
 
-    $this->controller->show($request, ['id' => $item_id]);
+    $this->controller->show(['id' => $item_id]);
   }
 
   function test_delete_asAnonymous_shouldThrow(): void
@@ -155,6 +209,7 @@ final class PostControllerTest extends TestWithUsers
   {
     $item = $this->createPost();
     $user = $this->createUser();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', "/admin/posts/{$item->id}/delete"))
       ->withAttribute('user', $user);
 
@@ -167,13 +222,11 @@ final class PostControllerTest extends TestWithUsers
   {
     $item = $this->createPost();
     $user = $this->createAdmin();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', "/admin/posts/{$item->id}/delete"))
       ->withAttribute('user', $user);
 
     $response = $this->controller->delete($request, ['id' => $item->id]);
-
-    $item = Post::find($item->id);
-    $this->assertNull($item);
 
     $status = $response->getStatusCode();
     $this->assertEquals(302, $status);
@@ -183,6 +236,7 @@ final class PostControllerTest extends TestWithUsers
   {
     $item_id = 1;
     $user = $this->createAdmin();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', "/admin/posts/$item_id/delete"))
       ->withAttribute('user', $user);
 

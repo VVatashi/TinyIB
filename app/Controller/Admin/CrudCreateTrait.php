@@ -8,7 +8,7 @@ use Imageboard\Service\RendererService;
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 
 trait CrudCreateTrait {
-  abstract protected function checkAccess(ServerRequestInterface $request): bool;
+  abstract protected function checkAccess(): bool;
 
   abstract protected function createModel(array $data);
 
@@ -25,16 +25,14 @@ trait CrudCreateTrait {
   /**
    * Returns item create form.
    *
-   * @param ServerRequestInterface $request
-   *
    * @return string Response HTML.
    *
    * @throws AccessDeniedException
    *   If current user is not an admin.
    */
-  function createForm(ServerRequestInterface $request): string
+  function createForm(): string
   {
-    if (!$this->checkAccess($request)) {
+    if (!$this->checkAccess()) {
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 
@@ -67,7 +65,7 @@ trait CrudCreateTrait {
    */
   function create(ServerRequestInterface $request): ResponseInterface
   {
-    if (!$this->checkAccess($request)) {
+    if (!$this->checkAccess()) {
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 

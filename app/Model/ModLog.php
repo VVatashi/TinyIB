@@ -82,7 +82,7 @@ class ModLog extends Model
   }
 
   /**
-   * @param int $created_at
+   * @param int $updated_at
    *
    * @return ModLog
    *

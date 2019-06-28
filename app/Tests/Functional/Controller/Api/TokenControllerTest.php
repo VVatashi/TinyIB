@@ -5,7 +5,6 @@ namespace Imageboard\Tests\Functional\Controller\Api;
 use GuzzleHttp\Psr7\ServerRequest;
 use Imageboard\Controller\Api\TokenController;
 use Imageboard\Exception\NotFoundException;
-use Imageboard\Model\User;
 use Imageboard\Repositories\TokenRepository;
 use Imageboard\Service\TokenService;
 use Imageboard\Tests\Functional\TestWithUsers;

@@ -2,11 +2,13 @@
 
 namespace Imageboard\Controller\Admin;
 
-use Imageboard\Command\CommandDispatcher;
 use Imageboard\Exception\NotFoundException;
-use Imageboard\Query\QueryDispatcher;
 use Imageboard\Repositories\Repository;
-use Imageboard\Service\{ConfigService, RendererService, UserService};
+use Imageboard\Service\{
+  ConfigService,
+  UserService,
+  RendererService
+};
 use Imageboard\Repositories\UserRepository;
 
 class UserController extends AdminController
@@ -25,25 +27,20 @@ class UserController extends AdminController
   /**
    * UserController constructor.
    *
-   * @param ConfigService     $config
-   * @param CommandDispatcher $command_dispatcher
-   * @param QueryDispatcher   $query_dispatcher
-   * @param RendererService   $renderer
-   * @param UserRepository    $repository
-   * @param UserService       $service
+   * @param ConfigService   $config
+   * @param UserRepository  $repository
+   * @param UserService     $service
+   * @param RendererService $renderer
    */
   function __construct(
     ConfigService     $config,
-    CommandDispatcher $command_dispatcher,
-    QueryDispatcher   $query_dispatcher,
-    RendererService   $renderer,
     UserRepository    $repository,
-    UserService       $service
+    UserService       $service,
+    RendererService   $renderer
   ) {
     parent::__construct(
       $config,
-      $command_dispatcher,
-      $query_dispatcher,
+      $service,
       $renderer
     );
 
