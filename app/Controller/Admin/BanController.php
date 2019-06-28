@@ -2,25 +2,54 @@
 
 namespace Imageboard\Controller\Admin;
 
-use Imageboard\Command\Admin\{CreateBan, DeleteBan};
-use Imageboard\Query\Admin\ListBans;
+use Imageboard\Repositories\{Repository, BanRepository};
+use Imageboard\Service\{
+  ConfigService,
+  BanService,
+  UserService,
+  RendererService
+};
 
 class BanController extends AdminController
 {
-  use ListTrait;
-  use CreateTrait;
-  use DeleteTrait;
+  use CrudListTrait;
+  use CrudCreateTrait;
+  use CrudDeleteTrait;
 
-  protected function getCreateCommand(): string {
-    return CreateBan::class;
+  /** @var BanRepository */
+  protected $repository;
+
+  /** @var BanService */
+  protected $service;
+
+  /**
+   * BanController constructor.
+   *
+   * @param ConfigService   $config
+   * @param BanRepository   $repository
+   * @param BanService      $service
+   * @param UserService     $user_service
+   * @param RendererService $renderer
+   */
+  function __construct(
+    ConfigService   $config,
+    BanRepository   $repository,
+    BanService      $service,
+    UserService     $user_service,
+    RendererService $renderer
+  ) {
+    parent::__construct(
+      $config,
+      $user_service,
+      $renderer
+    );
+
+    $this->repository = $repository;
+    $this->service = $service;
   }
 
-  protected function getDeleteCommand(): string {
-    return DeleteBan::class;
-  }
-
-  protected function getListQuery(): string {
-    return ListBans::class;
+  protected function getRepository(): Repository {
+    return $this->repository;
   }
 
   protected function getCreateUrl(): string {
@@ -53,5 +82,17 @@ class BanController extends AdminController
 
   protected function getItemsPerPage(): int {
     return 100;
+  }
+
+  protected function createModel(array $data) {
+    $ip = $data['ip'] ?? '';
+    $expires_in = $data['expires_in'] ?? 0;
+    $reason = $data['reason'] ?? '';
+
+    return $this->service->create($ip, $expires_in, $reason);
+  }
+
+  protected function deleteModel(int $id) {
+    return $this->service->delete($id);
   }
 }

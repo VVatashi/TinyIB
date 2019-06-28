@@ -6,6 +6,7 @@ use GuzzleHttp\Psr7\Response;
 use Imageboard\Cache\CacheInterface;
 use Imageboard\Exception\{NotFoundException, ValidationException};
 use Imageboard\Model\Post;
+use Imageboard\Repositories\PostRepository;
 use Imageboard\Service\{
   CaptchaService,
   ConfigService,
@@ -22,8 +23,11 @@ class PostController implements ControllerInterface
   /** @var CaptchaService */
   protected $captcha;
 
+  /** @var PostRepository */
+  protected $repository;
+
   /** @var PostService */
-  protected $post;
+  protected $service;
 
   /** @var RendererService */
   protected $renderer;
@@ -34,24 +38,27 @@ class PostController implements ControllerInterface
   /**
    * PostController constructor.
    *
-   * @param \Imageboard\Cache\CacheInterface    $cache
-   * @param \Imageboard\Service\CaptchaService  $captcha
-   * @param \Imageboard\Service\PostService     $post
-   * @param \Imageboard\Service\RendererService $renderer
-   * @param \Imageboard\Service\ConfigService   $config
+   * @param ConfigService   $config
+   * @param CacheInterface  $cache
+   * @param CaptchaService  $captcha
+   * @param PostRepository  $repository
+   * @param PostService     $service
+   * @param RendererService $renderer
    */
   function __construct(
-    CacheInterface $cache,
-    CaptchaService $captcha,
-    PostService $post,
-    RendererService $renderer,
-    ConfigService $config
+    ConfigService   $config,
+    CacheInterface  $cache,
+    CaptchaService  $captcha,
+    PostRepository  $repository,
+    PostService     $service,
+    RendererService $renderer
   ) {
-    $this->cache = $cache;
-    $this->captcha = $captcha;
-    $this->post = $post;
-    $this->renderer = $renderer;
-    $this->config = $config;
+    $this->config     = $config;
+    $this->cache      = $cache;
+    $this->captcha    = $captcha;
+    $this->repository = $repository;
+    $this->service    = $service;
+    $this->renderer   = $renderer;
 
     $this->base_path = $this->config->get('BASE_PATH', '');
   }
@@ -91,28 +98,22 @@ class PostController implements ControllerInterface
    */
   function create(ServerRequestInterface $request): ResponseInterface
   {
-    if ($this->config->get("DBMIGRATE")) {
-      $message = "Posting is currently disabled.\nPlease try again in a few moments.";
-      return new Response(503, [], $message);
-    }
-
     $data = $request->getParsedBody();
     $captcha = isset($data['captcha']) ? $data['captcha'] : '';
     if (!$this->checkCAPTCHA($captcha)) {
       throw new ValidationException('Incorrect CAPTCHA');
     }
 
-    $name     = isset($data['name'])      ? $data['name']     : '';
-    $email    = isset($data['email'])     ? $data['email']    : '';
-    $subject  = isset($data['subject'])   ? $data['subject']  : '';
-    $message  = isset($data['message'])   ? $data['message']  : '';
-    $password = isset($data['password'])  ? $data['password'] : '';
-    $ip = $_SERVER['REMOTE_ADDR'];
-    $user_id = $request->getAttribute('user')->id;
-    $parent = isset($data['parent']) ? (int)$data['parent'] : 0;
-    $rawpost = isset($data['rawpost']);
+    $name     = $data['name'] ?? '';
+    $email    = $data['email'] ?? '';
+    $subject  = $data['subject'] ?? '';
+    $message  = $data['message'] ?? '';
+    $password = '';
+    $ip       = $_SERVER['REMOTE_ADDR'] ?? '';
+    $user_id  = $request->getAttribute('user')->id;
+    $parent   = (int)($data['parent'] ?? 0);
 
-    $post = $this->post->create(
+    $post = $this->service->create(
       $name,
       $email,
       $subject,
@@ -120,18 +121,12 @@ class PostController implements ControllerInterface
       $password,
       $ip,
       $user_id,
-      $parent,
-      $rawpost
+      $parent
     );
 
-    $redirect_url = '/' . $this->config->get("BOARD") . '/';
-    if ($post->isModerated()) {
-      if ($this->config->get("ALWAYSNOKO") || strtolower($post->email) === 'noko') {
-        $id = $post->id;
-        $thread_id = $post->isThread() ? $id : $post->parent_id;
-        $redirect_url = '/' . $this->config->get("BOARD") . "/res/$thread_id#$id";
-      }
-    }
+    $id = $post->id;
+    $thread_id = $post->isThread() ? $id : $post->parent_id;
+    $redirect_url = '/' . $this->config->get("BOARD") . "/res/$thread_id#$id";
 
     return new Response(302, ['Location' => $redirect_url]);
   }
@@ -143,18 +138,16 @@ class PostController implements ControllerInterface
   {
     $data = $request->getParsedBody();
 
-    $name    = isset($data['name'])    ? $data['name']    : '';
-    $email   = isset($data['email'])   ? $data['email']   : '';
-    $subject = isset($data['subject']) ? $data['subject'] : '';
-    $message = isset($data['message']) ? $data['message'] : '';
-
+    $name     = $data['name'] ?? '';
+    $email    = $data['email'] ?? '';
+    $subject  = $data['subject'] ?? '';
+    $message  = $data['message'] ?? '';
     $password = '';
-    $ip = $_SERVER['REMOTE_ADDR'];
-    $user_id = $request->getAttribute('user')->id;
+    $ip       = $_SERVER['REMOTE_ADDR'] ?? '';
+    $user_id  = $request->getAttribute('user')->id;
+    $parent   = (int)($data['parent'] ?? 0);
 
-    $parent = isset($data['parent']) ? (int)$data['parent'] : 0;
-
-    $post = $this->post->create(
+    $post = $this->service->create(
       $name,
       $email,
       $subject,
@@ -183,7 +176,7 @@ class PostController implements ControllerInterface
       'email'      => $post->email,
       'subject'    => $post->subject,
       'file'       => $post->file,
-      'created_at' => $post->getCreatedTimestamp(),
+      'created_at' => $post->created_at,
     ]));
   }
 
@@ -199,7 +192,7 @@ class PostController implements ControllerInterface
     $data = $request->getParsedBody();
     $id = isset($data['delete']) ? $data['delete'] : 0;
     $password = isset($data['password']) ? $data['password'] : '';
-    $this->post->delete($id, $password);
+    $this->service->delete($id, $password);
     return 'Post deleted.';
   }
 
@@ -210,23 +203,23 @@ class PostController implements ControllerInterface
    */
   protected function renderBoardPage(int $page): string
   {
-    $threads = Post::getThreadsByPage($page);
-    $threads_count = Post::getThreadCount();
+    $threads = $this->repository->getThreadsByPage($page);
+    $threads_count = $this->repository->getThreadCount();
     $pages = ceil($threads_count / (int)$this->config->get("THREADSPERPAGE")) - 1;
     $posts = [];
 
     foreach ($threads as $thread) {
-      $replies = Post::getPostsByThreadID($thread->id);
+      $replies = $this->repository->getThreadPosts($thread->id);
       $preview_replies = $this->config->get('PREVIEWREPLIES');
-      $omitted = max(0, $replies->count() - $preview_replies - 1);
-      $replies = $replies->take(-$preview_replies);
+      $omitted = max(0, count($replies) - $preview_replies - 1);
+      $replies = array_slice($replies, -$preview_replies);
 
-      if ($replies->count() === 0 || $replies->first()->id !== $thread->id) {
-        $replies->prepend($thread);
+      if (count($replies) === 0 || $replies[0]->id !== $thread->id) {
+        array_unshift($replies, $thread);
       }
 
-      $replies->first()->omitted = $omitted;
-      $posts = collect([$posts, $replies])->collapse();
+      $replies[0]->omitted = $omitted;
+      $posts = array_merge($posts, $replies);
     }
 
     return $this->renderer->render('board.twig', [
@@ -249,7 +242,7 @@ class PostController implements ControllerInterface
   function board(ServerRequestInterface $request, array $args): ResponseInterface
   {
     $page = (int)($args['page'] ?? 0);
-    /** @var \Imageboard\Model\User $user */
+    /** @var User $user */
     $user = $request->getAttribute('user');
     $key = $this->config->get("BOARD") . ':page:' . $page . ':user:' . $user->id;
     $headers = [];
@@ -276,7 +269,7 @@ class PostController implements ControllerInterface
   function thread(ServerRequestInterface $request, array $args): ResponseInterface
   {
     $id = (int)$args['id'];
-    /** @var \Imageboard\Model\User $user */
+    /** @var User $user */
     $user = $request->getAttribute('user');
     $key = $this->config->get("BOARD") . ':thread:' . $id . ':user:' . $user->id;
     $headers = [];
@@ -286,12 +279,12 @@ class PostController implements ControllerInterface
     } else {
       $headers['X-Cached'] = 'false';
 
-      $thread = Post::find($id);
+      $thread = $this->repository->getById($id, true);
       if (!isset($thread)) {
         throw new NotFoundException("Thread #$id not found.");
       }
 
-      $posts = Post::getPostsByThreadID($id);
+      $posts = $this->repository->getThreadPosts($id);
       $data = $this->renderer->render('thread.twig', [
         'posts' => $posts,
         'parent' => $id,
@@ -315,7 +308,7 @@ class PostController implements ControllerInterface
   function ajaxPost(array $args): string
   {
     $id = (int)$args['id'];
-    $post = Post::find($id);
+    $post = $this->repository->getById($id);
     if (!isset($post)) {
       throw new NotFoundException("Post #$id not found.");
     }
@@ -339,7 +332,7 @@ class PostController implements ControllerInterface
   function ajaxThread(ServerRequestInterface $request, array $args): string
   {
     $id = (int)$args['id'];
-    $thread = Post::find($id);
+    $thread = $this->repository->getById($id, true);
     if (!isset($thread)) {
       throw new NotFoundException("Thread #$id not found.");
     }
@@ -347,10 +340,7 @@ class PostController implements ControllerInterface
     $query = $request->getQueryParams();
     $after = isset($query['after']) ? (int)$query['after'] : 0;
 
-    $posts = Post::where(function ($query) use ($id) {
-      $query->where('id', $id);
-      $query->orWhere('parent_id', $id);
-    })->where('id', '>', $after)->orderBy('id', 'asc')->get();
+    $posts = $this->repository->getThreadPosts($id, $after);
 
     return $this->renderer->render('ajax/thread.twig', [
       'posts' => $posts,

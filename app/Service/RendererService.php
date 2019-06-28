@@ -3,28 +3,27 @@
 namespace Imageboard\Service;
 
 use Exception;
-use Twig_Environment;
-use Twig_Loader_Filesystem;
-use Twig_SimpleFunction;
+use Twig\Loader\FilesystemLoader;
+use Twig\{Environment, TwigFilter, TwigFunction};
 
 class RendererService
 {
-  /** @var Twig_Environment */
+  /** @var Environment */
   protected $twig;
 
-  /** @var \Imageboard\Service\ConfigService */
+  /** @var ConfigService */
   protected $config;
 
   /**
-   * @param \Imageboard\Service\ConfigService $config
+   * @param ConfigService $config
    */
   function __construct(ConfigService $config)
   {
     $this->config = $config;
 
-    $loader = new Twig_Loader_Filesystem(__DIR__ . '/../../resources/views');
+    $loader = new FilesystemLoader(__DIR__ . '/../../resources/views');
 
-    $this->twig = new Twig_Environment($loader, [
+    $this->twig = new Environment($loader, [
       'autoescape' => false,
       'cache' => $this->config->get('TWIG_CACHE'),
       'debug' => true,
@@ -38,7 +37,7 @@ class RendererService
     $this->twig->addGlobal('websocket_url', $this->config->get('WEBSOCKET_URL'));
     $this->twig->addGlobal('board', $this->config->get('BOARD'));
 
-    $this->twig->addFunction(new Twig_SimpleFunction('mtime', function ($path) {
+    $this->twig->addFunction(new TwigFunction('mtime', function ($path) {
       $filename = basename($path);
       $path = realpath(dirname(__DIR__ . '/../../webroot/' . $path)) . DIRECTORY_SEPARATOR . $filename;
 
@@ -49,12 +48,12 @@ class RendererService
       }
     }));
 
-    $this->twig->addFunction(new Twig_SimpleFunction('config',
+    $this->twig->addFunction(new TwigFunction('config',
       function ($name, $default = null) use ($config) {
       return $config->get($name, $default);
     }));
 
-    $this->twig->addFilter(new \Twig_Filter('truncate', function ($str, $length) {
+    $this->twig->addFilter(new TwigFilter('truncate', function ($str, $length) {
       if (mb_strlen($str) < $length) {
         return $str;
       }

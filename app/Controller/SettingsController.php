@@ -42,7 +42,7 @@ class SettingsController implements ControllerInterface
    */
   function settings(ServerRequestInterface $request): Response
   {
-    /** @var \Imageboard\Model\User $user */
+    /** @var User $user */
     $user = $request->getAttribute('user');
     $key = $this->config->get('BOARD') . ':settings:user:' . $user->id;
     $data = $this->cache->get($key);
@@ -63,7 +63,7 @@ class SettingsController implements ControllerInterface
    */
   function ajaxSettings(ServerRequestInterface $request): Response
   {
-    /** @var \Imageboard\Model\User $user */
+    /** @var User $user */
     $user = $request->getAttribute('user');
     $key = $this->config->get('BOARD') . ':ajax_settings:user:' . $user->id;
     $data = $this->cache->get($key);

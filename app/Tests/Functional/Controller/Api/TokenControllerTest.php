@@ -3,30 +3,37 @@
 namespace Imageboard\Tests\Functional\Controller\Api;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Command\CommandDispatcher;
 use Imageboard\Controller\Api\TokenController;
 use Imageboard\Exception\NotFoundException;
-use Imageboard\Model\{Token, User};
-use Imageboard\Query\QueryDispatcher;
-use PHPUnit\Framework\TestCase;
+use Imageboard\Repositories\TokenRepository;
+use Imageboard\Service\TokenService;
+use Imageboard\Tests\Functional\TestWithUsers;
 
-final class TokenControllerTest extends TestCase
+final class TokenControllerTest extends TestWithUsers
 {
   /** @var TokenController */
   protected $controller;
 
+  /** @var TokenService */
+  protected $service;
+
   function setUp(): void
   {
-    global $container;
+    parent::setUp();
 
-    Token::truncate();
-    User::truncate();
+    global $database;
 
-    $command_dispatcher = new CommandDispatcher($container);
-    $query_dispatcher = new QueryDispatcher($container);
+    $connection = $database->getConnection();
+    $builder = $connection->createQueryBuilder();
+    $builder->delete('tokens')->execute();
+    $builder->delete('users')->execute();
+
+    $repository = new TokenRepository($database);
+    $this->service = new TokenService($repository);
     $this->controller = new TokenController(
-      $command_dispatcher,
-      $query_dispatcher
+      $this->user_repository,
+      $this->user_service,
+      $this->service
     );
   }
 
@@ -36,7 +43,7 @@ final class TokenControllerTest extends TestCase
       'email' => 'test@example.com',
       'password' => 'test',
     ];
-    User::createUser($data['email'], $data['password']);
+    $this->user_service->create($data['email'], $data['password']);
     $request = (new ServerRequest('POST', '/api/auth'))
       ->withParsedBody($data);
 
@@ -48,13 +55,8 @@ final class TokenControllerTest extends TestCase
 
   function test_token_shouldReturnItem(): void
   {
-    $user = User::createUser('test@example.com', 'test');
-    $token = Token::create([
-      'token' => 'token',
-      'expires_at' => time() + 60 * 60,
-      'user_id' => $user->id,
-    ]);
-    $token->save();
+    $user = $this->user_service->create('test@example.com', 'test');
+    $token = $this->service->create($user->id);
     $request = (new ServerRequest('GET', '/api/auth'))
       ->withHeader('X-Token', $token->token);
 
@@ -63,15 +65,11 @@ final class TokenControllerTest extends TestCase
     $this->assertNotNull($item);
   }
 
-  function test_token_expired_shouldThrow(): void
+  function test_token_revoked_shouldThrow(): void
   {
-    $user = User::createUser('test@example.com', 'test');
-    $token = Token::create([
-      'token' => 'token',
-      'expires_at' => time() - 60 * 60,
-      'user_id' => $user->id,
-    ]);
-    $token->save();
+    $user = $this->user_service->create('test@example.com', 'test');
+    $token = $this->service->create($user->id);
+    $this->service->revokeToken($token->token);
     $request = (new ServerRequest('GET', '/api/auth'))
       ->withHeader('X-Token', $token->token);
 

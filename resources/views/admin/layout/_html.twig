@@ -23,7 +23,7 @@
         {% if breadcrumb %}
           <nav>
             <ul class="header__breadcrumb">
-              {% spaceless %}
+              {% apply spaceless %}
                 {% for item in breadcrumb %}
                   <li class="header__breadcrumb-item">
                     {% if item.url %}
@@ -33,7 +33,7 @@
                     {% endif %}
                   </li>
                 {% endfor %}
-              {% endspaceless %}
+              {% endapply %}
             </ul>
           </nav>
         {% endif %}

@@ -6,9 +6,11 @@ use Doctrine\DBAL\Schema\Schema;
 
 class CreateTokens implements Migration
 {
+  const TABLE = 'tokens';
+
   function apply(Schema $schema)
   {
-    $table = $schema->createTable('tokens');
+    $table = $schema->createTable(static::TABLE);
     $table->addColumn('id', 'integer', ['autoincrement' => true]);
     $table->addColumn('token', 'string', ['length' => 32]);
     $table->addColumn('expires_at', 'integer');
@@ -25,6 +27,6 @@ class CreateTokens implements Migration
 
   function revert(Schema $schema)
   {
-    $schema->dropTable('tokens');
+    $schema->dropTable(static::TABLE);
   }
 }

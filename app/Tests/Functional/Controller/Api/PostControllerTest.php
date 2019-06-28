@@ -3,43 +3,111 @@
 namespace Imageboard\Tests\Functional\Controller\Api;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Command\CommandDispatcher;
+use Imageboard\Cache\NoCache;
 use Imageboard\Controller\Api\PostController;
 use Imageboard\Exception\NotFoundException;
 use Imageboard\Model\Post;
-use Imageboard\Query\QueryDispatcher;
-use PHPUnit\Framework\TestCase;
+use Imageboard\Repositories\{
+  BanRepository,
+  PostRepository
+};
+use Imageboard\Service\{
+  ConfigService,
+  PostService,
+  RendererService,
+  CryptographyService,
+  FileService,
+  ThumbnailService
+};
+use Imageboard\Service\Booru\{
+  E621Service,
+  SafebooruService,
+  SankakuService,
+  GelbooruService,
+  WebmbotService
+};
+use Imageboard\Tests\Functional\TestWithUsers;
 
-final class PostControllerTest extends TestCase
+final class PostControllerTest extends TestWithUsers
 {
+  /** @var PostRepository */
+  protected $post_repository;
+
   /** @var PostController */
   protected $controller;
 
   function setUp(): void
   {
-    global $container;
+    parent::setUp();
 
-    Post::truncate();
+    global $database;
 
-    $command_dispatcher = new CommandDispatcher($container);
-    $query_dispatcher = new QueryDispatcher($container);
+    $connection = $database->getConnection();
+    $builder = $connection->createQueryBuilder();
+    $config = new ConfigService();
+    $posts = $config->get('DBPOSTS', 'posts');
+    $builder->delete($posts)->execute();
+
+    $cache = new NoCache();
+    $ban_repository = new BanRepository($config, $database);
+    $this->post_repository = new PostRepository($config, $database);
+
+    $cryptography = new CryptographyService();
+    $file = new FileService();
+    $thumbnail = new ThumbnailService($file, $config);
+
+    $safebooru = new SafebooruService();
+    $e621 = new E621Service();
+    $sankaku = new SankakuService();
+    $gelbooru = new GelbooruService();
+    $webmbot = new WebmbotService();
+
+    $renderer = new RendererService($config);
+
+    $post_service = new PostService(
+      $config,
+      $cache,
+      $ban_repository,
+      $this->post_repository,
+      $this->modlog_service,
+      $this->user_service,
+      $cryptography,
+      $file,
+      $thumbnail,
+      $safebooru,
+      $e621,
+      $sankaku,
+      $gelbooru,
+      $webmbot,
+      $renderer
+    );
+
     $this->controller = new PostController(
-      $command_dispatcher,
-      $query_dispatcher
+      $post_service,
+      $this->user_service
     );
   }
 
   protected function createPost(int $parent_id = 0): Post {
-    return Post::create([
-      'parent_id' => $parent_id,
-      'ip' => '',
-      'name' => '',
-      'tripcode' => '',
-      'email' => '',
-      'subject' => '',
-      'message' => '',
-      'password' => '',
-    ]);
+    $now = time();
+    $post = new Post([
+      'created_at'   => $now,
+      'updated_at'   => $now,
+      'bumped_at'    => $now,
+      'parent_id'    => $parent_id,
+      'user_id'      => 0,
+      'ip'           => '',
+      'name'         => '',
+      'tripcode'     => '',
+      'subject'      => '',
+      'message'      => '',
+      'file_size'    => 0,
+      'image_width'  => 0,
+      'image_height' => 0,
+      'thumb_width'  => 0,
+      'thumb_height' => 0,
+    ], false);
+    return $this->post_repository->add($post);
   }
 
   function test_createThread_shouldCreateItem(): void

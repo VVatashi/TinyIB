@@ -2,43 +2,169 @@
 
 namespace Imageboard\Model;
 
-use Illuminate\Database\Eloquent\{Model, SoftDeletes};
-use Imageboard\Exception\{NotFoundException, ValidationException};
+use Imageboard\Exception\ValidationException;
 
 /**
- * @property int $id
- * @property string $email
- * @property string $password_hash
- * @property int $role
- * @property int $created_at
- * @property int $updated_at
- * @property int $deleted_at
- * @method static find(int $id)
+ * @property-read int $id
+ * @property-read int $created_at
+ * @property-read int $updated_at
+ * @property-read int $deleted_at
+ * @property-read string $email
+ * @property-read string $password_hash
+ * @property-read int $role
  */
-class User extends Model implements CurrentUserInterface
+class User extends Model
 {
-  use SoftDeletes;
-
   const ROLE_ANONYMOUS = 0;
   const ROLE_USER = 1;
   const ROLE_MODERATOR = 2;
   const ROLE_ADMINISTRATOR = 3;
 
-  protected $table = 'users';
+  /**
+   * User constructor.
+   *
+   * @param array $attributes
+   * @param bool  $validate
+   */
+  function __construct(array $attributes = [], bool $validate = true)
+  {
+    parent::__construct($attributes);
 
-  protected $fillable = [
-    'email',
-    'password_hash',
-    'role',
-  ];
+    if ($validate) {
+      $this->setId($attributes['id'] ?? null);
+      $this->setCreatedAt($attributes['created_at'] ?? 0);
+      $this->setUpdatedAt($attributes['updated_at'] ?? 0);
+      $this->setDeletedAt($attributes['deleted_at'] ?? null);
+      $this->setEmail($attributes['email'] ?? '');
+      $this->setPasswordHash($attributes['password_hash'] ?? '');
+      $this->setRole($attributes['role'] ?? 0);
+    }
+  }
 
-  protected $dates = [
-    'created_at',
-    'updated_at',
-    'deleted_at',
-  ];
+  /**
+   * @param null|int $id
+   *
+   * @return User
+   *
+   * @throws ValidationException
+   */
+  function setId($id): self
+  {
+    if (isset($id) && $id <= 0) {
+      throw new ValidationException('ID should be NULL or positive integer');
+    }
 
-  protected $dateFormat = 'U';
+    $this->id = $id;
+    return $this;
+  }
+
+  /**
+   * @param int $created_at
+   *
+   * @return User
+   *
+   * @throws ValidationException
+   */
+  function setCreatedAt(int $created_at): self
+  {
+    if ($created_at < 0) {
+      throw new ValidationException('Created at should not be less than zero');
+    }
+
+    $this->created_at = $created_at;
+    return $this;
+  }
+
+  /**
+   * @param int $updated_at
+   *
+   * @return User
+   *
+   * @throws ValidationException
+   */
+  function setUpdatedAt(int $updated_at): self
+  {
+    if ($updated_at < 0) {
+      throw new ValidationException('Updated at should not be less than zero');
+    }
+
+    $this->updated_at = $updated_at;
+    return $this;
+  }
+
+  /**
+   * @param null|int $deleted_at
+   *
+   * @return User
+   *
+   * @throws ValidationException
+   */
+  function setDeletedAt($deleted_at): self
+  {
+    if (isset($deleted_at) && $deleted_at <= 0) {
+      throw new ValidationException('Deleted at should be NULL or positive integer');
+    }
+
+    $this->deleted_at = $deleted_at;
+    return $this;
+  }
+
+  /**
+   * @param string $email
+   *
+   * @return User
+   *
+   * @throws ValidationException
+   */
+  function setEmail(string $email): self
+  {
+    if (empty($email)) {
+      throw new ValidationException('Email hash should not be empty');
+    }
+
+    $this->email = $email;
+    return $this;
+  }
+
+  /**
+   * @param string $password_hash
+   *
+   * @return User
+   *
+   * @throws ValidationException
+   */
+  function setPasswordHash(string $password_hash): self
+  {
+    if (empty($password_hash)) {
+      throw new ValidationException('Password hash should not be empty');
+    }
+
+    $this->password_hash = $password_hash;
+    return $this;
+  }
+
+  /**
+   * @param string $password
+   *
+   * @return User
+   */
+  function setPassword(string $password): self
+  {
+    $this->password_hash = password_hash($password, PASSWORD_BCRYPT);
+    return $this;
+  }
+
+  /**
+   * @param int $role
+   *
+   * @return User
+   *
+   */
+  function setRole(int $role): self
+  {
+    $this->role = $role;
+    return $this;
+  }
 
   /**
    * @param string $password
@@ -48,17 +174,6 @@ class User extends Model implements CurrentUserInterface
   function checkPassword(string $password): bool
   {
     return password_verify($password, $this->password_hash);
-  }
-
-  /**
-   * @param string $password
-   *
-   * @return self
-   */
-  function setPassword(string $password): User
-  {
-    $this->password_hash = password_hash($password, PASSWORD_BCRYPT);
-    return $this;
   }
 
   /**
@@ -91,119 +206,5 @@ class User extends Model implements CurrentUserInterface
   {
     /** @todo Role system. */
     return $this->role >= static::ROLE_ADMINISTRATOR;
-  }
-
-  /**
-   * Returns mod log entries related to this user.
-   */
-  function modlog()
-  {
-    return $this->hasMany(ModLog::class);
-  }
-
-  /**
-   * Returns anonymous user instance.
-   *
-   * @return User
-   */
-  static function anonymous(): User
-  {
-    $user = new User();
-    $user->id = 0;
-    $user->email = '';
-    $user->password_hash = '';
-    $user->role = static::ROLE_ANONYMOUS;
-    return $user;
-  }
-
-  /**
-   * Creates new user.
-   *
-   * @param string $email
-   *   User email.
-   *
-   * @param string $password
-   *   User password.
-   *
-   * @param int $role
-   *   User role ID.
-   *
-   * @return User
-   *   User object instance.
-   *
-   * @throws ValidationException
-   *   On validation errors.
-   */
-  static function createUser(string $email, string $password, int $role = 0): User
-  {
-    if (empty($email)) {
-      throw new ValidationException('Email should not be empty');
-    }
-
-    if (empty($password)) {
-      throw new ValidationException('Password should not be empty');
-    }
-
-    $user = User::where('email', $email)->first();
-    if (isset($user)) {
-      throw new ValidationException('User with this email address is already exists');
-    }
-
-    $user = User::onlyTrashed()->where('email', $email)->forceDelete();
-
-    $user = new User([
-      'email' => $email,
-      'role' => $role,
-    ]);
-    $user->setPassword($password);
-    $user->save();
-    return $user;
-  }
-
-  /**
-   * Logs in user.
-   *
-   * @param string $email
-   *   User email.
-   *
-   * @param string $password
-   *   User password.
-   *
-   * @return User
-   *   User object instance.
-   *
-   * @throws ValidationException
-   *   On validation errors.
-   */
-  static function login(string $email, string $password): User
-  {
-    if (empty($email)) {
-      throw new ValidationException('Email should not be empty');
-    }
-
-    if (empty($password)) {
-      throw new ValidationException('Password should not be empty');
-    }
-
-    /** @var User */
-    $user = User::where('email', $email)->first();
-    if (!isset($user)) {
-      throw new NotFoundException('User with this email address is not exists');
-    }
-
-    if (!$user->checkPassword($password)) {
-      throw new ValidationException('Incorrect password');
-    }
-
-    $_SESSION['user'] = $user->id;
-    return $user;
-  }
-
-  /**
-   * Logs out current user.
-   */
-  static function logout()
-  {
-    unset($_SESSION['user']);
   }
 }

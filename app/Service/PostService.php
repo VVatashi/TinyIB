@@ -9,12 +9,38 @@ use Imageboard\Exception\{
 };
 use Imageboard\Cache\CacheInterface;
 use Imageboard\Model\{Ban, Post};
+use Imageboard\Repositories\{
+  BanRepository,
+  PostRepository
+};
 use Predis\Client as Redis;
+use Imageboard\Service\Booru\{
+  SafebooruService,
+  E621Service,
+  SankakuService,
+  GelbooruService,
+  WebmbotService
+};
 
 class PostService
 {
+  /** @var ConfigService */
+  protected $config;
+
   /** @var CacheInterface */
   protected $cache;
+
+  /** @var BanRepository */
+  protected $ban_repository;
+
+  /** @var PostRepository */
+  protected $post_repository;
+
+  /** @var ModLogService */
+  protected $modlog_service;
+
+  /** @var UserService */
+  protected $user_service;
 
   /** @var CryptographyService */
   protected $cryptography;
@@ -34,11 +60,11 @@ class PostService
   /** @var SankakuService */
   protected $sankaku;
 
+  /** @var GelbooruService */
+  protected $gelbooru;
+
   /** @var WebmbotService */
   protected $webmbot;
-
-  /** @var ConfigService */
-  protected $config;
 
   /** @var RendererService */
   protected $renderer;
@@ -46,7 +72,12 @@ class PostService
   /**
    * Creates a new PostService instance.
    *
+   * @param ConfigService       $config
    * @param CacheInterface      $cache
+   * @param BanRepository       $ban_repository
+   * @param PostRepository      $post_repository
+   * @param ModLogService       $modlog_service
+   * @param UserService         $user_service
    * @param CryptographyService $cryptography
    * @param FileService         $file
    * @param ThumbnailService    $thubmnail
@@ -59,29 +90,65 @@ class PostService
    * @param RendererService     $renderer
    */
   function __construct(
-    CacheInterface $cache,
+    ConfigService       $config,
+    CacheInterface      $cache,
+    BanRepository       $ban_repository,
+    PostRepository      $post_repository,
+    ModLogService       $modlog_service,
+    UserService         $user_service,
     CryptographyService $cryptography,
-    FileService $file,
-    ThumbnailService $thubmnail,
-    SafebooruService $safebooru,
-    E621Service $e621,
-    SankakuService $sankaku,
-    GelbooruService $gelbooru,
-    WebmbotService $webmbot,
-    ConfigService $config,
-    RendererService $renderer
+    FileService         $file,
+    ThumbnailService    $thubmnail,
+    SafebooruService    $safebooru,
+    E621Service         $e621,
+    SankakuService      $sankaku,
+    GelbooruService     $gelbooru,
+    WebmbotService      $webmbot,
+    RendererService     $renderer
   ) {
-    $this->cache = $cache;
-    $this->cryptography = $cryptography;
-    $this->file = $file;
-    $this->thubmnail = $thubmnail;
-    $this->safebooru = $safebooru;
-    $this->e621 = $e621;
-    $this->sankaku = $sankaku;
-    $this->gelbooru = $gelbooru;
-    $this->webmbot = $webmbot;
-    $this->config = $config;
-    $this->renderer = $renderer;
+    $this->config          = $config;
+    $this->cache           = $cache;
+    $this->ban_repository  = $ban_repository;
+    $this->post_repository = $post_repository;
+    $this->modlog_service  = $modlog_service;
+    $this->user_service    = $user_service;
+    $this->cryptography    = $cryptography;
+    $this->file            = $file;
+    $this->thubmnail       = $thubmnail;
+    $this->safebooru       = $safebooru;
+    $this->e621            = $e621;
+    $this->sankaku         = $sankaku;
+    $this->gelbooru        = $gelbooru;
+    $this->webmbot         = $webmbot;
+    $this->renderer        = $renderer;
+  }
+
+  /**
+   * @param Post $post
+   *
+   * @return array Post view model.
+   */
+  protected function mapToViewModel(Post $post): array {
+    return [
+      'id' => $post->id,
+      'created_at'    => $post->created_at,
+      'updated_at'    => $post->updated_at,
+      'parent_id'     => $post->parent_id,
+      'bumped_at'     => $post->bumped_at,
+      'name'          => $post->name,
+      'tripcode'      => $post->tripcode,
+      'subject'       => $post->subject,
+      'message'       => $post->message,
+      'file'          => $post->file,
+      'file_hex'      => $post->file_hex,
+      'file_original' => $post->file_original,
+      'file_size'     => $post->file_size,
+      'image_width'   => $post->image_width,
+      'image_height'  => $post->image_height,
+      'thumb'         => $post->thumb,
+      'thumb_width'   => $post->thumb_width,
+      'thumb_height'  => $post->thumb_height,
+    ];
   }
 
   /**
@@ -93,9 +160,8 @@ class PostService
    *
    * @return bool
    */
-  protected function checkBanned(string $ip, &$ban): bool
-  {
-    $ban = Ban::where('ip', $ip)->first();
+  protected function checkBanned(string $ip, &$ban): bool {
+    $ban = $this->ban_repository->getByIp($ip);
     if (!isset($ban)) {
       return true;
     }
@@ -112,8 +178,7 @@ class PostService
    *
    * @return bool
    */
-  protected function checkMessageSize(string $message, &$length): bool
-  {
+  protected function checkMessageSize(string $message, &$length): bool {
     // @todo Configure max message length.
     $max_length = 8000;
     $length = strlen($message);
@@ -129,19 +194,16 @@ class PostService
    *
    * @return bool True if delay time has passed.
    */
-  protected function checkFlood(string $ip, &$remains_time): bool
-  {
+  protected function checkFlood(string $ip, &$remains_time): bool {
     $delay = (int)$this->config->get("DELAY");
 
     if ($delay <= 0) {
       return true;
     }
 
-    $post = Post::getLastPostByIP($ip);
+    $post = $this->post_repository->getLatestPostByIP($ip);
     if (isset($post)) {
-      /** @var Post */
-      $timestamp = $post->getCreatedTimestamp();
-      $remains_time = $delay - (time() - $timestamp);
+      $remains_time = $delay - (time() - $post->created_at);
       return $remains_time < 0;
     }
 
@@ -159,8 +221,7 @@ class PostService
    *     name - processed poster name;
    *     tripcode - processed poster tripcode.
    */
-  function processName(string $name): array
-  {
+  protected function processName(string $name): array {
     $secure_tripcode = '';
     $secure_password_index = strpos($name, '##');
     if ($secure_password_index !== false) {
@@ -194,8 +255,7 @@ class PostService
    *
    * @return string
    */
-  protected function cleanString(string $string): string
-  {
+  protected function cleanString(string $string): string {
     $search = ['<', '>'];
     $replace = ['&lt;', '&gt;'];
     return str_replace($search, $replace, $string);
@@ -208,14 +268,13 @@ class PostService
    *
    * @return string
    */
-  protected function postLink(string $message): string
-  {
+  protected function postLink(string $message): string {
     $board = $this->config->get('BOARD');
     return preg_replace_callback('/&gt;&gt;([0-9]+)/', function ($matches) use ($board) {
       $id = (int)$matches[1];
-      $post = Post::find($id);
+      $post = $this->post_repository->getById($id);
       if ($post !== null) {
-        /** @var Post */
+        /** @var Post $post */
         $thread_id = $post->isThread() ? $post->id : $post->parent_id;
         return '<a href="/' . $board . "/res/$thread_id#$id\">" . $matches[0] . '</a>';
       }
@@ -231,8 +290,7 @@ class PostService
    *
    * @return string
    */
-  protected function colorQuote(string $message): string
-  {
+  protected function colorQuote(string $message): string {
     if (substr($message, -1, 1) != "\n") {
       $message .= "\n";
     }
@@ -247,8 +305,7 @@ class PostService
    *
    * @return string
    */
-  protected function makeLinksClickable(string $message): string
-  {
+  protected function makeLinksClickable(string $message): string {
     $url_pattern =
       '/
     https?:\/\/
@@ -267,8 +324,7 @@ class PostService
    *
    * @return string
    */
-  protected function dice($message)
-  {
+  protected function dice($message) {
     return preg_replace_callback('/##(\d+)d(\d+)##/si', function ($matches) {
       $count = min(max((int)$matches[1], 1), $this->config->get('DICE_MAX_COUNT'));
       $max = min(max((int)$matches[2], 1), $this->config->get('DICE_MAX_VALUE'));
@@ -289,32 +345,16 @@ class PostService
     }, $message);
   }
 
-  protected function postCount($user_id, $message)
-  {
+  protected function postCount($user_id, $message) {
     if (!isset($user_id) || $user_id === 0) {
       return $message;
     }
 
     return preg_replace_callback('#(?:^|<br>)\s*/postcount\s*<br>#si', function ($matches) use ($user_id) {
-      $post_count = Post::withTrashed()->where('user_id', $user_id)->count();
-      $thread_count = Post::withTrashed()->where(['user_id' => $user_id, 'parent_id' => 0])->count();
+      $post_count = $this->post_repository->getUserPostCount($user_id);
+      $thread_count = $this->post_repository->getUserThreadCount($user_id);
       return "<span class=\"dice\">{$matches[0]}Posts created: $post_count<br>Threads: $thread_count<br></span>";
     }, $message);
-  }
-
-  /**
-   * Checks duplicate file.
-   *
-   * @param string $hash
-   * @param Post[] &$posts
-   *   (Output) Posts with the same file.
-   *
-   * @return bool
-   */
-  protected function checkDuplicateFile(string $hash, &$posts): bool
-  {
-    $posts = Post::getPostsByHex($hash)->all();
-    return empty($posts);
   }
 
   /**
@@ -322,8 +362,7 @@ class PostService
    *
    * @throws \Exception
    */
-  protected function validateFileUpload(array $file)
-  {
+  protected function validateFileUpload(array $file) {
     switch ($file['error']) {
       case UPLOAD_ERR_OK:
         break;
@@ -353,13 +392,13 @@ class PostService
    * @param string $subject
    * @param string $message
    * @param string $password
-   * @param int $parent
-   * @param bool $rawpost
+   * @param int    $user_id
+   * @param int    $parent
    *
    * @return Post
    *
-   * @throws \Exception
    * @throws ValidationException
+   * @throws NotFoundException
    */
   function create(
     string $name,
@@ -375,7 +414,7 @@ class PostService
     if (!$this->checkBanned($ip, $ban)) {
       $expire = $ban->isPermanent()
         ? '<br>This ban is permanent and will not expire.'
-        : '<br>This ban will expire ' . date('y/m/d(D)H:i:s', $ban->getExpiresTimestamp());
+        : '<br>This ban will expire ' . date('y/m/d(D)H:i:s', $ban->expires_at);
       $reason = $ban->hasReason() ? '<br>Reason: ' . $ban->reason : '';
       throw new ValidationException('Your IP address ' . $ban->ip
         . ' has been banned from posting on this image board.  ' . $expire . $reason);
@@ -397,11 +436,7 @@ class PostService
     }
 
     if ($parent !== NEWTHREAD) {
-      $thread = Post::where([
-        ['id', $parent],
-        ['parent_id', 0],
-        ['moderated', true],
-      ])->get();
+      $thread = $this->post_repository->getById($parent, true);
       if (!isset($thread)) {
         throw new NotFoundException('Invalid parent thread ID supplied, unable to create post.');
       }
@@ -415,7 +450,6 @@ class PostService
     $nameAndTripcode = $this->processName($name);
     $post->name = $this->cleanString(substr($nameAndTripcode['name'], 0, 75));
     $post->tripcode = $nameAndTripcode['tripcode'];
-    $post->email = $this->cleanString(str_replace('"', '&quot;', substr($email, 0, 75)));
 
     $message = rtrim($message);
     $message = $this->cleanString($message);
@@ -435,14 +469,12 @@ class PostService
     // Detect spam.
     if ($this->config->get('DETECT_SPAM', '') === 'same_message') {
       if (!empty($message) && !isset($_FILES['file']) && !isset($_FILES['file_mobile'])) {
-        $last = Post::getLastPostByIP($post->ip);
+        $last = $this->post_repository->getLatestPostByIP($post->ip);
         if (isset($last) && $message === $last->message) {
           throw new ValidationException('Spam detected');
         }
       }
     }
-
-    $post->password = !empty($password) ? md5(md5($password)) : '';
 
     if (isset($_FILES['file']) && !empty($_FILES['file']['name'])) {
       $file = $_FILES['file'];
@@ -519,18 +551,6 @@ class PostService
       $post->file_hex = md5_file($file['tmp_name']);
       $post->file_size = $file['size'];
 
-      $allow_dup = $this->config->get('FILE_ALLOW_DUPLICATE');
-      if (!$allow_dup) {
-        $posts = [];
-        if (!$this->checkDuplicateFile($post->file_hex, $posts)) {
-          $post = current($posts);
-          $id = $post->id;
-          $thread_id = $post->isThread() ? $id : $post->parent_id;
-          throw new ValidationException('Duplicate file uploaded.'
-            . " That file has already been posted <a href=\"res/$thread_id.html#$id\">here</a>.");
-        }
-      }
-
       $file_name = time() . substr(microtime(), 2, 3);
       $mime_type = $this->thubmnail->getMimeTypeByContent($file['tmp_name'])
         ?? $this->thubmnail->getMimeTypeByExtension($file['name']);
@@ -586,106 +606,170 @@ class PostService
       }
     }
 
-    $now = (new \DateTime())->getTimestamp();
-    $post->bumped_at = $now;
-    $post->moderated = true;
-    $post->save();
+    $post->bumped_at = time();
+    $this->post_repository->add($post);
+
+    $this->trimThreads();
 
     $board = $this->config->get("BOARD");
 
-    if ($post->isModerated()) {
-      Post::trimThreads();
+    if ($post->isReply()) {
+      $parent = $post->parent_id;
+      $this->cache->deletePattern($board . ":thread:$parent:*");
 
-      if ($post->isReply()) {
-        $parent = $post->parent_id;
-        $this->cache->deletePattern($board . ":thread:$parent:*");
-
-        if (strtolower($post->email) !== 'sage') {
-          $max_replies = $this->config->get("MAXREPLIES");
-          if (
-            $max_replies == 0
-            || Post::getReplyCountByThreadID($parent) <= $max_replies
-          ) {
-            $thread = Post::find($parent);
-            if (isset($thread)) {
-              $thread->bumped_at = time();
-              $thread->save();
-            }
+      if (strtolower($post->email) !== 'sage') {
+        $max_replies = $this->config->get("MAXREPLIES");
+        if (
+          $max_replies == 0
+          || $this->post_repository->getThreadPostCount($parent) <= $max_replies
+        ) {
+          $thread = $this->post_repository->getById($parent);
+          if (isset($thread)) {
+            $thread->bumped_at = time();
+            $this->post_repository->update($thread);
           }
         }
-      } else {
-        $id = $post->id;
-        $this->cache->deletePattern($board . ":thread:$id:*");
       }
+    } else {
+      $id = $post->id;
+      $this->cache->deletePattern($board . ":thread:$id:*");
+    }
 
-      $this->cache->deletePattern($board . ':page:*');
+    $this->cache->deletePattern($board . ':page:*');
 
-      $redis_host = $this->config->get('REDIS_HOST', '');
-      if (!empty($redis_host)) {
-        // Send post to the redis queue.
-        $board = $this->config->get('BOARD');
-        $channel = "$board:thread:$parent";
-        $message = json_encode([
-          'type' => 'add_post',
-          'data' => [
-            'id'             => $post->id,
-            'created_at'     => $post->getCreatedTimestamp(),
-            'subject'        => $post->subject,
-            'name'           => $post->name,
-            'tripcode'       => $post->tripcode,
-            'message'        => $post->message,
-            'file'           => $post->file,
-            'file_type'      => $post->getFileType(),
-            'image_width'    => $post->image_width,
-            'image_height'   => $post->image_height,
-            'file_size'      => $post->file_size,
-            'thumb'          => $post->thumb,
-            'thumb_width'    => $post->thumb_width,
-            'thumb_height'   => $post->thumb_height,
-            'html'           => $this->renderer->render('ajax/post.twig', [
-              'post'  => $post,
-              'res'   => RESPAGE,
-            ]),
-          ],
-        ]);
+    $redis_host = $this->config->get('REDIS_HOST', '');
+    if (!empty($redis_host)) {
+      // Send post to the redis queue.
+      $board = $this->config->get('BOARD');
+      $channel = "$board:thread:$parent";
+      $message = json_encode([
+        'type' => 'add_post',
+        'data' => [
+          'id'           => $post->id,
+          'created_at'   => $post->created_at,
+          'subject'      => $post->subject,
+          'name'         => $post->name,
+          'tripcode'     => $post->tripcode,
+          'message'      => $post->message,
+          'file'         => $post->file,
+          'file_type'    => $post->getFileType(),
+          'image_width'  => $post->image_width,
+          'image_height' => $post->image_height,
+          'file_size'    => $post->file_size,
+          'thumb'        => $post->thumb,
+          'thumb_width'  => $post->thumb_width,
+          'thumb_height' => $post->thumb_height,
+          'html'         => $this->renderer->render('ajax/post.twig', [
+            'post' => $post,
+            'res'  => RESPAGE,
+          ]),
+        ],
+      ]);
 
-        $redis = new Redis($redis_host);
-        $redis->publish($channel, $message);
-        $redis->quit();
-      }
+      $redis = new Redis($redis_host);
+      $redis->publish($channel, $message);
+      $redis->quit();
     }
 
     return $post;
   }
 
   /**
-   * Deletes post by ID.
+   * Deletes image & thumbnail of the post.
    *
-   * @param int $id
-   * @param string $password
+   * @param Post $post
+   */
+  function deletePostImages(Post $post) {
+    // TODO: Exception handling & logging.
+
+    if (!empty($post->file)) {
+      $path = 'src/' . $post->file;
+      if (file_exists($path)) {
+        unlink($path);
+      }
+    }
+
+    if (!empty($post->thumb)) {
+      $path = 'thumb/' . $post->thumb;
+      if (file_exists($path)) {
+        unlink($path);
+      }
+    }
+  }
+
+  /**
+   * Deletes post or thread by ID.
+   *
+   * @param int  $id
+   * @param bool $add_to_modlog
    *
    * @throws NotFoundException
    * @throws AccessDeniedException
    */
-  function delete(int $id, string $password)
-  {
+  function delete(int $id, bool $add_to_modlog = true) {
     $board = $this->config->get("BOARD");
-
-    /** @var Post */
-    $post = Post::find($id);
+    $post = $this->post_repository->getById($id);
     if ($post === null) {
       throw new NotFoundException("Post #$id not found.");
     }
 
-    $password_hash = md5(md5($password));
-    if ($password_hash !== $post->password) {
-      throw new AccessDeniedException('Invalid password.');
+    // Remove post and children posts if it is a thread.
+    $posts = $this->post_repository->getThreadPosts($id);
+    foreach ($posts as $post) {
+      $this->deletePostImages($post);
+      $this->post_repository->remove($post);
     }
 
-    Post::deletePostByID($id);
-
+    // Clear cache.
     $thread_id = $post->isThread() ? $id : $post->parent_id;
     $this->cache->deletePattern($board . ":thread:$thread_id:*");
     $this->cache->deletePattern($board . ':page:*');
+
+    if ($add_to_modlog) {
+      // Add entry to the modlog.
+      $user = $this->user_service->getCurrentUser();
+      $this->modlog_service->create("User {$user->email} has deleted post {$id}.", $user->id);
+    }
+  }
+
+  /**
+   * Removes old threads.
+   *
+   * @throws ConfigServiceException
+   */
+  function trimThreads() {
+    $limit = (int)$this->config->get('MAXTHREADS');
+    if ($limit > 0) {
+      $threads = $this->post_repository->getThreads($limit, 100);
+      foreach ($threads as $thread) {
+        $this->delete($thread->id, false);
+      }
+    }
+  }
+
+  function getThreads(): array {
+    $posts = $this->post_repository->getThreads();
+    return array_map([$this, 'mapToViewModel'], $posts);
+  }
+
+  function getThreadPosts(int $thread_id, int $after_id = 0): array {
+    $posts = $this->post_repository->getThreadPosts($thread_id, $after_id);
+    return array_map([$this, 'mapToViewModel'], $posts);
+  }
+
+  /**
+   * @param int $post_id
+   *
+   * @return array Post view model.
+   *
+   * @throws NotFoundException
+   */
+  function getById(int $post_id): array {
+    $post = $this->post_repository->getById($post_id);
+    if (!isset($post)) {
+      throw new NotFoundException("Post #$post_id is not found.");
+    }
+
+    return $this->mapToViewModel($post);
   }
 }

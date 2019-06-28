@@ -5,13 +5,21 @@ namespace Imageboard\Controller;
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Exception\ValidationException;
 use Imageboard\Model\User;
-use Imageboard\Service\{CaptchaService, ConfigService, RendererService};
+use Imageboard\Service\{
+  CaptchaService,
+  ConfigService,
+  RendererService,
+  UserService
+};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
 class AuthController implements ControllerInterface
 {
   /** @var CaptchaService */
   protected $captcha;
+
+  /** @var UserService */
+  protected $user_service;
 
   /** @var RendererService */
   protected $renderer;
@@ -22,16 +30,19 @@ class AuthController implements ControllerInterface
   /**
    * Creates a new AuthController instance.
    *
-   * @param \Imageboard\Service\CaptchaService  $captcha
-   * @param \Imageboard\Service\RendererService $renderer
-   * @param \Imageboard\Service\ConfigService   $config
+   * @param CaptchaService  $captcha
+   * @param UserService     $user_service
+   * @param RendererService $renderer
+   * @param ConfigService   $config
    */
   function __construct(
     CaptchaService $captcha,
+    UserService $user_service,
     RendererService $renderer,
     ConfigService $config
   ) {
     $this->captcha = $captcha;
+    $this->user_service = $user_service;
     $this->renderer = $renderer;
     $this->config = $config;
   }
@@ -45,7 +56,7 @@ class AuthController implements ControllerInterface
    */
   function registerForm(ServerRequestInterface $request)
   {
-    /** @var User */
+    /** @var User $user */
     $user = $request->getAttribute('user');
     if (!$user->isAnonymous()) {
       // Allow only anonymous user access.
@@ -76,7 +87,7 @@ class AuthController implements ControllerInterface
    */
   function register(ServerRequestInterface $request): ResponseInterface
   {
-    /** @var User */
+    /** @var User $user */
     $user = $request->getAttribute('user');
     if (!$user->isAnonymous()) {
       // Allow only anonymous user access.
@@ -100,8 +111,8 @@ class AuthController implements ControllerInterface
     }
 
     try {
-      User::createUser($email, $password);
-      User::login($email, $password);
+      $this->user_service->create($email, $password);
+      $this->user_service->login($email, $password);
     } catch (ValidationException $e) {
       $_SESSION['error'] = $e->getMessage();
       return new Response(302, ['Location' => '/' . $this->config->get("BOARD") . '/auth/register']);
@@ -120,7 +131,7 @@ class AuthController implements ControllerInterface
    */
   function loginForm(ServerRequestInterface $request)
   {
-    /** @var User */
+    /** @var User $user */
     $user = $request->getAttribute('user');
     if (!$user->isAnonymous()) {
       // Allow only anonymous user access.
@@ -151,7 +162,7 @@ class AuthController implements ControllerInterface
    */
   function login(ServerRequestInterface $request): ResponseInterface
   {
-    /** @var User */
+    /** @var User $user */
     $user = $request->getAttribute('user');
     if (!$user->isAnonymous()) {
       // Allow only anonymous user access.
@@ -175,7 +186,7 @@ class AuthController implements ControllerInterface
     }
 
     try {
-      User::login($email, $password);
+      $this->user_service->login($email, $password);
     } catch (ValidationException $e) {
       $_SESSION['error'] = $e->getMessage();
       return new Response(302, ['Location' => '/' . $this->config->get("BOARD") . '/auth/login']);
@@ -192,7 +203,7 @@ class AuthController implements ControllerInterface
    */
   function logout(): ResponseInterface
   {
-    User::logout();
+    $this->user_service->logout();
 
     // Redirect to the index page.
     return new Response(302, ['Location' => '/' . $this->config->get("BOARD")]);

@@ -20,17 +20,17 @@
 {% extends 'components/form/_textfield.twig' %}
 
 {% block label %}
-  {% spaceless %}
+  {% apply spaceless %}
     <label class="{{ label_class }}"
       {% if id is defined %} for="{{ id }}" {% endif %}
     >
       <img id="captchaimage" src="{{ base_url }}/captcha" alt="CAPTCHA" />
     </label>
-  {% endspaceless %}
+  {% endapply %}
 {% endblock %}
 
 {% block input %}
-  {% spaceless %}
+  {% apply spaceless %}
     <input type="{{ type }}"
       class="{{ input_class }}"
       {% if id is defined %} id="{{ id }}" {% endif %}
@@ -39,5 +39,5 @@
       value="{{ value }}"
       placeholder="{{ placeholder }}"
     />
-  {% endspaceless %}
+  {% endapply %}
 {% endblock %}

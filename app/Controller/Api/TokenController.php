@@ -3,31 +3,51 @@
 namespace Imageboard\Controller\Api;
 
 use GuzzleHttp\Psr7\Response;
-use Imageboard\Command\{CommandDispatcher, CreateToken};
 use Imageboard\Controller\ControllerInterface;
-use Imageboard\Query\{QueryDispatcher, Token};
+use Imageboard\Exception\NotFoundException;
+use Imageboard\Model\{Token, User};
+use Imageboard\Repositories\UserRepository;
+use Imageboard\Service\{TokenService, UserService};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
 class TokenController implements ControllerInterface
 {
-  /** @var CommandDispatcher */
-  protected $command_dispatcher;
+  /** @var UserRepository */
+  protected $user_repository;
 
-  /** @var QueryDispatcher */
-  protected $query_dispatcher;
+  /** @var UserService */
+  protected $user_service;
+
+  /** @var TokenService */
+  protected $token_service;
 
   /**
    * TokenController constructor.
    *
-   * @param \Imageboard\Command\CommandDispatcher $command_dispatcher
-   * @param \Imageboard\Query\QueryDispatcher     $query_dispatcher
+   * @param UserRepository $user_repository
+   * @param UserService $user_service
+   * @param TokenService $token_service
    */
   function __construct(
-    CommandDispatcher $command_dispatcher,
-    QueryDispatcher $query_dispatcher
+    UserRepository $user_repository,
+    UserService $user_service,
+    TokenService $token_service
   ) {
-    $this->command_dispatcher = $command_dispatcher;
-    $this->query_dispatcher = $query_dispatcher;
+    $this->user_repository = $user_repository;
+    $this->user_service = $user_service;
+    $this->token_service = $token_service;
+  }
+
+  protected function mapToViewModel(Token $token, User $user): array {
+    return [
+      'token'      => $token->token,
+      'created_at' => $token->created_at,
+      'expires_at' => $token->expires_at,
+      'expires_in' => $token->expires_at - time(),
+      'user_id'    => $token->user_id,
+      'user_email' => $user->email,
+      'user_role'  => $user->role,
+    ];
   }
 
   /**
@@ -45,27 +65,20 @@ class TokenController implements ControllerInterface
       $data = $request->getParsedBody();
     }
 
-    $command = new CreateToken($data);
-    $handler = $this->command_dispatcher->getHandler($command);
+    $email = $data['email'] ?? '';
+    $password = $data['password'] ?? '';
 
     try {
-      $token = $handler->handle($command);
+      $user = $this->user_service->login($email, $password);
+      $token = $this->token_service->create($user->id);
     } catch (\Exception $exception) {
       return new Response(400, [], json_encode([
         'error' => $exception->getMessage(),
       ]));
     }
 
-    $expires_at = $token->expires_at->timestamp;
-    return new Response(201, [], json_encode([
-      'token'       => $token->token,
-      'created_at'  => $token->created_at->timestamp,
-      'expires_at'  => $expires_at,
-      'expires_in'  => $expires_at - time(),
-      'user_id'     => $token->user_id,
-      'user_email'  => $token->user->email,
-      'user_role'   => $token->user->role,
-    ]));
+    $view_model = $this->mapToViewModel($token, $user);
+    return new Response(201, [], json_encode($view_model));
   }
 
   /**
@@ -74,12 +87,19 @@ class TokenController implements ControllerInterface
    * @param ServerRequestInterface $request
    *
    * @return array Token view model.
+   *
+   * @throws NotFoundException
    */
   function token(ServerRequestInterface $request): array
   {
-    $token = $request->getHeaderLine('X-Token');
-    $query = new Token($token);
-    $handler = $this->query_dispatcher->getHandler($query);
-    return $handler->handle($query);
+    $token_str = $request->getHeaderLine('X-Token');
+    $token = $this->token_service->getByToken($token_str);
+    if (!isset($token) || $token->expires_at < time()) {
+      throw new NotFoundException();
+    }
+
+    $user = $this->user_repository->getById($token->user_id);
+    $view_model = $this->mapToViewModel($token, $user);
+    return $view_model;
   }
 }

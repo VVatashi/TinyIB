@@ -9,25 +9,25 @@ class PostTest extends TestCase
 {
     public function test_isThread_parentId0_shouldReturnTrue() : void
     {
-        $post = new Post(['parent_id' => 0]);
+        $post = new Post(['parent_id' => 0], false);
         $this->assertTrue($post->isThread());
     }
 
     public function test_isThread_parentIdNot0_shouldReturnFalse() : void
     {
-        $post = new Post(['parent_id' => 1]);
+        $post = new Post(['parent_id' => 1], false);
         $this->assertFalse($post->isThread());
     }
 
     public function test_isReply_parentId0_shouldReturnFalse() : void
     {
-        $post = new Post(['parent_id' => 0]);
+        $post = new Post(['parent_id' => 0], false);
         $this->assertFalse($post->isReply());
     }
 
     public function test_isReply_parentIdNot0_shouldReturnTrue() : void
     {
-        $post = new Post(['parent_id' => 1]);
+        $post = new Post(['parent_id' => 1], false);
         $this->assertTrue($post->isReply());
     }
 

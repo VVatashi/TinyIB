@@ -5,7 +5,7 @@
     <span class="post-header__subject filetitle">{{ post.subject }}</span>
   {% endif %}
 
-  {% spaceless %}
+  {% apply spaceless %}
     {% if post.name %}
       <span class="post-header__name postername">{{ post.name }}</span>
     {% elseif not post.tripcode %}
@@ -17,7 +17,7 @@
     {% if post.tripcode %}
       <span class="post-header__tripcode postertrip">!{{ post.tripcode }}</span>
     {% endif %}
-  {% endspaceless %}
+  {% endapply %}
 {% endmacro %}
 
 {% import _self as self %}
@@ -39,8 +39,8 @@
     {% endif %}
   </span>
 
-  {% set date_iso = post.createdTimestamp|date('c') %}
-  {% set date = post.createdTimestamp|date('j.m.Y H:i:s') %}
+  {% set date_iso = post.created_at|date('c') %}
+  {% set date = post.created_at|date('j.m.Y H:i:s') %}
 
   <time class="post-header__datetime" datetime="{{ date_iso }}">
     {{ date }}
@@ -58,10 +58,6 @@
 
     {% if isInThread %}
       <a class="post-header__reflink-icon fas fa-reply" href="{{ reflink }}" title="Quick reply" data-reflink="{{ post.id }}"></a>
-    {% endif %}
-
-    {% if post.isStickied %}
-      <img src="{{ base_url }}/images/sticky.png" alt="Stickied" title="Stickied" width="16" height="16" />
     {% endif %}
 
     {% if post.isThread() and not isInThread %}

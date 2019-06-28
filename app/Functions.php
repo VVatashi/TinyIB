@@ -7,30 +7,6 @@ use Imageboard\Model\Post;
 class Functions
 {
   /**
-   * Deletes image & thumbnail of the post.
-   *
-   * @param Post $post
-   */
-  static function deletePostImages(Post $post)
-  {
-    // TODO: Exception handling & logging.
-
-    if (!empty($post->file)) {
-      $path = 'src/' . $post->file;
-      if (file_exists($path)) {
-        unlink($path);
-      }
-    }
-
-    if (!empty($post->thumb)) {
-      $path = 'thumb/' . $post->thumb;
-      if (file_exists($path)) {
-        unlink($path);
-      }
-    }
-  }
-
-  /**
    * Format exception string.
    *
    * @param \Throwable $exception

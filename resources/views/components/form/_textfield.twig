@@ -30,7 +30,7 @@
 {% set type = type|default('text') %}
 {% set value = value|default('') %}
 
-{% spaceless %}
+{% apply spaceless %}
   <div class="{{ class }}">
       {% block label %}
         <label class="{{ label_class }}"
@@ -49,4 +49,4 @@
         />
       {% endblock %}
   </div>
-{% endspaceless %}
+{% endapply %}

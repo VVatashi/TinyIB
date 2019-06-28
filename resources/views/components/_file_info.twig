@@ -1,4 +1,4 @@
-{% set has_size = post.imageWidth > 0 and post.imageHeight > 0 %}
+{% set has_size = post.image_width > 0 and post.image_height > 0 %}
 {% set show_name = config('FILE_SHOW_ORIG_NAME') and post.fileOriginal %}
 
 {% if post.fileType %}
@@ -7,7 +7,7 @@
 {% endif %}
 
 <div class="{{ class is defined ? class ~ ' ' }}file-info">
-  {% spaceless %}
+  {% apply spaceless %}
     {% if post.file %}
       {% if post.fileType == 'image' %}
       <span class="file-info__search fas fa-search"></span>
@@ -58,9 +58,9 @@
 
       <span class="file-info__size">
         {{ post.fileSizeFormatted }}{% if has_size %},
-        {{ post.imageWidth }}x{{ post.imageHeight }}{% endif %}{% if show_name %},
+        {{ post.image_width }}x{{ post.image_height }}{% endif %}{% if show_name %},
         {{ post.fileOriginal }}{% endif %}
       </span>
     {% endif %}
-  {% endspaceless %}
+  {% endapply %}
 </div>

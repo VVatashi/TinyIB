@@ -1,10 +1,10 @@
 {% macro link(title, url) %}
-  {% spaceless %}
+  {% apply spaceless %}
   <li class="menu__list-item">
     {% set url = base_url ~ '/' ~ url %}
     <a class="menu__link" href="{{ url }}">{{ title }}</a>
   </li>
-  {% endspaceless %}
+  {% endapply %}
 {% endmacro %}
 
 {% import _self as self %}

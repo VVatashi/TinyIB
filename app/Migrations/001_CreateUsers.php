@@ -6,9 +6,11 @@ use Doctrine\DBAL\Schema\Schema;
 
 class CreateUsers implements Migration
 {
+  const TABLE = 'users';
+
   function apply(Schema $schema)
   {
-    $table = $schema->createTable('users');
+    $table = $schema->createTable(static::TABLE);
     $table->addColumn('id', 'integer', ['autoincrement' => true]);
     $table->addColumn('email', 'string');
     $table->addColumn('password_hash', 'string', ['fixed' => true, 'length' => 60]);
@@ -23,6 +25,6 @@ class CreateUsers implements Migration
 
   function revert(Schema $schema)
   {
-    $schema->dropTable('users');
+    $schema->dropTable(static::TABLE);
   }
 }

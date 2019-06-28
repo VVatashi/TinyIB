@@ -3,74 +3,60 @@
 namespace Imageboard\Tests\Functional\Controller\Admin;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Command\CommandDispatcher;
 use Imageboard\Controller\Admin\BanController;
 use Imageboard\Exception\{AccessDeniedException, NotFoundException};
-use Imageboard\Model\{Ban, CurrentUserInterface, User};
-use Imageboard\Query\QueryDispatcher;
-use Imageboard\Service\ConfigService;
-use Imageboard\Service\RendererService;
-use PHPUnit\Framework\TestCase;
+use Imageboard\Model\Ban;
+use Imageboard\Repositories\{BanRepository};
+use Imageboard\Service\{
+  ConfigService,
+  BanService,
+  RendererService
+};
+use Imageboard\Tests\Functional\TestWithUsers;
 
-final class BanControllerTest extends TestCase
+final class BanControllerTest extends TestWithUsers
 {
   /** @var BanController */
   protected $controller;
 
+  /** @var BanService */
+  protected $service;
+
   function setUp(): void
   {
-    global $container;
+    parent::setUp();
 
-    Ban::truncate();
-    User::truncate();
+    global $database;
+
+    $connection = $database->getConnection();
+    $builder = $connection->createQueryBuilder();
+    $builder->delete('users')->execute();
 
     $config = new ConfigService();
-    $command_dispatcher = new CommandDispatcher($container);
-    $query_dispatcher = new QueryDispatcher($container);
-    $renderer = new RendererService($config);
+    $bans = $config->get('DBBANS', 'bans');
+    $builder->delete($bans)->execute();
 
+    $repository = new BanRepository($config, $database);
+    $this->service = new BanService(
+      $repository,
+      $this->modlog_service,
+      $this->user_service
+    );
+
+    $renderer = new RendererService($config);
 
     $this->controller = new BanController(
       $config,
-      $command_dispatcher,
-      $query_dispatcher,
+      $repository,
+      $this->service,
+      $this->user_service,
       $renderer
     );
   }
 
-  protected function createAnonymous(): User
-  {
-    global $container;
-
-    $user = User::anonymous();
-    $container->registerInstance(CurrentUserInterface::class, $user);
-
-    return $user;
-  }
-
-  protected function createUser(): User
-  {
-    global $container;
-
-    $user = User::createUser('user@example.com', 'user@example.com', User::ROLE_USER);
-    $container->registerInstance(CurrentUserInterface::class, $user);
-
-    return $user;
-  }
-
-  protected function createAdmin(): User
-  {
-    global $container;
-
-    $user = User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
-    $container->registerInstance(CurrentUserInterface::class, $user);
-
-    return $user;
-  }
-
   protected function createBan(): Ban
   {
-    return Ban::createBan('123.0.0.1', 60 * 60, 'Test');
+    return $this->service->create('123.0.0.1', 60 * 60, 'Test');
   }
 
   function test_list_asAnonymous_shouldThrow(): void
@@ -87,6 +73,7 @@ final class BanControllerTest extends TestCase
   function test_list_asUser_shouldThrow(): void
   {
     $user = $this->createUser();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/bans'))
       ->withAttribute('user', $user);
 
@@ -98,6 +85,7 @@ final class BanControllerTest extends TestCase
   function test_list_asAdmin_shouldReturnContent(): void
   {
     $user = $this->createAdmin();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/bans'))
       ->withAttribute('user', $user);
 
@@ -121,6 +109,7 @@ final class BanControllerTest extends TestCase
   function test_createForm_asUser_shouldThrow(): void
   {
     $user = $this->createUser();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/bans/create'))
       ->withAttribute('user', $user);
 
@@ -132,6 +121,7 @@ final class BanControllerTest extends TestCase
   function test_createForm_asAdmin_shouldReturnContent(): void
   {
     $user = $this->createAdmin();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/bans/create'))
       ->withAttribute('user', $user);
 
@@ -161,6 +151,7 @@ final class BanControllerTest extends TestCase
   function test_create_asUser_shouldThrow(): void
   {
     $user = $this->createUser();
+    $_SESSION['user'] = $user->id;
     $data = [
       'ip' => '123.0.0.1',
       'expires_in' => 60 * 60,
@@ -178,6 +169,7 @@ final class BanControllerTest extends TestCase
   function test_create_asAdmin_shouldCreateAndReturnRedirect(): void
   {
     $user = $this->createAdmin();
+    $_SESSION['user'] = $user->id;
     $data = [
       'ip' => '123.0.0.1',
       'expires_in' => 60 * 60,
@@ -188,9 +180,6 @@ final class BanControllerTest extends TestCase
       ->withParsedBody($data);
 
     $response = $this->controller->create($request);
-
-    $item = Ban::where('ip', $data['ip'])->first();
-    $this->assertNotNull($item);
 
     $status = $response->getStatusCode();
     $this->assertEquals(302, $status);
@@ -212,6 +201,7 @@ final class BanControllerTest extends TestCase
   {
     $item = $this->createBan();
     $user = $this->createUser();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', "/admin/bans/{$item->id}/delete"))
       ->withAttribute('user', $user);
 
@@ -224,13 +214,11 @@ final class BanControllerTest extends TestCase
   {
     $item = $this->createBan();
     $user = $this->createAdmin();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', "/admin/bans/{$item->id}/delete"))
       ->withAttribute('user', $user);
 
     $response = $this->controller->delete($request, ['id' => $item->id]);
-
-    $item = Ban::find($item->id);
-    $this->assertNull($item);
 
     $status = $response->getStatusCode();
     $this->assertEquals(302, $status);
@@ -240,6 +228,7 @@ final class BanControllerTest extends TestCase
   {
     $item_id = 1;
     $user = $this->createAdmin();
+    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', "/admin/bans/$item_id/delete"))
       ->withAttribute('user', $user);
 

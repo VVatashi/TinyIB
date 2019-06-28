@@ -6,9 +6,11 @@ use Doctrine\DBAL\Schema\Schema;
 
 class CreateModLog implements Migration
 {
+  const TABLE = 'mod_log';
+
   function apply(Schema $schema)
   {
-    $table = $schema->createTable('mod_log');
+    $table = $schema->createTable(static::TABLE);
     $table->addColumn('id', 'integer', ['autoincrement' => true]);
     $table->addColumn('message', 'string');
     $table->addColumn('created_at', 'integer');
@@ -23,6 +25,6 @@ class CreateModLog implements Migration
 
   function revert(Schema $schema)
   {
-    $schema->dropTable('mod_log');
+    $schema->dropTable(static::TABLE);
   }
 }
