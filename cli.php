@@ -35,11 +35,7 @@ $commands['serve'] = function (array $args) use ($color) {
 
 $commands['help'] = function() use ($color) {
   $write_command = function($command, string $description, $tabs_count = 1) use ($color) {
-    $tabs = "";
-    for($i = 0; $i < $tabs_count; $i++) {
-      $tabs .= "\t";
-    }
-
+    $tabs = str_repeat("\t", $tabs_count);
     print("{$color("green")}{$command} $tabs {$color("white")}{$description}\n");
   };
 
@@ -81,7 +77,7 @@ $commands['migration:apply'] = function (array $args) use ($color) {
   $database = new DatabaseService($config);
   $migrations = new MigrationService($database);
   if (!$migrations->apply($migration)) {
-    print("{$color("red")}Migration {$color("white")}$migration {$color("red")}Mis not found or already applied\n");
+    print("{$color("red")}Migration {$color("white")}$migration {$color("red")}is not found or already applied\n");
   }
 };
 
