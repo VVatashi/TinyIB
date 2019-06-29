@@ -139,6 +139,7 @@ class PostService
       'tripcode'      => $post->tripcode,
       'subject'       => $post->subject,
       'message'       => $post->message,
+      'message_tree'  => $post->getMessageTree(),
       'file'          => $post->file,
       'file_hex'      => $post->file_hex,
       'file_original' => $post->file_original,

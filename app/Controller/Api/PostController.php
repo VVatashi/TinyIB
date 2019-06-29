@@ -4,7 +4,6 @@ namespace Imageboard\Controller\Api;
 
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Controller\ControllerInterface;
-use Imageboard\Repositories\PostRepository;
 use Imageboard\Service\{PostService, UserService};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 

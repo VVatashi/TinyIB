@@ -4,7 +4,22 @@ namespace Imageboard\Model;
 
 use Imageboard\Exception\ValidationException;
 use Imageboard\Service\ConfigService;
-use VVatashi\BBCode\{Parser, TagDef};
+use VVatashi\BBCode\{Parser, TagDef, Node\Node, Node\TagNode, Node\TextNode};
+
+class TreeParser extends Parser {
+  /**
+   * Parses input string.
+   *
+   * @param string $text
+   *
+   * @return Node[]
+   */
+  public function getTree(string $text): array {
+    $tokens = $this->tokenizer->tokenize($text);
+    $segments = $this->createSegments($tokens);
+    return $this->createTree($segments);
+  }
+}
 
 /**
  * @property-read int    $id
@@ -426,19 +441,20 @@ class Post extends Model
     }, $message);
   }
 
-  function getMessageFormatted(): string
-  {
-    // Convert Wakabamark to BBCodes.
-    $patterns = [
-      '/\*\*(.*?)\*\*/si' => '[b]\\1[/b]',
-      '/\*(.*?)\*/si'     => '[i]\\1[/i]',
-      '/~~(.*?)~~/si'     => '[s]\\1[/s]',
-      '/%%(.*?)%%/si'     => '[spoiler]\\1[/spoiler]',
-    ];
+  protected static function convertWakabamarkToBBCode(string $message): string {
+    static $patterns = [];
+    if (empty($patterns)) {
+      $patterns = [
+        '/\*\*(.*?)\*\*/si' => '[b]\\1[/b]',
+        '/\*(.*?)\*/si'     => '[i]\\1[/i]',
+        '/~~(.*?)~~/si'     => '[s]\\1[/s]',
+        '/%%(.*?)%%/si'     => '[spoiler]\\1[/spoiler]',
+      ];
+    }
 
     $flags = PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE;
     $rawContentPattern = '/(\[code\].+?\[\/code\])/';
-    $segments = preg_split($rawContentPattern, $this->message, -1, $flags);
+    $segments = preg_split($rawContentPattern, $message, -1, $flags);
     $segments = array_map(function ($segment) use ($patterns, $rawContentPattern) {
       $matches = [];
       if (!preg_match($rawContentPattern, $segment, $matches)) {
@@ -448,36 +464,89 @@ class Post extends Model
         return $segment;
       }
     }, $segments);
-    $message = implode('', $segments);
 
-    // Process BBCodes.
-    $parser = new Parser([
-      new TagDef('b', ['outputFormat' => '<strong>{content}</strong>']),
-      new TagDef('i', ['outputFormat' => '<em>{content}</em>']),
-      new TagDef('u', ['outputFormat' => '<span class="markup__underline">{content}</span>']),
-      new TagDef('s', ['outputFormat' => '<del>{content}</del>']),
-      new TagDef('sub'),
-      new TagDef('sup'),
-      new TagDef('code', [
-        'outputFormat' => '<code>{content}</code>',
-        'rawContent' => true,
-      ]),
-      new TagDef('spoiler', ['outputFormat' => '<span class="markup__spoiler">{content}</span>']),
-      new TagDef('rp',      ['outputFormat' => '<span class="markup__rp">{content}</span>']),
-      new TagDef('color', [
-        'attributePattern' =>
-'/
-  #
-  (?:
-      [0-9a-fA-F]{3}
-  ){1,2}
-/x',
-        'outputFormat' => '<span style="color: {attribute};">{content}</span>',
-      ]),
-      new TagDef('quote', ['outputFormat' => '<span class="markup__quote">{content}</span>']),
-    ]);
+    return implode('', $segments);
+  }
+
+  protected static function getBBCodes(): array {
+    static $bbcodes = [];
+    if (empty($bbcodes)) {
+      $bbcodes = [
+        new TagDef('b', ['outputFormat' => '<strong>{content}</strong>']),
+        new TagDef('i', ['outputFormat' => '<em>{content}</em>']),
+        new TagDef('u', ['outputFormat' => '<span class="markup__underline">{content}</span>']),
+        new TagDef('s', ['outputFormat' => '<del>{content}</del>']),
+        new TagDef('sub'),
+        new TagDef('sup'),
+        new TagDef('code', [
+          'outputFormat' => '<code>{content}</code>',
+          'rawContent' => true,
+        ]),
+        new TagDef('spoiler', ['outputFormat' => '<span class="markup__spoiler">{content}</span>']),
+        new TagDef('rp',      ['outputFormat' => '<span class="markup__rp">{content}</span>']),
+        new TagDef('color', [
+          'attributePattern' =>
+          '/
+          #
+          (?:
+            [0-9a-fA-F]{3}
+          ){1,2}
+          /x',
+          'outputFormat' => '<span style="color: {attribute};">{content}</span>',
+        ]),
+        new TagDef('link', [
+          'attributePattern' => '/[^"]+/',
+          'outputFormat' => '<a href="{attribute}">{content}</a>',
+        ]),
+        new TagDef('quote', ['outputFormat' => '<span class="markup__quote">{content}</span>']),
+      ];
+    }
+
+    return $bbcodes;
+  }
+
+  function getMessageFormatted(): string {
+    $message = static::convertWakabamarkToBBCode($this->message);
+
+    $parser = new Parser(static::getBBCodes());
     $message = $parser->parse($message);
 
     return static::fixLinks($message);
+  }
+
+  protected static function processNode(Node $node): array {
+    $data = [];
+
+    if ($node instanceof TagNode) {
+      $data['type'] = 'tag';
+
+      $tag = $node->getTag();
+      $data['tag'] = $tag->getTagName();
+
+      $attribute = $tag->getAttribute();
+      if (!empty($attribute)) {
+        $data['attribute'] = $tag->getAttribute();
+      }
+
+      $data['children'] = array_map([Post::class, 'processNode'], $node->getChildren());
+    } elseif ($node instanceof TextNode) {
+      $data['type'] = 'text';
+      $data['text'] = html_entity_decode($node->getText());
+    }
+
+    return $data;
+  }
+
+  function getMessageTree(): array {
+    $message = str_replace("\r", '', $this->message);
+    $message = str_replace('<br>', "\n", $message);
+    $message = preg_replace('/<a href="([^"]+)">([^<]+)<\/a>/', '[link="$1"]$2[/link]', $message);
+
+    $message = static::convertWakabamarkToBBCode($message);
+
+    $parser = new TreeParser(static::getBBCodes());
+    $tree = $parser->getTree($message);
+
+    return array_map([Post::class, 'processNode'], $tree);
   }
 }
