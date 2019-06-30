@@ -42,7 +42,7 @@ class PostController implements ControllerInterface
     $message   = $data['message'] ?? '';
     $ip        = $_SERVER['REMOTE_ADDR'] ?? '';
     $user_id   = $this->user_service->getCurrentUserId();
-    $parent_id = (int)($data['parent_id'] ?? 0);
+    $parent_id = 0;
 
     try {
       $post = $this->post_service->create(
@@ -86,7 +86,7 @@ class PostController implements ControllerInterface
     $message   = $data['message'] ?? '';
     $ip        = $_SERVER['REMOTE_ADDR'] ?? '';
     $user_id   = $this->user_service->getCurrentUserId();
-    $parent_id = (int)($args['parent_id'] ?? 0);
+    $parent_id = (int)($args['id'] ?? 0);
 
     try {
       $post = $this->post_service->create(
