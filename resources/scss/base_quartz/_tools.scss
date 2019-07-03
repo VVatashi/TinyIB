@@ -20,6 +20,6 @@
   }
 
   &__button--active {
-    @extend .button:active;
+    @extend .button, :active;
   }
 }
