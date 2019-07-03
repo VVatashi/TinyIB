@@ -45,6 +45,21 @@ class EmbedController implements ControllerInterface
     return false;
   }
 
+  /** @api {get} /api/embed?url=:url Get embed data
+   * @apiName Get embed data
+   * @apiGroup embed
+   * @apiVersion 0.1.0
+   * @apiDescription Fetches data from the specified URL and returns it as is.
+   *  Used to proxy requests to external APIs, in order to avoid issues with CORS.
+   *
+   * @apiParam (Query) {String} url External API URL to fetch data from.
+   *
+   * @apiParamExample {json} Example
+   *  {
+   *    "url": "https://coub.com/api/v2/coubs/13246m"
+   *  }
+   */
+
   /**
    * Fetches a content from the URL.
    *

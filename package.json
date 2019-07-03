@@ -3,8 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "sass resources/scss:webroot/css && webpack --progress --hide-modules --config resources/build/admin.dev.js && webpack --progress --hide-modules --config resources/build/app.dev.js",
-    "build-prod": "sass --style=compressed --no-source-map resources/scss:webroot/css && webpack --progress --hide-modules --config resources/build/admin.prod.js && webpack --progress --hide-modules --config resources/build/app.prod.js"
+    "doc": "apidoc -i app/Controller/ -o doc/",
+    "build:styles": "sass resources/scss:webroot/css",
+    "build:admin": "webpack --progress --hide-modules --config resources/build/admin.dev.js",
+    "build:app": "webpack --progress --hide-modules --config resources/build/app.dev.js",
+    "build": "npm run build:styles && npm run build:admin && npm run build:app",
+    "build-prod:styles": "sass --style=compressed --no-source-map resources/scss:webroot/css",
+    "build-prod:admin": "webpack --progress --hide-modules --config resources/build/admin.prod.js",
+    "build-prod:app": "webpack --progress --hide-modules --config resources/build/app.prod.js",
+    "build-prod": "npm run build-prod:styles && npm run build-prod:admin && npm run build-prod:app"
   },
   "repository": {
     "type": "git",
@@ -15,6 +22,7 @@
     "@types/axios": "^0.14.0",
     "@types/luxon": "^0.5.3",
     "@vvatashi/color-picker": "^1.1.0",
+    "apidoc": "^0.17.7",
     "sass": "^1.22.2",
     "ts-loader": "^5.3.3",
     "typescript": "^3.3.3333",
@@ -26,7 +34,7 @@
     "webpack-merge": "^4.2.1"
   },
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.19.0",
     "luxon": "^1.11.3",
     "vue": "^2.6.8"
   }

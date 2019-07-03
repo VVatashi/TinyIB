@@ -51,6 +51,54 @@ class TokenController implements ControllerInterface
   }
 
   /**
+   * @api {post} /api/auth Create auth token
+   * @apiName Create auth token
+   * @apiGroup token
+   * @apiVersion 0.1.0
+   * @apiDescription Creates new auth token.
+   *
+   * @apiParam (Body) {String} email    User E-Mail.
+   * @apiParam (Body) {String} password User password.
+   *
+   * @apiParamExample {json} Example
+   *  {
+   *    "email":    "user@example.com",
+   *    "password": "12345678"
+   *  }
+   *
+   * @apiError (Error 400) {String} error Error message.
+   *
+   * @apiErrorExample {json} User not found
+   *  {
+   *    "error": "User with this email address is not exists"
+   *  }
+   *
+   * @apiErrorExample {json} Incorrect password
+   *  {
+   *    "error": "Incorrect password"
+   *  }
+   *
+   * @apiSuccess (Success 200) {String} token      Created token.
+   * @apiSuccess (Success 200) {Number} created_at Token creation timestamp.
+   * @apiSuccess (Success 200) {Number} expires_at Token expiration timestamp.
+   * @apiSuccess (Success 200) {Number} expires_in Token time to live in seconds.
+   * @apiSuccess (Success 200) {Number} user_id    User ID.
+   * @apiSuccess (Success 200) {String} user_email User E-Mail.
+   * @apiSuccess (Success 200) {Number} user_role  User role ID.
+   *
+   * @apiSuccessExample {json} Example
+   *  {
+   *    "token":      "q1vBBTXUAtp3JNMc",
+   *    "created_at": 1562148385,
+   *    "expires_at": 1562151985,
+   *    "expires_in": 3600,
+   *    "user_id":    1,
+   *    "user_email": "user@example.com",
+   *    "user_role":  2
+   *  }
+   */
+
+  /**
    * Creates auth token.
    *
    * @param ServerRequestInterface $request
@@ -80,6 +128,47 @@ class TokenController implements ControllerInterface
     $view_model = $this->mapToViewModel($token, $user);
     return new Response(201, [], json_encode($view_model));
   }
+
+  /**
+   * @api {get} /api/auth Get current auth token info
+   * @apiName Get current auth token info
+   * @apiGroup token
+   * @apiVersion 0.1.0
+   * @apiDescription Returns info about current auth token.
+   *
+   * @apiHeader {String} X-Token Auth token.
+   *
+   * @apiHeaderExample {json} Example
+   *  {
+   *    "X-Token": "q1vBBTXUAtp3JNMc"
+   *  }
+   *
+   * @apiError (Error 404) {String} error Error message.
+   *
+   * @apiErrorExample {json} Token not found
+   *  {
+   *    "error": "Not Found"
+   *  }
+   *
+   * @apiSuccess (Success 200) {String} token      Token.
+   * @apiSuccess (Success 200) {Number} created_at Token creation timestamp.
+   * @apiSuccess (Success 200) {Number} expires_at Token expiration timestamp.
+   * @apiSuccess (Success 200) {Number} expires_in Token time to live in seconds.
+   * @apiSuccess (Success 200) {Number} user_id    User ID.
+   * @apiSuccess (Success 200) {String} user_email User E-Mail.
+   * @apiSuccess (Success 200) {Number} user_role  User role ID.
+   *
+   * @apiSuccessExample {json} Example
+   *  {
+   *    "token":      "q1vBBTXUAtp3JNMc",
+   *    "created_at": 1562148385,
+   *    "expires_at": 1562151985,
+   *    "expires_in": 2164,
+   *    "user_id":    1,
+   *    "user_email": "user@example.com",
+   *    "user_role":  2
+   *  }
+   */
 
   /**
    * Returns current auth token info.
