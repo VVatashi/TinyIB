@@ -2,6 +2,8 @@
 
 namespace Imageboard;
 
+use Imageboard\Service\SessionService;
+
 /**
  * Script for generation of CAPTCHAs
  *
@@ -53,7 +55,7 @@ class SimpleCaptcha
     public $maxWordLength = 6;
 
     /** Sessionname to store the original text */
-    public $session_var = 'tinyibcaptcha';
+    public $session_var = 'captcha';
 
     /** Background color in RGB-array */
     public $backgroundColor = array(254, 254, 254);
@@ -114,8 +116,13 @@ class SimpleCaptcha
     /** GD image */
     public $im;
 
-    public function __construct($config = array())
-    {
+    /** @var SessionService */
+    protected $session;
+
+    public function __construct(
+      SessionService $session
+    ) {
+      $this->session = $session;
     }
 
     public function CreateImage()
@@ -130,7 +137,7 @@ class SimpleCaptcha
         $fontcfg = $this->fonts[array_rand($this->fonts)];
         $this->WriteText($text, $fontcfg);
 
-        $_SESSION[$this->session_var] = $text;
+        $this->session->set($this->session_var, $text);
 
         /** Transformations */
         if (!empty($this->lineWidth)) {

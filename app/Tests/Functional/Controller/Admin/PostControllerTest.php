@@ -76,7 +76,6 @@ final class PostControllerTest extends TestWithUsers
       $ban_repository,
       $this->post_repository,
       $this->modlog_service,
-      $this->user_service,
       $cryptography,
       $file,
       $thumbnail,
@@ -93,7 +92,7 @@ final class PostControllerTest extends TestWithUsers
       $config,
       $this->post_repository,
       $post_service,
-      $this->user_service,
+      $this->session,
       $renderer
     );
   }
@@ -134,7 +133,6 @@ final class PostControllerTest extends TestWithUsers
   function test_list_asUser_shouldThrow(): void
   {
     $user = $this->createUser();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/posts'))
       ->withAttribute('user', $user);
 
@@ -146,7 +144,6 @@ final class PostControllerTest extends TestWithUsers
   function test_list_asAdmin_shouldReturnContent(): void
   {
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/posts'))
       ->withAttribute('user', $user);
 
@@ -159,30 +156,35 @@ final class PostControllerTest extends TestWithUsers
   function test_show_asAnonymous_shouldThrow(): void
   {
     $item = $this->createPost();
+    $user = $this->createAnonymous();
+    $request = (new ServerRequest('GET', "/admin/posts/{$item->id}"))
+      ->withAttribute('user', $user);
 
     $this->expectException(AccessDeniedException::class);
 
-    $this->controller->show(['id' => $item->id]);
+    $this->controller->show($request, ['id' => $item->id]);
   }
 
   function test_show_asUser_shouldThrow(): void
   {
     $item = $this->createPost();
     $user = $this->createUser();
-    $_SESSION['user'] = $user->id;
+    $request = (new ServerRequest('GET', "/admin/posts/{$item->id}"))
+      ->withAttribute('user', $user);
 
     $this->expectException(AccessDeniedException::class);
 
-    $this->controller->show(['id' => $item->id]);
+    $this->controller->show($request, ['id' => $item->id]);
   }
 
   function test_show_asAdmin_shouldReturnContent(): void
   {
     $item = $this->createPost();
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
+    $request = (new ServerRequest('GET', "/admin/posts/{$item->id}"))
+      ->withAttribute('user', $user);
 
-    $content = $this->controller->show(['id' => $item->id]);
+    $content = $this->controller->show($request, ['id' => $item->id]);
 
     $this->assertIsString($content);
     $this->assertNotEmpty($content);
@@ -192,11 +194,12 @@ final class PostControllerTest extends TestWithUsers
   {
     $item_id = 1;
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
+    $request = (new ServerRequest('GET', "/admin/posts/{$item_id}"))
+      ->withAttribute('user', $user);
 
     $this->expectException(NotFoundException::class);
 
-    $this->controller->show(['id' => $item_id]);
+    $this->controller->show($request, ['id' => $item_id]);
   }
 
   function test_delete_asAnonymous_shouldThrow(): void
@@ -215,7 +218,6 @@ final class PostControllerTest extends TestWithUsers
   {
     $item = $this->createPost();
     $user = $this->createUser();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', "/admin/posts/{$item->id}/delete"))
       ->withAttribute('user', $user);
 
@@ -228,7 +230,6 @@ final class PostControllerTest extends TestWithUsers
   {
     $item = $this->createPost();
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', "/admin/posts/{$item->id}/delete"))
       ->withAttribute('user', $user);
 
@@ -242,7 +243,6 @@ final class PostControllerTest extends TestWithUsers
   {
     $item_id = 1;
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', "/admin/posts/$item_id/delete"))
       ->withAttribute('user', $user);
 

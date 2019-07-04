@@ -70,7 +70,6 @@ final class PostControllerTest extends TestWithUsers
       $ban_repository,
       $this->post_repository,
       $this->modlog_service,
-      $this->user_service,
       $cryptography,
       $file,
       $thumbnail,
@@ -118,6 +117,7 @@ final class PostControllerTest extends TestWithUsers
       'message' => 'Message',
     ];
     $request = (new ServerRequest('POST', '/api/threads'))
+      ->withAttribute('user', $this->createAnonymous())
       ->withParsedBody($data);
 
     $response = $this->controller->createThread($request);
@@ -138,6 +138,7 @@ final class PostControllerTest extends TestWithUsers
       'message' => 'Message',
     ];
     $request = (new ServerRequest('POST', "/api/threads/$id/posts"))
+      ->withAttribute('user', $this->createAnonymous())
       ->withParsedBody($data);
 
     $response = $this->controller->createPost($request, ['id' => $id]);
@@ -169,7 +170,9 @@ final class PostControllerTest extends TestWithUsers
       $this->createPost($id);
     }
 
-    $request = (new ServerRequest('GET', "/api/threads/$id/posts"));
+    $request = (new ServerRequest('GET', "/api/threads/$id/posts"))
+      ->withAttribute('user', $this->createAnonymous());
+
     $items = $this->controller->threadPosts($request, ['id' => $id]);
 
     $this->assertIsArray($items);

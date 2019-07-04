@@ -4,13 +4,13 @@ namespace Imageboard\Controller\Admin;
 
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Exception\AccessDeniedException;
-use Imageboard\Service\RendererService;
+use Imageboard\Service\{SessionService, RendererService};
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 
 trait CrudEditTrait {
-  abstract protected function checkAccess(): bool;
+  abstract protected function checkAccess(ServerRequestInterface $request): bool;
 
-  abstract protected function editModel(array $data);
+  abstract protected function editModel(ServerRequestInterface $request);
 
   abstract protected function getListUrl(): string;
 
@@ -20,11 +20,14 @@ trait CrudEditTrait {
 
   abstract protected function loadItem(int $id): array;
 
+  abstract protected function getSession(): SessionService;
+
   abstract protected function getRenderer(): RendererService;
 
   /**
    * Returns item edit form.
    *
+   * @param ServerRequestInterface $request
    * @param array Path arguments.
    *
    * @return string Response HTML.
@@ -34,22 +37,24 @@ trait CrudEditTrait {
    * @throws NotFoundException
    *   If item with the specified ID is not found.
    */
-  function editForm(array $args): string
+  function editForm(ServerRequestInterface $request, array $args): string
   {
-    if (!$this->checkAccess()) {
+    if (!$this->checkAccess($request)) {
       throw new AccessDeniedException('You are not allowed to access this page');
     }
+
+    /** @var SessionService $session */
+    $session = $this->getSession();
 
     // Restore form data from a session.
     $id = (int)($args['id'] ?? 0);
     $key = $this->getEditUrl() . ':item';
-    $item = $_SESSION[$key] ?? $this->loadItem($id);
-    unset($_SESSION[$key]);
+    $item = $session->get($key, $this->loadItem($id));
+    $session->delete($key);
 
     // Show error message from a session.
     $key = $this->getEditUrl() . ':error';
-    $error = $_SESSION[$key] ?? null;
-    unset($_SESSION[$key]);
+    $error = $session->delete($key);
 
     $renderer = $this->getRenderer();
     return $renderer->render($this->getFormTemplate(), [
@@ -73,22 +78,23 @@ trait CrudEditTrait {
    */
   function edit(ServerRequestInterface $request, array $args): ResponseInterface
   {
-    if (!$this->checkAccess()) {
+    if (!$this->checkAccess($request)) {
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 
-    $data = $request->getParsedBody();
-
     try {
-      $this->editModel($data);
+      $this->editModel($request);
     } catch (Exception $exception) {
+      /** @var SessionService $session */
+      $session = $this->getSession();
+
       // Store form data in a session.
       $key = $this->getEditUrl() . ':item';
-      $_SESSION[$key] = $data;
+      $session->$key = $request->getParsedBody();
 
       // Store error message in a session.
       $key = $this->getEditUrl() . ':error';
-      $_SESSION[$key] = $exception->getMessage();
+      $session->$key = $exception->getMessage();
 
       $id = (int)($args['id'] ?? 0);
       return new Response(302, [

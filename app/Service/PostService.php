@@ -39,9 +39,6 @@ class PostService
   /** @var ModLogService */
   protected $modlog_service;
 
-  /** @var UserService */
-  protected $user_service;
-
   /** @var CryptographyService */
   protected $cryptography;
 
@@ -77,7 +74,6 @@ class PostService
    * @param BanRepository       $ban_repository
    * @param PostRepository      $post_repository
    * @param ModLogService       $modlog_service
-   * @param UserService         $user_service
    * @param CryptographyService $cryptography
    * @param FileService         $file
    * @param ThumbnailService    $thubmnail
@@ -95,7 +91,6 @@ class PostService
     BanRepository       $ban_repository,
     PostRepository      $post_repository,
     ModLogService       $modlog_service,
-    UserService         $user_service,
     CryptographyService $cryptography,
     FileService         $file,
     ThumbnailService    $thubmnail,
@@ -111,7 +106,6 @@ class PostService
     $this->ban_repository  = $ban_repository;
     $this->post_repository = $post_repository;
     $this->modlog_service  = $modlog_service;
-    $this->user_service    = $user_service;
     $this->cryptography    = $cryptography;
     $this->file            = $file;
     $this->thubmnail       = $thubmnail;
@@ -705,13 +699,13 @@ class PostService
   /**
    * Deletes post or thread by ID.
    *
-   * @param int  $id
-   * @param bool $add_to_modlog
+   * @param int       $id
+   * @param null|User $user User who deletes a post.
    *
    * @throws NotFoundException
    * @throws AccessDeniedException
    */
-  function delete(int $id, bool $add_to_modlog = true) {
+  function delete(int $id, $user = null) {
     $board = $this->config->get("BOARD");
     $post = $this->post_repository->getById($id);
     if ($post === null) {
@@ -730,9 +724,8 @@ class PostService
     $this->cache->deletePattern($board . ":thread:$thread_id:*");
     $this->cache->deletePattern($board . ':page:*');
 
-    if ($add_to_modlog) {
+    if (isset($user)) {
       // Add entry to the modlog.
-      $user = $this->user_service->getCurrentUser();
       $this->modlog_service->create("User {$user->email} has deleted post {$id}.", $user->id);
     }
   }

@@ -9,7 +9,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 trait CrudListTrait
 {
-  abstract protected function checkAccess(): bool;
+  abstract protected function checkAccess(ServerRequestInterface $request): bool;
 
   abstract protected function getItemsPerPage(): int;
 
@@ -33,7 +33,7 @@ trait CrudListTrait
    */
   function list(ServerRequestInterface $request): string
   {
-    if (!$this->checkAccess()) {
+    if (!$this->checkAccess($request)) {
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 
@@ -83,7 +83,7 @@ trait CrudListTrait
    */
   function ajaxList(ServerRequestInterface $request): string
   {
-    if (!$this->checkAccess()) {
+    if (!$this->checkAccess($request)) {
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 

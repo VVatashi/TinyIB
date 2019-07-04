@@ -7,9 +7,11 @@ use Imageboard\Repositories\Repository;
 use Imageboard\Service\{
   ConfigService,
   UserService,
-  RendererService
+  RendererService,
+  SessionService
 };
 use Imageboard\Repositories\UserRepository;
+use Psr\Http\Message\ServerRequestInterface;
 
 class UserController extends AdminController
 {
@@ -30,17 +32,19 @@ class UserController extends AdminController
    * @param ConfigService   $config
    * @param UserRepository  $repository
    * @param UserService     $service
+   * @param SessionService  $session
    * @param RendererService $renderer
    */
   function __construct(
-    ConfigService     $config,
-    UserRepository    $repository,
-    UserService       $service,
-    RendererService   $renderer
+    ConfigService   $config,
+    UserRepository  $repository,
+    UserService     $service,
+    SessionService  $session,
+    RendererService $renderer
   ) {
     parent::__construct(
       $config,
-      $service,
+      $session,
       $renderer
     );
 
@@ -82,10 +86,10 @@ class UserController extends AdminController
 
   protected function getNewItem(): array {
     return [
-      'id'        => 0,
-      'email'     => '',
-      'password'  => '',
-      'role'      => 0,
+      'id'       => 0,
+      'email'    => '',
+      'password' => '',
+      'role'     => 0,
     ];
   }
 
@@ -97,31 +101,38 @@ class UserController extends AdminController
     }
 
     return [
-      'id'        => $user->id,
-      'email'     => $user->email,
-      'password'  => '',
-      'role'      => $user->role,
+      'id'       => $user->id,
+      'email'    => $user->email,
+      'password' => '',
+      'role'     => $user->role,
     ];
   }
 
-  protected function createModel(array $data) {
-    $email = $data['email'] ?? '';
-    $password = $data['password'] ?? '';
-    $role = $data['role'] ?? 0;
+  protected function createModel(ServerRequestInterface $request) {
+    $data = $request->getParsedBody();
 
-    return $this->service->create($email, $password, $role);
+    $email    = $data['email'] ?? '';
+    $password = $data['password'] ?? '';
+    $role     = $data['role'] ?? 0;
+
+    $user = $request->getAttribute('user');
+    return $this->service->create($email, $password, $role, $user);
   }
 
-  protected function editModel(array $data) {
-    $id = (int)($data['id'] ?? 0);
-    $email = $data['email'] ?? '';
-    $password = $data['password'] ?? '';
-    $role = $data['role'] ?? 0;
+  protected function editModel(ServerRequestInterface $request) {
+    $data = $request->getParsedBody();
 
-    return $this->service->edit($id, $email, $password, $role);
+    $id       = (int)($data['id'] ?? 0);
+    $email    = $data['email'] ?? '';
+    $password = $data['password'] ?? '';
+    $role     = $data['role'] ?? 0;
+
+    $user = $request->getAttribute('user');
+    return $this->service->edit($id, $email, $password, $role, $user);
   }
 
-  protected function deleteModel(int $id) {
-    return $this->service->delete($id);
+  protected function deleteModel(ServerRequestInterface $request, int $id) {
+    $user = $request->getAttribute('user');
+    return $this->service->delete($id, $user);
   }
 }

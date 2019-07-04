@@ -6,7 +6,7 @@ use GuzzleHttp\Psr7\ServerRequest;
 use Imageboard\Cache\NoCache;
 use Imageboard\Controller\Admin\SystemController;
 use Imageboard\Exception\AccessDeniedException;
-use Imageboard\Service\{ConfigService, SystemService, RendererService};
+use Imageboard\Service\{ConfigService, SystemService, RendererService, SessionService};
 use Imageboard\Tests\Functional\TestWithUsers;
 
 final class SystemControllerTest extends TestWithUsers
@@ -28,12 +28,13 @@ final class SystemControllerTest extends TestWithUsers
     $cache = new NoCache();
     $service = new SystemService($cache, $config);
 
+    $session = new SessionService();
     $renderer = new RendererService($config);
 
     $this->controller = new SystemController(
       $config,
       $service,
-      $this->user_service,
+      $session,
       $renderer
     );
   }
@@ -52,7 +53,6 @@ final class SystemControllerTest extends TestWithUsers
   function test_index_asUser_shouldThrow() : void
   {
     $user = $this->createUser();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/system'))
       ->withAttribute('user', $user);
 
@@ -64,7 +64,6 @@ final class SystemControllerTest extends TestWithUsers
   function test_index_asAdmin_shouldReturnContent() : void
   {
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/system'))
       ->withAttribute('user', $user);
 
@@ -88,7 +87,6 @@ final class SystemControllerTest extends TestWithUsers
   function test_clearCache_asUser_shouldThrow() : void
   {
     $user = $this->createUser();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', '/admin/system/clear-cache'))
       ->withAttribute('user', $user);
 
@@ -100,7 +98,6 @@ final class SystemControllerTest extends TestWithUsers
   function test_clearCache_asAdmin_shouldReturnRedirect() : void
   {
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', '/admin/system/clear-cache'))
       ->withAttribute('user', $user);
 

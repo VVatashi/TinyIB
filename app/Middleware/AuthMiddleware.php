@@ -3,7 +3,11 @@
 namespace Imageboard\Middleware;
 
 use Imageboard\Repositories\UserRepository;
-use Imageboard\Service\{RendererService, TokenService, UserService};
+use Imageboard\Service\{
+  RendererService,
+  TokenService,
+  UserService
+};
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
 
@@ -27,15 +31,15 @@ class AuthMiddleware implements MiddlewareInterface
   protected $renderer;
 
   public function __construct(
-    UserRepository $user_repository,
-    UserService $user_service,
-    TokenService $token_service,
+    UserRepository  $user_repository,
+    UserService     $user_service,
+    TokenService    $token_service,
     RendererService $renderer
   ) {
     $this->user_repository = $user_repository;
-    $this->user_service = $user_service;
-    $this->token_service = $token_service;
-    $this->renderer = $renderer;
+    $this->user_service    = $user_service;
+    $this->token_service   = $token_service;
+    $this->renderer        = $renderer;
   }
 
   /**
@@ -45,22 +49,15 @@ class AuthMiddleware implements MiddlewareInterface
     ServerRequestInterface $request,
     RequestHandlerInterface $handler
   ): ResponseInterface {
-    if (isset($_SESSION['user'])) {
-      // Try to load user.
-      $user = $this->user_service->getCurrentUser();
-    } elseif ($request->hasHeader('X-Token')) {
+    $user = $this->user_service->getCurrentUser();
+    if ($request->hasHeader('X-Token')) {
       // Try to auth with a token.
       $token_str = $request->getHeaderLine('X-Token');
       $token = $this->token_service->getByToken($token_str);
       if (isset($token)) {
-        $user = $token->user;
+        $user_id = $token->user_id;
+        $user = $this->user_repository->getById($user_id);
       }
-    }
-
-    // If there is no user ID in the session,
-    // store anonymous user instance in the request.
-    if (!isset($user)) {
-      $user = $this->user_service->getAnonymous();
     }
 
     // Store current user to a Twig global variable.

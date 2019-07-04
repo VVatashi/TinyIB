@@ -14,8 +14,8 @@ use Imageboard\Repositories\UserRepository;
 use Imageboard\Service\{
   ConfigService,
   DatabaseService,
-  RoutingService,
   RendererService,
+  RoutingService,
   TokenService,
   UserService
 };

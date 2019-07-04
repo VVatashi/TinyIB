@@ -8,7 +8,7 @@ class ThumbnailService
 {
   const DEFAULT_MIME_TYPE = 'application/octet-stream';
   const DEFAULT_EXTENSION = 'bin';
-  const AUDIO_THUMBNAIL = 'images/audio_thumbnail.png';
+  const AUDIO_THUMBNAIL   = 'images/audio_thumbnail.png';
 
   /** @var FileService */
   protected $file;

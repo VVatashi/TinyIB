@@ -5,9 +5,10 @@ namespace Imageboard\Controller\Admin;
 use Imageboard\Exception\{AccessDeniedException, NotFoundException};
 use Imageboard\Repositories\Repository;
 use Imageboard\Service\RendererService;
+use Psr\Http\Message\ServerRequestInterface;
 
 trait CrudShowTrait {
-  abstract protected function checkAccess(): bool;
+  abstract protected function checkAccess(ServerRequestInterface $request): bool;
 
   abstract protected function getRepository(): Repository;
 
@@ -18,6 +19,7 @@ trait CrudShowTrait {
   /**
    * Returns details page for a single item by id.
    *
+   * @param ServerRequestInterface $request
    * @param array $args
    *
    * @return string Response HTML.
@@ -27,9 +29,9 @@ trait CrudShowTrait {
    * @throws NotFoundException
    *   If item with the specified ID is not found.
    */
-  function show(array $args): string
+  function show(ServerRequestInterface $request, array $args): string
   {
-    if (!$this->checkAccess()) {
+    if (!$this->checkAccess($request)) {
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 

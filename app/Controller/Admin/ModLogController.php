@@ -3,7 +3,7 @@
 namespace Imageboard\Controller\Admin;
 
 use Imageboard\Repositories\{Repository, ModLogRepository};
-use Imageboard\Service\{ConfigService, UserService, RendererService};
+use Imageboard\Service\{ConfigService, RendererService, SessionService};
 
 class ModLogController extends AdminController
 {
@@ -33,18 +33,18 @@ class ModLogController extends AdminController
    *
    * @param ConfigService    $config
    * @param ModLogRepository $repository
-   * @param UserService      $user_service
+   * @param SessionService   $session
    * @param RendererService  $renderer
    */
   function __construct(
     ConfigService    $config,
     ModLogRepository $repository,
-    UserService      $user_service,
+    SessionService   $session,
     RendererService  $renderer
   ) {
     parent::__construct(
       $config,
-      $user_service,
+      $session,
       $renderer
     );
 

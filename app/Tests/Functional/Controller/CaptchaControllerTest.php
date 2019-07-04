@@ -4,7 +4,7 @@ namespace Imageboard\Tests\Functional\Controller;
 
 use GuzzleHttp\Psr7\ServerRequest;
 use Imageboard\Controller\CaptchaController;
-use Imageboard\Service\CaptchaService;
+use Imageboard\Service\{CaptchaService, SessionService};
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
@@ -15,8 +15,9 @@ final class CaptchaControllerTest extends TestCase
 
   function setUp(): void
   {
-    $service = new CaptchaService();
-    $this->controller = new CaptchaController($service);
+    $session = new SessionService();
+    $service = new CaptchaService($session);
+    $this->controller = new CaptchaController($service, $session);
   }
 
   function testCreateController(): void

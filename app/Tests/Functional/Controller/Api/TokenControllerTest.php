@@ -43,7 +43,7 @@ final class TokenControllerTest extends TestWithUsers
       'email' => 'test@example.com',
       'password' => 'test',
     ];
-    $this->user_service->create($data['email'], $data['password']);
+    $this->user_service->create($data['email'], $data['password'], 1);
     $request = (new ServerRequest('POST', '/api/auth'))
       ->withParsedBody($data);
 
@@ -55,7 +55,7 @@ final class TokenControllerTest extends TestWithUsers
 
   function test_token_shouldReturnItem(): void
   {
-    $user = $this->user_service->create('test@example.com', 'test');
+    $user = $this->user_service->create('test@example.com', 'test', 1);
     $token = $this->service->create($user->id);
     $request = (new ServerRequest('GET', '/api/auth'))
       ->withHeader('X-Token', $token->token);
@@ -67,7 +67,7 @@ final class TokenControllerTest extends TestWithUsers
 
   function test_token_revoked_shouldThrow(): void
   {
-    $user = $this->user_service->create('test@example.com', 'test');
+    $user = $this->user_service->create('test@example.com', 'test', 1);
     $token = $this->service->create($user->id);
     $this->service->revokeToken($token->token);
     $request = (new ServerRequest('GET', '/api/auth'))

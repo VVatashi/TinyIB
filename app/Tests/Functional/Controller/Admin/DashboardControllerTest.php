@@ -28,7 +28,7 @@ final class DashboardControllerTest extends TestWithUsers
 
     $this->controller = new DashboardController(
       $config,
-      $this->user_service,
+      $this->session,
       $renderer
     );
   }
@@ -47,7 +47,6 @@ final class DashboardControllerTest extends TestWithUsers
   function test_index_asUser_shouldThrow() : void
   {
     $user = $this->createUser();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin'))
       ->withAttribute('user', $user);
 
@@ -59,7 +58,6 @@ final class DashboardControllerTest extends TestWithUsers
   function test_index_asAdmin_shouldReturnContent() : void
   {
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin'))
       ->withAttribute('user', $user);
 

@@ -4,13 +4,13 @@ namespace Imageboard\Controller\Admin;
 
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Exception\AccessDeniedException;
-use Imageboard\Service\RendererService;
+use Imageboard\Service\{SessionService, RendererService};
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 
 trait CrudCreateTrait {
-  abstract protected function checkAccess(): bool;
+  abstract protected function checkAccess(ServerRequestInterface $request): bool;
 
-  abstract protected function createModel(array $data);
+  abstract protected function createModel(ServerRequestInterface $request);
 
   abstract protected function getListUrl(): string;
 
@@ -20,31 +20,37 @@ trait CrudCreateTrait {
 
   abstract protected function getNewItem(): array;
 
+  abstract protected function getSession(): SessionService;
+
   abstract protected function getRenderer(): RendererService;
 
   /**
    * Returns item create form.
+   *
+   * @param ServerRequestInterface $request
    *
    * @return string Response HTML.
    *
    * @throws AccessDeniedException
    *   If current user is not an admin.
    */
-  function createForm(): string
+  function createForm(ServerRequestInterface $request): string
   {
-    if (!$this->checkAccess()) {
+    if (!$this->checkAccess($request)) {
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 
+    /** @var SessionService $session */
+    $session = $this->getSession();
+
     // Restore form data from a session.
     $key = $this->getCreateUrl() . ':item';
-    $item = $_SESSION[$key] ?? $this->getNewItem();
-    unset($_SESSION[$key]);
+    $item = $session->get($key, $this->getNewItem());
+    $session->delete($key);
 
     // Show error message from a session.
     $key = $this->getCreateUrl() . ':error';
-    $error = $_SESSION[$key] ?? null;
-    unset($_SESSION[$key]);
+    $error = $session->delete($key);
 
     $renderer = $this->getRenderer();
     return $renderer->render($this->getFormTemplate(), [
@@ -65,22 +71,23 @@ trait CrudCreateTrait {
    */
   function create(ServerRequestInterface $request): ResponseInterface
   {
-    if (!$this->checkAccess()) {
+    if (!$this->checkAccess($request)) {
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 
-    $data = $request->getParsedBody();
-
     try {
-      $this->createModel($data);
+      $this->createModel($request);
     } catch (Exception $exception) {
+      /** @var SessionService $session */
+      $session = $this->getSession();
+
       // Store form data in a session.
       $key = $this->getCreateUrl() . ':item';
-      $_SESSION[$key] = $data;
+      $session->$key = $request->getParsedBody();
 
       // Store error message in a session.
       $key = $this->getCreateUrl() . ':error';
-      $_SESSION[$key] = $exception->getMessage();
+      $session->$key = $exception->getMessage();
 
       return new Response(302, [
         'Location' => $this->getCreateUrl(),

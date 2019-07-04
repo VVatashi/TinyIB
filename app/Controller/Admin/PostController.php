@@ -9,9 +9,10 @@ use Imageboard\Repositories\{
 use Imageboard\Service\{
   ConfigService,
   PostService,
-  UserService,
-  RendererService
+  RendererService,
+  SessionService
 };
+use Psr\Http\Message\ServerRequestInterface;
 
 class PostController extends AdminController
 {
@@ -31,18 +32,19 @@ class PostController extends AdminController
    * @param ConfigService   $config
    * @param PostRepository  $repository
    * @param PostService     $service
+   * @param SessionService  $session
    * @param RendererService $renderer
    */
   function __construct(
     ConfigService   $config,
     PostRepository  $repository,
     PostService     $service,
-    UserService     $user_service,
+    SessionService  $session,
     RendererService $renderer
   ) {
     parent::__construct(
       $config,
-      $user_service,
+      $session,
       $renderer
     );
 
@@ -74,12 +76,14 @@ class PostController extends AdminController
     return 100;
   }
 
-  protected function createModel(array $data) {
+  protected function createModel(ServerRequestInterface $request) {
+    $data = $request->getParsedBody();
+
     $name      = $data['name'] ?? '';
     $subject   = $data['subject'] ?? '';
     $message   = $data['message'] ?? '';
     $ip        = $_SERVER['REMOTE_ADDR'] ?? '';
-    $user_id   = $this->user_service->getCurrentUserId();
+    $user_id   = $request->getAttribute('user')->id;
     $parent_id = (int)($data['parent_id'] ?? 0);
 
     return $this->service->create(
@@ -94,7 +98,8 @@ class PostController extends AdminController
     );
   }
 
-  protected function deleteModel(int $id) {
-    return $this->service->delete($id);
+  protected function deleteModel(ServerRequestInterface $request, int $id) {
+    $user = $request->getAttribute('user');
+    return $this->service->delete($id, $user);
   }
 }

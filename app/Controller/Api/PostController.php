@@ -74,7 +74,7 @@ class PostController implements ControllerInterface
     $subject   = $data['subject'] ?? '';
     $message   = $data['message'] ?? '';
     $ip        = $_SERVER['REMOTE_ADDR'] ?? '';
-    $user_id   = $this->user_service->getCurrentUserId();
+    $user_id   = $request->getAttribute('user')->id;
     $parent_id = 0;
 
     try {
@@ -153,7 +153,7 @@ class PostController implements ControllerInterface
     $subject   = $data['subject'] ?? '';
     $message   = $data['message'] ?? '';
     $ip        = $_SERVER['REMOTE_ADDR'] ?? '';
-    $user_id   = $this->user_service->getCurrentUserId();
+    $user_id   = $request->getAttribute('user')->id;
     $parent_id = (int)($args['id'] ?? 0);
 
     try {

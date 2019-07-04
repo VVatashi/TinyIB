@@ -14,12 +14,17 @@ class UserService
   /** @var ModLogService */
   protected $modlog_service;
 
+  /** @var SessionService */
+  protected $session;
+
   function __construct(
     UserRepository $repository,
-    ModLogService $modlog_service
+    ModLogService  $modlog_service,
+    SessionService $session
   ) {
-    $this->repository = $repository;
+    $this->repository     = $repository;
     $this->modlog_service = $modlog_service;
+    $this->session        = $session;
   }
 
   /**
@@ -34,13 +39,16 @@ class UserService
    * @param int $role
    *   User role ID.
    *
+   * @param null|User $current
+   *   User who creates new user.
+   *
    * @return User
    *   User object instance.
    *
    * @throws ValidationException
    *   On validation errors.
    */
-  function create(string $email, string $password, int $role = 0): User
+  function create(string $email, string $password, int $role, $current = null): User
   {
     $existing = $this->repository->getByEmail($email);
     if (isset($existing)) {
@@ -59,17 +67,16 @@ class UserService
     $user = $this->repository->add($user);
 
     // Add entry to the modlog.
-    $current = $this->getCurrentUser();
-    if (!$current->isAnonymous()) {
+    if (isset($current)) {
       $this->modlog_service->create("User {$current->email} has created user $email.", $current->id);
     } else {
-      $this->modlog_service->create("User {$current->email} has registered.", $current->id);
+      $this->modlog_service->create("User $email has registered.");
     }
 
     return $user;
   }
 
-  function edit(int $user_id, string $email, string $password, int $role): User
+  function edit(int $user_id, string $email, string $password, int $role, $current = null): User
   {
     $user = $this->repository->getById($user_id);
     if (!isset($user)) {
@@ -85,14 +92,15 @@ class UserService
 
     $user = $this->repository->update($user);
 
-    // Add entry to the modlog.
-    $current = $this->getCurrentUser();
-    $this->modlog_service->create("User {$current->email} has edited user $email.", $current->id);
+    if (isset($current)) {
+      // Add entry to the modlog.
+      $this->modlog_service->create("User {$current->email} has edited user $email.", $current->id);
+    }
 
     return $user;
   }
 
-  function delete(int $id): User
+  function delete(int $id, $current = null): User
   {
     $user = $this->repository->getById($id);
     if (!isset($user)) {
@@ -101,9 +109,10 @@ class UserService
 
     $user = $this->repository->remove($user);
 
-    // Add entry to the modlog.
-    $current = $this->getCurrentUser();
-    $this->modlog_service->create("User {$current->email} has deleted user {$user->email}.", $current->id);
+    if (isset($current)) {
+      // Add entry to the modlog.
+      $this->modlog_service->create("User {$current->email} has deleted user {$user->email}.", $current->id);
+    }
 
     return $user;
   }
@@ -149,7 +158,7 @@ class UserService
       throw new ValidationException('Incorrect password');
     }
 
-    $_SESSION['user'] = $user->id;
+    $this->session->user = $user->id;
     return $user;
   }
 
@@ -158,7 +167,7 @@ class UserService
    */
   function logout()
   {
-    unset($_SESSION['user']);
+    $this->session->delete('user');
   }
 
   /**
@@ -166,7 +175,7 @@ class UserService
    */
   function getCurrentUserId(): int
   {
-    return $_SESSION['user'] ?? 0;
+    return $this->session->get('user', 0);
   }
 
   /**

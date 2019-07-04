@@ -30,7 +30,7 @@ final class ModLogControllerTest extends TestWithUsers
     $this->controller = new ModLogController(
       $config,
       $this->modlog_repository,
-      $this->user_service,
+      $this->session,
       $renderer
     );
   }
@@ -49,7 +49,6 @@ final class ModLogControllerTest extends TestWithUsers
   function test_list_asUser_shouldThrow() : void
   {
     $user = $this->createUser();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/modlog'))
       ->withAttribute('user', $user);
 
@@ -61,7 +60,6 @@ final class ModLogControllerTest extends TestWithUsers
   function test_list_asAdmin_shouldReturnContent() : void
   {
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/modlog'))
       ->withAttribute('user', $user);
 

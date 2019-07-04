@@ -6,17 +6,18 @@ use Imageboard\Controller\ControllerInterface;
 use Imageboard\Model\User;
 use Imageboard\Service\{
   ConfigService,
-  UserService,
+  SessionService,
   RendererService
 };
+use Psr\Http\Message\ServerRequestInterface;
 
 abstract class AdminController implements ControllerInterface
 {
   /** @var ConfigService */
   protected $config;
 
-  /** @var UserService */
-  protected $user_service;
+  /** @var SessionService */
+  protected $session;
 
   /** @var RendererService */
   protected $renderer;
@@ -30,17 +31,17 @@ abstract class AdminController implements ControllerInterface
    * Creates a new CRUD controller instance.
    *
    * @param ConfigService   $config
-   * @param UserService     $user_service
+   * @param SessionService  $session
    * @param RendererService $renderer
    */
   function __construct(
     ConfigService   $config,
-    UserService     $user_service,
+    SessionService  $session,
     RendererService $renderer
   ) {
-    $this->config       = $config;
-    $this->user_service = $user_service;
-    $this->renderer     = $renderer;
+    $this->config   = $config;
+    $this->session  = $session;
+    $this->renderer = $renderer;
 
     $this->base_path = $this->config->get('BASE_PATH', '');
   }
@@ -48,12 +49,18 @@ abstract class AdminController implements ControllerInterface
   /**
    * Checks user access.
    *
+   * @param ServerRequestInterface $request
+   *
    * @return bool
    */
-  protected function checkAccess(): bool {
+  protected function checkAccess(ServerRequestInterface $request): bool {
     /** @var User $current_user */
-    $current_user = $this->user_service->getCurrentUser();
+    $current_user = $request->getAttribute('user');
     return $current_user->isMod();
+  }
+
+  protected function getSession(): SessionService {
+    return $this->session;
   }
 
   protected function getRenderer(): RendererService {

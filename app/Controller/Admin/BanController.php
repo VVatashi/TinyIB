@@ -6,9 +6,10 @@ use Imageboard\Repositories\{Repository, BanRepository};
 use Imageboard\Service\{
   ConfigService,
   BanService,
-  UserService,
-  RendererService
+  RendererService,
+  SessionService
 };
+use Psr\Http\Message\ServerRequestInterface;
 
 class BanController extends AdminController
 {
@@ -28,19 +29,19 @@ class BanController extends AdminController
    * @param ConfigService   $config
    * @param BanRepository   $repository
    * @param BanService      $service
-   * @param UserService     $user_service
+   * @param SessionService  $session
    * @param RendererService $renderer
    */
   function __construct(
     ConfigService   $config,
     BanRepository   $repository,
     BanService      $service,
-    UserService     $user_service,
+    SessionService  $session,
     RendererService $renderer
   ) {
     parent::__construct(
       $config,
-      $user_service,
+      $session,
       $renderer
     );
 
@@ -74,9 +75,9 @@ class BanController extends AdminController
 
   protected function getNewItem(): array {
     return [
-      'ip'          => '',
-      'expires_in'  => 60 * 60,
-      'reason'      => '',
+      'ip'         => '',
+      'expires_in' => 60 * 60,
+      'reason'     => '',
     ];
   }
 
@@ -84,15 +85,19 @@ class BanController extends AdminController
     return 100;
   }
 
-  protected function createModel(array $data) {
-    $ip = $data['ip'] ?? '';
-    $expires_in = $data['expires_in'] ?? 0;
-    $reason = $data['reason'] ?? '';
+  protected function createModel(ServerRequestInterface $request) {
+    $data = $request->getParsedBody();
 
-    return $this->service->create($ip, $expires_in, $reason);
+    $ip         = $data['ip'] ?? '';
+    $expires_in = $data['expires_in'] ?? 0;
+    $reason     = $data['reason'] ?? '';
+
+    $user = $request->getAttribute('user');
+    return $this->service->create($ip, $expires_in, $reason, $user);
   }
 
-  protected function deleteModel(int $id) {
-    return $this->service->delete($id);
+  protected function deleteModel(ServerRequestInterface $request, int $id) {
+    $user = $request->getAttribute('user');
+    return $this->service->delete($id, $user);
   }
 }

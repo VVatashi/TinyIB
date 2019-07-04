@@ -6,7 +6,7 @@ use GuzzleHttp\Psr7\ServerRequest;
 use Imageboard\Controller\Admin\UserController;
 use Imageboard\Exception\{AccessDeniedException, NotFoundException};
 use Imageboard\Model\User;
-use Imageboard\Service\{ConfigService, RendererService};
+use Imageboard\Service\{ConfigService, RendererService, UserService};
 use Imageboard\Tests\Functional\TestWithUsers;
 
 final class UserControllerTest extends TestWithUsers
@@ -31,6 +31,7 @@ final class UserControllerTest extends TestWithUsers
       $config,
       $this->user_repository,
       $this->user_service,
+      $this->session,
       $renderer
     );
   }
@@ -57,7 +58,6 @@ final class UserControllerTest extends TestWithUsers
   function test_list_asUser_shouldThrow(): void
   {
     $user = $this->createUser();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/users'))
       ->withAttribute('user', $user);
 
@@ -69,7 +69,6 @@ final class UserControllerTest extends TestWithUsers
   function test_list_asAdmin_shouldReturnContent(): void
   {
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/users'))
       ->withAttribute('user', $user);
 
@@ -93,7 +92,6 @@ final class UserControllerTest extends TestWithUsers
   function test_createForm_asUser_shouldThrow(): void
   {
     $user = $this->createUser();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/users/create'))
       ->withAttribute('user', $user);
 
@@ -105,7 +103,6 @@ final class UserControllerTest extends TestWithUsers
   function test_createForm_asAdmin_shouldReturnContent(): void
   {
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/users/create'))
       ->withAttribute('user', $user);
 
@@ -135,7 +132,6 @@ final class UserControllerTest extends TestWithUsers
   function test_create_asUser_shouldThrow(): void
   {
     $user = $this->createUser();
-    $_SESSION['user'] = $user->id;
     $data = [
       'email' => 'test@example.com',
       'password' => 'test@example.com',
@@ -153,7 +149,6 @@ final class UserControllerTest extends TestWithUsers
   function test_create_asAdmin_shouldCreateAndReturnRedirect(): void
   {
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
     $data = [
       'email' => 'test@example.com',
       'password' => 'test@example.com',
@@ -172,30 +167,35 @@ final class UserControllerTest extends TestWithUsers
   function test_editForm_asAnonymous_shouldThrow(): void
   {
     $item = $this->createItem();
+    $user = $this->createAnonymous();
+    $request = (new ServerRequest('GET', "/admin/users/{$item->id}"))
+      ->withAttribute('user', $user);
 
     $this->expectException(AccessDeniedException::class);
 
-    $this->controller->editForm(['id' => $item->id]);
+    $this->controller->editForm($request, ['id' => $item->id]);
   }
 
   function test_editForm_asUser_shouldThrow(): void
   {
     $item = $this->createItem();
     $user = $this->createUser();
-    $_SESSION['user'] = $user->id;
+    $request = (new ServerRequest('GET', "/admin/users/{$item->id}"))
+      ->withAttribute('user', $user);
 
     $this->expectException(AccessDeniedException::class);
 
-    $this->controller->editForm(['id' => $item->id]);
+    $this->controller->editForm($request, ['id' => $item->id]);
   }
 
   function test_editForm_asAdmin_shouldReturnContent(): void
   {
     $item = $this->createItem();
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
+    $request = (new ServerRequest('GET', "/admin/users/{$item->id}"))
+      ->withAttribute('user', $user);
 
-    $content = $this->controller->editForm(['id' => $item->id]);
+    $content = $this->controller->editForm($request, ['id' => $item->id]);
 
     $this->assertIsString($content);
     $this->assertNotEmpty($content);
@@ -224,7 +224,6 @@ final class UserControllerTest extends TestWithUsers
   {
     $item = $this->createItem();
     $user = $this->createUser();
-    $_SESSION['user'] = $user->id;
     $data = [
       'id' => $item->id,
       'email' => 'new@example.com',
@@ -244,7 +243,6 @@ final class UserControllerTest extends TestWithUsers
   {
     $item = $this->createItem();
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
     $data = [
       'id' => $item->id,
       'email' => 'new@example.com',
@@ -277,7 +275,6 @@ final class UserControllerTest extends TestWithUsers
   {
     $item = $this->createItem();
     $user = $this->createUser();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', "/admin/users/{$item->id}/delete"))
       ->withAttribute('user', $user);
 
@@ -290,7 +287,6 @@ final class UserControllerTest extends TestWithUsers
   {
     $item = $this->createItem();
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', "/admin/users/{$item->id}/delete"))
       ->withAttribute('user', $user);
 
@@ -304,7 +300,6 @@ final class UserControllerTest extends TestWithUsers
   {
     $item_id = 1000;
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', "/admin/users/$item_id/delete"))
       ->withAttribute('user', $user);
 

@@ -7,7 +7,7 @@ use Imageboard\Exception\AccessDeniedException;
 use Imageboard\Service\{
   ConfigService,
   SystemService,
-  UserService,
+  SessionService,
   RendererService
 };
 use Psr\Http\Message\{
@@ -23,12 +23,12 @@ class SystemController extends AdminController
   function __construct(
     ConfigService   $config,
     SystemService   $service,
-    UserService     $user_service,
+    SessionService  $session,
     RendererService $renderer
   ) {
     parent::__construct(
       $config,
-      $user_service,
+      $session,
       $renderer
     );
 
@@ -51,11 +51,13 @@ class SystemController extends AdminController
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 
+    /** @var SessionService $session */
+    $session = $this->getSession();
+
     // Show status message from a session.
     $url = $this->config->get('BASE_PATH', '') . '/admin/system';
     $key = "$url:message";
-    $message = $_SESSION[$key] ?? null;
-    unset($_SESSION[$key]);
+    $message = $session->delete($key);
 
     return $this->renderer->render('admin/system.twig', [
       'message' => $message,
@@ -78,6 +80,9 @@ class SystemController extends AdminController
       throw new AccessDeniedException('You are not allowed to access this page');
     }
 
+    /** @var SessionService $session */
+    $session = $this->getSession();
+
     $back_url = $this->config->get('BASE_PATH', '') . '/admin/system';
     $message_key = "$back_url:message";
 
@@ -85,10 +90,10 @@ class SystemController extends AdminController
       $this->service->clearCache();
 
       // Store status message in a session.
-      $_SESSION[$message_key] = 'Cache cleared.';
+      $session->$message_key = 'Cache cleared.';
     } catch (\Exception $exception) {
       // Store error message in a session.
-      $_SESSION[$message_key] = $exception->getMessage();
+      $session->$message_key = $exception->getMessage();
     }
 
     return new Response(302, [

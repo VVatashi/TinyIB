@@ -9,6 +9,7 @@ use Imageboard\Service\{
   CaptchaService,
   ConfigService,
   RendererService,
+  SessionService,
   UserService
 };
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
@@ -21,6 +22,9 @@ class AuthController implements ControllerInterface
   /** @var UserService */
   protected $user_service;
 
+  /** @var SessionService */
+  protected $session;
+
   /** @var RendererService */
   protected $renderer;
 
@@ -32,19 +36,22 @@ class AuthController implements ControllerInterface
    *
    * @param CaptchaService  $captcha
    * @param UserService     $user_service
+   * @param SessionService  $session
    * @param RendererService $renderer
    * @param ConfigService   $config
    */
   function __construct(
-    CaptchaService $captcha,
-    UserService $user_service,
+    CaptchaService  $captcha,
+    UserService     $user_service,
+    SessionService  $session,
     RendererService $renderer,
-    ConfigService $config
+    ConfigService   $config
   ) {
-    $this->captcha = $captcha;
+    $this->captcha      = $captcha;
     $this->user_service = $user_service;
-    $this->renderer = $renderer;
-    $this->config = $config;
+    $this->session      = $session;
+    $this->renderer     = $renderer;
+    $this->config       = $config;
   }
 
   /**
@@ -61,16 +68,13 @@ class AuthController implements ControllerInterface
     if (!$user->isAnonymous()) {
       // Allow only anonymous user access.
       // Redirect logged in users to the index page.
-      $_SESSION['error'] = 'Already logged in';
+      $this->session->error = 'Already logged in';
       return new Response(302, ['Location' => '/' . $this->config->get("BOARD")]);
     }
 
     // Restore form input from the session.
-    $error = isset($_SESSION['error']) ? $_SESSION['error'] : '';
-    $email = isset($_SESSION['email']) ? $_SESSION['email'] : '';
-
-    unset($_SESSION['error']);
-    unset($_SESSION['email']);
+    $error = $this->session->delete('error');
+    $email = $this->session->delete('email');
 
     return $this->renderer->render('auth/register.twig', [
       'error' => $error,
@@ -92,7 +96,7 @@ class AuthController implements ControllerInterface
     if (!$user->isAnonymous()) {
       // Allow only anonymous user access.
       // Redirect logged in users to the index page.
-      $_SESSION['error'] = 'Already logged in';
+      $this->session->error = 'Already logged in';
       return new Response(302, ['Location' => '/' . $this->config->get("BOARD")]);
     }
 
@@ -101,20 +105,20 @@ class AuthController implements ControllerInterface
     $password = isset($data['password']) ? $data['password'] : '';
 
     // Store form input to the session.
-    $_SESSION['email'] = $email;
+    $this->session->email = $email;
 
     // Check captcha.
     $captcha = isset($data['captcha']) ? $data['captcha'] : '';
     if (!$this->captcha->checkCaptcha($captcha)) {
-      $_SESSION['error'] = 'Incorrect CAPTCHA';
+      $this->session->error = 'Incorrect CAPTCHA';
       return new Response(302, ['Location' => '/' . $this->config->get("BOARD") . '/auth/register']);
     }
 
     try {
-      $this->user_service->create($email, $password);
+      $this->user_service->create($email, $password, 0);
       $this->user_service->login($email, $password);
     } catch (ValidationException $e) {
-      $_SESSION['error'] = $e->getMessage();
+      $this->session->error = $e->getMessage();
       return new Response(302, ['Location' => '/' . $this->config->get("BOARD") . '/auth/register']);
     }
 
@@ -136,16 +140,13 @@ class AuthController implements ControllerInterface
     if (!$user->isAnonymous()) {
       // Allow only anonymous user access.
       // Redirect logged in users to the index page.
-      $_SESSION['error'] = 'Already logged in';
+      $this->session->error = 'Already logged in';
       return new Response(302, ['Location' => '/' . $this->config->get("BOARD")]);
     }
 
     // Restore form input from the session.
-    $error = isset($_SESSION['error']) ? $_SESSION['error'] : '';
-    $email = isset($_SESSION['email']) ? $_SESSION['email'] : '';
-
-    unset($_SESSION['error']);
-    unset($_SESSION['email']);
+    $error = $this->session->delete('error');
+    $email = $this->session->delete('email');
 
     return $this->renderer->render('auth/login.twig', [
       'error' => $error,
@@ -167,7 +168,7 @@ class AuthController implements ControllerInterface
     if (!$user->isAnonymous()) {
       // Allow only anonymous user access.
       // Redirect logged in users to the index page.
-      $_SESSION['error'] = 'Already logged in';
+      $this->session->error = 'Already logged in';
       return new Response(302, ['Location' => '/' . $this->config->get("BOARD")]);
     }
 
@@ -176,19 +177,19 @@ class AuthController implements ControllerInterface
     $password = isset($data['password']) ? $data['password'] : '';
 
     // Store form input to the session.
-    $_SESSION['email'] = $email;
+    $this->session->email = $email;
 
     // Check captcha.
     $captcha = isset($data['captcha']) ? $data['captcha'] : '';
     if (!$this->captcha->checkCaptcha($captcha)) {
-      $_SESSION['error'] = 'Incorrect CAPTCHA';
+      $this->session->error = 'Incorrect CAPTCHA';
       return new Response(302, ['Location' => '/' . $this->config->get("BOARD") . '/auth/login']);
     }
 
     try {
       $this->user_service->login($email, $password);
     } catch (ValidationException $e) {
-      $_SESSION['error'] = $e->getMessage();
+      $this->session->error = $e->getMessage();
       return new Response(302, ['Location' => '/' . $this->config->get("BOARD") . '/auth/login']);
     }
 

@@ -6,6 +6,12 @@ use Imageboard\SimpleCaptcha;
 
 class CaptchaService extends SimpleCaptcha
 {
+  function __construct(
+    SessionService $session
+  ) {
+    parent::__construct($session);
+  }
+
   /**
    * Creates a random text to use in CAPTCHA.
    *
@@ -31,7 +37,7 @@ class CaptchaService extends SimpleCaptcha
     $fontcfg = $this->fonts[array_rand($this->fonts)];
     $this->WriteText($text, $fontcfg);
 
-    $_SESSION[$this->session_var] = $text;
+    $this->session->set($this->session_var, $text);
 
     /** Transformations */
     if (!empty($this->lineWidth)) {
@@ -53,10 +59,10 @@ class CaptchaService extends SimpleCaptcha
    */
   function checkCaptcha(string $captcha_response): bool
   {
-    if (!isset($_SESSION[$this->session_var])) {
+    if ($this->session->has($this->session_var)) {
       return true;
     }
 
-    return strcasecmp($captcha_response, $_SESSION[$this->session_var]) === 0;
+    return strcasecmp($captcha_response, $this->session->get($this->session_var)) === 0;
   }
 }

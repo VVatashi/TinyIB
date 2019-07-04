@@ -5,7 +5,6 @@ namespace Imageboard\Controller;
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Cache\CacheInterface;
 use Imageboard\Exception\{NotFoundException, ValidationException};
-use Imageboard\Model\Post;
 use Imageboard\Repositories\PostRepository;
 use Imageboard\Service\{
   CaptchaService,
@@ -223,11 +222,11 @@ class PostController implements ControllerInterface
     }
 
     return $this->renderer->render('board.twig', [
-      'posts' => $posts,
-      'pages' => max($pages, 0),
+      'posts'     => $posts,
+      'pages'     => max($pages, 0),
       'this_page' => $page,
-      'parent' => 0,
-      'res' => INDEXPAGE,
+      'parent'    => 0,
+      'res'       => INDEXPAGE,
     ]);
   }
 
@@ -286,9 +285,9 @@ class PostController implements ControllerInterface
 
       $posts = $this->repository->getThreadPosts($id);
       $data = $this->renderer->render('thread.twig', [
-        'posts' => $posts,
+        'posts'  => $posts,
         'parent' => $id,
-        'res' => RESPAGE,
+        'res'    => RESPAGE,
       ]);
       $this->cache->set($key, $data, 4 * 60 * 60);
     }
@@ -314,8 +313,8 @@ class PostController implements ControllerInterface
     }
 
     return $this->renderer->render('ajax/post.twig', [
-      'post'  => $post,
-      'res'   => RESPAGE,
+      'post' => $post,
+      'res'  => RESPAGE,
     ]);
   }
 
@@ -343,9 +342,9 @@ class PostController implements ControllerInterface
     $posts = $this->repository->getThreadPosts($id, $after);
 
     return $this->renderer->render('ajax/thread.twig', [
-      'posts' => $posts,
+      'posts'  => $posts,
       'parent' => $id,
-      'res' => RESPAGE,
+      'res'    => RESPAGE,
     ]);
   }
 }

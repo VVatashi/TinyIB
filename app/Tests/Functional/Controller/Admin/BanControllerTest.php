@@ -49,7 +49,7 @@ final class BanControllerTest extends TestWithUsers
       $config,
       $repository,
       $this->service,
-      $this->user_service,
+      $this->session,
       $renderer
     );
   }
@@ -73,7 +73,6 @@ final class BanControllerTest extends TestWithUsers
   function test_list_asUser_shouldThrow(): void
   {
     $user = $this->createUser();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/bans'))
       ->withAttribute('user', $user);
 
@@ -85,7 +84,6 @@ final class BanControllerTest extends TestWithUsers
   function test_list_asAdmin_shouldReturnContent(): void
   {
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/bans'))
       ->withAttribute('user', $user);
 
@@ -109,7 +107,6 @@ final class BanControllerTest extends TestWithUsers
   function test_createForm_asUser_shouldThrow(): void
   {
     $user = $this->createUser();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/bans/create'))
       ->withAttribute('user', $user);
 
@@ -121,7 +118,6 @@ final class BanControllerTest extends TestWithUsers
   function test_createForm_asAdmin_shouldReturnContent(): void
   {
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('GET', '/admin/bans/create'))
       ->withAttribute('user', $user);
 
@@ -151,7 +147,6 @@ final class BanControllerTest extends TestWithUsers
   function test_create_asUser_shouldThrow(): void
   {
     $user = $this->createUser();
-    $_SESSION['user'] = $user->id;
     $data = [
       'ip' => '123.0.0.1',
       'expires_in' => 60 * 60,
@@ -169,7 +164,6 @@ final class BanControllerTest extends TestWithUsers
   function test_create_asAdmin_shouldCreateAndReturnRedirect(): void
   {
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
     $data = [
       'ip' => '123.0.0.1',
       'expires_in' => 60 * 60,
@@ -201,7 +195,6 @@ final class BanControllerTest extends TestWithUsers
   {
     $item = $this->createBan();
     $user = $this->createUser();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', "/admin/bans/{$item->id}/delete"))
       ->withAttribute('user', $user);
 
@@ -214,7 +207,6 @@ final class BanControllerTest extends TestWithUsers
   {
     $item = $this->createBan();
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', "/admin/bans/{$item->id}/delete"))
       ->withAttribute('user', $user);
 
@@ -228,7 +220,6 @@ final class BanControllerTest extends TestWithUsers
   {
     $item_id = 1;
     $user = $this->createAdmin();
-    $_SESSION['user'] = $user->id;
     $request = (new ServerRequest('POST', "/admin/bans/$item_id/delete"))
       ->withAttribute('user', $user);
 

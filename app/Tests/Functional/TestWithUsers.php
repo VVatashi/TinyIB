@@ -4,7 +4,7 @@ namespace Imageboard\Tests\Functional;
 
 use Imageboard\Model\User;
 use Imageboard\Repositories\{ModLogRepository, UserRepository};
-use Imageboard\Service\{ModLogService, UserService};
+use Imageboard\Service\{ModLogService, UserService, SessionService};
 use PHPUnit\Framework\TestCase;
 
 abstract class TestWithUsers extends TestCase
@@ -21,6 +21,9 @@ abstract class TestWithUsers extends TestCase
   /** @var UserService */
   protected $user_service;
 
+  /** @var SessionService */
+  protected $session;
+
   function setUp(): void
   {
     global $database;
@@ -28,8 +31,14 @@ abstract class TestWithUsers extends TestCase
     $this->modlog_repository = new ModLogRepository($database);
     $this->user_repository = new UserRepository($database);
 
+    $this->session = new SessionService();
+
     $this->modlog_service = new ModLogService($this->modlog_repository);
-    $this->user_service = new UserService($this->user_repository, $this->modlog_service);
+    $this->user_service = new UserService(
+      $this->user_repository,
+      $this->modlog_service,
+      $this->session
+    );
   }
 
   protected function createAnonymous(): User
