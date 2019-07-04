@@ -11,10 +11,23 @@ require_once __DIR__ . '/vendor/autoload.php';
 $allow_colors = true;
 // CLI colors support
 $colors = [
-  "red"     => "\e[01;31m",
-  "green"   => "\e[01;32m",
-  "white"   => "\e[01;37m",
-  "default" => "\e[01;39m",
+  "black" => "\e[0;30m",
+  "dark_gray" => "\e[1;30m",
+  "blue" => "\e[0;34m",
+  "light_blue" => "\e[1;34m",
+  "green" => "\e[0;32m",
+  "light_green" => "\e[1;32m",
+  "cyan" => "\e[0;36m",
+  "light_cyan" => "\e[1;36m",
+  "red" => "\e[0;31m",
+  "light_red" => "\e[1;31m",
+  "purple" => "\e[0;35m",
+  "light_purple" => "\e[1;35m",
+  "brown" => "\e[0;33m",
+  "yellow" => "\e[1;33m",
+  "light_gray" => "\e[0;37m",
+  "white" => "\e[1;37m",
+  "default" => "\e[01;39m"
 ];
 
 // Manage color
@@ -43,9 +56,25 @@ $commands['help'] = function() use ($color) {
   $write_command("help", "Show commands list", 4);
   $write_command("serve", "Start PHP web server", 4);
   $write_command("migration:list", "Show all migrations status", 3);
-  $write_command("migration:migrate <name>", "Apply migration by name", 1);
-  $write_command("migration:revert  <name>", "Revert migration by name", 1);
-  $write_command("migration:apply", "Apply migrations", 2);
+  $write_command("migration:migrate", "Apply migration by name", 2);
+  $write_command("migration:revert <name>", "Revert migration by name", 1);
+  $write_command("migration:apply  <name>", "Apply migration by name", 1);
+  $write_command("create:dango:family", "Create big dango family! For Nagisa...", 0);
+};
+
+$commands['create:dango:family'] = function(array $args) use ($colors, $color) {
+  $dango_color = function() use ($colors) {
+    return $colors[array_rand($colors)];
+  };
+
+  print("{$dango_color()}だんご　{$dango_color()}だんご　{$dango_color()}だんご　{$dango_color()}だんご　{$dango_color()}だんご　{$color("default")}だんご　大家族\n");
+  print("\n{$color("default")}Put all of them together to make a family of one hundred!\n\n");
+  
+  $dango_count = 10;
+  for($i = 0; $i < 10; $i++) {
+    print(str_repeat("🍡", $dango_count) . "\n");
+  }
+  print("\nThe big dumpling family!\n");
 };
 
 $commands['migration:list'] = function (array $args) use ($color) {
@@ -55,7 +84,7 @@ $commands['migration:list'] = function (array $args) use ($color) {
   $all = $migrations->getMigrations();
   $applied = $migrations->getAppliedMigrations();
   foreach ($all as $migration) {
-    $status = in_array($migration, $applied) ? "{$color("green")}Applied" : "{$color("red")}Pending";
+    $status = in_array($migration, $applied) ? "{$color("green")}Applied" : "{$color("yellow")}Pending";
     printf("%-20s | %-10s{$color("default")}\n", $migration, $status);
   }
 };
