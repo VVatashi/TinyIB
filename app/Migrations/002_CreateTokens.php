@@ -4,7 +4,7 @@ namespace Imageboard\Migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 
-class CreateTokens implements Migration
+class CreateTokens extends Migration
 {
   const TABLE = 'tokens';
 

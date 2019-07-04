@@ -3,7 +3,7 @@
 namespace Imageboard\Service;
 
 use Exception;
-use Imageboard\Migrations\Migration;
+use Imageboard\Migrations\MigrationInterface;
 
 /**
  * @package Imageboard\Service
@@ -49,7 +49,7 @@ class MigrationService
     }
   }
 
-  function applyMigration(Migration $migration)
+  function applyMigration(MigrationInterface $migration)
   {
     $this->ensureMigrationsTable();
 
@@ -69,10 +69,12 @@ class MigrationService
         $connection->exec($query);
       }
 
+      $builder = $connection->createQueryBuilder();
+      $migration->upgradeData($builder);
+
       $class_parts = explode('\\', get_class($migration));
       $class = array_pop($class_parts);
 
-      $builder = $connection->createQueryBuilder();
       $builder->insert(static::MIGRATIONS_TABLE)
         ->values([
           'migration' => $builder->createNamedParameter($class),
@@ -87,7 +89,7 @@ class MigrationService
     }
   }
 
-  function revertMigration(Migration $migration)
+  function revertMigration(MigrationInterface $migration)
   {
     $this->ensureMigrationsTable();
 
@@ -178,7 +180,7 @@ class MigrationService
       require $file;
 
       $class = "Imageboard\\Migrations\\$class";
-      /** @var Migration $migration */
+      /** @var MigrationInterface $migration */
       $migration = new $class;
       $this->applyMigration($migration);
     }
@@ -197,7 +199,7 @@ class MigrationService
         require $file;
 
         $class = "Imageboard\\Migrations\\$class";
-        /** @var Migration $migration */
+        /** @var MigrationInterface $migration */
         $migration = new $class;
         $this->applyMigration($migration);
         break;
@@ -220,7 +222,7 @@ class MigrationService
         require $file;
 
         $class = "Imageboard\\Migrations\\$class";
-        /** @var Migration $migration */
+        /** @var MigrationInterface $migration */
         $migration = new $class;
         $this->revertMigration($migration);
         break;

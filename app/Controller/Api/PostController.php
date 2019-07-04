@@ -30,10 +30,10 @@ class PostController implements ControllerInterface
    * @apiVersion 0.1.0
    * @apiDescription Creates new thread.
    *
-   * @apiParam (Body) {String} [name]    Poster name. Can contain tripcode and secure tripcode.
-   * @apiParam (Body) {String} [subject] Post subject. Can contain additional post options.
-   * @apiParam (Body) {String} [message] Post message.
-   * @apiParam (Body) {File}   file      Post file.
+   * @apiParam (Body) {String{..75}}   [name]    Poster name. Can contain tripcode and secure tripcode.
+   * @apiParam (Body) {String{..75}}   [subject] Post subject. Can contain additional post options.
+   * @apiParam (Body) {String{..8000}} [message] Post message.
+   * @apiParam (Body) {File}           file      Post file.
    *
    * @apiParamExample {json} Example
    *  {
@@ -106,11 +106,11 @@ class PostController implements ControllerInterface
    * @apiVersion 0.1.0
    * @apiDescription Creates new post.
    *
-   * @apiParam (Url)  {Number} id        Parent thread ID.
-   * @apiParam (Body) {String} [name]    Poster name. Can contain tripcode and secure tripcode.
-   * @apiParam (Body) {String} [subject] Post subject. Can contain additional post options.
-   * @apiParam (Body) {String} [message] Post message.
-   * @apiParam (Body) {File}   [file]    Post file.
+   * @apiParam (Url)  {Number}         id        Parent thread ID.
+   * @apiParam (Body) {String{..75}}   [name]    Poster name. Can contain tripcode and secure tripcode.
+   * @apiParam (Body) {String{..75}}   [subject] Post subject. Can contain additional post options.
+   * @apiParam (Body) {String{..8000}} [message] Post message.
+   * @apiParam (Body) {File}           [file]    Post file.
    *
    * @apiParamExample {json} Example
    *  {
@@ -195,6 +195,7 @@ class PostController implements ControllerInterface
    * @apiSuccess (Success 200) {String}   -.tripcode      Poster tripcode.
    * @apiSuccess (Success 200) {String}   -.subject       Post subject.
    * @apiSuccess (Success 200) {String}   -.message       Post message HTML fragment.
+   * @apiSuccess (Success 200) {String}   -.message_raw   Raw post message.
    * @apiSuccess (Success 200) {Object[]} -.message_tree  Parsed post message.
    * @apiSuccess (Success 200) {String}   -.file          File URL.
    * @apiSuccess (Success 200) {String}   -.file_hex      File hash.
@@ -209,15 +210,16 @@ class PostController implements ControllerInterface
    * @apiSuccessExample {json} Example
    *  [
    *    {
-   *      "id":         87,
-   *      "created_at": 1558425161,
-   *      "updated_at": 1559039766,
-   *      "parent_id":  0,
-   *      "bumped_at":  1562240007,
-   *      "name":       "",
-   *      "tripcode":   "piec1MorXg",
-   *      "subject":    "",
-   *      "message":    "Test thread 2<br>",
+   *      "id":          87,
+   *      "created_at":  1558425161,
+   *      "updated_at":  1559039766,
+   *      "parent_id":   0,
+   *      "bumped_at":   1562240007,
+   *      "name":        "",
+   *      "tripcode":    "piec1MorXg",
+   *      "subject":     "",
+   *      "message":     "Test thread 2<br>",
+   *      "message_raw": "Test thread 2\n",
    *      "message_tree": [
    *        {
    *          "type": "text",
@@ -235,15 +237,16 @@ class PostController implements ControllerInterface
    *      "thumb_height":  250
    *    },
    *    {
-   *      "id":46,
-   *      "created_at": 1557996334,
-   *      "updated_at": 1558425141,
-   *      "parent_id":  0,
-   *      "bumped_at":  1558425141,
-   *      "name":       "",
-   *      "tripcode":   "",
-   *      "subject":    "",
-   *      "message":    "test thread<br>",
+   *      "id":          46,
+   *      "created_at":  1557996334,
+   *      "updated_at":  1558425141,
+   *      "parent_id":   0,
+   *      "bumped_at":   1558425141,
+   *      "name":        "",
+   *      "tripcode":    "",
+   *      "subject":     "",
+   *      "message":     "test thread<br>",
+   *      "message_raw": "test thread\n",
    *      "message_tree": [
    *        {
    *          "type": "text",
@@ -296,6 +299,7 @@ class PostController implements ControllerInterface
    * @apiSuccess (Success 200) {String}   -.tripcode      Poster tripcode.
    * @apiSuccess (Success 200) {String}   -.subject       Post subject.
    * @apiSuccess (Success 200) {String}   -.message       Post message HTML fragment.
+   * @apiSuccess (Success 200) {String}   -.message_raw   Raw post message.
    * @apiSuccess (Success 200) {Object[]} -.message_tree  Parsed post message.
    * @apiSuccess (Success 200) {String}   -.file          File URL.
    * @apiSuccess (Success 200) {String}   -.file_hex      File hash.
@@ -310,15 +314,16 @@ class PostController implements ControllerInterface
    * @apiSuccessExample {json} Example
    *  [
    *    {
-   *      "id":         87,
-   *      "created_at": 1558425161,
-   *      "updated_at": 1559039766,
-   *      "parent_id":  0,
-   *      "bumped_at":  1562240007,
-   *      "name":       "",
-   *      "tripcode":   "piec1MorXg",
-   *      "subject":    "",
-   *      "message":    "Test thread 2<br>",
+   *      "id":          87,
+   *      "created_at":  1558425161,
+   *      "updated_at":  1559039766,
+   *      "parent_id":   0,
+   *      "bumped_at":   1562240007,
+   *      "name":        "",
+   *      "tripcode":    "piec1MorXg",
+   *      "subject":     "",
+   *      "message":     "Test thread 2<br>",
+   *      "message_raw": "Test thread 2\n",
    *      "message_tree": [
    *        {
    *          "type": "text",
@@ -376,6 +381,7 @@ class PostController implements ControllerInterface
    * @apiSuccess (Success 200) {String}   tripcode      Poster tripcode.
    * @apiSuccess (Success 200) {String}   subject       Post subject.
    * @apiSuccess (Success 200) {String}   message       Post message HTML fragment.
+   * @apiSuccess (Success 200) {String}   message_raw   Raw post message.
    * @apiSuccess (Success 200) {Object[]} message_tree  Parsed post message.
    * @apiSuccess (Success 200) {String}   file          File URL.
    * @apiSuccess (Success 200) {String}   file_hex      File hash.
@@ -389,15 +395,16 @@ class PostController implements ControllerInterface
    *
    * @apiSuccessExample {json} Example
    *  {
-   *    "id":         87,
-   *    "created_at": 1558425161,
-   *    "updated_at": 1559039766,
-   *    "parent_id":  0,
-   *    "bumped_at":  1562240007,
-   *    "name":       "",
-   *    "tripcode":   "piec1MorXg",
-   *    "subject":    "",
-   *    "message":    "Test thread 2<br>",
+   *    "id":          87,
+   *    "created_at":  1558425161,
+   *    "updated_at":  1559039766,
+   *    "parent_id":   0,
+   *    "bumped_at":   1562240007,
+   *    "name":        "",
+   *    "tripcode":    "piec1MorXg",
+   *    "subject":     "",
+   *    "message":     "Test thread 2<br>",
+   *    "message_raw": "Test thread 2\n",
    *    "message_tree": [
    *      {
    *        "type": "text",

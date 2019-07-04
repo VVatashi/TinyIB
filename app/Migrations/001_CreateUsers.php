@@ -4,7 +4,7 @@ namespace Imageboard\Migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 
-class CreateUsers implements Migration
+class CreateUsers extends Migration
 {
   const TABLE = 'users';
 

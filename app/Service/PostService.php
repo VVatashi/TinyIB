@@ -133,6 +133,7 @@ class PostService
       'tripcode'      => $post->tripcode,
       'subject'       => $post->subject,
       'message'       => $post->message,
+      'message_raw'   => $post->message_raw,
       'message_tree'  => $post->getMessageTree(),
       'file'          => $post->file,
       'file_hex'      => $post->file_hex,
@@ -302,12 +303,12 @@ class PostService
    */
   protected function makeLinksClickable(string $message): string {
     $url_pattern =
-      '/
+    '/
     https?:\/\/
     [-a-zA-Z0-9@:%._\+~#=]{2,}
     \.[a-z]{2,}\b
     [-a-zA-Z0-9@:%_\+.~#?&\/=]*
-/x';
+    /x';
 
     return preg_replace($url_pattern, '<a href="$0">$0</a>', $message);
   }
@@ -438,17 +439,19 @@ class PostService
     }
 
     $post = new Post();
-    $post->parent_id = $parent;
-    $post->ip = $ip;
-    $post->user_id = $user_id;
+    $post->setParentId($parent);
+    $post->setIp($ip);
+    $post->setUserId($user_id);
 
     $now = time();
-    $post->created_at = $now;
-    $post->updated_at = $now;
+    $post->setCreatedAt($now);
+    $post->setUpdatedAt($now);
 
     $nameAndTripcode = $this->processName($name);
-    $post->name = $this->cleanString(substr($nameAndTripcode['name'], 0, 75));
-    $post->tripcode = $nameAndTripcode['tripcode'];
+    $post->setName($this->cleanString(substr($nameAndTripcode['name'], 0, 75)));
+    $post->setTripcode($nameAndTripcode['tripcode']);
+
+    $post->setMessageRaw($message);
 
     $message = rtrim($message);
     $message = $this->cleanString($message);
@@ -463,7 +466,7 @@ class PostService
 
     $message = $this->postCount($post->user_id, $message);
 
-    $post->message = $message;
+    $post->setMessage($message);
 
     // Detect spam.
     if ($this->config->get('DETECT_SPAM', '') === 'same_message') {
@@ -531,7 +534,7 @@ class PostService
       }, $subject);
     }
 
-    $post->subject = $this->cleanString(substr($subject, 0, 75));
+    $post->setSubject($this->cleanString(substr($subject, 0, 75)));
 
     if (!empty($file)) {
       $this->validateFileUpload($file);
@@ -546,9 +549,9 @@ class PostService
         throw new ValidationException("That file is larger than $max_desc.");
       }
 
-      $post->file_original = trim(htmlentities(substr($file['name'], 0, 50), ENT_QUOTES));
-      $post->file_hex = md5_file($file['tmp_name']);
-      $post->file_size = $file['size'];
+      $post->setFileOriginal(trim(htmlentities(substr($file['name'], 0, 50), ENT_QUOTES)));
+      $post->setFileHex(md5_file($file['tmp_name']));
+      $post->setFileSize($file['size']);
 
       $file_name = time() . substr(microtime(), 2, 3);
       $mime_type = $this->thubmnail->getMimeTypeByContent($file['tmp_name'])
@@ -562,7 +565,7 @@ class PostService
         throw new ValidationException("Unknown file type: $mime_type.");
       }
 
-      $post->file = "$file_name.$file_extension";
+      $post->setFile("$file_name.$file_extension");
 
       $file_path = "src/{$post->file}";
       if (!rename($file['tmp_name'], $file_path)) {
@@ -575,23 +578,24 @@ class PostService
       }
 
       [$width, $height] = $this->thubmnail->getFileSize($file_path);
-      $post->image_width = $width;
-      $post->image_height = $height;
+      $post->setImageWidth($width);
+      $post->setImageHeight($height);
 
       $max_width = (int)$this->config->get('MAXW');
       $max_height = (int)$this->config->get('MAXH');
 
-      $post->thumb = $this->thubmnail->createThumbnail(
+      $thumb = $this->thubmnail->createThumbnail(
         $file_path,
         'thumb',
         $max_width,
         $max_height
       );
+      $post->setThumb($thumb);
 
       $thumb_path = "thumb/{$post->thumb}";
       [$thumb_width, $thumb_height] = $this->thubmnail->getFileSize($thumb_path);
-      $post->thumb_width = $thumb_width;
-      $post->thumb_height = $thumb_height;
+      $post->setThumbWidth($thumb_width);
+      $post->setThumbHeight($thumb_height);
     }
 
     if (empty($post->file)) {
@@ -605,7 +609,7 @@ class PostService
       }
     }
 
-    $post->bumped_at = time();
+    $post->setBumpedAt(time());
     $this->post_repository->add($post);
 
     $this->trimThreads();
@@ -624,7 +628,7 @@ class PostService
         ) {
           $thread = $this->post_repository->getById($parent);
           if (isset($thread)) {
-            $thread->bumped_at = time();
+            $thread->setBumpedAt(time());
             $this->post_repository->update($thread);
           }
         }
@@ -650,6 +654,7 @@ class PostService
           'name'         => $post->name,
           'tripcode'     => $post->tripcode,
           'message'      => $post->message,
+          'message_raw'  => $post->message_raw,
           'file'         => $post->file,
           'file_type'    => $post->getFileType(),
           'image_width'  => $post->image_width,

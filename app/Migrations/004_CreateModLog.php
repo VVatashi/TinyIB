@@ -4,7 +4,7 @@ namespace Imageboard\Migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 
-class CreateModLog implements Migration
+class CreateModLog extends Migration
 {
   const TABLE = 'mod_log';
 

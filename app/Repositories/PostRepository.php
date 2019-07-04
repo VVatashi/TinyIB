@@ -50,6 +50,7 @@ class PostRepository implements CrudRepository
         'email'         => $builder->createNamedParameter(''),
         'subject'       => $builder->createNamedParameter($post->subject),
         'message'       => $builder->createNamedParameter($post->message),
+        'message_raw'   => $builder->createNamedParameter($post->message_raw),
         'password'      => $builder->createNamedParameter(''),
         'file'          => $builder->createNamedParameter($post->file),
         'file_hex'      => $builder->createNamedParameter($post->file_hex),
@@ -85,6 +86,7 @@ class PostRepository implements CrudRepository
       ->set('tripcode', $builder->createNamedParameter($post->tripcode))
       ->set('subject', $builder->createNamedParameter($post->subject))
       ->set('message', $builder->createNamedParameter($post->message))
+      ->set('message_raw', $builder->createNamedParameter($post->message_raw))
       ->set('file', $builder->createNamedParameter($post->file))
       ->set('file_hex', $builder->createNamedParameter($post->file_hex))
       ->set('file_original', $builder->createNamedParameter($post->file_original))
@@ -212,6 +214,7 @@ class PostRepository implements CrudRepository
       'p.tripcode',
       'p.subject',
       'p.message',
+      'p.message_raw',
       'p.file',
       'p.file_hex',
       'p.file_original',

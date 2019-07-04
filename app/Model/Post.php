@@ -34,6 +34,7 @@ class TreeParser extends Parser {
  * @property-read string $tripcode
  * @property-read string $subject
  * @property-read string $message
+ * @property-read string $message_raw
  * @property-read string $file
  * @property-read string $file_hex
  * @property-read string $file_original
@@ -46,6 +47,69 @@ class TreeParser extends Parser {
  */
 class Post extends Model
 {
+  /** @var null|int */
+  protected $id = null;
+
+  /** @var int */
+  protected $created_at = 0;
+
+  /** @var int */
+  protected $updated_at = 0;
+
+  /** @var null|int */
+  protected $deleted_at = null;
+
+  /** @var int */
+  protected $parent_id = 0;
+
+  /** @var int */
+  protected $bumped_at = 0;
+
+  /** @var string */
+  protected $ip = '';
+
+  /** @var int */
+  protected $user_id = 0;
+
+  /** @var string */
+  protected $name = '';
+
+  /** @var string */
+  protected $tripcode = '';
+
+  /** @var string */
+  protected $subject = '';
+
+  /** @var string */
+  protected $message = '';
+
+  /** @var string */
+  protected $file = '';
+
+  /** @var string */
+  protected $file_hex = '';
+
+  /** @var string */
+  protected $file_original = '';
+
+  /** @var int */
+  protected $file_size = 0;
+
+  /** @var int */
+  protected $image_width = 0;
+
+  /** @var int */
+  protected $image_height = 0;
+
+  /** @var string */
+  protected $thumb = '';
+
+  /** @var int */
+  protected $thumb_width = 0;
+
+  /** @var int */
+  protected $thumb_height = 0;
+
   /**
    * Post constructor.
    *
@@ -69,6 +133,7 @@ class Post extends Model
       $this->setTripcode($attributes['tripcode'] ?? '');
       $this->setSubject($attributes['subject'] ?? '');
       $this->setMessage($attributes['message'] ?? '');
+      $this->setMessageRaw($attributes['message_raw'] ?? '');
       $this->setFile($attributes['file'] ?? '');
       $this->setFileHex($attributes['file_hex'] ?? '');
       $this->setFileOriginal($attributes['file_original'] ?? '');
@@ -240,6 +305,17 @@ class Post extends Model
   function setMessage(string $message): self
   {
     $this->message = $message;
+    return $this;
+  }
+
+  /**
+   * @param string $message_raw
+   *
+   * @return Post
+   */
+  function setMessageRaw(string $message_raw): self
+  {
+    $this->message_raw = $message_raw;
     return $this;
   }
 

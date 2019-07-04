@@ -3,9 +3,13 @@
 namespace Imageboard\Migrations;
 
 use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Query\QueryBuilder;
 
-interface Migration
+abstract class Migration implements MigrationInterface
 {
-  function apply(Schema $schema);
-  function revert(Schema $schema);
+  abstract function apply(Schema $schema);
+
+  function upgradeData(QueryBuilder $builder) { }
+
+  abstract function revert(Schema $schema);
 }

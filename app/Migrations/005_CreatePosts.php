@@ -5,7 +5,7 @@ namespace Imageboard\Migrations;
 use Doctrine\DBAL\Schema\Schema;
 use Imageboard\Service\ConfigService;
 
-class CreatePosts implements Migration
+class CreatePosts extends Migration
 {
   function apply(Schema $schema)
   {

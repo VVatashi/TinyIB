@@ -24,8 +24,8 @@ class Ban extends Model
   /** @var int */
   protected $updated_at = 0;
 
-  /** @var int */
-  protected $deleted_at = 0;
+  /** @var null|int */
+  protected $deleted_at = null;
 
   /** @var int */
   protected $expires_at = 0;
