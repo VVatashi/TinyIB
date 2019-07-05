@@ -14,7 +14,7 @@ class AddRawMessage extends Migration
 
   function apply(Schema $schema)
   {
-    $table_name = ConfigService::getInstance()->get('DBPOSTS');
+    $table_name = ConfigService::getInstance()->get('DBPOSTS', 'posts');
     $table = $schema->getTable($table_name);
     $table->addColumn(static::COLUMN, 'text')->setDefault('');
   }
@@ -23,7 +23,7 @@ class AddRawMessage extends Migration
   {
     print("Upgrading data...\n");
 
-    $table_name = ConfigService::getInstance()->get('DBPOSTS');
+    $table_name = ConfigService::getInstance()->get('DBPOSTS', 'posts');
     $b = clone $builder;
     $count = $b->select('COUNT(p.id)')
       ->from($table_name, 'p')
@@ -38,13 +38,13 @@ class AddRawMessage extends Migration
       $posts = $b->select('p.id', 'p.message')
         ->from($table_name, 'p')
         ->where('p.deleted_at IS NULL')
+        ->orderBy('id', 'asc')
         ->setFirstResult($offset)
         ->setMaxResults(static::ITEMS_PER_STEP)
         ->execute()
         ->fetchAll();
 
-      for ($i = 0; $i < count($posts); ++$i) {
-        $post = $posts[$i];
+      foreach ($posts as $post) {
         // Reverse post markup.
         $post['message'] = preg_replace('/<a href="\/[a-z0-9_-]+\/res\/\d+#\d+">&gt;&gt;(\d+)<\/a>/i', '>>$1', $post['message']);
         $post['message'] = preg_replace('/<a href="[^"]+"(?:\starget="_blank")?>([^<]+)<\/a>/i', '$1', $post['message']);
@@ -67,7 +67,7 @@ class AddRawMessage extends Migration
 
   function revert(Schema $schema)
   {
-    $table_name = ConfigService::getInstance()->get('DBPOSTS');
+    $table_name = ConfigService::getInstance()->get('DBPOSTS', 'posts');
     $table = $schema->getTable($table_name);
     $table->dropColumn(static::COLUMN);
   }

@@ -9,7 +9,7 @@ class CreatePosts extends Migration
 {
   function apply(Schema $schema)
   {
-    $table_name = ConfigService::getInstance()->get('DBPOSTS');
+    $table_name = ConfigService::getInstance()->get('DBPOSTS', 'posts');
     $table = $schema->createTable($table_name);
     $table->addColumn('id', 'integer', ['autoincrement' => true]);
     $table->addColumn('parent_id', 'integer', ['default' => 0]);
@@ -46,7 +46,7 @@ class CreatePosts extends Migration
 
   function revert(Schema $schema)
   {
-    $table_name = ConfigService::getInstance()->get('DBPOSTS');
+    $table_name = ConfigService::getInstance()->get('DBPOSTS', 'posts');
     $schema->dropTable($table_name);
   }
 }

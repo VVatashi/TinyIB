@@ -327,6 +327,30 @@ class PostRepository implements CrudRepository
   }
 
   /**
+   * @param int $thread_id
+   * @param int $count
+   *
+   * @return Post[]
+   */
+  function getLastThreadPosts(
+    int $thread_id,
+    int $count
+  ): array {
+    $query = $this->getBaseQuery();
+    $expr = $query->expr();
+    $query = $query->where('p.deleted_at IS NULL')
+      ->andWhere($expr->orX(
+        $expr->eq('p.parent_id', $query->createNamedParameter($thread_id)),
+        $expr->eq('p.id', $query->createNamedParameter($thread_id))
+      ))
+      ->orderBy('p.id', 'desc')
+      ->setMaxResults($count);
+
+    $rows = $query->execute()->fetchAll();
+    return array_reverse(array_map([$this, 'mapToModel'], $rows));
+  }
+
+  /**
    * @param int  $id
    * @param bool $only_threads
    * @param bool $with_deleted

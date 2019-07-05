@@ -8,10 +8,11 @@ use Imageboard\Exception\{
   ValidationException
 };
 use Imageboard\Cache\CacheInterface;
-use Imageboard\Model\{Ban, Post};
+use Imageboard\Model\{Ban, Post, RefMap};
 use Imageboard\Repositories\{
   BanRepository,
-  PostRepository
+  PostRepository,
+  RefMapRepository
 };
 use Predis\Client as Redis;
 use Imageboard\Service\Booru\{
@@ -35,6 +36,9 @@ class PostService
 
   /** @var PostRepository */
   protected $post_repository;
+
+  /** @var RefMapRepository */
+  protected $refmap_repository;
 
   /** @var ModLogService */
   protected $modlog_service;
@@ -72,6 +76,7 @@ class PostService
    * @param ConfigService       $config
    * @param CacheInterface      $cache
    * @param BanRepository       $ban_repository
+   * @param RefMapRepository    $refmap_repository
    * @param PostRepository      $post_repository
    * @param ModLogService       $modlog_service
    * @param CryptographyService $cryptography
@@ -89,6 +94,7 @@ class PostService
     ConfigService       $config,
     CacheInterface      $cache,
     BanRepository       $ban_repository,
+    RefMapRepository    $refmap_repository,
     PostRepository      $post_repository,
     ModLogService       $modlog_service,
     CryptographyService $cryptography,
@@ -101,50 +107,77 @@ class PostService
     WebmbotService      $webmbot,
     RendererService     $renderer
   ) {
-    $this->config          = $config;
-    $this->cache           = $cache;
-    $this->ban_repository  = $ban_repository;
-    $this->post_repository = $post_repository;
-    $this->modlog_service  = $modlog_service;
-    $this->cryptography    = $cryptography;
-    $this->file            = $file;
-    $this->thubmnail       = $thubmnail;
-    $this->safebooru       = $safebooru;
-    $this->e621            = $e621;
-    $this->sankaku         = $sankaku;
-    $this->gelbooru        = $gelbooru;
-    $this->webmbot         = $webmbot;
-    $this->renderer        = $renderer;
+    $this->config            = $config;
+    $this->cache             = $cache;
+    $this->ban_repository    = $ban_repository;
+    $this->refmap_repository = $refmap_repository;
+    $this->post_repository   = $post_repository;
+    $this->modlog_service    = $modlog_service;
+    $this->cryptography      = $cryptography;
+    $this->file              = $file;
+    $this->thubmnail         = $thubmnail;
+    $this->safebooru         = $safebooru;
+    $this->e621              = $e621;
+    $this->sankaku           = $sankaku;
+    $this->gelbooru          = $gelbooru;
+    $this->webmbot           = $webmbot;
+    $this->renderer          = $renderer;
   }
 
   /**
-   * @param Post $post
+   * @param Post[] $posts
    *
    * @return array Post view model.
    */
-  protected function mapToViewModel(Post $post): array {
-    return [
-      'id' => $post->id,
-      'created_at'    => $post->created_at,
-      'updated_at'    => $post->updated_at,
-      'parent_id'     => $post->parent_id,
-      'bumped_at'     => $post->bumped_at,
-      'name'          => $post->name,
-      'tripcode'      => $post->tripcode,
-      'subject'       => $post->subject,
-      'message'       => $post->message,
-      'message_raw'   => $post->message_raw,
-      'message_tree'  => $post->getMessageTree(),
-      'file'          => $post->file,
-      'file_hex'      => $post->file_hex,
-      'file_original' => $post->file_original,
-      'file_size'     => $post->file_size,
-      'image_width'   => $post->image_width,
-      'image_height'  => $post->image_height,
-      'thumb'         => $post->thumb,
-      'thumb_width'   => $post->thumb_width,
-      'thumb_height'  => $post->thumb_height,
-    ];
+  protected function mapToViewModels(array $posts): array {
+    $post_ids = array_map(function (Post $post) {
+      return $post->id;
+    }, $posts);
+    $refs = $this->refmap_repository->getMany($post_ids);
+
+    $results = [];
+    foreach ($posts as $post) {
+      /** @var Post $post */
+      $results[$post->id] = [
+        'id'             => $post->id,
+        'created_at'     => $post->created_at,
+        'updated_at'     => $post->updated_at,
+        'parent_id'      => $post->parent_id,
+        'bumped_at'      => $post->bumped_at,
+        'name'           => $post->name,
+        'tripcode'       => $post->tripcode,
+        'subject'        => $post->subject,
+        'message'        => $post->getMessageFormatted(),
+        'message_raw'    => $post->message_raw,
+        'message_tree'   => $post->getMessageTree(),
+        'refs_from'      => [],
+        'refs_to'        => [],
+        'file'           => $post->file,
+        'file_hex'       => $post->file_hex,
+        'file_original'  => $post->file_original,
+        'file_type'      => $post->getFileType(),
+        'file_size'      => $post->file_size,
+        'file_size_text' => $post->getFileSizeFormatted(),
+        'file_extension' => $post->getFileExtension(),
+        'image_width'    => $post->image_width,
+        'image_height'   => $post->image_height,
+        'thumb'          => $post->thumb,
+        'thumb_width'    => $post->thumb_width,
+        'thumb_height'   => $post->thumb_height,
+      ];
+
+      foreach ($refs as $ref) {
+        if ($ref->target_id === $post->id) {
+          $results[$post->id]['refs_from'][] = $ref->post_id;
+        }
+
+        if ($ref->post_id === $post->id) {
+          $results[$post->id]['refs_to'][] = $ref->target_id;
+        }
+      }
+    }
+
+    return array_values($results);
   }
 
   /**
@@ -191,7 +224,7 @@ class PostService
    * @return bool True if delay time has passed.
    */
   protected function checkFlood(string $ip, &$remains_time): bool {
-    $delay = (int)$this->config->get("DELAY");
+    $delay = (int)$this->config->get('DELAY');
 
     if ($delay <= 0) {
       return true;
@@ -255,28 +288,6 @@ class PostService
     $search = ['<', '>'];
     $replace = ['&lt;', '&gt;'];
     return str_replace($search, $replace, $string);
-  }
-
-  /**
-   * Processes post links.
-   *
-   * @param string $message
-   *
-   * @return string
-   */
-  protected function postLink(string $message): string {
-    $board = $this->config->get('BOARD');
-    return preg_replace_callback('/&gt;&gt;([0-9]+)/', function ($matches) use ($board) {
-      $id = (int)$matches[1];
-      $post = $this->post_repository->getById($id);
-      if ($post !== null) {
-        /** @var Post $post */
-        $thread_id = $post->isThread() ? $post->id : $post->parent_id;
-        return '<a href="/' . $board . "/res/$thread_id#$id\">" . $matches[0] . '</a>';
-      }
-
-      return $matches[0];
-    }, $message);
   }
 
   /**
@@ -455,7 +466,26 @@ class PostService
 
     $message = rtrim($message);
     $message = $this->cleanString($message);
-    $message = $this->postLink($message);
+
+    // Process post links.
+    $board = $this->config->get('BOARD');
+    $refs = [];
+    $message = preg_replace_callback('/&gt;&gt;([0-9]+)/', function ($matches) use ($board, &$refs) {
+      $id = (int)$matches[1];
+      $post = $this->post_repository->getById($id);
+      if ($post !== null) {
+        if (!in_array($id, $refs)) {
+          $refs[] = $id;
+        }
+
+        /** @var Post $post */
+        $thread_id = $post->isThread() ? $post->id : $post->parent_id;
+        return '<a href="/' . $board . "/res/$thread_id#$id\">" . $matches[0] . '</a>';
+      }
+
+      return $matches[0];
+    }, $message);
+
     $message = $this->colorQuote($message);
     $message = $this->makeLinksClickable($message);
     $message = str_replace("\n", '<br>', $message);
@@ -609,8 +639,16 @@ class PostService
       }
     }
 
-    $post->setBumpedAt(time());
+    $post->setBumpedAt($now);
     $this->post_repository->add($post);
+
+    // Populate the reference map.
+    foreach ($refs as $ref) {
+      $this->refmap_repository->add(new RefMap([
+        'post_id'   => $post->id,
+        'target_id' => $ref,
+      ]));
+    }
 
     $this->trimThreads();
 
@@ -628,7 +666,7 @@ class PostService
         ) {
           $thread = $this->post_repository->getById($parent);
           if (isset($thread)) {
-            $thread->setBumpedAt(time());
+            $thread->setBumpedAt($now);
             $this->post_repository->update($thread);
           }
         }
@@ -752,12 +790,22 @@ class PostService
 
   function getThreads(): array {
     $posts = $this->post_repository->getThreads();
-    return array_map([$this, 'mapToViewModel'], $posts);
+    return $this->mapToViewModels($posts);
+  }
+
+  function getThreadsByPage(int $page): array {
+    $posts = $this->post_repository->getThreadsByPage($page);
+    return $this->mapToViewModels($posts);
   }
 
   function getThreadPosts(int $thread_id, int $after_id = 0): array {
     $posts = $this->post_repository->getThreadPosts($thread_id, $after_id);
-    return array_map([$this, 'mapToViewModel'], $posts);
+    return $this->mapToViewModels($posts);
+  }
+
+  function getLastThreadPosts(int $thread_id, int $count): array {
+    $posts = $this->post_repository->getLastThreadPosts($thread_id, $count);
+    return $this->mapToViewModels($posts);
   }
 
   /**
@@ -773,6 +821,6 @@ class PostService
       throw new NotFoundException("Post #$post_id is not found.");
     }
 
-    return $this->mapToViewModel($post);
+    return $this->mapToViewModels([$post])[0];
   }
 }

@@ -34,7 +34,7 @@
         <a class="post-header__reflink-icon fas fa-reply" href="{{ reflink }}" title="Quick reply" data-reflink="{{ post.id }}"></a>
       {% endif %}
 
-      {% if post.isThread() and not isInThread %}
+      {% if post.parent_id == 0 and not isInThread %}
         <span class="post-header-mobile__reply-wrapper">
           <a class="post-header-mobile__reply-link" href="{{ replylink }}">Reply</a>
         </span>
@@ -53,7 +53,7 @@
       {{ post.created_at|date('j.m.Y H:i:s') }}
     </time>
 
-    {% if post.fileType %}
+    {% if post.file_type %}
       {% include 'components/_file_info.twig' with {'class': 'post-header-mobile__file-info'} %}
     {% endif %}
   </div>

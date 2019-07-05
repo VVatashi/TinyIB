@@ -60,7 +60,7 @@
       <a class="post-header__reflink-icon fas fa-reply" href="{{ reflink }}" title="Quick reply" data-reflink="{{ post.id }}"></a>
     {% endif %}
 
-    {% if post.isThread() and not isInThread %}
+    {% if post.parent_id == 0 and not isInThread %}
       <span class="post-header__reply-wrapper">
         <a class="post-header__reply-link" href="{{ replylink }}">Reply</a>
       </span>

@@ -197,6 +197,8 @@ class PostController implements ControllerInterface
    * @apiSuccess (Success 200) {String}   -.message       Post message HTML fragment.
    * @apiSuccess (Success 200) {String}   -.message_raw   Raw post message.
    * @apiSuccess (Success 200) {Object[]} -.message_tree  Parsed post message.
+   * @apiSuccess (Success 200) {Number[]} -.refs_from     IDs of posts that references this post.
+   * @apiSuccess (Success 200) {Number[]} -.refs_to       IDs of posts referenced in this post.
    * @apiSuccess (Success 200) {String}   -.file          File URL.
    * @apiSuccess (Success 200) {String}   -.file_hex      File hash.
    * @apiSuccess (Success 200) {String}   -.file_original Original file name.
@@ -253,6 +255,8 @@ class PostController implements ControllerInterface
    *          "text": "test thread\n"
    *        }
    *      ],
+   *      "refs_from":     [],
+   *      "refs_to":       [],
    *      "file":          "1557996334020.jpg",
    *      "file_hex":      "f649ff8c9f284fe845eceaba6f952034",
    *      "file_original": "6d8e7849291fa85afad3fde646763b30.jpg",
@@ -301,6 +305,8 @@ class PostController implements ControllerInterface
    * @apiSuccess (Success 200) {String}   -.message       Post message HTML fragment.
    * @apiSuccess (Success 200) {String}   -.message_raw   Raw post message.
    * @apiSuccess (Success 200) {Object[]} -.message_tree  Parsed post message.
+   * @apiSuccess (Success 200) {Number[]} -.refs_from     IDs of posts that references this post.
+   * @apiSuccess (Success 200) {Number[]} -.refs_to       IDs of posts referenced in this post.
    * @apiSuccess (Success 200) {String}   -.file          File URL.
    * @apiSuccess (Success 200) {String}   -.file_hex      File hash.
    * @apiSuccess (Success 200) {String}   -.file_original Original file name.
@@ -330,6 +336,8 @@ class PostController implements ControllerInterface
    *          "text": "Test thread 2\n"
    *        }
    *      ],
+   *      "refs_from":     [],
+   *      "refs_to":       [],
    *      "file":          "1558425160552.jpg",
    *      "file_hex":      "b49c1ae1fe98df5d004cac4e5e08dde7",
    *      "file_original": "mpv-shot0032.jpg",
@@ -383,6 +391,8 @@ class PostController implements ControllerInterface
    * @apiSuccess (Success 200) {String}   message       Post message HTML fragment.
    * @apiSuccess (Success 200) {String}   message_raw   Raw post message.
    * @apiSuccess (Success 200) {Object[]} message_tree  Parsed post message.
+   * @apiSuccess (Success 200) {Number[]} refs_from     IDs of posts that references this post.
+   * @apiSuccess (Success 200) {Number[]} refs_to       IDs of posts referenced in this post.
    * @apiSuccess (Success 200) {String}   file          File URL.
    * @apiSuccess (Success 200) {String}   file_hex      File hash.
    * @apiSuccess (Success 200) {String}   file_original Original file name.
@@ -411,6 +421,8 @@ class PostController implements ControllerInterface
    *        "text": "Test thread 2\n"
    *      }
    *    ],
+   *    "refs_from":     [],
+   *    "refs_to":       [],
    *    "file":          "1558425160552.jpg",
    *    "file_hex":      "b49c1ae1fe98df5d004cac4e5e08dde7",
    *    "file_original": "mpv-shot0032.jpg",

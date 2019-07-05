@@ -1,7 +1,7 @@
 {% set has_size = post.image_width > 0 and post.image_height > 0 %}
-{% set show_name = config('FILE_SHOW_ORIG_NAME') and post.fileOriginal %}
+{% set show_name = config('FILE_SHOW_ORIG_NAME') and post.file_original %}
 
-{% if post.fileType %}
+{% if post.file_type %}
   {% set direct_link = config('CONTENT_PATH') ~ '/src/' ~ post.file %}
   {% set full_link = protocol ~ '://' ~ hostname ~ direct_link %}
 {% endif %}
@@ -9,7 +9,7 @@
 <div class="{{ class is defined ? class ~ ' ' }}file-info">
   {% apply spaceless %}
     {% if post.file %}
-      {% if post.fileType == 'image' %}
+      {% if post.file_type == 'image' %}
       <span class="file-info__search fas fa-search"></span>
 
       <div class="file-info__search-menu">
@@ -54,12 +54,12 @@
       {% endif %}
 
       <a class="file-info__link" href="{{ direct_link }}" data-id="{{ post.id }}"
-        target="_blank"  title="Open in a new window">.{{ post.fileExtension }}</a>,
+        target="_blank"  title="Open in a new window">.{{ post.file_extension }}</a>,
 
       <span class="file-info__size">
-        {{ post.fileSizeFormatted }}{% if has_size %},
+        {{ post.file_size_text }}{% if has_size %},
         {{ post.image_width }}x{{ post.image_height }}{% endif %}{% if show_name %},
-        {{ post.fileOriginal }}{% endif %}
+        {{ post.file_original }}{% endif %}
       </span>
     {% endif %}
   {% endapply %}

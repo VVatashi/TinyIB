@@ -14,7 +14,7 @@
       <input type="hidden" name="board" value="{{ config('BOARD') }}" />
 
       {% for post in posts %}
-        {% if post.isThread() %}
+        {% if post.parent_id == 0 %}
           <hr />
         {% endif %}
 

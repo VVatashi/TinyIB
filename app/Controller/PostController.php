@@ -202,22 +202,21 @@ class PostController implements ControllerInterface
    */
   protected function renderBoardPage(int $page): string
   {
-    $threads = $this->repository->getThreadsByPage($page);
+    $threads = $this->service->getThreadsByPage($page);
     $threads_count = $this->repository->getThreadCount();
     $pages = ceil($threads_count / (int)$this->config->get("THREADSPERPAGE")) - 1;
     $posts = [];
 
     foreach ($threads as $thread) {
-      $replies = $this->repository->getThreadPosts($thread->id);
       $preview_replies = $this->config->get('PREVIEWREPLIES');
-      $omitted = max(0, count($replies) - $preview_replies - 1);
-      $replies = array_slice($replies, -$preview_replies);
+      $replies = $this->service->getLastThreadPosts($thread['id'], $preview_replies);
+      $omitted = max(0, $this->repository->getThreadPostCount($thread['id']) - $preview_replies);
 
-      if (count($replies) === 0 || $replies[0]->id !== $thread->id) {
+      if (count($replies) === 0 || $replies[0]['id'] !== $thread['id']) {
         array_unshift($replies, $thread);
       }
 
-      $replies[0]->omitted = $omitted;
+      $replies[0]['omitted'] = $omitted;
       $posts = array_merge($posts, $replies);
     }
 
@@ -283,7 +282,7 @@ class PostController implements ControllerInterface
         throw new NotFoundException("Thread #$id not found.");
       }
 
-      $posts = $this->repository->getThreadPosts($id);
+      $posts = $this->service->getThreadPosts($id);
       $data = $this->renderer->render('thread.twig', [
         'posts'  => $posts,
         'parent' => $id,
@@ -307,10 +306,7 @@ class PostController implements ControllerInterface
   function ajaxPost(array $args): string
   {
     $id = (int)$args['id'];
-    $post = $this->repository->getById($id);
-    if (!isset($post)) {
-      throw new NotFoundException("Post #$id not found.");
-    }
+    $post = $this->service->getById($id);
 
     return $this->renderer->render('ajax/post.twig', [
       'post' => $post,
@@ -332,14 +328,11 @@ class PostController implements ControllerInterface
   {
     $id = (int)$args['id'];
     $thread = $this->repository->getById($id, true);
-    if (!isset($thread)) {
-      throw new NotFoundException("Thread #$id not found.");
-    }
 
     $query = $request->getQueryParams();
     $after = isset($query['after']) ? (int)$query['after'] : 0;
 
-    $posts = $this->repository->getThreadPosts($id, $after);
+    $posts = $this->service->getThreadPosts($id, $after);
 
     return $this->renderer->render('ajax/thread.twig', [
       'posts'  => $posts,
