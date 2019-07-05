@@ -63,8 +63,9 @@ class UserRepository implements CrudRepository
   {
     $connection = $this->database->getConnection();
     $builder = $connection->createQueryBuilder();
-    $builder->delete(static::TABLE)
-      ->where('id = ' . $builder->createNamedParameter($user->id))
+    $builder->update(static::TABLE, 'u')
+      ->set('deleted_at', $builder->createNamedParameter(time(), ParameterType::INTEGER))
+      ->where('u.id = ' . $builder->createNamedParameter($user->id))
       ->execute();
 
     $user->setId(null);

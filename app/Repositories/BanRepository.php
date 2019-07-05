@@ -54,8 +54,9 @@ class BanRepository implements CrudRepository
   {
     $connection = $this->database->getConnection();
     $builder = $connection->createQueryBuilder();
-    $builder->delete($this->table)
-      ->where('id = ' . $builder->createNamedParameter($ban->id))
+    $builder->update($this->table, 'b')
+      ->set('deleted_at', $builder->createNamedParameter(time(), ParameterType::INTEGER))
+      ->where('b.id = ' . $builder->createNamedParameter($ban->id))
       ->execute();
 
     $ban->setId(null);

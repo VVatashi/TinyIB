@@ -5,14 +5,6 @@
     display: block;
   }
 
-  &__delete {
-    display: none;
-  }
-
-  &__delete-label {
-    display: none;
-  }
-
   &__subject {
     color: $post-subject-color;
   }
@@ -34,6 +26,7 @@
   }
 
   &__reflink-icon,
+  &__delete,
   &__hide,
   &__pin {
     @extend %clickable;
@@ -73,6 +66,7 @@
 
   @include breakpoint($xs-up) {
     &__reflink-icon,
+    &__delete,
     &__hide,
     &__pin {
       font-size: 1em;

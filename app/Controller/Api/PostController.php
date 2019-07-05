@@ -3,12 +3,18 @@
 namespace Imageboard\Controller\Api;
 
 use GuzzleHttp\Psr7\Response;
+use Imageboard\Exception\{AccessDeniedException, NotFoundException};
+use Imageboard\Model\User;
 use Imageboard\Controller\ControllerInterface;
 use Imageboard\Service\{PostService, UserService};
+use Imageboard\Repositories\PostRepository;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
 class PostController implements ControllerInterface
 {
+  /** @var PostRepository */
+  protected $post_repository;
+
   /** @var PostService */
   protected $post_service;
 
@@ -16,11 +22,13 @@ class PostController implements ControllerInterface
   protected $user_service;
 
   function __construct(
-    PostService $post_service,
-    UserService $user_service
+    PostRepository $post_repository,
+    PostService    $post_service,
+    UserService    $user_service
   ) {
-    $this->post_service = $post_service;
-    $this->user_service = $user_service;
+    $this->post_repository = $post_repository;
+    $this->post_service    = $post_service;
+    $this->user_service    = $user_service;
   }
 
   /**
@@ -176,6 +184,58 @@ class PostController implements ControllerInterface
     return new Response(201, [], json_encode([
       'id' => $post->id,
     ]));
+  }
+
+  /**
+   * @api {delete} /api/posts/:id Delete post
+   * @apiName Delete post
+   * @apiGroup post
+   * @apiVersion 0.1.0
+   * @apiDescription Deletes post.
+   *
+   * @apiParam (Url) {Number} id Post ID.
+   *
+   * @apiParamExample {json} Example
+   *  {
+   *    "id": 104
+   *  }
+   */
+
+  /**
+   * Deletes post.
+   *
+   * @param ServerRequestInterface $request
+   * @param array $args Path arguments.
+   *
+   * @return ResponseInterface
+   *
+   * @throws NotFoundException
+   * @throws AccessDeniedException
+   */
+  function delete(ServerRequestInterface $request, array $args): ResponseInterface {
+    $id = (int)($args['id'] ?? 0);
+    $post = $this->post_repository->getById($id);
+    if (!isset($post)) {
+      throw new NotFoundException();
+    }
+
+    /** @var User $user */
+    $user = $request->getAttribute('user');
+    if (!$user->isMod()
+      && $user->id !== $post->user_id
+      && $_SERVER['REMOTE_ADDR'] !== $post->ip) {
+      throw new AccessDeniedException();
+    }
+
+    try {
+      $this->post_service->delete($id, $user);
+    } catch (\Exception $exception) {
+      return new Response(400, [], json_encode([
+        'error' => $exception->getMessage(),
+      ]));
+    }
+
+    return new Response(204);
   }
 
   /**

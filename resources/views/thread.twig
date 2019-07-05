@@ -8,14 +8,10 @@
 
 {% block content %}
   <main class="{{class is defined ? class ~ ' '}}">
-    <form id="delform" action="{{ base_url }}/post/delete" method="post">
-      <input type="hidden" name="board" value="{{ config('BOARD') }}" />
-
-      {% for post in posts %}
-        {% set postNo = loop.index %}
-        {% include 'components/_post.twig' %}
-      {% endfor %}
-    </form>
+    {% for post in posts %}
+      {% set postNo = loop.index %}
+      {% include 'components/_post.twig' %}
+    {% endfor %}
 
     <div id="thread-updater" class="thread-updater content__thread-updater">
       <button class="button thread-updater__update">Get new posts</button>

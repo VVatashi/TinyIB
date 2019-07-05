@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { LocalStorage } from '../services';
+import { LocalStorage, API } from '../services';
 import { Time } from '../utils';
 
 export class Post {
@@ -39,5 +39,9 @@ export class Post {
     const authorName = name + tripcode;
     const postAuthorName = this.name + this.tripcode;
     return this._isOwn = authorName.length && postAuthorName.indexOf(authorName) === 0;
+  }
+
+  delete() {
+    return API.deletePost(this.id);
   }
 }

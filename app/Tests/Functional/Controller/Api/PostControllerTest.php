@@ -9,7 +9,8 @@ use Imageboard\Exception\NotFoundException;
 use Imageboard\Model\Post;
 use Imageboard\Repositories\{
   BanRepository,
-  PostRepository
+  PostRepository,
+  RefMapRepository
 };
 use Imageboard\Service\{
   ConfigService,
@@ -50,6 +51,7 @@ final class PostControllerTest extends TestWithUsers
 
     $cache = new NoCache();
     $ban_repository = new BanRepository($config, $database);
+    $refmap_repository = new RefMapRepository($database);
     $this->post_repository = new PostRepository($config, $database);
 
     $cryptography = new CryptographyService();
@@ -68,6 +70,7 @@ final class PostControllerTest extends TestWithUsers
       $config,
       $cache,
       $ban_repository,
+      $refmap_repository,
       $this->post_repository,
       $this->modlog_service,
       $cryptography,
@@ -100,6 +103,7 @@ final class PostControllerTest extends TestWithUsers
       'tripcode'     => '',
       'subject'      => '',
       'message'      => '',
+      'message_raw'  => '',
       'file_size'    => 0,
       'image_width'  => 0,
       'image_height' => 0,

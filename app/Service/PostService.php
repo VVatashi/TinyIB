@@ -746,7 +746,6 @@ class PostService
    * @param null|User $user User who deletes a post.
    *
    * @throws NotFoundException
-   * @throws AccessDeniedException
    */
   function delete(int $id, $user = null) {
     $board = $this->config->get("BOARD");

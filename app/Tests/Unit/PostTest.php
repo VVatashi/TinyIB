@@ -53,7 +53,7 @@ class PostTest extends TestCase
     $post = new Post();
 
     // Try set & get the size of the file attached to the post.
-    $post->file_size = $input;
+    $post->setFileSize($input);
     $file_size = $post->getFileSizeFormatted();
     $this->assertEquals($expected, $file_size);
   }

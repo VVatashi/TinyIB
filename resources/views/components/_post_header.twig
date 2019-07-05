@@ -23,12 +23,6 @@
 {% import _self as self %}
 
 <div class="{{ class is defined ? class ~ ' ' }}post-header">
-  <div class="post-header__delete">
-    <input type="checkbox" class="post-header__delete-input" id="delete_{{ post.id }}"
-      name="delete" value="{{ post.id }}" title="Mark to delete" />
-    <label class="post-header__delete-label" for="delete_{{ post.id }}">Delete post</label>
-  </div>
-
   <span class="post-header__name-wrapper">
     {% if post.email %}
       <a class="post-header__email" href="mailto:{{ post.email }}">
@@ -54,6 +48,7 @@
       {{- post.id -}}
     </a>
 
+    <a class="post-header__delete fas fa-trash" href="#" title="Delete post"></a>
     <a class="post-header__hide fas fa-times" href="#" title="Hide post"></a>
 
     {% if isInThread %}

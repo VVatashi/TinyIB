@@ -28,4 +28,15 @@ export class API {
 
     return response.text();
   }
+
+  static async deletePost(id: number) {
+    const response = await fetch(`${window.baseUrl}/api/posts/${id}`, {
+      method: 'delete',
+      credentials: 'same-origin',
+    });
+
+    if (!response.status || response.status >= 400) {
+      throw new APIError(response);
+    }
+  }
 }

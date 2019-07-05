@@ -61,7 +61,8 @@ class RoutingService implements RequestHandlerInterface
         });
 
         $routes->addGroup('/posts', function (RouteCollector $routes) {
-          $routes->addRoute('GET', '/{id:\d+}', [PostApi::class, 'post']);
+          $routes->addRoute('GET',    '/{id:\d+}', [PostApi::class, 'post']);
+          $routes->addRoute('DELETE', '/{id:\d+}', [PostApi::class, 'delete']);
         });
 
         $routes->addGroup('/threads', function (RouteCollector $routes) {
