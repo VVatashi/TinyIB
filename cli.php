@@ -27,7 +27,7 @@ $colors = [
   "yellow" => "\e[1;33m",
   "light_gray" => "\e[0;37m",
   "white" => "\e[1;37m",
-  "default" => "\e[01;39m"
+  "default" => "\e[0m"
 ];
 
 // Manage color
@@ -59,7 +59,7 @@ $commands['help'] = function() use ($color) {
   $write_command("migration:migrate", "Apply migration by name", 2);
   $write_command("migration:revert <name>", "Revert migration by name", 1);
   $write_command("migration:apply  <name>", "Apply migration by name", 1);
-  $write_command("create:dango:family", "Create big dango family! For Nagisa...", 0);
+  $write_command("create:dango:family", "Create big dango family! For Nagisa...", 2);
 };
 
 $commands['create:dango:family'] = function(array $args) use ($colors, $color) {
@@ -68,13 +68,13 @@ $commands['create:dango:family'] = function(array $args) use ($colors, $color) {
   };
 
   print("{$dango_color()}だんご　{$dango_color()}だんご　{$dango_color()}だんご　{$dango_color()}だんご　{$dango_color()}だんご　{$color("default")}だんご　大家族\n");
-  print("\n{$color("default")}Put all of them together to make a family of one hundred!\n\n");
+  print("\n{$color("white")}Put all of them together to make a family of one hundred!\n\n");
   
   $dango_count = 10;
   for($i = 0; $i < 10; $i++) {
     print(str_repeat("🍡", $dango_count) . "\n");
   }
-  print("\nThe big dumpling family!\n");
+  print("\nThe big dumpling family!{$color("default")}\n");
 };
 
 $commands['migration:list'] = function (array $args) use ($color) {
@@ -85,7 +85,7 @@ $commands['migration:list'] = function (array $args) use ($color) {
   $applied = $migrations->getAppliedMigrations();
   foreach ($all as $migration) {
     $status = in_array($migration, $applied) ? "{$color("green")}Applied" : "{$color("yellow")}Pending";
-    printf("%-20s | %-10s{$color("default")}\n", $migration, $status);
+    printf("{$color("whilte")}%-20s | %-10s{$color("default")}\n", $migration, $status);
   }
 };
 
@@ -99,7 +99,7 @@ $commands['migration:migrate'] = function (array $args) {
 $commands['migration:apply'] = function (array $args) use ($color) {
   $migration = array_shift($args);
   if (empty($migration)) {
-    print("{$color("red")}Migration name is required\n");
+    print("{$color("red")}Migration name is required{$color("default")}\n");
     return UNIX_CODE_ERR_GENERAL;
   }
 
@@ -107,14 +107,14 @@ $commands['migration:apply'] = function (array $args) use ($color) {
   $database = new DatabaseService($config);
   $migrations = new MigrationService($database);
   if (!$migrations->apply($migration)) {
-    print("{$color("red")}Migration {$color("white")}$migration {$color("red")}is not found or already applied\n");
+    print("{$color("red")}Migration {$color("white")}$migration {$color("red")}is not found or already applied{$color("default")}\n");
   }
 };
 
 $commands['migration:revert'] = function (array $args) use ($color) {
   $migration = array_shift($args);
   if (empty($migration)) {
-    print("{$color("red")}Migration name is required\n");
+    print("{$color("red")}Migration name is required{$color("default")}\n");
     return UNIX_CODE_ERR_GENERAL;
   }
 
@@ -122,7 +122,7 @@ $commands['migration:revert'] = function (array $args) use ($color) {
   $database = new DatabaseService($config);
   $migrations = new MigrationService($database);
   if (!$migrations->revert($migration)) {
-    print("{$color("red")}Migration {$color("white")}$migration {$color("red")}is not found or not applied\n");
+    print("{$color("red")}Migration {$color("white")}$migration {$color("red")}is not found or not applied{$color("default")}\n");
   }
 };
 
@@ -137,7 +137,7 @@ $command = array_shift($argv);
 if (isset($commands[$command])) {
   $commands[$command]($argv);
 } else {
-  print("{$color("red")}Unknown command: {$color("white")}$command\n");
+  print("{$color("red")}Unknown command: {$color("white")}$command{$color("white")}\n");
   return UNIX_CODE_ERR_GENERAL;
 }
 
