@@ -138,7 +138,7 @@ $command = array_shift($argv);
 if (isset($commands[$command])) {
   $commands[$command]($argv);
 } else {
-  print("{$color("red")}Unknown command: {$color("white")}$command{$color("white")}\n");
+  print("{$color("red")}Unknown command: {$color("white")}$command{$color("default")}\n");
   return UNIX_CODE_ERR_GENERAL;
 }
 
