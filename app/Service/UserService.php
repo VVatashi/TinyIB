@@ -52,7 +52,7 @@ class UserService
   {
     $existing = $this->repository->getByEmail($email);
     if (isset($existing)) {
-      throw new ValidationException('User with this email address is already exists');
+      throw new ValidationException('User with this email address is already exist');
     }
 
     $now = time();
@@ -151,7 +151,7 @@ class UserService
   {
     $user = $this->repository->getByEmail($email);
     if (!isset($user)) {
-      throw new NotFoundException('User with this email address is not exists');
+      throw new NotFoundException('User with this email address does not exist');
     }
 
     if (!$user->checkPassword($password)) {
