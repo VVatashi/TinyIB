@@ -70,7 +70,7 @@ class TokenController implements ControllerInterface
    *
    * @apiErrorExample {json} User not found
    *  {
-   *    "error": "User with this email address is not exists"
+   *    "error": "User with this email address does not exist"
    *  }
    *
    * @apiErrorExample {json} Incorrect password
