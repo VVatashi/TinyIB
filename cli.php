@@ -60,6 +60,7 @@ $commands['help'] = function() use ($color) {
   $write_command("migration:revert <name>", "Revert migration by name", 1);
   $write_command("migration:apply  <name>", "Apply migration by name", 1);
   $write_command("create:dango:family", "Create big dango family! For Nagisa...", 2);
+  print($color("default"));
 };
 
 $commands['create:dango:family'] = function(array $args) use ($colors, $color) {
