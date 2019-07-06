@@ -262,6 +262,27 @@ class PostRepository implements CrudRepository
   }
 
   /**
+   * @param int[] $post_ids
+   *
+   * @return Post[]
+   */
+  function getMany(array $post_ids): array
+  {
+    if (empty($post_ids)) {
+      return [];
+    }
+
+    $query = $this->getBaseQuery();
+    $id_params = array_map([$query, 'createNamedParameter'], $post_ids);
+    $query = $query->where('p.deleted_at IS NULL')
+      ->andWhere('p.id IN (' . implode(',', $id_params) . ')')
+      ->orderBy('p.id', 'asc');
+
+    $rows = $query->execute()->fetchAll();
+    return array_map([$this, 'mapToModel'], $rows);
+  }
+
+  /**
    * Returns threads by a board page.
    *
    * @param null|int $skip

@@ -2,8 +2,8 @@
 
 namespace Imageboard\Service;
 
+use GuzzleHttp\Client;
 use Imageboard\Exception\{
-  AccessDeniedException,
   NotFoundException,
   ValidationException
 };
@@ -724,6 +724,55 @@ class PostService
       $redis = new Redis($redis_host);
       $redis->publish($channel, $message);
       $redis->quit();
+    }
+
+    // Send desktop notifications.
+    $onesignal_appid = $this->config->get('ONESIGNAL_APPID', '');
+    $onesignal_key = $this->config->get('ONESIGNAL_KEY', '');
+    if (!empty($refs) && !empty($onesignal_appid) && !empty($onesignal_key)) {
+      $posts = $this->post_repository->getMany($refs);
+      $user_ids = array_filter(array_map(function (Post $post) {
+        return $post->user_id;
+      }, $posts));
+
+      if (!empty($user_ids)) {
+        $protocol = $_SERVER['REQUEST_SCHEME'] ?? 'https';
+        $hostname = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $basePath = $this->config->get('BASE_PATH', '/');
+
+        $data = [
+          'app_id'   => $onesignal_appid,
+          'filters'  => [],
+          'headings' => [
+            'en' => 'You have new reply',
+          ],
+          'contents' => [
+            'en' => "{$post->name}{$post->tripcode}\n{$post->message_raw}",
+          ],
+          'url' => "$protocol://$hostname$basePath/res/{$post->parent_id}#{$post->id}",
+        ];
+
+        foreach ($user_ids as $user_id) {
+          if (!empty($data['filters'])) {
+            $data['filters'][] = ['operator' => 'OR'];
+          }
+
+          $data['filters'][] = [
+            'field'    => 'tag',
+            'key'      => 'user_id',
+            'relation' => '=',
+            'value'    => $user_id,
+          ];
+        }
+
+        $client = new Client();
+        $client->post('https://onesignal.com/api/v1/notifications', [
+          'headers' => [
+            'Authorization' => "Basic $onesignal_key",
+          ],
+          'json' => $data,
+        ]);
+      }
     }
 
     return $post;

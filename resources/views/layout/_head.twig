@@ -37,6 +37,13 @@
 {{ self.style('Quartz',    'quartz') }}
 {{ self.style('Synthwave', 'synthwave') }}
 
+<script>
+  window.baseUrl = '{{ base_url|raw }}';
+  window.websocketUrl = '{{ websocket_url|raw }}';
+  window.board = '{{ board|raw }}';
+  window.userId = {{ user.id|raw }};
+</script>
+
 {% if config('GTM') %}
   <!-- Google Tag Manager -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -47,7 +54,7 @@
   <!-- End Google Tag Manager -->
 {% endif %}
 
-{% if config('ONE_SIGNAL_APPID') %}
+{% if config('ONESIGNAL_APPID') %}
   <link rel="manifest" href="/manifest.json" />
 
   <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
@@ -56,12 +63,16 @@
     var OneSignal = window.OneSignal || [];
     OneSignal.push(function () {
       OneSignal.init({
-        appId: "{{ config('ONE_SIGNAL_APPID') }}",
+        appId: "{{ config('ONESIGNAL_APPID') }}",
         autoResubscribe: true,
         welcomeNotification: {
           disable: true,
         },
       });
+
+      if (window.user_id) {
+        OneSignal.sendTag('user_id', window.user_id);
+      }
     });
   </script>
 {% endif %}
@@ -70,11 +81,4 @@
 {{ self.script('vendor/fetch.min') }}
 {{ self.script('vendor/luxon.min') }}
 {{ self.script('vendor/vue.min') }}
-
-<script>
-  window.baseUrl = '{{ base_url|raw }}';
-  window.websocketUrl = '{{ websocket_url|raw }}';
-  window.board = '{{ board|raw }}';
-</script>
-
 {{ self.script('index') }}
