@@ -112,6 +112,8 @@ export class Post {
 
     const $post = DOM.qid(`reply_${this.media[prevIndex].postId}`);
     if ($post) {
+      this.currentPostId = +$post.getAttribute('data-post-id');
+      this.markCurrentPost();
       DOM.scrollToMiddle($post);
     }
 
@@ -124,6 +126,8 @@ export class Post {
 
     const $post = DOM.qid(`reply_${this.media[nextIndex].postId}`);
     if ($post) {
+      this.currentPostId = +$post.getAttribute('data-post-id');
+      this.markCurrentPost();
       DOM.scrollToMiddle($post);
     }
 
