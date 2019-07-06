@@ -740,16 +740,24 @@ class PostService
         $hostname = $_SERVER['HTTP_HOST'] ?? 'localhost';
         $basePath = $this->config->get('BASE_PATH', '/');
 
+        $name = $post->name . $post->tripcode;
+        if (empty($name)) {
+          $name = 'Anonymous';
+        }
+
+        $date = date('Y-m-d H:i:s', $post->created_at);
+        $message = preg_replace('/\[[^[]+\]/', '', $post->message_raw);
+
         $data = [
           'app_id'   => $onesignal_appid,
           'filters'  => [],
           'headings' => [
-            'en' => 'You have new reply',
+            'en' => "New reply in $basePath/{$post->parent_id}",
           ],
           'contents' => [
-            'en' => "{$post->name}{$post->tripcode}\n{$post->message_raw}",
+            'en' => "{$post->name}{$post->tripcode} $date\r\n$message",
           ],
-          'url' => "$protocol://$hostname$basePath/res/{$post->parent_id}#{$post->id}",
+          'url' => "$protocol://$hostname$basePath/res/{$post->parent_id}#reply_{$post->id}",
         ];
 
         foreach ($user_ids as $user_id) {
