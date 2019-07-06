@@ -71,6 +71,80 @@
     <div class="settings-form__row">
       {{ self.radio('In the right bottom corner', 'post.reflink-icon-position', 'post') }}
     </div>
+
+    <h3 class="settings-form__option-title">Unread posts notify</h3>
+
+    <div class="settings-form__row">
+      {{ self.radio('Disable', 'post.unread-posts-notify', 'disable') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.radio('Play once', 'post.unread-posts-notify', 'once') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.radio('Play on every new post', 'post.unread-posts-notify', 'every-post') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.radio('Play every'
+          ~ ' <input type="number" min="1" data-key="post.unread-posts-notify-interval"'
+          ~ ' class="input settings-form__text" />'
+          ~ ' seconds', 'post.unread-posts-notify', 'repeat') }}
+    </div>
+
+    <h4 class="settings-form__option-title">Unread posts notify sound</h4>
+
+    <div class="settings-form__row">
+      {{ self.radio('Default 1', 'post.unread-posts-notify-type', 'default-1') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.radio('Default 2', 'post.unread-posts-notify-type', 'default-2') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.radio('Custom'
+          ~ ' <input type="file" data-key="post.unread-posts-notify-custom" />',
+          'post.unread-posts-notify-type', 'custom') }}
+    </div>
+
+    <h3 class="settings-form__option-title">Unread replies notify</h3>
+
+    <div class="settings-form__row">
+      {{ self.radio('Disable', 'post.unread-replies-notify', 'disable') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.radio('Play once', 'post.unread-replies-notify', 'once') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.radio('Play on every new post', 'post.unread-replies-notify', 'every-post') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.radio('Play every'
+          ~ ' <input type="number" min="1" data-key="post.unread-replies-notify-interval"'
+          ~ ' class="input settings-form__text" />'
+          ~ ' seconds', 'post.unread-replies-notify', 'repeat') }}
+    </div>
+
+    <h4 class="settings-form__option-title">Unread replies notify sound</h4>
+
+    <div class="settings-form__row">
+      {{ self.radio('Default 1', 'post.unread-replies-notify-type', 'default-1') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.radio('Default 2', 'post.unread-replies-notify-type', 'default-2') }}
+    </div>
+
+    <div class="settings-form__row">
+      {{ self.radio('Custom'
+          ~ ' <input type="file" data-key="post.unread-replies-notify-custom" />',
+          'post.unread-replies-notify-type', 'custom') }}
+    </div>
   </div>
 
   <div class="settings-form__tab-content" data-tab-content="image">

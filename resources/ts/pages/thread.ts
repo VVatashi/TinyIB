@@ -63,6 +63,8 @@ export class ThreadPage extends BasePage {
   protected readonly faviconHref: string;
   protected readonly title: string;
 
+  protected notifyIntervalTimer: number = null;
+
   constructor(readonly threadId: number) {
     super();
 
@@ -192,6 +194,8 @@ export class ThreadPage extends BasePage {
         $mobileRefWrapper.appendChild($postNo.cloneNode(true));
       });
 
+      const prevUnreadCount = this.model.unreadPosts;
+
       // Create view & model for each post.
       const views = $newPosts.map($post => new PostView($post as HTMLElement));
       this.posts.push(...views);
@@ -200,6 +204,43 @@ export class ThreadPage extends BasePage {
       this.model.addPosts(models, document.hidden);
       this.updateFavicon(this.model.unreadPosts, this.model.hasReplies);
       this.updateTitle(this.model.unreadPosts);
+
+      if (this.model.unreadPosts > 0) {
+        const notifyTypeKey = this.model.hasReplies
+          ? 'post.unread-replies-notify'
+          : 'post.unread-posts-notify';
+        const notifyType = Settings.get(notifyTypeKey);
+        switch (notifyType) {
+          case 'every-post':
+            this.notify(this.model.hasReplies);
+            break;
+
+          case 'once':
+            if (prevUnreadCount === 0) {
+              this.notify(this.model.hasReplies);
+            }
+            break;
+
+          case 'repeat':
+            if (this.notifyIntervalTimer) {
+              clearInterval(this.notifyIntervalTimer);
+              this.notifyIntervalTimer = null;
+            }
+
+            const intervalKey = this.model.hasReplies
+              ? 'post.unread-replies-notify-interval'
+              : 'post.unread-posts-notify-interval';
+            const interval = Settings.get<number>(intervalKey) * 1000;
+            this.notify(false);
+            this.notifyIntervalTimer = setInterval(() => {
+              this.notify(false);
+            }, interval);
+            break;
+
+          default:
+            break;
+        }
+      }
 
       eventBus.emit(Events.PostsInserted, $newPosts);
     }
@@ -239,6 +280,43 @@ export class ThreadPage extends BasePage {
     const $post = DOM.qs(`[data-post-id="${id}"]`);
     if ($post) {
       $post.remove();
+    }
+  }
+
+  protected notify(reply: boolean) {
+    const $source = DOM.qid('notify-source') as HTMLSourceElement;
+    const $notify = DOM.qid('notify') as HTMLAudioElement;
+    if ($source && $notify) {
+      const oldSrc = $source.src;
+      const typeKey = reply
+        ? 'post.unread-replies-notify-type'
+        : 'post.unread-posts-notify-type';
+      const type = Settings.get(typeKey);
+      switch (type) {
+        case 'default-1':
+          $source.src = `${window.baseUrl}/mp3/notify-1.mp3`;
+          break;
+
+        case 'default-2':
+          $source.src = `${window.baseUrl}/mp3/notify-2.mp3`;
+          break;
+
+        case 'custom':
+          const srcKey = reply
+            ? 'post.unread-replies-notify-custom'
+            : 'post.unread-posts-notify-custom';
+          $source.src = Settings.get(srcKey);
+          break;
+
+        default:
+          break;
+      }
+
+      if (oldSrc !== $source.src) {
+        $notify.load();
+      }
+
+      $notify.play();
     }
   }
 
@@ -458,6 +536,11 @@ export class ThreadPage extends BasePage {
         this.model.readAll();
         this.updateFavicon(this.model.unreadPosts, this.model.hasReplies);
         this.updateTitle(this.model.unreadPosts);
+
+        if (this.notifyIntervalTimer) {
+          clearInterval(this.notifyIntervalTimer);
+          this.notifyIntervalTimer = null;
+        }
       }
     });
   }

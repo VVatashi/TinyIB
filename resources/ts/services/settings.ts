@@ -4,6 +4,9 @@ interface SettingsData {
   [key: string]: any,
 }
 
+type Notify = 'disable' | 'once' | 'every-post' | 'repeat';
+type NotifyFile = 'default-1' | 'default-2' | 'custom';
+
 const defaultSettings: SettingsData = {
   'filter.remove-hidden-posts': false,
   'filter.hidden-authors': [],
@@ -16,6 +19,14 @@ const defaultSettings: SettingsData = {
   'post.reflink-icon-position': 'header',
   'post.show-spoilers': false,
   'post.disable-sub': false,
+  'post.unread-posts-notify': 'disable' as Notify,
+  'post.unread-posts-notify-interval': 10,
+  'post.unread-posts-notify-type': 'default-1' as NotifyFile,
+  'post.unread-posts-notify-custom': '',
+  'post.unread-replies-notify': 'disable' as Notify,
+  'post.unread-replies-notify-interval': 10,
+  'post.unread-replies-notify-type': 'default-1' as NotifyFile,
+  'post.unread-replies-notify-custom': '',
   'image.nsfw': false,
   'image.show-video-overlay': false,
   'image.hide-popup-on-outside-click': false,

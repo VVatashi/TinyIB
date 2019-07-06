@@ -37,6 +37,10 @@
     {% include 'components/_tools.twig' with {'class': 'content__tools'} %}
     {% include 'components/_nav-left.twig' with {'class': 'content__navigation-left hidden'} %}
     {% include 'components/_nav-right.twig' with {'class': 'content__navigation-right hidden'} %}
+
+    <audio id="notify" class="hidden" hidden>
+      <source id="notify-source" src="{{ base_url }}/mp3/notify-1.mp3"></source>
+    </audio>
   </main>
 {% endblock %}
 
