@@ -8,10 +8,12 @@
 
 {% block content %}
   <main class="{{class is defined ? class ~ ' '}}">
-    {% for post in posts %}
-      {% set postNo = loop.index %}
-      {% include 'components/_post.twig' %}
-    {% endfor %}
+    <article class="thread">
+      {% for post in posts %}
+        {% set postNo = loop.index %}
+        {% include 'components/_post.twig' %}
+      {% endfor %}
+    </article>
 
     <div id="thread-updater" class="thread-updater content__thread-updater">
       <button class="button thread-updater__update">Get new posts</button>

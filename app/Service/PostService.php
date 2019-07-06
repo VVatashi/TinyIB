@@ -683,29 +683,42 @@ class PostService
       // Send post to the redis queue.
       $board = $this->config->get('BOARD');
       $channel = "$board:thread:$parent";
+      $data = [
+        'id'             => $post->id,
+        'created_at'     => $post->created_at,
+        'updated_at'     => $post->updated_at,
+        'parent_id'      => $post->parent_id,
+        'bumped_at'      => $post->bumped_at,
+        'name'           => $post->name,
+        'tripcode'       => $post->tripcode,
+        'subject'        => $post->subject,
+        'message'        => $post->getMessageFormatted(),
+        'message_raw'    => $post->message_raw,
+        'message_tree'   => $post->getMessageTree(),
+        'refs_from'      => [],
+        'refs_to'        => [],
+        'file'           => $post->file,
+        'file_hex'       => $post->file_hex,
+        'file_original'  => $post->file_original,
+        'file_type'      => $post->getFileType(),
+        'file_size'      => $post->file_size,
+        'file_size_text' => $post->getFileSizeFormatted(),
+        'file_extension' => $post->getFileExtension(),
+        'image_width'    => $post->image_width,
+        'image_height'   => $post->image_height,
+        'thumb'          => $post->thumb,
+        'thumb_width'    => $post->thumb_width,
+        'thumb_height'   => $post->thumb_height,
+      ];
+
+      $data['html'] = $this->renderer->render('ajax/post.twig', [
+        'post' => $data,
+        'res'  => RESPAGE,
+      ]);
+
       $message = json_encode([
         'type' => 'add_post',
-        'data' => [
-          'id'           => $post->id,
-          'created_at'   => $post->created_at,
-          'subject'      => $post->subject,
-          'name'         => $post->name,
-          'tripcode'     => $post->tripcode,
-          'message'      => $post->message,
-          'message_raw'  => $post->message_raw,
-          'file'         => $post->file,
-          'file_type'    => $post->getFileType(),
-          'image_width'  => $post->image_width,
-          'image_height' => $post->image_height,
-          'file_size'    => $post->file_size,
-          'thumb'        => $post->thumb,
-          'thumb_width'  => $post->thumb_width,
-          'thumb_height' => $post->thumb_height,
-          'html'         => $this->renderer->render('ajax/post.twig', [
-            'post' => $post,
-            'res'  => RESPAGE,
-          ]),
-        ],
+        'data' => $data,
       ]);
 
       $redis = new Redis($redis_host);

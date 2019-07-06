@@ -27,13 +27,16 @@ interface WSPostData {
 }
 
 interface WSAddPost {
+  id: number;
+  timestamp: number;
   type: 'add_post';
   data: WSPostData;
 }
 
 interface WSLatency {
-  type: 'latency';
+  id: number;
   timestamp: number;
+  type: 'latency';
 }
 
 type WSCommand = WSAddPost | WSLatency;
@@ -287,10 +290,16 @@ export class ThreadPage extends BasePage {
   protected latencyTimer: number;
 
   protected readonly retryInterval = 1000;
-  protected readonly maxRetries = 3;
+  protected readonly maxRetries = 10;
   protected retries = 0;
 
+  protected readonly receivedMessageIds = new Set();
+
   protected checkLatensy() {
+    if (this.latencyTimer) {
+      return;
+    }
+
     this.socket.send(JSON.stringify({
       command: 'latency',
       timestamp: Date.now(),
@@ -333,11 +342,27 @@ export class ThreadPage extends BasePage {
       }
 
       this.retries = 0;
+
+      if (this.latencyTimer) {
+        clearTimeout(this.latencyTimer);
+        this.latencyTimer = null;
+      }
+
       this.checkLatensy();
     });
 
     this.socket.addEventListener('message', e => {
       const message = JSON.parse(e.data) as WSCommand;
+      this.socket.send(JSON.stringify({
+        command: 'ack',
+        id: message.id,
+      }));
+
+      if (this.receivedMessageIds.has(message.id)) {
+        return;
+      }
+      this.receivedMessageIds.add(message.id);
+
       if (message.type === 'add_post') {
         this.onNewWSPostDataLoaded(message.data);
       } else if (message.type === 'latency') {
@@ -369,11 +394,12 @@ export class ThreadPage extends BasePage {
       }
 
       if (this.retries < this.maxRetries) {
+        const interval = Math.min(30000, (this.retries + 1) * this.retryInterval);
         setTimeout(() => {
           this.retries++;
           console.info(`Retrying connect to websocket (${this.retries}/${this.maxRetries}).`);
           this.bindWSThreadUpdater();
-        }, this.retryInterval);
+        }, interval);
       } else {
         console.warn('Fallback to legacy thread updater.');
         this.bindThreadUpdater();
@@ -390,9 +416,8 @@ export class ThreadPage extends BasePage {
       new WebSocket('wss://echo.websocket.org');
       return true;
     } catch {
+      return false;
     }
-
-    return false;
   }
 
   protected bindModel() {

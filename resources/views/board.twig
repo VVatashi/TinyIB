@@ -10,13 +10,17 @@
   <main class="{{class is defined ? class ~ ' '}}">
     {% include 'components/_posting_form.twig' with {'class': 'content__posting-form'} %}
 
-    {% for post in posts %}
-      {% if post.parent_id == 0 %}
-        <hr />
-      {% endif %}
+    <article class="thread">
+      {% for post in posts %}
+        {% if post.parent_id == 0 and not loop.first %}
+          </article>
+          <hr />
+          <article class="thread">
+        {% endif %}
 
-      {% include 'components/_post.twig' %}
-    {% endfor %}
+        {% include 'components/_post.twig' %}
+      {% endfor %}
+    </article>
 
     <hr />
 
