@@ -47,6 +47,24 @@
   <!-- End Google Tag Manager -->
 {% endif %}
 
+{% if config('ONE_SIGNAL_APPID') %}
+  <link rel="manifest" href="/manifest.json" />
+
+  <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
+
+  <script>
+    const OneSignal = window.OneSignal || [];
+    OneSignal.push(function () {
+      OneSignal.init({
+        appId: "{{ config('ONE_SIGNAL_APPID') }}",
+        notifyButton: {
+          enable: true,
+        },
+      });
+    });
+  </script>
+{% endif %}
+
 {{ self.script('vendor/promise-polyfill.min') }}
 {{ self.script('vendor/fetch.min') }}
 {{ self.script('vendor/luxon.min') }}

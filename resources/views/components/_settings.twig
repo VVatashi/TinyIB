@@ -145,6 +145,10 @@
           ~ ' <input type="file" data-key="post.unread-replies-notify-custom" />',
           'post.unread-replies-notify-type', 'custom') }}
     </div>
+
+    {% if config('ONE_SIGNAL_APPID') %}
+      <button id="enable-desktop-notify">Enable desktop notifications</button>
+    {% endif %}
   </div>
 
   <div class="settings-form__tab-content" data-tab-content="image">

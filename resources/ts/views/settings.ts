@@ -161,6 +161,18 @@ export class SettingsView implements View {
         });
       });
     }
+
+    const $enableDesktopNotifications = DOM.qid('enable-desktop-notify');
+    if ($enableDesktopNotifications) {
+      $enableDesktopNotifications.addEventListener('click', e => {
+        e.preventDefault();
+
+        const OneSignal = window.OneSignal || [];
+        OneSignal.push(function () {
+          OneSignal.showNativePrompt();
+        });
+      });
+    }
   }
 
   detach() {
