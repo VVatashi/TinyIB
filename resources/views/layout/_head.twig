@@ -53,12 +53,13 @@
   <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
 
   <script>
-    const OneSignal = window.OneSignal || [];
+    var OneSignal = window.OneSignal || [];
     OneSignal.push(function () {
       OneSignal.init({
         appId: "{{ config('ONE_SIGNAL_APPID') }}",
-        notifyButton: {
-          enable: true,
+        autoResubscribe: true,
+        welcomeNotification: {
+          disable: true,
         },
       });
     });
