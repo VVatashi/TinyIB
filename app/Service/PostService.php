@@ -783,6 +783,25 @@ class PostService
       // Add entry to the modlog.
       $this->modlog_service->create("User {$user->email} has deleted post {$id}.", $user->id);
     }
+
+    $redis_host = $this->config->get('REDIS_HOST', '');
+    if (!empty($redis_host)) {
+      // Send notify to the redis queue.
+      $board = $this->config->get('BOARD');
+      $channel = "$board:thread:$thread_id";
+      $data = [
+        'id' => $id,
+      ];
+
+      $message = json_encode([
+        'type' => 'remove_post',
+        'data' => $data,
+      ]);
+
+      $redis = new Redis($redis_host);
+      $redis->publish($channel, $message);
+      $redis->quit();
+    }
   }
 
   /**

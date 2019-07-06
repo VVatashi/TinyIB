@@ -33,13 +33,22 @@ interface WSAddPost {
   data: WSPostData;
 }
 
+interface WSRemovePost {
+  id: number;
+  timestamp: number;
+  type: 'remove_post';
+  data: {
+    id: number;
+  };
+}
+
 interface WSLatency {
   id: number;
   timestamp: number;
   type: 'latency';
 }
 
-type WSCommand = WSAddPost | WSLatency;
+type WSCommand = WSAddPost | WSRemovePost | WSLatency;
 
 export class ThreadPage extends BasePage {
   readonly posts: PostView[];
@@ -221,6 +230,18 @@ export class ThreadPage extends BasePage {
     this.processNewPosts($wrapper);
   }
 
+  protected removePost(id: number) {
+    const $wrapper = DOM.qs('.post').parentElement;
+    if (!$wrapper) {
+      return;
+    }
+
+    const $post = DOM.qs(`[data-post-id="${id}"]`);
+    if ($post) {
+      $post.remove();
+    }
+  }
+
   protected bindThreadUpdater() {
     if (this.$updater) {
       this.$updater.classList.remove('hidden');
@@ -365,6 +386,8 @@ export class ThreadPage extends BasePage {
 
       if (message.type === 'add_post') {
         this.onNewWSPostDataLoaded(message.data);
+      } else if (message.type === 'remove_post') {
+        this.removePost(message.data.id);
       } else if (message.type === 'latency') {
         const latency = Date.now() - message.timestamp;
         this.$statusWS.textContent = `WebSocket connected: latency ${latency} ms`;
