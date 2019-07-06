@@ -2,6 +2,7 @@
 
 namespace Imageboard\Repositories;
 
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Imageboard\Model\Ban;
 use Imageboard\Service\{ConfigService, DatabaseService};
@@ -54,9 +55,9 @@ class BanRepository implements CrudRepository
   {
     $connection = $this->database->getConnection();
     $builder = $connection->createQueryBuilder();
-    $builder->update($this->table, 'b')
+    $builder->update($this->table)
       ->set('deleted_at', $builder->createNamedParameter(time(), ParameterType::INTEGER))
-      ->where('b.id = ' . $builder->createNamedParameter($ban->id))
+      ->where('id = ' . $builder->createNamedParameter((int)$ban->id, ParameterType::INTEGER))
       ->execute();
 
     $ban->setId(null);

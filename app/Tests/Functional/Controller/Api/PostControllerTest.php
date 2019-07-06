@@ -85,6 +85,7 @@ final class PostControllerTest extends TestWithUsers
     );
 
     $this->controller = new PostController(
+      $this->post_repository,
       $post_service,
       $this->user_service
     );

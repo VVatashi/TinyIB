@@ -3,6 +3,7 @@
 namespace Imageboard\Repositories;
 
 use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\DBAL\ParameterType;
 use Imageboard\Model\User;
 use Imageboard\Service\DatabaseService;
 
@@ -63,9 +64,9 @@ class UserRepository implements CrudRepository
   {
     $connection = $this->database->getConnection();
     $builder = $connection->createQueryBuilder();
-    $builder->update(static::TABLE, 'u')
+    $builder->update(static::TABLE)
       ->set('deleted_at', $builder->createNamedParameter(time(), ParameterType::INTEGER))
-      ->where('u.id = ' . $builder->createNamedParameter($user->id))
+      ->where('id = ' . $builder->createNamedParameter((int)$user->id, ParameterType::INTEGER))
       ->execute();
 
     $user->setId(null);

@@ -106,9 +106,9 @@ class PostRepository implements CrudRepository
   {
     $connection = $this->database->getConnection();
     $builder = $connection->createQueryBuilder();
-    $builder->update($this->table, 'p')
+    $builder->update($this->table)
       ->set('deleted_at', $builder->createNamedParameter(time(), ParameterType::INTEGER))
-      ->where('p.id = ' . $builder->createNamedParameter($post->id))
+      ->where('id = ' . $builder->createNamedParameter((int)$post->id, ParameterType::INTEGER))
       ->execute();
 
     $post->setId(null);
