@@ -3,6 +3,7 @@
 namespace Imageboard\Services\Notification;
 
 use GuzzleHttp\Client;
+use Imageboard\Services\ConfigService;
 
 class OneSignalService implements NotificationService
 {
@@ -12,9 +13,9 @@ class OneSignalService implements NotificationService
   /** @var string */
   protected $key;
 
-  function __construct() {
-    $this->appid = $this->config->get('ONESIGNAL_APPID', '');
-    $this->key   = $this->config->get('ONESIGNAL_KEY', '');
+  function __construct(ConfigService $config) {
+    $this->appid = $config->get('ONESIGNAL_APPID', '');
+    $this->key   = $config->get('ONESIGNAL_KEY', '');
   }
 
   /**
