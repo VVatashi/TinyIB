@@ -27,6 +27,7 @@ use Imageboard\Services\Booru\{
   WebmbotService
 };
 use Imageboard\Services\Cache\NoCache;
+use Imageboard\Services\Notification\StubNotificationService;
 use Imageboard\Tests\Functional\TestWithUsers;
 
 final class PostControllerTest extends TestWithUsers
@@ -64,6 +65,7 @@ final class PostControllerTest extends TestWithUsers
     $gelbooru = new GelbooruService();
     $webmbot = new WebmbotService();
 
+    $notification = new StubNotificationService();
     $renderer = new RendererService($config);
 
     $post_service = new PostService(
@@ -81,6 +83,7 @@ final class PostControllerTest extends TestWithUsers
       $sankaku,
       $gelbooru,
       $webmbot,
+      $notification,
       $renderer
     );
 
