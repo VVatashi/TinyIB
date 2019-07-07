@@ -2,7 +2,7 @@
 
 namespace Imageboard\Tests\Unit;
 
-use Imageboard\Service\CryptographyService;
+use Imageboard\Services\CryptographyService;
 use PHPUnit\Framework\TestCase;
 
 final class CryptographyServiceTest extends TestCase

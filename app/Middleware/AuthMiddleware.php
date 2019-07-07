@@ -3,7 +3,7 @@
 namespace Imageboard\Middleware;
 
 use Imageboard\Repositories\UserRepository;
-use Imageboard\Service\{
+use Imageboard\Services\{
   RendererService,
   TokenService,
   UserService

@@ -3,10 +3,10 @@
 namespace Imageboard\Tests\Functional\Controller\Api;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Controller\Api\TokenController;
-use Imageboard\Exception\NotFoundException;
+use Imageboard\Controllers\Api\TokenController;
+use Imageboard\Exceptions\NotFoundException;
 use Imageboard\Repositories\TokenRepository;
-use Imageboard\Service\TokenService;
+use Imageboard\Services\TokenService;
 use Imageboard\Tests\Functional\TestWithUsers;
 
 final class TokenControllerTest extends TestWithUsers

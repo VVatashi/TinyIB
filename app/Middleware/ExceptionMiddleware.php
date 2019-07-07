@@ -3,9 +3,9 @@
 namespace Imageboard\Middleware;
 
 use GuzzleHttp\Psr7\Response;
-use Imageboard\Exception\HttpException;
+use Imageboard\Exceptions\HttpException;
 use Imageboard\Functions;
-use Imageboard\Service\RendererService;
+use Imageboard\Services\RendererService;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Http\Server\{RequestHandlerInterface, MiddlewareInterface};
 use Psr\Log\LoggerInterface;

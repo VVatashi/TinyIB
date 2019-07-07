@@ -3,7 +3,7 @@
 namespace Imageboard\Migrations;
 
 use Doctrine\DBAL\Schema\Schema;
-use Imageboard\Service\ConfigService;
+use Imageboard\Services\ConfigService;
 
 class CreatePosts extends Migration
 {

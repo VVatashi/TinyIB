@@ -2,7 +2,7 @@
 
 namespace Imageboard\Tests\Unit;
 
-use Imageboard\Model\User;
+use Imageboard\Models\User;
 use PHPUnit\Framework\TestCase;
 
 final class UserTest extends TestCase

@@ -1,7 +1,7 @@
 <?php
 
 use Imageboard\App;
-use Imageboard\Service\MigrationService;
+use Imageboard\Services\MigrationService;
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 

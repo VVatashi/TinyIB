@@ -3,9 +3,9 @@
 namespace Imageboard\Tests\Functional\Controller\Admin;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Controller\Admin\ModLogController;
-use Imageboard\Exception\AccessDeniedException;
-use Imageboard\Service\{ConfigService, RendererService};
+use Imageboard\Controllers\Admin\ModLogController;
+use Imageboard\Exceptions\AccessDeniedException;
+use Imageboard\Services\{ConfigService, RendererService};
 use Imageboard\Tests\Functional\TestWithUsers;
 
 final class ModLogControllerTest extends TestWithUsers

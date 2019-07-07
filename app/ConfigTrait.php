@@ -2,7 +2,7 @@
 
 namespace Imageboard;
 
-use Imageboard\Service\ConfigService;
+use Imageboard\Services\ConfigService;
 
 trait ConfigTrait
 {

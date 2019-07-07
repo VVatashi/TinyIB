@@ -3,11 +3,11 @@
 namespace Imageboard\Tests\Functional\Controller\Admin;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Controller\Admin\BanController;
-use Imageboard\Exception\{AccessDeniedException, NotFoundException};
-use Imageboard\Model\Ban;
+use Imageboard\Controllers\Admin\BanController;
+use Imageboard\Exceptions\{AccessDeniedException, NotFoundException};
+use Imageboard\Models\Ban;
 use Imageboard\Repositories\{BanRepository};
-use Imageboard\Service\{
+use Imageboard\Services\{
   ConfigService,
   BanService,
   RendererService

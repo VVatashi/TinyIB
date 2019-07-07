@@ -3,8 +3,8 @@
 namespace Imageboard\Repositories;
 
 use Doctrine\DBAL\Query\QueryBuilder;
-use Imageboard\Model\ModLog;
-use Imageboard\Service\DatabaseService;
+use Imageboard\Models\ModLog;
+use Imageboard\Services\DatabaseService;
 
 class ModLogRepository implements Repository
 {

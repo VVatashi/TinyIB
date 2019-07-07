@@ -2,9 +2,9 @@
 
 namespace Imageboard\Tests\Functional;
 
-use Imageboard\Model\User;
+use Imageboard\Models\User;
 use Imageboard\Repositories\{ModLogRepository, UserRepository};
-use Imageboard\Service\{ModLogService, UserService, SessionService};
+use Imageboard\Services\{ModLogService, UserService, SessionService};
 use PHPUnit\Framework\TestCase;
 
 abstract class TestWithUsers extends TestCase

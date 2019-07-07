@@ -2,7 +2,7 @@
 
 namespace Imageboard\Tests\Unit;
 
-use Imageboard\Model\Post;
+use Imageboard\Models\Post;
 use PHPUnit\Framework\TestCase;
 
 class PostTest extends TestCase

@@ -5,7 +5,7 @@ namespace Imageboard\Migrations;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Query\QueryBuilder;
-use Imageboard\Service\ConfigService;
+use Imageboard\Services\ConfigService;
 
 class AddRawMessage extends Migration
 {

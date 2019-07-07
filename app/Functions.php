@@ -2,7 +2,7 @@
 
 namespace Imageboard;
 
-use Imageboard\Model\Post;
+use Imageboard\Models\Post;
 
 class Functions
 {

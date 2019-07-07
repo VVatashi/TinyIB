@@ -2,7 +2,7 @@
 
 namespace Imageboard\Tests\Unit;
 
-use Imageboard\Service\{CaptchaService, SessionService};
+use Imageboard\Services\{CaptchaService, SessionService};
 use PHPUnit\Framework\TestCase;
 
 final class CaptchaServiceTest extends TestCase

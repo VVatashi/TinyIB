@@ -3,10 +3,10 @@
 namespace Imageboard\Tests\Functional\Controller\Admin;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Cache\NoCache;
-use Imageboard\Controller\Admin\SystemController;
-use Imageboard\Exception\AccessDeniedException;
-use Imageboard\Service\{ConfigService, SystemService, RendererService, SessionService};
+use Imageboard\Controllers\Admin\SystemController;
+use Imageboard\Exceptions\AccessDeniedException;
+use Imageboard\Services\{ConfigService, SystemService, RendererService, SessionService};
+use Imageboard\Services\Cache\NoCache;
 use Imageboard\Tests\Functional\TestWithUsers;
 
 final class SystemControllerTest extends TestWithUsers

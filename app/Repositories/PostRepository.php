@@ -4,8 +4,8 @@ namespace Imageboard\Repositories;
 
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Query\QueryBuilder;
-use Imageboard\Model\Post;
-use Imageboard\Service\{ConfigService, DatabaseService};
+use Imageboard\Models\Post;
+use Imageboard\Services\{ConfigService, DatabaseService};
 
 class PostRepository implements CrudRepository
 {

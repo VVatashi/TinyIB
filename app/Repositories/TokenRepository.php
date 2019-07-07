@@ -3,8 +3,8 @@
 namespace Imageboard\Repositories;
 
 use Doctrine\DBAL\Query\QueryBuilder;
-use Imageboard\Model\Token;
-use Imageboard\Service\DatabaseService;
+use Imageboard\Models\Token;
+use Imageboard\Services\DatabaseService;
 
 class TokenRepository implements Repository
 {

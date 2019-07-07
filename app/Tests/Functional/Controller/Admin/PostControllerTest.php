@@ -3,19 +3,18 @@
 namespace Imageboard\Tests\Functional\Controller\Admin;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Cache\NoCache;
-use Imageboard\Controller\Admin\PostController;
-use Imageboard\Exception\{
+use Imageboard\Controllers\Admin\PostController;
+use Imageboard\Exceptions\{
   AccessDeniedException,
   NotFoundException
 };
-use Imageboard\Model\Post;
+use Imageboard\Models\Post;
 use Imageboard\Repositories\{
   BanRepository,
   PostRepository,
   RefMapRepository
 };
-use Imageboard\Service\{
+use Imageboard\Services\{
   ConfigService,
   PostService,
   RendererService,
@@ -23,13 +22,14 @@ use Imageboard\Service\{
   FileService,
   ThumbnailService
 };
-use Imageboard\Service\Booru\{
+use Imageboard\Services\Booru\{
   E621Service,
   SafebooruService,
   SankakuService,
   GelbooruService,
   WebmbotService
 };
+use Imageboard\Services\Cache\NoCache;
 use Imageboard\Tests\Functional\TestWithUsers;
 
 final class PostControllerTest extends TestWithUsers

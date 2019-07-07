@@ -2,7 +2,7 @@
 
 namespace Imageboard\Tests\Unit;
 
-use Imageboard\Model\Ban;
+use Imageboard\Models\Ban;
 use PHPUnit\Framework\TestCase;
 
 final class BanTest extends TestCase

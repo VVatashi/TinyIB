@@ -3,8 +3,8 @@
 namespace Imageboard\Tests\Functional\Controller;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Controller\AuthController;
-use Imageboard\Service\{
+use Imageboard\Controllers\AuthController;
+use Imageboard\Services\{
   CaptchaService,
   ConfigService,
   RendererService,

@@ -3,8 +3,8 @@
 namespace Imageboard\Repositories;
 
 use Doctrine\DBAL\Query\QueryBuilder;
-use Imageboard\Model\RefMap;
-use Imageboard\Service\DatabaseService;
+use Imageboard\Models\RefMap;
+use Imageboard\Services\DatabaseService;
 
 class RefMapRepository implements Repository
 {

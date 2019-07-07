@@ -4,8 +4,8 @@ namespace Imageboard\Repositories;
 
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Query\QueryBuilder;
-use Imageboard\Model\Ban;
-use Imageboard\Service\{ConfigService, DatabaseService};
+use Imageboard\Models\Ban;
+use Imageboard\Services\{ConfigService, DatabaseService};
 
 class BanRepository implements CrudRepository
 {

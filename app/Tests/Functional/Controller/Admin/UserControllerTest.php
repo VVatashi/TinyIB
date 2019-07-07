@@ -3,10 +3,10 @@
 namespace Imageboard\Tests\Functional\Controller\Admin;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Controller\Admin\UserController;
-use Imageboard\Exception\{AccessDeniedException, NotFoundException};
-use Imageboard\Model\User;
-use Imageboard\Service\{ConfigService, RendererService, UserService};
+use Imageboard\Controllers\Admin\UserController;
+use Imageboard\Exceptions\{AccessDeniedException, NotFoundException};
+use Imageboard\Models\User;
+use Imageboard\Services\{ConfigService, RendererService, UserService};
 use Imageboard\Tests\Functional\TestWithUsers;
 
 final class UserControllerTest extends TestWithUsers

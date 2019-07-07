@@ -4,7 +4,7 @@ namespace Imageboard\Migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Query\QueryBuilder;
-use Imageboard\Service\ConfigService;
+use Imageboard\Services\ConfigService;
 
 class CreateRefMap extends Migration
 {

@@ -3,7 +3,6 @@
 namespace Imageboard;
 
 use GuzzleHttp\Psr7\{ServerRequest, Response};
-use Imageboard\Cache\{CacheInterface, NoCache, RedisCache};
 use Imageboard\Middleware\{
   AuthMiddleware,
   CorsMiddleware,
@@ -11,7 +10,7 @@ use Imageboard\Middleware\{
   RequestHandler
 };
 use Imageboard\Repositories\UserRepository;
-use Imageboard\Service\{
+use Imageboard\Services\{
   ConfigService,
   DatabaseService,
   RendererService,
@@ -19,6 +18,7 @@ use Imageboard\Service\{
   TokenService,
   UserService
 };
+use Imageboard\Services\Cache\{CacheInterface, NoCache, RedisCache};
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
@@ -145,21 +145,11 @@ EOF;
       });
     }
 
-    if ($this->config->get('CACHE') === 'redis') {
-      // Lazy create Redis cache.
-      $this->container->registerCallback(CacheInterface::class, function ($container) {
-        return new RedisCache($this->config->get('CACHE_REDIS_HOST'));
-      });
-    } else {
-      // Disable cache.
-      $this->container->registerType(CacheInterface::class, NoCache::class);
-    }
-
     // Register services in the IoC-container by conventions.
     $directories = [
-      'Controller',
-      'Model',
-      'Service',
+      'Controllers',
+      'Models',
+      'Services',
       'Repositories',
     ];
 
@@ -175,6 +165,16 @@ EOF;
       foreach ($classes as $class) {
         $this->container->registerType($class, $class);
       }
+    }
+
+    if ($this->config->get('CACHE') === 'redis') {
+      // Lazy create Redis cache.
+      $this->container->registerCallback(CacheInterface::class, function ($container) {
+        return new RedisCache($this->config->get('CACHE_REDIS_HOST'));
+      });
+    } else {
+      // Disable cache.
+      $this->container->registerType(CacheInterface::class, NoCache::class);
     }
   }
 

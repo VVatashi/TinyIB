@@ -2,7 +2,7 @@
 
 namespace Imageboard;
 
-use Imageboard\Service\SessionService;
+use Imageboard\Services\SessionService;
 
 /**
  * Script for generation of CAPTCHAs

@@ -4,8 +4,8 @@ namespace Imageboard\Repositories;
 
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\ParameterType;
-use Imageboard\Model\User;
-use Imageboard\Service\DatabaseService;
+use Imageboard\Models\User;
+use Imageboard\Services\DatabaseService;
 
 class UserRepository implements CrudRepository
 {

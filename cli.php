@@ -4,7 +4,7 @@
 const UNIX_CODE_ERR_GENERAL = 1;
 const UNIX_CODE_OK = 0;
 
-use Imageboard\Service\{ConfigService, DatabaseService, MigrationService};
+use Imageboard\Services\{ConfigService, DatabaseService, MigrationService};
 
 require_once __DIR__ . '/vendor/autoload.php';
 

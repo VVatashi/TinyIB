@@ -3,8 +3,8 @@
 namespace Imageboard\Tests\Functional\Controller;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Controller\CaptchaController;
-use Imageboard\Service\{CaptchaService, SessionService};
+use Imageboard\Controllers\CaptchaController;
+use Imageboard\Services\{CaptchaService, SessionService};
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
