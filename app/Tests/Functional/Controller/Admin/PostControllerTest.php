@@ -3,79 +3,124 @@
 namespace Imageboard\Tests\Functional\Controller\Admin;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Command\CommandDispatcher;
-use Imageboard\Controller\Admin\PostController;
-use Imageboard\Exception\{AccessDeniedException, NotFoundException};
-use Imageboard\Model\{Post, User};
-use Imageboard\Query\QueryDispatcher;
-use Imageboard\Service\ConfigService;
-use Imageboard\Service\RendererService;
-use PHPUnit\Framework\TestCase;
+use Imageboard\Controllers\Admin\PostController;
+use Imageboard\Exceptions\{
+  AccessDeniedException,
+  NotFoundException
+};
+use Imageboard\Models\Post;
+use Imageboard\Repositories\{
+  BanRepository,
+  PostRepository,
+  RefMapRepository
+};
+use Imageboard\Services\{
+  ConfigService,
+  PostService,
+  RendererService,
+  CryptographyService,
+  FileService,
+  ThumbnailService
+};
+use Imageboard\Services\Booru\{
+  E621Service,
+  SafebooruService,
+  SankakuService,
+  GelbooruService,
+  WebmbotService
+};
+use Imageboard\Services\Cache\NoCache;
+use Imageboard\Tests\Functional\TestWithUsers;
 
-final class PostControllerTest extends TestCase
+final class PostControllerTest extends TestWithUsers
 {
+  /** @var PostRepository */
+  protected $post_repository;
+
   /** @var PostController */
   protected $controller;
 
   function setUp(): void
   {
-    global $container;
+    parent::setUp();
 
-    Post::truncate();
-    User::truncate();
+    global $database;
+
+    $connection = $database->getConnection();
+    $builder = $connection->createQueryBuilder();
+    $builder->delete('users')->execute();
 
     $config = new ConfigService();
-    $command_dispatcher = new CommandDispatcher($container);
-    $query_dispatcher = new QueryDispatcher($container);
+    $posts = $config->get('DBPOSTS', 'posts');
+    $builder->delete($posts)->execute();
+
+    $cache = new NoCache();
+
+    $ban_repository = new BanRepository($config, $database);
+    $refmap_repository = new RefMapRepository($database);
+    $this->post_repository = new PostRepository($config, $database);
+
+    $cryptography = new CryptographyService();
+    $file = new FileService();
+    $thumbnail = new ThumbnailService($file, $config);
+
+    $safebooru = new SafebooruService();
+    $e621 = new E621Service();
+    $sankaku = new SankakuService();
+    $gelbooru = new GelbooruService();
+    $webmbot = new WebmbotService();
+
+    $renderer = new RendererService($config);
+
+    $post_service = new PostService(
+      $config,
+      $cache,
+      $ban_repository,
+      $refmap_repository,
+      $this->post_repository,
+      $this->modlog_service,
+      $cryptography,
+      $file,
+      $thumbnail,
+      $safebooru,
+      $e621,
+      $sankaku,
+      $gelbooru,
+      $webmbot,
+      $renderer
+    );
+
     $renderer = new RendererService($config);
     $this->controller = new PostController(
       $config,
-      $command_dispatcher,
-      $query_dispatcher,
+      $this->post_repository,
+      $post_service,
+      $this->session,
       $renderer
     );
   }
 
-  protected function createAnonymous(): User
-  {
-    global $container;
-
-    $user = User::anonymous();
-    $container->registerInstance(CurrentUserInterface::class, $user);
-
-    return $user;
-  }
-
-  protected function createUser(): User
-  {
-    global $container;
-
-    $user = User::createUser('user@example.com', 'user@example.com', User::ROLE_USER);
-    $container->registerInstance(CurrentUserInterface::class, $user);
-
-    return $user;
-  }
-
-  protected function createAdmin(): User
-  {
-    global $container;
-
-    $user = User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
-    $container->registerInstance(CurrentUserInterface::class, $user);
-
-    return $user;
-  }
-
   protected function createPost(): Post {
-    return Post::create([
-      'ip' => '',
-      'name' => '',
-      'tripcode' => '',
-      'email' => '',
-      'subject' => '',
-      'message' => '',
-      'password' => '',
-    ]);
+    $now = time();
+    $post = new Post([
+      'created_at'   => $now,
+      'updated_at'   => $now,
+      'bumped_at'    => $now,
+      'parent_id'    => 0,
+      'user_id'      => 0,
+      'ip'           => '',
+      'name'         => '',
+      'tripcode'     => '',
+      'subject'      => '',
+      'message'      => '',
+      'message_raw'  => '',
+      'file_size'    => 0,
+      'image_width'  => 0,
+      'image_height' => 0,
+      'thumb_width'  => 0,
+      'thumb_height' => 0,
+    ], false);
+    return $this->post_repository->add($post);
   }
 
   function test_list_asAnonymous_shouldThrow(): void
@@ -153,7 +198,7 @@ final class PostControllerTest extends TestCase
   {
     $item_id = 1;
     $user = $this->createAdmin();
-    $request = (new ServerRequest('GET', "/admin/posts/$item_id"))
+    $request = (new ServerRequest('GET', "/admin/posts/{$item_id}"))
       ->withAttribute('user', $user);
 
     $this->expectException(NotFoundException::class);
@@ -193,9 +238,6 @@ final class PostControllerTest extends TestCase
       ->withAttribute('user', $user);
 
     $response = $this->controller->delete($request, ['id' => $item->id]);
-
-    $item = Post::find($item->id);
-    $this->assertNull($item);
 
     $status = $response->getStatusCode();
     $this->assertEquals(302, $status);

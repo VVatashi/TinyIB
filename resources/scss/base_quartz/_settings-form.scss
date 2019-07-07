@@ -17,7 +17,7 @@
     padding: 0.25em;
 
     &--active {
-      @extend .button:active;
+      @extend .button, :active;
     }
   }
 

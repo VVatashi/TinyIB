@@ -112,6 +112,8 @@ export class Post {
 
     const $post = DOM.qid(`reply_${this.media[prevIndex].postId}`);
     if ($post) {
+      this.currentPostId = +$post.getAttribute('data-post-id');
+      this.markCurrentPost();
       DOM.scrollToMiddle($post);
     }
 
@@ -124,6 +126,8 @@ export class Post {
 
     const $post = DOM.qid(`reply_${this.media[nextIndex].postId}`);
     if ($post) {
+      this.currentPostId = +$post.getAttribute('data-post-id');
+      this.markCurrentPost();
       DOM.scrollToMiddle($post);
     }
 
@@ -723,8 +727,8 @@ export class Post {
 </div>
 
 <div class="modal__content modal__content--audio">
-  <audio class="modal__audio" src="${file.url}"
-    ${autoPlay ? 'autoplay="true"' : ''} loop="true" preload="metadata" controls="true">
+  <audio class="modal__audio" ${autoPlay ? 'autoplay="true"' : ''} loop="true" preload="metadata" controls="true">
+    <source src="${file.url}">
   </audio>
 </div>`;
       this.$layout.appendChild(this.$modal);
@@ -744,8 +748,8 @@ export class Post {
       this.$modal.innerHTML = `
 <div class="modal__content modal__content--video">
   <div class="player">
-    <video class="player__video" src="${file.url}"
-      ${autoPlay ? 'autoplay="true"' : ''} preload="metadata">
+    <video class="player__video" ${autoPlay ? 'autoplay="true"' : ''} preload="metadata">
+      <source src="${file.url}">
     </video>
 
     <div class="player__controls">

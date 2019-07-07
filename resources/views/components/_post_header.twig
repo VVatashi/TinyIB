@@ -5,7 +5,7 @@
     <span class="post-header__subject filetitle">{{ post.subject }}</span>
   {% endif %}
 
-  {% spaceless %}
+  {% apply spaceless %}
     {% if post.name %}
       <span class="post-header__name postername">{{ post.name }}</span>
     {% elseif not post.tripcode %}
@@ -17,18 +17,12 @@
     {% if post.tripcode %}
       <span class="post-header__tripcode postertrip">!{{ post.tripcode }}</span>
     {% endif %}
-  {% endspaceless %}
+  {% endapply %}
 {% endmacro %}
 
 {% import _self as self %}
 
 <div class="{{ class is defined ? class ~ ' ' }}post-header">
-  <div class="post-header__delete">
-    <input type="checkbox" class="post-header__delete-input" id="delete_{{ post.id }}"
-      name="delete" value="{{ post.id }}" title="Mark to delete" />
-    <label class="post-header__delete-label" for="delete_{{ post.id }}">Delete post</label>
-  </div>
-
   <span class="post-header__name-wrapper">
     {% if post.email %}
       <a class="post-header__email" href="mailto:{{ post.email }}">
@@ -39,8 +33,8 @@
     {% endif %}
   </span>
 
-  {% set date_iso = post.createdTimestamp|date('c') %}
-  {% set date = post.createdTimestamp|date('j.m.Y H:i:s') %}
+  {% set date_iso = post.created_at|date('c') %}
+  {% set date = post.created_at|date('j.m.Y H:i:s') %}
 
   <time class="post-header__datetime" datetime="{{ date_iso }}">
     {{ date }}
@@ -54,17 +48,14 @@
       {{- post.id -}}
     </a>
 
+    <a class="post-header__delete fas fa-trash" href="#" title="Delete post"></a>
     <a class="post-header__hide fas fa-times" href="#" title="Hide post"></a>
 
     {% if isInThread %}
       <a class="post-header__reflink-icon fas fa-reply" href="{{ reflink }}" title="Quick reply" data-reflink="{{ post.id }}"></a>
     {% endif %}
 
-    {% if post.isStickied %}
-      <img src="{{ base_url }}/images/sticky.png" alt="Stickied" title="Stickied" width="16" height="16" />
-    {% endif %}
-
-    {% if post.isThread() and not isInThread %}
+    {% if post.parent_id == 0 and not isInThread %}
       <span class="post-header__reply-wrapper">
         <a class="post-header__reply-link" href="{{ replylink }}">Reply</a>
       </span>

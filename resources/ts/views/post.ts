@@ -60,5 +60,19 @@ export class PostView implements View {
     if (this.model.isOwn) {
       $element.classList.add('post--own');
     }
+
+    const $delete = DOM.qs('.post-header__delete', $element);
+    if ($delete) {
+      $delete.addEventListener('click', async e => {
+        e.preventDefault();
+
+        try {
+          await this.model.delete();
+          this.$element.style.display = 'none';
+        } catch (e) {
+          console.error(e);
+        }
+      });
+    }
   }
 }

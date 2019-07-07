@@ -10,17 +10,17 @@
   <main class="{{class is defined ? class ~ ' '}}">
     {% include 'components/_posting_form.twig' with {'class': 'content__posting-form'} %}
 
-    <form id="delform" action="{{ base_url }}/post/delete" method="post">
-      <input type="hidden" name="board" value="{{ config('BOARD') }}" />
-
+    <article class="thread">
       {% for post in posts %}
-        {% if post.isThread() %}
+        {% if post.parent_id == 0 and not loop.first %}
+          </article>
           <hr />
+          <article class="thread">
         {% endif %}
 
         {% include 'components/_post.twig' %}
       {% endfor %}
-    </form>
+    </article>
 
     <hr />
 

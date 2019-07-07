@@ -15,6 +15,7 @@ declare global {
     board: string;
     app: App;
     WebSocket?: any;
+    OneSignal?: any;
   }
 }
 

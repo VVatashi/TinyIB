@@ -41,6 +41,8 @@
   }
 
   &__content {
+    @include clearfix;
+
     color: $post-content-color;
 
     padding: $post-content-padding;

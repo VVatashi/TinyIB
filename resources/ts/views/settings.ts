@@ -107,7 +107,7 @@ export class SettingsView implements View {
           $input.checked = value === 'true' || value === true;
         } else if ($input.type === 'radio') {
           $input.checked = value === $input.value;
-        } else {
+        } else if ($input.type !== 'file') {
           $input.value = value as string;
         }
       }
@@ -128,6 +128,50 @@ export class SettingsView implements View {
         const time = DateTime.fromJSDate(new Date());
         $time.textContent = Time.format(time);
       }, 1000);
+    }
+
+    const $postsCustomNotify = DOM.qs('[data-key="post.unread-posts-notify-custom"]') as HTMLInputElement;
+    if ($postsCustomNotify) {
+      $postsCustomNotify.addEventListener('change', e => {
+        if ($postsCustomNotify.files.length === 0) {
+          return;
+        }
+
+        const file = $postsCustomNotify.files[0];
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.addEventListener('load', e => {
+          Settings.set('post.unread-posts-notify-custom', reader.result);
+        });
+      });
+    }
+
+    const $repliesCustomNotify = DOM.qs('[data-key="post.unread-replies-notify-custom"]') as HTMLInputElement;
+    if ($repliesCustomNotify) {
+      $repliesCustomNotify.addEventListener('change', e => {
+        if ($repliesCustomNotify.files.length === 0) {
+          return;
+        }
+
+        const file = $repliesCustomNotify.files[0];
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.addEventListener('load', e => {
+          Settings.set('post.unread-replies-notify-custom', reader.result);
+        });
+      });
+    }
+
+    const $enableDesktopNotifications = DOM.qid('enable-desktop-notify');
+    if ($enableDesktopNotifications) {
+      $enableDesktopNotifications.addEventListener('click', e => {
+        e.preventDefault();
+
+        const OneSignal = window.OneSignal || [];
+        OneSignal.push(function () {
+          OneSignal.showNativePrompt();
+        });
+      });
     }
   }
 

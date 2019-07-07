@@ -1,7 +1,7 @@
 <?php
 
 use Imageboard\App;
-use Imageboard\Service\MigrationService;
+use Imageboard\Services\MigrationService;
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
@@ -11,9 +11,10 @@ putenv("ENVIRONMENT=test");
 $app = new App();
 $app->bootstrap(false);
 
-// Make container available globally.
+// Make container & database available globally.
 $container = $app->getContainer();
+$database = $app->getDatabase();
 
 // Apply migrations
-$migration = new MigrationService($app->getDatabase());
+$migration = new MigrationService($database);
 $migration->migrate();

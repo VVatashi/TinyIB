@@ -34,11 +34,7 @@
         <a class="post-header__reflink-icon fas fa-reply" href="{{ reflink }}" title="Quick reply" data-reflink="{{ post.id }}"></a>
       {% endif %}
 
-      {% if post.isStickied %}
-        <img src="{{ base_url }}/images/sticky.png" alt="Stickied" title="Stickied" width="16" height="16" />
-      {% endif %}
-
-      {% if post.isThread() and not isInThread %}
+      {% if post.parent_id == 0 and not isInThread %}
         <span class="post-header-mobile__reply-wrapper">
           <a class="post-header-mobile__reply-link" href="{{ replylink }}">Reply</a>
         </span>
@@ -50,14 +46,14 @@
     </span>
   </div>
 
-  {% set date_iso = post.createdTimestamp|date('c') %}
+  {% set date_iso = post.created_at|date('c') %}
 
   <div class="post-header-mobile__row">
     <time class="post-header-mobile__datetime" datetime="{{ date_iso }}">
-      {{ post.createdTimestamp|date('j.m.Y H:i:s') }}
+      {{ post.created_at|date('j.m.Y H:i:s') }}
     </time>
 
-    {% if post.fileType %}
+    {% if post.file_type %}
       {% include 'components/_file_info.twig' with {'class': 'post-header-mobile__file-info'} %}
     {% endif %}
   </div>

@@ -3,35 +3,48 @@
 namespace Imageboard\Tests\Functional\Controller;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Controller\AuthController;
-use Imageboard\Model\User;
-use Imageboard\Service\{CaptchaService, ConfigService, RendererService};
-use PHPUnit\Framework\TestCase;
+use Imageboard\Controllers\AuthController;
+use Imageboard\Services\{
+  CaptchaService,
+  ConfigService,
+  RendererService,
+  SessionService
+};
+use Imageboard\Tests\Functional\TestWithUsers;
 use Psr\Http\Message\ResponseInterface;
 
-final class AuthControllerTest extends TestCase
+final class AuthControllerTest extends TestWithUsers
 {
   /** @var AuthController */
   protected $controller;
 
   function setUp(): void
   {
-    global $_SESSION;
+    parent::setUp();
+
+    global $database;
+
     $_SESSION = [];
 
-    User::truncate();
+    $connection = $database->getConnection();
+    $builder = $connection->createQueryBuilder();
+    $builder->delete('users')->execute();
 
     $config = new ConfigService();
-    $captcha = new CaptchaService();
+    $captcha = new CaptchaService($this->session);
     $renderer = new RendererService($config);
-    $this->controller = new AuthController($captcha, $renderer, $config);
+    $this->controller = new AuthController(
+      $captcha,
+      $this->user_service,
+      $this->session,
+      $renderer,
+      $config
+    );
   }
 
   function test_logout_shouldLogoutAndRedirect(): void
   {
-    $user = User::createUser('test@example.com', 'test');
-    $_SESSION['user'] = $user->id;
-
+    $user = $this->user_service->create('test@example.com', 'test', 1);
     $request = (new ServerRequest('GET', '/auth/logout'))
       ->withAttribute('user', $user);
 
@@ -44,12 +57,13 @@ final class AuthControllerTest extends TestCase
     $this->assertEquals(302, $status);
 
     // Should remove user from the session.
-    $this->assertEquals(false, isset($_SESSION['user']));
+    $session = new SessionService();
+    $this->assertEquals(false, $session->has('user'));
   }
 
   function test_loginForm_shouldReturnContent(): void
   {
-    $user = User::anonymous();
+    $user = $this->user_service->getAnonymous();
     $request = (new ServerRequest('GET', '/auth/login'))
       ->withAttribute('user', $user);
 
@@ -60,8 +74,8 @@ final class AuthControllerTest extends TestCase
 
   function test_submitLoginForm_shouldLoginAndRedirect(): void
   {
-    User::createUser('test@example.com', 'test');
-    $user = User::anonymous();
+    $this->user_service->create('test@example.com', 'test', 1);
+    $user = $this->user_service->getAnonymous();
     $request = (new ServerRequest('POST', '/auth/login'))
       ->withAttribute('user', $user)
       ->withParsedBody([
@@ -77,17 +91,19 @@ final class AuthControllerTest extends TestCase
     $status = $response->getStatusCode();
     $this->assertEquals(302, $status);
 
+    $session = new SessionService();
+
     // Should not set error.
-    $this->assertEquals(false, isset($_SESSION['error']));
+    $this->assertEquals(false, $session->has('error'));
 
     // Should set user ID.
-    $this->assertEquals(true, isset($_SESSION['user']));
+    $this->assertEquals(true, $session->has('user'));
   }
 
   function test_submitLoginForm_withIncorrectPassword_shouldSetErrorAndRedirect(): void
   {
-    User::createUser('test@example.com', 'test');
-    $user = User::anonymous();
+    $this->user_service->create('test@example.com', 'test', 1);
+    $user = $this->user_service->getAnonymous();
     $request = (new ServerRequest('POST', '/auth/login'))
       ->withAttribute('user', $user)
       ->withParsedBody([
@@ -103,16 +119,18 @@ final class AuthControllerTest extends TestCase
     $status = $response->getStatusCode();
     $this->assertEquals(302, $status);
 
+    $session = new SessionService();
+
     // Should set error.
-    $this->assertEquals(true, isset($_SESSION['error']));
+    $this->assertEquals(true, $session->has('error'));
 
     // Should not set user.
-    $this->assertEquals(false, isset($_SESSION['user']));
+    $this->assertEquals(false, $session->has('user'));
   }
 
   function test_registerForm_shouldReturnContent(): void
   {
-    $user = User::anonymous();
+    $user = $this->user_service->getAnonymous();
     $request = (new ServerRequest('GET', '/auth/register'))
       ->withAttribute('user', $user);
 
@@ -123,7 +141,7 @@ final class AuthControllerTest extends TestCase
 
   function test_submitRegisterForm_shouldRegisterAndRedirect(): void
   {
-    $user = User::anonymous();
+    $user = $this->user_service->getAnonymous();
     $request = (new ServerRequest('POST', '/auth/register'))
       ->withAttribute('user', $user)
       ->withParsedBody([
@@ -139,14 +157,16 @@ final class AuthControllerTest extends TestCase
     $status = $response->getStatusCode();
     $this->assertEquals(302, $status);
 
+    $session = new SessionService();
+
     // Should not set error.
-    $this->assertEquals(false, isset($_SESSION['error']));
+    $this->assertEquals(false, $session->has('error'));
   }
 
   function test_submitRegisterForm_withExistingEmail_shouldSetErrorAndRedirect(): void
   {
-    User::createUser('test@example.com', 'test');
-    $user = User::anonymous();
+    $this->user_service->create('test@example.com', 'test', 1);
+    $user = $this->user_service->getAnonymous();
     $request = (new ServerRequest('POST', '/auth/register'))
       ->withAttribute('user', $user)
       ->withParsedBody([
@@ -162,10 +182,12 @@ final class AuthControllerTest extends TestCase
     $status = $response->getStatusCode();
     $this->assertEquals(302, $status);
 
+    $session = new SessionService();
+
     // Should set error.
-    $this->assertEquals(true, isset($_SESSION['error']));
+    $this->assertEquals(true, $session->has('error'));
 
     // Should not set user.
-    $this->assertEquals(false, isset($_SESSION['user']));
+    $this->assertEquals(false, $session->has('user'));
   }
 }

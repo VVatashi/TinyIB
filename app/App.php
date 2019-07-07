@@ -3,20 +3,22 @@
 namespace Imageboard;
 
 use GuzzleHttp\Psr7\{ServerRequest, Response};
-use Illuminate\Database\Capsule\Manager as Capsule;
-use Imageboard\Cache\{CacheInterface, NoCache, RedisCache};
 use Imageboard\Middleware\{
   AuthMiddleware,
   CorsMiddleware,
   ExceptionMiddleware,
   RequestHandler
 };
-use Imageboard\Service\{
+use Imageboard\Repositories\UserRepository;
+use Imageboard\Services\{
   ConfigService,
   DatabaseService,
+  RendererService,
   RoutingService,
-  RendererService
+  TokenService,
+  UserService
 };
+use Imageboard\Services\Cache\{CacheInterface, NoCache, RedisCache};
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
@@ -128,6 +130,7 @@ EOF;
     // Register container itself.
     $this->container->registerInstance(ContainerInterface::class, $this->container);
     $this->container->registerInstance(ConfigService::class , $this->config);
+    $this->container->registerInstance(DatabaseService::class, $this->database);
 
     if ($this->config->get('ERROR_LOG', true)) {
       // Lazy create logger.
@@ -142,47 +145,12 @@ EOF;
       });
     }
 
-    if ($this->config->get('CACHE') === 'redis') {
-      // Lazy create Redis cache.
-      $this->container->registerCallback(CacheInterface::class, function ($container) {
-        return new RedisCache($this->config->get('CACHE_REDIS_HOST'));
-      });
-    } else {
-      // Disable cache.
-      $this->container->registerType(CacheInterface::class, NoCache::class);
-    }
-
-    // Create database connection and ORM.
-    $capsule = new Capsule();
-
-    $capsule->addConnection([
-      'driver'    => $this->config->get('DBDRIVER'),
-      'host'      => $this->config->get('DBHOST'),
-      'database'  => $this->database->getFullPath(),
-      'username'  => $this->config->get('DBUSERNAME'),
-      'password'  => $this->config->get('DBPASSWORD'),
-      'charset'   => 'utf8',
-      'collation' => 'utf8_unicode_ci',
-      'prefix'    => '',
-    ]);
-    $capsule->setAsGlobal();
-    $capsule->bootEloquent();
-    $this->container->registerInstance(Capsule::class, $capsule);
-
-    $pdo = $capsule->getConnection()->getReadPdo();
-    $this->container->registerInstance(\PDO::class, $pdo);
-
-    // Set PDO.
-    /** @todo Refactor later to not modify connection on get */
-    $this->database->getConnection($pdo);
-
     // Register services in the IoC-container by conventions.
     $directories = [
-      'Command',
-      'Controller',
-      'Model',
-      'Service',
-      'Query',
+      'Controllers',
+      'Models',
+      'Services',
+      'Repositories',
     ];
 
     foreach ($directories as $directory) {
@@ -198,6 +166,16 @@ EOF;
         $this->container->registerType($class, $class);
       }
     }
+
+    if ($this->config->get('CACHE') === 'redis') {
+      // Lazy create Redis cache.
+      $this->container->registerCallback(CacheInterface::class, function ($container) {
+        return new RedisCache($this->config->get('CACHE_REDIS_HOST'));
+      });
+    } else {
+      // Disable cache.
+      $this->container->registerType(CacheInterface::class, NoCache::class);
+    }
   }
 
   /**
@@ -206,17 +184,31 @@ EOF;
   function handleRequest()
   {
     // Use routing handler.
-    /** @var RoutingService */
+    /** @var RoutingService $handler */
     $handler = $this->container->get(RoutingService::class);
 
-    /** @var RendererService */
+    /** @var UserRepository $user_repository */
+    $user_repository = $this->container->get(UserRepository::class);
+
+    /** @var UserService $user_service */
+    $user_service = $this->container->get(UserService::class);
+
+    /** @var TokenService $token_service */
+    $token_service = $this->container->get(TokenService::class);
+
+    /** @var RendererService $renderer */
     $renderer = $this->container->get(RendererService::class);
 
-    /** @var LoggerInterface */
+    /** @var LoggerInterface $logger */
     $logger = $this->container->get(LoggerInterface::class);
 
     // Use auth middleware.
-    $auth_middleware = new AuthMiddleware($this->container, $renderer);
+    $auth_middleware = new AuthMiddleware(
+      $user_repository,
+      $user_service,
+      $token_service,
+      $renderer
+    );
     $handler = new RequestHandler($auth_middleware, $handler);
 
     // Use CORS handler.

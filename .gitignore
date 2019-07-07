@@ -5,6 +5,7 @@
 .vscode/
 *.db
 *error_log
+/doc/
 /logs/
 /node_modules/
 /vendor/

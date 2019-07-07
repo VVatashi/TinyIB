@@ -3,9 +3,9 @@
 namespace Imageboard\Migrations;
 
 use Doctrine\DBAL\Schema\Schema;
-use Imageboard\Service\ConfigService;
+use Imageboard\Services\ConfigService;
 
-class CreateBans implements Migration
+class CreateBans extends Migration
 {
   function apply(Schema $schema)
   {

@@ -3,75 +3,50 @@
 namespace Imageboard\Tests\Functional\Controller\Admin;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Imageboard\Command\CommandDispatcher;
-use Imageboard\Controller\Admin\UserController;
-use Imageboard\Exception\{AccessDeniedException, NotFoundException};
-use Imageboard\Model\User;
-use Imageboard\Query\QueryDispatcher;
-use Imageboard\Service\ConfigService;
-use Imageboard\Service\RendererService;
-use PHPUnit\Framework\TestCase;
+use Imageboard\Controllers\Admin\UserController;
+use Imageboard\Exceptions\{AccessDeniedException, NotFoundException};
+use Imageboard\Models\User;
+use Imageboard\Services\{ConfigService, RendererService, UserService};
+use Imageboard\Tests\Functional\TestWithUsers;
 
-final class UserControllerTest extends TestCase
+final class UserControllerTest extends TestWithUsers
 {
   /** @var UserController */
   protected $controller;
 
   function setUp(): void
   {
-    global $container;
+    parent::setUp();
 
-    User::truncate();
+    global $database;
+
+    $connection = $database->getConnection();
+    $builder = $connection->createQueryBuilder();
+    $builder->delete('users')->execute();
 
     $config = new ConfigService();
-    $command_dispatcher = new CommandDispatcher($container);
-    $query_dispatcher = new QueryDispatcher($container);
     $renderer = new RendererService($config);
+
     $this->controller = new UserController(
       $config,
-      $command_dispatcher,
-      $query_dispatcher,
+      $this->user_repository,
+      $this->user_service,
+      $this->session,
       $renderer
     );
   }
 
-  protected function createAnonymous(): User
-  {
-    global $container;
-
-    $user = User::anonymous();
-    $container->registerInstance(CurrentUserInterface::class, $user);
-
-    return $user;
-  }
-
-  protected function createUser(): User
-  {
-    global $container;
-
-    $user = User::createUser('user@example.com', 'user@example.com', User::ROLE_USER);
-    $container->registerInstance(CurrentUserInterface::class, $user);
-
-    return $user;
-  }
-
-  protected function createAdmin(): User
-  {
-    global $container;
-
-    $user = User::createUser('admin@example.com', 'admin@example.com', User::ROLE_ADMINISTRATOR);
-    $container->registerInstance(CurrentUserInterface::class, $user);
-
-    return $user;
-  }
-
   protected function createItem(): User {
-    return User::createUser('test@example.com', 'test@example.com', User::ROLE_USER);
+    return $this->user_service->create(
+      'test@example.com',
+      'test@example.com',
+      User::ROLE_USER
+    );
   }
 
   function test_list_asAnonymous_shouldThrow(): void
   {
-    $user = User::anonymous();
+    $user = $this->createAnonymous();
     $request = (new ServerRequest('GET', '/admin/users'))
       ->withAttribute('user', $user);
 
@@ -185,9 +160,6 @@ final class UserControllerTest extends TestCase
 
     $response = $this->controller->create($request);
 
-    $item = User::where('email', $data['email'])->first();
-    $this->assertNotNull($item);
-
     $status = $response->getStatusCode();
     $this->assertEquals(302, $status);
   }
@@ -196,7 +168,7 @@ final class UserControllerTest extends TestCase
   {
     $item = $this->createItem();
     $user = $this->createAnonymous();
-    $request = (new ServerRequest('GET', "/admin/users/{$item->id}/edit"))
+    $request = (new ServerRequest('GET', "/admin/users/{$item->id}"))
       ->withAttribute('user', $user);
 
     $this->expectException(AccessDeniedException::class);
@@ -208,7 +180,7 @@ final class UserControllerTest extends TestCase
   {
     $item = $this->createItem();
     $user = $this->createUser();
-    $request = (new ServerRequest('GET', "/admin/users/{$item->id}/edit"))
+    $request = (new ServerRequest('GET', "/admin/users/{$item->id}"))
       ->withAttribute('user', $user);
 
     $this->expectException(AccessDeniedException::class);
@@ -220,7 +192,7 @@ final class UserControllerTest extends TestCase
   {
     $item = $this->createItem();
     $user = $this->createAdmin();
-    $request = (new ServerRequest('GET', "/admin/users/{$item->id}/edit"))
+    $request = (new ServerRequest('GET', "/admin/users/{$item->id}"))
       ->withAttribute('user', $user);
 
     $content = $this->controller->editForm($request, ['id' => $item->id]);
@@ -283,9 +255,6 @@ final class UserControllerTest extends TestCase
 
     $response = $this->controller->edit($request, ['id' => $item->id]);
 
-    $item = User::where('email', $data['email'])->first();
-    $this->assertNotNull($item);
-
     $status = $response->getStatusCode();
     $this->assertEquals(302, $status);
   }
@@ -322,9 +291,6 @@ final class UserControllerTest extends TestCase
       ->withAttribute('user', $user);
 
     $response = $this->controller->delete($request, ['id' => $item->id]);
-
-    $item = User::find($item->id);
-    $this->assertNull($item);
 
     $status = $response->getStatusCode();
     $this->assertEquals(302, $status);

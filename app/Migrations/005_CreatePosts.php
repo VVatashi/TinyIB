@@ -3,13 +3,13 @@
 namespace Imageboard\Migrations;
 
 use Doctrine\DBAL\Schema\Schema;
-use Imageboard\Service\ConfigService;
+use Imageboard\Services\ConfigService;
 
-class CreatePosts implements Migration
+class CreatePosts extends Migration
 {
   function apply(Schema $schema)
   {
-    $table_name = ConfigService::getInstance()->get('DBPOSTS');
+    $table_name = ConfigService::getInstance()->get('DBPOSTS', 'posts');
     $table = $schema->createTable($table_name);
     $table->addColumn('id', 'integer', ['autoincrement' => true]);
     $table->addColumn('parent_id', 'integer', ['default' => 0]);
@@ -46,7 +46,7 @@ class CreatePosts implements Migration
 
   function revert(Schema $schema)
   {
-    $table_name = ConfigService::getInstance()->get('DBPOSTS');
+    $table_name = ConfigService::getInstance()->get('DBPOSTS', 'posts');
     $schema->dropTable($table_name);
   }
 }
