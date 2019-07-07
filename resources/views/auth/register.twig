@@ -3,14 +3,14 @@
 {% block head %}
   {{ parent() }}
 
-  <link rel="canonical" href="{{ base_url }}/auth/register" />
+  <link rel="canonical" href="{{ url('auth/register') }}" />
 {% endblock %}
 
 {% block content %}
   <main class="{{class is defined ? class ~ ' '}}">
-    <form class="content__auth-form auth-form" method="post" action="{{ base_url }}/auth/register">
+    <form class="content__auth-form auth-form" method="post" action="{{ url('auth/register') }}">
       <ul class="auth-form__links">
-        <li><a href="{{ base_url }}/auth/login">Login</a></li>
+        <li><a href="{{ url('auth/login') }}">Login</a></li>
       </ul>
 
       <h1 class="auth-form__header">Register</h1>

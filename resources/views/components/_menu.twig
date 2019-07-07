@@ -1,8 +1,7 @@
-{% macro link(title, url) %}
+{% macro link(title, href) %}
   {% apply spaceless %}
   <li class="menu__list-item">
-    {% set url = base_url ~ '/' ~ url %}
-    <a class="menu__link" href="{{ url }}">{{ title }}</a>
+    <a class="menu__link" href="{{ url(href) }}">{{ title }}</a>
   </li>
   {% endapply %}
 {% endmacro %}

@@ -1,9 +1,9 @@
 {% set title = 'Post #' ~ item.id %}
 
 {% set breadcrumb = [
-  { url: base_url, title: config('BOARDDESC') },
-  { url: base_url ~ '/admin', title: 'Admin Dashboard' },
-  { url: base_url ~ '/admin/posts', title: 'Post List' },
+  { url: url(), title: config('BOARDDESC') },
+  { url: url('admin'), title: 'Admin Dashboard' },
+  { url: url('admin/posts'), title: 'Post List' },
 ] %}
 
 {% extends 'admin/layout/_html.twig' %}
@@ -16,8 +16,8 @@
 
     <div class="item__content">
       <div class="item__actions">
-        {% set back = base_url ~ '/admin/posts' %}
-        {% set url = base_url ~ '/admin/posts/' ~ item.id ~ '/delete?back=' ~ back|e('url') %}
+        {% set back = url('admin/posts') %}
+        {% set url = url('admin/posts/' ~ item.id ~ '/delete?back=' ~ back|e('url')) %}
         <form method="post" action="{{ url }}">
           <button type="submit" class="button">Delete</button>
         </form>
@@ -38,7 +38,7 @@
             <th class="item__cell item__cell--nostretch" scope="row">Thread</th>
             <td class="item__cell">
               {% if item.parent_id %}
-                <a href="{{ base_url }}/admin/posts/{{ item.parent_id }}">{{ item.parent_id }}</a>
+                <a href="{{ url('admin/posts/' ~ item.parent_id) }}">{{ item.parent_id }}</a>
               {% endif %}
             </td>
           </tr>
@@ -72,7 +72,7 @@
             <th class="item__cell item__cell--nostretch" scope="row">File</th>
             <td class="item__cell">
               {% if item.file %}
-                <a href="{{ base_url }}/src/{{ item.file }}">{{ item.file }}</a>
+                <a href="{{ url('src/' ~ item.file) }}">{{ item.file }}</a>
                 ({{ item.file_original|e }}, {{ item.image_width }}x{{ item.image_height }}, {{ item.file_size }} bytes)
               {% endif %}
             </td>
@@ -82,7 +82,7 @@
             <th class="item__cell item__cell--nostretch" scope="row">User</th>
             <td class="item__cell">
               {% if item.user_id %}
-                <a href="{{ base_url }}/admin/users?id={{ item.user_id }}">{{ user|e }}</a>
+                <a href="{{ url('admin/users?id=' ~ item.user_id) }}">{{ user|e }}</a>
               {% endif %}
             </td>
           </tr>

@@ -3,7 +3,7 @@
 {% block head %}
   {{ parent() }}
 
-  <link rel="canonical" href="{{ base_url }}{{ this_page ? '/' ~ this_page  }}" />
+  <link rel="canonical" href="{{ url(this_page) }}" />
 {% endblock %}
 
 {% block content %}

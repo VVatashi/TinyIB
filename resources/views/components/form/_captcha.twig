@@ -24,7 +24,7 @@
     <label class="{{ label_class }}"
       {% if id is defined %} for="{{ id }}" {% endif %}
     >
-      <img id="captchaimage" src="{{ base_url }}/captcha" alt="CAPTCHA" />
+      <img id="captchaimage" src="{{ url('captcha') }}" alt="CAPTCHA" />
     </label>
   {% endapply %}
 {% endblock %}

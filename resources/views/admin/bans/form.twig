@@ -1,9 +1,9 @@
 {% set title = 'Add Ban' %}
 
 {% set breadcrumb = [
-  { url: base_url, title: config('BOARDDESC') },
-  { url: base_url ~ '/admin', title: 'Admin Dashboard' },
-  { url: base_url ~ '/admin/bans', title: 'Ban List' },
+  { url: url(), title: config('BOARDDESC') },
+  { url: url('admin'), title: 'Admin Dashboard' },
+  { url: url('admin/bans'), title: 'Ban List' },
 ] %}
 
 {% extends 'admin/layout/_html.twig' %}
@@ -25,7 +25,7 @@
       </div>
       {% endif %}
 
-      <form method="post" action="{{ base_url }}/admin/bans/create">
+      <form method="post" action="{{ url('admin/bans/create') }}">
         <div class="form__row">
           <label class="form__label" for="ip">IP:</label>
           <input type="text" class="input form__input" id="ip" name="ip" value="{{ item.ip }}" required />
@@ -57,7 +57,7 @@
 
         <div class="form__row form__row--centered">
           <button type="submit" class="button form__button">Add ban</button>
-          <a class="button form__button" href="{{ base_url }}/admin/bans">Cancel</a>
+          <a class="button form__button" href="{{ url('admin/bans') }}">Cancel</a>
         </div>
       </form>
     </div>

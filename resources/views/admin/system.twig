@@ -1,8 +1,8 @@
 {% set title = 'System' %}
 
 {% set breadcrumb = [
-  { url: base_url, title: config('BOARDDESC') },
-  { url: base_url ~ '/admin', title: 'Admin Dashboard' },
+  { url: url(), title: config('BOARDDESC') },
+  { url: url('admin'), title: 'Admin Dashboard' },
 ] %}
 
 {% extends 'admin/layout/_html.twig' %}
@@ -27,7 +27,7 @@
       <div class="item__actions">
         <ul class="item__actions-list">
           <li class="item__actions-list-item">
-            <form method="post" action="{{ base_url }}/admin/system/clear-cache">
+            <form method="post" action="{{ url('admin/system/clear-cache') }}">
               <button type="submit" class="button">Clear cache</button>
             </form>
           </li>

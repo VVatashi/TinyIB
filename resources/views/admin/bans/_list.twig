@@ -43,8 +43,8 @@
         <td class="list__cell">{{ item.reason|e }}</td>
 
         <td class="list__cell list__cell--nostretch list__cell--center">
-          {% set back = base_url ~ '/admin/bans?' ~ (query + { page: pager.current_page })|url_encode %}
-          {% set url = base_url ~ '/admin/bans/' ~ item.id ~ '/delete?back=' ~ back|e('url') %}
+          {% set back = url('admin/bans?' ~ (query + { page: pager.current_page })|url_encode) %}
+          {% set url = url('admin/bans/' ~ item.id ~ '/delete?back=' ~ back|e('url')) %}
           <form method="post" action="{{ url }}">
             <button class="button button--delete">Lift</button>
           </form>

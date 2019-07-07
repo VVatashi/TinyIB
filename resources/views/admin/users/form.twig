@@ -1,9 +1,9 @@
 {% set title = item.id ? 'Edit User' : 'Create User' %}
 
 {% set breadcrumb = [
-  { url: base_url, title: config('BOARDDESC') },
-  { url: base_url ~ '/admin', title: 'Admin Dashboard' },
-  { url: base_url ~ '/admin/users', title: 'User List' },
+  { url: url(), title: config('BOARDDESC') },
+  { url: url('admin'), title: 'Admin Dashboard' },
+  { url: url('admin/users'), title: 'User List' },
 ] %}
 
 {% extends 'admin/layout/_html.twig' %}
@@ -25,7 +25,7 @@
       </div>
       {% endif %}
 
-      {% set url = base_url ~ '/admin/users/' ~ (item.id ? item.id ~ '/edit' : 'create') %}
+      {% set url = url('admin/users/' ~ (item.id ? item.id ~ '/edit' : 'create')) %}
       <form method="post" action="{{ url }}">
         <input type="hidden" name="id" value="{{ item.id }}" />
 
@@ -58,7 +58,7 @@
 
         <div class="form__row form__row--centered">
           <button type="submit" class="button form__button">{{ item.id ? 'Edit user' : 'Create user' }}</button>
-          <a class="button form__button" href="{{ base_url }}/admin/users">Cancel</a>
+          <a class="button form__button" href="{{ url('admin/users') }}">Cancel</a>
         </div>
       </form>
     </div>

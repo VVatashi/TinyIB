@@ -31,12 +31,12 @@
       {% set user = item.user_email ? item.user_email|truncate(20) : item.user_id %}
       <tr class="list__row">
         <th class="list__cell list__cell--nostretch" scope="row">
-          <a href="{{ base_url }}/admin/posts/{{ item.id }}">{{ item.id }}</a>
+          <a href="{{ url('admin/posts/' ~ item.id) }}">{{ item.id }}</a>
         </th>
 
         <td class="list__cell list__cell--nostretch">
           {% if item.parent_id %}
-          <a href="{{ base_url }}/admin/posts/{{ item.parent_id }}">{{ item.parent_id }}</a>
+          <a href="{{ url('admin/posts/' ~ item.parent_id) }}">{{ item.parent_id }}</a>
           {% endif %}
         </td>
 
@@ -46,15 +46,15 @@
 
         <td class="list__cell list__cell--nostretch">
           {% if item.user_id %}
-          <a href="{{ base_url }}/admin/users?id={{ item.user_id }}">{{ user|e }}</a>
+          <a href="{{ url('admin/users?id=' ~ item.user_id) }}">{{ user|e }}</a>
           {% endif %}
         </td>
 
         <td class="list__cell list__cell--nostretch">{{ item.ip }}</td>
 
         <td class="list__cell list__cell--nostretch list__cell--center">
-          {% set back = base_url ~ '/admin/posts?' ~ (query + { page: pager.current_page })|url_encode %}
-          {% set url = base_url ~ '/admin/posts/' ~ item.id ~ '/delete?back=' ~ back|e('url') %}
+          {% set back = url('admin/posts?' ~ (query + { page: pager.current_page })|url_encode) %}
+          {% set url = url('admin/posts/' ~ item.id ~ '/delete?back=' ~ back|e('url')) %}
           <form method="post" action="{{ url }}">
             <button type="submit" class="button">Delete</button>
           </form>

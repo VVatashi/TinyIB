@@ -43,14 +43,22 @@ class RendererService
 
       try {
         return filemtime($path);
-      } catch( Exception $e) {
+      } catch (Exception $e) {
         return 0;
       }
     }));
 
-    $this->twig->addFunction(new TwigFunction('config',
-      function ($name, $default = null) use ($config) {
-      return $config->get($name, $default);
+    $this->twig->addFunction(new TwigFunction('config', function ($name, $default = null) {
+      return $this->config->get($name, $default);
+    }));
+
+    $this->twig->addFunction(new TwigFunction('url', function ($url = '') {
+      $base_path = $this->config->get('BASE_PATH');
+      if (empty($url)) {
+        return $base_path;
+      }
+
+      return "$base_path/$url";
     }));
 
     $this->twig->addFilter(new TwigFilter('truncate', function ($str, $length) {

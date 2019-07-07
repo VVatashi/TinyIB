@@ -13,8 +13,8 @@
 <div class="{{ class is defined ? class ~ ' ' }}pager">
   <ul class="pager__list">
     {% if this_page > 0 %}
-      {{ self.link(base_url ~ '/', 'First') }}
-      {{ self.link(base_url ~ '/' ~ (this_page != 1 ? this_page - 1), 'Previous') }}
+      {{ self.link(url(), 'First') }}
+      {{ self.link(url(this_page != 1 ? this_page - 1), 'Previous') }}
     {% else %}
       {{ self.item('First') }}
       {{ self.item('Previous') }}
@@ -22,15 +22,15 @@
 
     {% for i in 0..pages %}
       {% if this_page != i %}
-        {{ self.link(base_url ~ '/' ~ (i != 0 ? i), i) }}
+        {{ self.link(url(i != 0 ? i), i) }}
       {% else %}
         {{ self.item(i) }}
       {% endif %}
     {% endfor %}
 
     {% if this_page < pages %}
-      {{ self.link(base_url ~ '/' ~ (this_page + 1), 'Next') }}
-      {{ self.link(base_url ~ '/' ~ pages, 'Last') }}
+      {{ self.link(url(this_page + 1), 'Next') }}
+      {{ self.link(url(pages), 'Last') }}
     {% else %}
       {{ self.item('Next') }}
       {{ self.item('Last') }}

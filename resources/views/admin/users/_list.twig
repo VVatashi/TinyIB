@@ -57,13 +57,13 @@
         <td class="list__cell list__cell--nostretch list__cell--center">
           <ul class="list__table-actions">
             <li class="list__table-action">
-              {% set url = base_url ~ '/admin/users/' ~ item.id ~ '/edit' %}
+              {% set url = url('admin/users/' ~ item.id ~ '/edit') %}
               <a class="button" href="{{ url }}">Edit</a>
             </li>
 
             <li class="list__table-action">
-              {% set back = base_url ~ '/admin/users?' ~ (query + { page: pager.current_page })|url_encode %}
-              {% set url = base_url ~ '/admin/users/' ~ item.id ~ '/delete?back=' ~ back|e('url') %}
+              {% set back = url('admin/users?' ~ (query + { page: pager.current_page })|url_encode) %}
+              {% set url = url('admin/users/' ~ item.id ~ '/delete?back=' ~ back|e('url')) %}
               <form method="post" action="{{ url }}">
                 <button class="button button--delete">Delete</button>
               </form>
