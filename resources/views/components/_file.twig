@@ -5,7 +5,7 @@
 <div class="{{ class is defined ? class ~ ' ' }}file" data-hash="{{ post.file_hex }}">
   {% include 'components/_file_info.twig' with {'class': 'post__file-info'} %}
 
-  <span class="file__hide fas fa-window-close" title="Hide preview"></span>
+  <span class="file__hide fas fa-minus-square" title="Hide preview"></span>
   <span class="file__show far fa-plus-square hidden" title="Show hidden preview"></span>
 
   {% if post.thumb_width > 0 and post.thumb_height > 0 %}
