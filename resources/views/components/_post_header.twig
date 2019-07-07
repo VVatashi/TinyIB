@@ -48,8 +48,8 @@
       {{- post.id -}}
     </a>
 
-    <a class="post-header__delete fas fa-trash" href="#" title="Delete post"></a>
-    <a class="post-header__hide fas fa-times" href="#" title="Hide post"></a>
+    <a class="post-header__delete fas fa-times" href="#" title="Delete post"></a>
+    <a class="post-header__hide fas fa-minus" href="#" title="Hide post"></a>
 
     {% if isInThread %}
       <a class="post-header__reflink-icon fas fa-reply" href="{{ reflink }}" title="Quick reply" data-reflink="{{ post.id }}"></a>
