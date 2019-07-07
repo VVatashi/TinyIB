@@ -22,6 +22,7 @@ use Imageboard\Services\Booru\{
   WebmbotService
 };
 use Imageboard\Services\Cache\CacheInterface;
+use Imageboard\Services\Notification\NotificationService;
 
 class PostService
 {
@@ -67,6 +68,9 @@ class PostService
   /** @var WebmbotService */
   protected $webmbot;
 
+  /** @var NotificationService */
+  protected $notification;
+
   /** @var RendererService */
   protected $renderer;
 
@@ -88,6 +92,7 @@ class PostService
    * @param GelbooruService     $gelbooru
    * @param WebmbotService      $webmbot
    * @param ConfigService       $config
+   * @param NotificationService $notification
    * @param RendererService     $renderer
    */
   function __construct(
@@ -105,6 +110,7 @@ class PostService
     SankakuService      $sankaku,
     GelbooruService     $gelbooru,
     WebmbotService      $webmbot,
+    NotificationService $notification,
     RendererService     $renderer
   ) {
     $this->config            = $config;
@@ -121,6 +127,7 @@ class PostService
     $this->sankaku           = $sankaku;
     $this->gelbooru          = $gelbooru;
     $this->webmbot           = $webmbot;
+    $this->notification      = $notification;
     $this->renderer          = $renderer;
   }
 
@@ -727,60 +734,27 @@ class PostService
     }
 
     // Send desktop notifications.
-    $onesignal_appid = $this->config->get('ONESIGNAL_APPID', '');
-    $onesignal_key = $this->config->get('ONESIGNAL_KEY', '');
-    if (!empty($refs) && !empty($onesignal_appid) && !empty($onesignal_key)) {
+    if (!empty($refs)) {
       $posts = $this->post_repository->getMany($refs);
       $user_ids = array_filter(array_map(function (Post $post) {
         return $post->user_id;
       }, $posts));
 
-      if (!empty($user_ids)) {
-        $protocol = $_SERVER['REQUEST_SCHEME'] ?? 'https';
-        $hostname = $_SERVER['HTTP_HOST'] ?? 'localhost';
-        $basePath = $this->config->get('BASE_PATH', '/');
+      $protocol = $_SERVER['REQUEST_SCHEME'] ?? 'https';
+      $hostname = $_SERVER['HTTP_HOST'] ?? 'localhost';
+      $basePath = $this->config->get('BASE_PATH', '/');
 
-        $name = $post->name . $post->tripcode;
-        if (empty($name)) {
-          $name = 'Anonymous';
-        }
-
-        $date = date('Y-m-d H:i:s', $post->created_at);
-        $message = preg_replace('/\[[^[]+\]/', '', $post->message_raw);
-
-        $data = [
-          'app_id'   => $onesignal_appid,
-          'filters'  => [],
-          'headings' => [
-            'en' => "New reply in $basePath/{$post->parent_id}",
-          ],
-          'contents' => [
-            'en' => "{$post->name}{$post->tripcode} $date\r\n$message",
-          ],
-          'url' => "$protocol://$hostname$basePath/res/{$post->parent_id}#reply_{$post->id}",
-        ];
-
-        foreach ($user_ids as $user_id) {
-          if (!empty($data['filters'])) {
-            $data['filters'][] = ['operator' => 'OR'];
-          }
-
-          $data['filters'][] = [
-            'field'    => 'tag',
-            'key'      => 'user_id',
-            'relation' => '=',
-            'value'    => $user_id,
-          ];
-        }
-
-        $client = new Client();
-        $client->post('https://onesignal.com/api/v1/notifications', [
-          'headers' => [
-            'Authorization' => "Basic $onesignal_key",
-          ],
-          'json' => $data,
-        ]);
+      $name = $post->name . $post->tripcode;
+      if (empty($name)) {
+        $name = 'Anonymous';
       }
+
+      $date = date('Y-m-d H:i:s', $post->created_at);
+      $message = preg_replace('/\[[^[]+\]/', '', $post->message_raw);
+      $message = "{$post->name}!{$post->tripcode} $date\r\n$message";
+      $title = "New reply in $basePath/{$post->parent_id}";
+      $url = "$protocol://$hostname$basePath/res/{$post->parent_id}#reply_{$post->id}";
+      $this->notification->sendNotification($user_ids, $title, $message, $url);
     }
 
     return $post;

@@ -30,7 +30,10 @@ wss.on('connection', ws => {
   ws.on('message', message => {
     const data = JSON.parse(message.toString());
     if (data.command === 'latency') {
-      sendMessage(ws, { type: 'latency' });
+      sendMessage(ws, {
+        type: 'latency',
+        timestamp: data.timestamp,
+      });
     } else if (data.command === 'ack') {
       ws.buffer.delete(data.id);
     } else if (data.command === 'listen') {

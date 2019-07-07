@@ -20,8 +20,8 @@
         <span class="post-header-mobile__tripcode">!{{ post.tripcode }}</span>
     {% endif %}
 
-    {% set reflink = base_url ~ '/res/' ~ post.parent_id ~ '#q' ~ post.id %}
-    {% set replylink = base_url ~ '/res/' ~ post.id %}
+    {% set reflink = url('res/' ~ post.parent_id ~ '#reply_' ~ post.id) %}
+    {% set replylink = url('res/' ~ post.id) %}
 
     <span class="post-header-mobile__reflink-wrapper">
       №<a class="post-header-mobile__reflink" href="{{ reflink }}" data-reflink="{{ post.id }}">

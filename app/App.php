@@ -18,7 +18,16 @@ use Imageboard\Services\{
   TokenService,
   UserService
 };
-use Imageboard\Services\Cache\{CacheInterface, NoCache, RedisCache};
+use Imageboard\Services\Cache\{
+  CacheInterface,
+  NoCache,
+  RedisCache
+};
+use Imageboard\Services\Notification\{
+  NotificationService,
+  StubNotificationService,
+  OneSignalService
+};
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
@@ -175,6 +184,13 @@ EOF;
     } else {
       // Disable cache.
       $this->container->registerType(CacheInterface::class, NoCache::class);
+    }
+
+    if (!empty($this->config->get('ONESIGNAL_APPID', ''))
+      && !empty($this->config->get('ONESIGNAL_KEY', ''))) {
+      $this->container->registerType(NotificationService::class, OneSignalService::class);
+    } else {
+      $this->container->registerType(NotificationService::class, StubNotificationService::class);
     }
   }
 

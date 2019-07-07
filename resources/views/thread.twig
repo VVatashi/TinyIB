@@ -3,7 +3,7 @@
 {% block head %}
   {{ parent() }}
 
-  <link rel="canonical" href="{{ base_url }}/res/{{ parent }}" />
+  <link rel="canonical" href="{{ url('res/' ~ parent) }}" />
 {% endblock %}
 
 {% block content %}
@@ -39,7 +39,7 @@
     {% include 'components/_nav-right.twig' with {'class': 'content__navigation-right hidden'} %}
 
     <audio id="notify" class="hidden" hidden>
-      <source id="notify-source" src="{{ base_url }}/mp3/notify-1.mp3"></source>
+      <source id="notify-source" src="{{ url('mp3/notify-1.mp3') }}"></source>
     </audio>
   </main>
 {% endblock %}

@@ -1,8 +1,8 @@
 {% set title = 'Post List' %}
 
 {% set breadcrumb = [
-  { url: base_url, title: config('BOARDDESC') },
-  { url: base_url ~ '/admin', title: 'Admin Dashboard' },
+  { url: url(), title: config('BOARDDESC') },
+  { url: url('admin'), title: 'Admin Dashboard' },
 ] %}
 
 {% extends 'admin/layout/_html.twig' %}
@@ -15,11 +15,11 @@
 
     <div class="list__content">
       {% include 'admin/components/_filters.twig' with filter + {
-        'list_url': base_url ~ '/admin/posts',
+        'list_url': url('admin/posts'),
         'class': 'list__filters',
       } %}
 
-      <div id="list" data-url="{{ base_url }}/ajax/admin/posts">
+      <div id="list" data-url="{{ url('ajax/admin/posts') }}">
       {% include 'admin/posts/_list.twig' %}
       </div>
     </div>
