@@ -7,7 +7,8 @@ use Imageboard\Repositories\UserRepository;
 use Imageboard\Services\{
   RendererService,
   TokenService,
-  UserService
+  UserService,
+  ConfigService
 };
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
