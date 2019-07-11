@@ -555,7 +555,8 @@ class Post extends Model
         new TagDef('sub'),
         new TagDef('sup'),
         new TagDef('code', [
-          'outputFormat' => '<code>{content}</code>',
+          'attributePattern' => '/[a-zA-Z]*/',
+          'outputFormat' => '<code data-code="{attribute}">{content}</code>',
           'rawContent' => true,
         ]),
         new TagDef('spoiler', ['outputFormat' => '<span class="markup__spoiler">{content}</span>']),

@@ -1,3 +1,4 @@
+import katex from 'katex';
 import { View } from '.';
 import { Post } from '../model';
 import { DOM } from '../utils';
@@ -30,6 +31,8 @@ export class PostView implements View {
     const fileWidth = $fileLink ? +$fileLink.getAttribute('data-width') : null;
     const fileHeight = $fileLink ? +$fileLink.getAttribute('data-height') : null;
 
+    const $message = DOM.qs('.post__message', $element);
+
     const $references = DOM.qsa('a[data-target-post-id]', $element);
     const referencedIds = $references.map($reference => {
       return +$reference.getAttribute('data-target-post-id');
@@ -55,6 +58,16 @@ export class PostView implements View {
     const $mobileDateTime = DOM.qs('.post-header-mobile__datetime', $element);
     if ($mobileDateTime) {
       $mobileDateTime.textContent = this.model.formattedTime;
+    }
+
+    if ($message) {
+      const $latex = DOM.qsa('[data-code="latex"]', $message) as HTMLElement[];
+      $latex.forEach($el => {
+        katex.render($el.textContent, $el, {
+          displayMode: true,
+          throwOnError: false,
+        });
+      });
     }
 
     if (this.model.isOwn) {
