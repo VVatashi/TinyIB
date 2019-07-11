@@ -22,6 +22,7 @@ module.exports = {
   externals: {
     'axios': 'axios',
     'luxon': 'luxon',
+    'katex': 'katex',
     'vue': 'Vue',
   },
   resolve: {

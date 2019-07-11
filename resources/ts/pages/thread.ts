@@ -61,8 +61,8 @@ export class ThreadPage extends BasePage {
   protected readonly $statusWS: HTMLElement;
   protected readonly $title: HTMLElement;
   protected readonly faviconHref: string;
-  protected readonly title: string;
 
+  protected title: string;
   protected notifyIntervalTimer: number = null;
 
   constructor(readonly threadId: number) {
@@ -80,11 +80,17 @@ export class ThreadPage extends BasePage {
     this.$statusWS = this.$updaterWS ?
       DOM.qs('.thread-updater__status', this.$updaterWS) as HTMLElement : null;
 
-    this.$title = DOM.qs('title') as HTMLElement;
-    this.title = this.$title ? this.$title.textContent : '';
-
     const $posts = DOM.qsa('.post') as HTMLElement[];
     this.posts = $posts.map($post => new PostView($post));
+
+    this.$title = DOM.qs('title') as HTMLElement;
+    this.title = this.$title.textContent;
+    if (this.posts.length && this.posts[0].model.subject) {
+      this.title += ' — ' + this.posts[0].model.subject;
+    } else {
+      this.title += ' — Thread #' + this.posts[0].model.id;
+    }
+    this.updateTitle(0);
 
     const posts = this.posts.map(view => view.model);
     this.model = new Thread(threadId, posts);
