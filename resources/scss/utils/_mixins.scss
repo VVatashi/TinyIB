@@ -12,6 +12,22 @@
   }
 }
 
+@mixin clearfix-before {
+  &::before {
+    clear: both;
+    content: '';
+    display: table;
+  }
+}
+
+@mixin clearfix-after {
+  &::after {
+    clear: both;
+    content: '';
+    display: table;
+  }
+}
+
 @mixin breakpoint($min-width) {
   @media screen and (min-width: #{2 * $min-width}),
   screen and (-webkit-max-device-pixel-ratio: 1.5) and (min-width: #{1.5 * $min-width}),

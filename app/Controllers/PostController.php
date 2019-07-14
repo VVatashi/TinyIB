@@ -3,7 +3,7 @@
 namespace Imageboard\Controllers;
 
 use GuzzleHttp\Psr7\Response;
-use Imageboard\Exceptions\{NotFoundException, ValidationException};
+use Imageboard\Exceptions\{NotFoundException, ValidationException, AccessDeniedException};
 use Imageboard\Repositories\PostRepository;
 use Imageboard\Services\{
   CaptchaService,
@@ -185,13 +185,28 @@ class PostController implements ControllerInterface
    * @param ServerRequestInterface
    *
    * @return string|ResponseInterface Response.
+   *
+   * @throws NotFoundException
+   * @throws AccessDeniedException
    */
   function delete(ServerRequestInterface $request)
   {
     $data = $request->getParsedBody();
     $id = isset($data['delete']) ? $data['delete'] : 0;
-    $password = isset($data['password']) ? $data['password'] : '';
-    $this->service->delete($id, $password);
+    $post = $this->repository->getById($id);
+    if (!isset($post)) {
+      throw new NotFoundException();
+    }
+
+    /** @var User $user */
+    $user = $request->getAttribute('user');
+    if (!$user->isMod()
+      && $user->id !== $post->user_id
+      && $_SERVER['REMOTE_ADDR'] !== $post->ip) {
+      throw new AccessDeniedException();
+    }
+
+    $this->service->delete($id, $user);
     return 'Post deleted.';
   }
 

@@ -845,7 +845,7 @@ class PostService
     if ($limit > 0) {
       $threads = $this->post_repository->getThreads($limit, 100);
       foreach ($threads as $thread) {
-        $this->delete($thread->id, false);
+        $this->delete($thread->id);
       }
     }
   }

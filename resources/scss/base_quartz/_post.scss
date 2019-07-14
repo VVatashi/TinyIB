@@ -41,7 +41,7 @@
   }
 
   &__content {
-    @include clearfix;
+    @include clearfix-after;
 
     color: $post-content-color;
 
