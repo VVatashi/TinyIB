@@ -92,16 +92,14 @@ export const FilePreview = Vue.extend({
   },
   watch: {
     file(value: File) {
-      if (!value) {
+      if (this.src) {
+        URL.revokeObjectURL(this.src);
         this.src = null;
-        return;
       }
 
-      const reader = new FileReader();
-      reader.addEventListener('load', e => {
-        this.src = (e.target as any).result;
-      });
-      reader.readAsDataURL(value);
+      if (value) {
+        this.src = URL.createObjectURL(value);
+      }
     },
   },
   methods: {
