@@ -44,6 +44,7 @@ class TreeParser extends Parser {
  * @property-read string $thumb
  * @property-read int    $thumb_width
  * @property-read int    $thumb_height
+ * @property-read int    $score
  */
 class Post extends Model
 {
@@ -109,6 +110,9 @@ class Post extends Model
 
   /** @var int */
   protected $thumb_height = 0;
+
+  /** @var int */
+  protected $score = 0;
 
   /**
    * Post constructor.

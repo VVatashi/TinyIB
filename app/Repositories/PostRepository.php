@@ -224,9 +224,33 @@ class PostRepository implements CrudRepository
       'p.image_height',
       'p.thumb',
       'p.thumb_width',
-      'p.thumb_height'
+      'p.thumb_height',
+      'COALESCE(SUM(v.score), 0) as score'
       )
-      ->from($this->table, 'p');
+      ->from($this->table, 'p')
+      ->leftJoin('p', 'votes', 'v', 'v.post_id = p.id')
+      ->addGroupBy('p.id')
+      ->addGroupBy('p.created_at')
+      ->addGroupBy('p.updated_at')
+      ->addGroupBy('p.deleted_at')
+      ->addGroupBy('p.parent_id')
+      ->addGroupBy('p.bumped_at')
+      ->addGroupBy('p.ip')
+      ->addGroupBy('p.user_id')
+      ->addGroupBy('p.name')
+      ->addGroupBy('p.tripcode')
+      ->addGroupBy('p.subject')
+      ->addGroupBy('p.message')
+      ->addGroupBy('p.message_raw')
+      ->addGroupBy('p.file')
+      ->addGroupBy('p.file_hex')
+      ->addGroupBy('p.file_original')
+      ->addGroupBy('p.file_size')
+      ->addGroupBy('p.image_width')
+      ->addGroupBy('p.image_height')
+      ->addGroupBy('p.thumb')
+      ->addGroupBy('p.thumb_width')
+      ->addGroupBy('p.thumb_height');
   }
 
   /**

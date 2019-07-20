@@ -87,5 +87,36 @@ export class PostView implements View {
         }
       });
     }
+
+    const $score = DOM.qs('.post-header__score-value', $element);
+    if ($score) {
+      const $voteUp = DOM.qs('.post-header__score-up', $element);
+      if ($voteUp) {
+        $voteUp.addEventListener('click', async e => {
+          e.preventDefault();
+
+          try {
+            const data = await this.model.voteUp();
+            $score.textContent = data.total_score.toString();
+          } catch (e) {
+            console.error(e);
+          }
+        });
+      }
+
+      const $voteDown = DOM.qs('.post-header__score-down', $element);
+      if ($voteDown) {
+        $voteDown.addEventListener('click', async e => {
+          e.preventDefault();
+
+          try {
+            const data = await this.model.voteDown();
+            $score.textContent = data.total_score.toString();
+          } catch (e) {
+            console.error(e);
+          }
+        });
+      }
+    }
   }
 }

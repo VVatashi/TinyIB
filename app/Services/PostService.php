@@ -2,7 +2,6 @@
 
 namespace Imageboard\Services;
 
-use GuzzleHttp\Client;
 use Imageboard\Exceptions\{
   NotFoundException,
   ValidationException
@@ -136,7 +135,8 @@ class PostService
    *
    * @return array Post view model.
    */
-  protected function mapToViewModels(array $posts): array {
+  protected function mapToViewModels(array $posts): array
+  {
     $post_ids = array_map(function (Post $post) {
       return $post->id;
     }, $posts);
@@ -171,6 +171,7 @@ class PostService
         'thumb'          => $post->thumb,
         'thumb_width'    => $post->thumb_width,
         'thumb_height'   => $post->thumb_height,
+        'score'          => (int) $post->score,
       ];
 
       foreach ($refs as $ref) {
@@ -196,7 +197,8 @@ class PostService
    *
    * @return bool
    */
-  protected function checkBanned(string $ip, &$ban): bool {
+  protected function checkBanned(string $ip, &$ban): bool
+  {
     $ban = $this->ban_repository->getByIp($ip);
     if (!isset($ban)) {
       return true;
@@ -214,7 +216,8 @@ class PostService
    *
    * @return bool
    */
-  protected function checkMessageSize(string $message, &$length): bool {
+  protected function checkMessageSize(string $message, &$length): bool
+  {
     // @todo Configure max message length.
     $max_length = 8000;
     $length = strlen($message);
@@ -230,8 +233,9 @@ class PostService
    *
    * @return bool True if delay time has passed.
    */
-  protected function checkFlood(string $ip, &$remains_time): bool {
-    $delay = (int)$this->config->get('DELAY');
+  protected function checkFlood(string $ip, &$remains_time): bool
+  {
+    $delay = (int) $this->config->get('DELAY');
 
     if ($delay <= 0) {
       return true;
@@ -257,7 +261,8 @@ class PostService
    *     name - processed poster name;
    *     tripcode - processed poster tripcode.
    */
-  protected function processName(string $name): array {
+  protected function processName(string $name): array
+  {
     $secure_tripcode = '';
     $secure_password_index = strpos($name, '##');
     if ($secure_password_index !== false) {
@@ -291,7 +296,8 @@ class PostService
    *
    * @return string
    */
-  protected function cleanString(string $string): string {
+  protected function cleanString(string $string): string
+  {
     $search = ['<', '>'];
     $replace = ['&lt;', '&gt;'];
     return str_replace($search, $replace, $string);
@@ -304,7 +310,8 @@ class PostService
    *
    * @return string
    */
-  protected function colorQuote(string $message): string {
+  protected function colorQuote(string $message): string
+  {
     if (substr($message, -1, 1) != "\n") {
       $message .= "\n";
     }
@@ -319,9 +326,10 @@ class PostService
    *
    * @return string
    */
-  protected function makeLinksClickable(string $message): string {
+  protected function makeLinksClickable(string $message): string
+  {
     $url_pattern =
-    '/
+      '/
     https?:\/\/
     [-a-zA-Z0-9@:%._\+~#=]{2,}
     \.[a-z]{2,}\b
@@ -338,10 +346,11 @@ class PostService
    *
    * @return string
    */
-  protected function dice($message) {
+  protected function dice($message)
+  {
     return preg_replace_callback('/##(\d+)d(\d+)##/si', function ($matches) {
-      $count = min(max((int)$matches[1], 1), $this->config->get('DICE_MAX_COUNT'));
-      $max = min(max((int)$matches[2], 1), $this->config->get('DICE_MAX_VALUE'));
+      $count = min(max((int) $matches[1], 1), $this->config->get('DICE_MAX_COUNT'));
+      $max = min(max((int) $matches[2], 1), $this->config->get('DICE_MAX_VALUE'));
 
       $sum = 0;
       $results = [];
@@ -359,7 +368,8 @@ class PostService
     }, $message);
   }
 
-  protected function postCount($user_id, $message) {
+  protected function postCount($user_id, $message)
+  {
     if (!isset($user_id) || $user_id === 0) {
       return $message;
     }
@@ -376,7 +386,8 @@ class PostService
    *
    * @throws \Exception
    */
-  protected function validateFileUpload(array $file) {
+  protected function validateFileUpload(array $file)
+  {
     switch ($file['error']) {
       case UPLOAD_ERR_OK:
         break;
@@ -478,7 +489,7 @@ class PostService
     $board = $this->config->get('BOARD');
     $refs = [];
     $message = preg_replace_callback('/&gt;&gt;([0-9]+)/', function ($matches) use ($board, &$refs) {
-      $id = (int)$matches[1];
+      $id = (int) $matches[1];
       $post = $this->post_repository->getById($id);
       if ($post !== null) {
         if (!in_array($id, $refs)) {
@@ -580,7 +591,7 @@ class PostService
         throw new ValidationException('File transfer failure. Please retry the submission.');
       }
 
-      $max = (int)$this->config->get('MAXKB', 0);
+      $max = (int) $this->config->get('MAXKB', 0);
       if ($max > 0 && filesize($file['tmp_name']) > $max * 1024) {
         $max_desc = $this->config->get('MAXKBDESC');
         throw new ValidationException("That file is larger than $max_desc.");
@@ -618,8 +629,8 @@ class PostService
       $post->setImageWidth($width);
       $post->setImageHeight($height);
 
-      $max_width = (int)$this->config->get('MAXW');
-      $max_height = (int)$this->config->get('MAXH');
+      $max_width = (int) $this->config->get('MAXW');
+      $max_height = (int) $this->config->get('MAXH');
 
       $thumb = $this->thubmnail->createThumbnail(
         $file_path,
@@ -637,7 +648,7 @@ class PostService
 
     if (empty($post->file)) {
       // No file uploaded.
-      if ($post->isThread() && !(bool)$this->config->get("NOFILEOK")) {
+      if ($post->isThread() && !(bool) $this->config->get("NOFILEOK")) {
         throw new ValidationException('A file is required to start a thread.');
       }
 
@@ -716,6 +727,7 @@ class PostService
         'thumb'          => $post->thumb,
         'thumb_width'    => $post->thumb_width,
         'thumb_height'   => $post->thumb_height,
+        'score'          => (int) $post->score,
       ];
 
       $data['html'] = $this->renderer->render('ajax/post.twig', [
@@ -765,7 +777,8 @@ class PostService
    *
    * @param Post $post
    */
-  function deletePostImages(Post $post) {
+  function deletePostImages(Post $post)
+  {
     // TODO: Exception handling & logging.
 
     if (!empty($post->file)) {
@@ -791,7 +804,8 @@ class PostService
    *
    * @throws NotFoundException
    */
-  function delete(int $id, $user = null) {
+  function delete(int $id, $user = null)
+  {
     $board = $this->config->get("BOARD");
     $post = $this->post_repository->getById($id);
     if ($post === null) {
@@ -840,8 +854,9 @@ class PostService
    *
    * @throws ConfigServiceException
    */
-  function trimThreads() {
-    $limit = (int)$this->config->get('MAXTHREADS');
+  function trimThreads()
+  {
+    $limit = (int) $this->config->get('MAXTHREADS');
     if ($limit > 0) {
       $threads = $this->post_repository->getThreads($limit, 100);
       foreach ($threads as $thread) {
@@ -850,22 +865,26 @@ class PostService
     }
   }
 
-  function getThreads(): array {
+  function getThreads(): array
+  {
     $posts = $this->post_repository->getThreads();
     return $this->mapToViewModels($posts);
   }
 
-  function getThreadsByPage(int $page): array {
+  function getThreadsByPage(int $page): array
+  {
     $posts = $this->post_repository->getThreadsByPage($page);
     return $this->mapToViewModels($posts);
   }
 
-  function getThreadPosts(int $thread_id, int $after_id = 0): array {
+  function getThreadPosts(int $thread_id, int $after_id = 0): array
+  {
     $posts = $this->post_repository->getThreadPosts($thread_id, $after_id);
     return $this->mapToViewModels($posts);
   }
 
-  function getLastThreadPosts(int $thread_id, int $count): array {
+  function getLastThreadPosts(int $thread_id, int $count): array
+  {
     $posts = $this->post_repository->getLastThreadPosts($thread_id, $count);
     return $this->mapToViewModels($posts);
   }
@@ -877,10 +896,11 @@ class PostService
    *
    * @throws NotFoundException
    */
-  function getById(int $post_id): array {
+  function getById(int $post_id): array
+  {
     $post = $this->post_repository->getById($post_id);
     if (!isset($post)) {
-      throw new NotFoundException("Post #$post_id is not found.");
+      throw new NotFoundException("Post #$post_id was not found.");
     }
 
     return $this->mapToViewModels([$post])[0];
