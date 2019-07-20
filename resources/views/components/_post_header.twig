@@ -64,5 +64,13 @@
     {% if postNo %}
       <span class="post-header__post-no">#{{ postNo }}</span>
     {% endif %}
+
+    {% if config('VOTES') %}
+      <span class="post-header__score">
+        <a class="post-header__score-up fas fa-thumbs-up" href="#" title="Vote up"></a>
+        <span class="post-header__score-value{{ post.score > 0 ? ' post-header__score-value--positive' }}{{ post.score < 0 ? ' post-header__score-value--negative' }}">{{ post.score }}</span>
+        <a class="post-header__score-down fas fa-thumbs-down" href="#" title="Vote down"></a>
+      </span>
+    {% endif %}
   </span>
 </div>

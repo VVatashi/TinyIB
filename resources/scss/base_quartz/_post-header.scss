@@ -28,7 +28,9 @@
   &__reflink-icon,
   &__delete,
   &__hide,
-  &__pin {
+  &__pin,
+  &__score-up,
+  &__score-down {
     @extend %clickable;
     font-size: 1.25em;
     padding: 0 0.1em;
@@ -40,6 +42,11 @@
       color: inherit;
       text-decoration: none;
     }
+  }
+
+  &__score {
+    margin-left: 0.5em;
+    float: right;
   }
 
   .post--hidden &__hide {
@@ -68,7 +75,9 @@
     &__reflink-icon,
     &__delete,
     &__hide,
-    &__pin {
+    &__pin,
+    &__score-up,
+    &__score-down {
       font-size: 1em;
     }
   }

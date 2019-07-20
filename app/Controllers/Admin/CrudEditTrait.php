@@ -35,7 +35,7 @@ trait CrudEditTrait {
    * @throws AccessDeniedException
    *   If current user is not an admin.
    * @throws NotFoundException
-   *   If item with the specified ID is not found.
+   *   If item with the specified ID was not found.
    */
   function editForm(ServerRequestInterface $request, array $args): string
   {
@@ -74,7 +74,7 @@ trait CrudEditTrait {
    * @throws AccessDeniedException
    *   If current user is not an admin.
    * @throws NotFoundException
-   *   If item with the specified ID is not found.
+   *   If item with the specified ID was not found.
    */
   function edit(ServerRequestInterface $request, array $args): ResponseInterface
   {

@@ -39,4 +39,25 @@ export class API {
       throw new APIError(response);
     }
   }
+
+  static async voteForPost(id: number, score: number) {
+    const response = await fetch(`${window.baseUrl}/api/votes`, {
+      method: 'post',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        post_id: id,
+        score,
+      }),
+      credentials: 'same-origin',
+    });
+
+    if (!response.status || response.status >= 400) {
+      throw new APIError(response);
+    }
+
+    return response.json();
+  }
 }

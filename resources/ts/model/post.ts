@@ -44,4 +44,12 @@ export class Post {
   delete() {
     return API.deletePost(this.id);
   }
+
+  voteUp() {
+    return API.voteForPost(this.id, 1);
+  }
+
+  voteDown() {
+    return API.voteForPost(this.id, -1);
+  }
 }

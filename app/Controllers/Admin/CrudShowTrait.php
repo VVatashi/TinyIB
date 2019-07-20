@@ -27,7 +27,7 @@ trait CrudShowTrait {
    * @throws AccessDeniedException
    *   If current user is not an admin.
    * @throws NotFoundException
-   *   If item with the specified ID is not found.
+   *   If item with the specified ID was not found.
    */
   function show(ServerRequestInterface $request, array $args): string
   {

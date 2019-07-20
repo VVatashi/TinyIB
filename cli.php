@@ -70,7 +70,7 @@ $commands['create:dango:family'] = function(array $args) use ($colors, $color) {
 
   print("{$dango_color()}だんご　{$dango_color()}だんご　{$dango_color()}だんご　{$dango_color()}だんご　{$dango_color()}だんご　{$color("default")}だんご　大家族\n");
   print("\n{$color("white")}Put all of them together to make a family of one hundred!\n\n");
-  
+
   $dango_count = 10;
   for($i = 0; $i < 10; $i++) {
     print(str_repeat("🍡", $dango_count) . "\n");
@@ -108,7 +108,7 @@ $commands['migration:apply'] = function (array $args) use ($color) {
   $database = new DatabaseService($config);
   $migrations = new MigrationService($database);
   if (!$migrations->apply($migration)) {
-    print("{$color("red")}Migration {$color("white")}$migration {$color("red")}is not found or already applied{$color("default")}\n");
+    print("{$color("red")}Migration {$color("white")}$migration {$color("red")}was not found or already applied{$color("default")}\n");
   }
 };
 
@@ -123,7 +123,7 @@ $commands['migration:revert'] = function (array $args) use ($color) {
   $database = new DatabaseService($config);
   $migrations = new MigrationService($database);
   if (!$migrations->revert($migration)) {
-    print("{$color("red")}Migration {$color("white")}$migration {$color("red")}is not found or not applied{$color("default")}\n");
+    print("{$color("red")}Migration {$color("white")}$migration {$color("red")}was not found or not applied{$color("default")}\n");
   }
 };
 

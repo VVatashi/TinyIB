@@ -42,13 +42,26 @@ interface WSRemovePost {
   };
 }
 
+interface WSVote {
+  id: number;
+  timestamp: number;
+  type: 'vote';
+  data: {
+    id: number;
+    post_id: number;
+    user_id: number;
+    score: number;
+    total_score: number;
+  };
+}
+
 interface WSLatency {
   id: number;
   timestamp: number;
   type: 'latency';
 }
 
-type WSCommand = WSAddPost | WSRemovePost | WSLatency;
+type WSCommand = WSAddPost | WSRemovePost | WSVote | WSLatency;
 
 export class ThreadPage extends BasePage {
   readonly posts: PostView[];
@@ -283,9 +296,24 @@ export class ThreadPage extends BasePage {
       return;
     }
 
-    const $post = DOM.qs(`[data-post-id="${id}"]`);
+    const $post = DOM.qs(`[data-post-id="${id}"]`, $wrapper);
     if ($post) {
       $post.remove();
+    }
+  }
+
+  protected setPostScore(id: number, score: number) {
+    const $wrapper = DOM.qs('.post').parentElement;
+    if (!$wrapper) {
+      return;
+    }
+
+    const $post = DOM.qs(`[data-post-id="${id}"]`, $wrapper);
+    if ($post) {
+      const $score = DOM.qs('.post-header__score-value', $post);
+      if ($score) {
+        $score.textContent = score.toString();
+      }
     }
   }
 
@@ -472,6 +500,8 @@ export class ThreadPage extends BasePage {
         this.onNewWSPostDataLoaded(message.data);
       } else if (message.type === 'remove_post') {
         this.removePost(message.data.id);
+      } else if (message.type === 'vote') {
+        this.setPostScore(message.data.post_id, message.data.total_score);
       } else if (message.type === 'latency') {
         const latency = Date.now() - message.timestamp;
         this.$statusWS.textContent = `WebSocket connected: latency ${latency} ms`;
