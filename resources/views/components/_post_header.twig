@@ -23,6 +23,8 @@
 {% import _self as self %}
 
 <div class="{{ class is defined ? class ~ ' ' }}post-header">
+  <a class="post-header__delete fas fa-times" href="#" title="Delete post"></a>
+
   <span class="post-header__name-wrapper">
     {% if post.email %}
       <a class="post-header__email" href="mailto:{{ post.email }}">
@@ -48,7 +50,6 @@
       {{- post.id -}}
     </a>
 
-    <a class="post-header__delete fas fa-times" href="#" title="Delete post"></a>
     <a class="post-header__hide fas fa-minus" href="#" title="Hide post"></a>
 
     {% if isInThread %}
