@@ -886,6 +886,8 @@ export class Post {
       return;
     }
 
+    $link.setAttribute('data-has-popup', 'true');
+
     const $popup = document.createElement('div');
     $popup.setAttribute('data-post-id', targetPostId.toString());
     $popup.classList.add('post', 'post_reply', 'post--popup', 'fade', 'faded');
@@ -906,7 +908,7 @@ export class Post {
     this.$layout.appendChild($popup);
 
     const backLinks = DOM.qsa(`a[data-target-post-id="${parentPostId}"]`, $popup) as HTMLElement[];
-    backLinks.forEach(link => link.style.fontWeight = '700');
+    backLinks.forEach(link => link.classList.add('backlink'));
 
     setTimeout(() => {
       $popup.classList.remove('faded');
@@ -1039,6 +1041,10 @@ export class Post {
       return false;
     }
 
+    if (popup.$parentLink.hasAttribute('data-hover')) {
+      return false;
+    }
+
     // Check if any children has hover.
     const childrenIds = [...popup.childrenIds];
     while (childrenIds.length) {
@@ -1066,6 +1072,7 @@ export class Post {
     }
 
     // Close popup if none of it's children has hover.
+    popup.$parentLink.removeAttribute('data-has-popup');
     popup.$popup.classList.add('faded');
     setTimeout(() => {
       popup.$popup.remove();

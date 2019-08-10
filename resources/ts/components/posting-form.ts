@@ -477,10 +477,10 @@ export class PostingForm {
           const message = this.fields.message as string;
           const before = message.substring(0, selection.begin);
           const after = message.substring(selection.end);
-          const quoteText = window.getSelection().toString();
+          const quoteText = window.getSelection().toString().replace(/^/gm, '> ');
           const newLineBefore = before.length && !before.endsWith('\n') ? '\n' : '';
           const newLineAfter = (!after.length || !after.startsWith('\n')) && quoteText.length ? '\n' : '';
-          const quote = `${newLineBefore}> ${quoteText}${newLineAfter}`;
+          const quote = `${newLineBefore}${quoteText}${newLineAfter}`;
 
           const scroll = messageEl.scrollTop;
           this.fields.message = [
@@ -600,7 +600,7 @@ export class PostingForm {
         const newLineBefore = before.length && !before.endsWith('\n') ? '\n' : '';
         const newLineAfter = !after.length || !after.startsWith('\n') ? '\n' : '';
         const id = target.getAttribute('data-reflink');
-        const quoteText = window.getSelection().toString();
+        const quoteText = window.getSelection().toString().replace(/^/gm, '> ');
         const lastQuoteIndex = message.lastIndexOf('>>', selection.begin);
         const quoteSamePost = lastQuoteIndex !== -1
           && message.lastIndexOf(`>>${id}`, selection.begin) >= lastQuoteIndex;
@@ -609,11 +609,11 @@ export class PostingForm {
         let quote = '';
         if (quoteSamePost) {
           quote = quoteText
-            ? `${newLineBefore}> ${quoteText}${newLineAfter}`
+            ? `${newLineBefore}${quoteText}${newLineAfter}`
             : '';
         } else {
           quote = quoteText
-            ? `${newLineBefore}>>${id}\n> ${quoteText}${newLineAfter}`
+            ? `${newLineBefore}>>${id}\n${quoteText}${newLineAfter}`
             : `${newLineBefore}>>${id}${newLineAfter}`;
         }
 

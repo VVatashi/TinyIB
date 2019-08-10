@@ -59,10 +59,12 @@ export class BasePage implements Page {
           if ($post) {
             const id = +$post.getAttribute('data-post-id');
 
-            try {
-              eventBus.emit(Events.PostDeleted, id);
-            } catch (e) {
-              console.error(e);
+            if (confirm(`Delete post #${id}?`)) {
+              try {
+                eventBus.emit(Events.PostDeleted, id);
+              } catch (e) {
+                console.error(e);
+              }
             }
           }
 

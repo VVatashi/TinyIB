@@ -73,3 +73,11 @@ ul, ol {
 
   pointer-events: none;
 }
+
+a[data-has-popup] {
+  outline: 1px dotted;
+}
+
+a.backlink {
+  font-weight: 700;
+}
