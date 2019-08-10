@@ -23,7 +23,9 @@
 {% import _self as self %}
 
 <div class="{{ class is defined ? class ~ ' ' }}post-header">
-  <a class="post-header__delete fas fa-times" href="#" title="Delete post"></a>
+  {% if user.isMod() or user.isAdmin() or ip == post.ip %}
+    <a class="post-header__delete fas fa-times" href="#" title="Delete post"></a>
+  {% endif %}
 
   <span class="post-header__name-wrapper">
     {% if post.email %}

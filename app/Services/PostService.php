@@ -151,6 +151,7 @@ class PostService
         'updated_at'     => $post->updated_at,
         'parent_id'      => $post->parent_id,
         'bumped_at'      => $post->bumped_at,
+        'ip'             => $post->ip,
         'name'           => $post->name,
         'tripcode'       => $post->tripcode,
         'subject'        => $post->subject,

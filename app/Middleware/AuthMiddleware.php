@@ -62,6 +62,7 @@ class AuthMiddleware implements MiddlewareInterface
 
     // Store current user to a Twig global variable.
     $this->renderer->registerGlobal('user', $user);
+    $this->renderer->registerGlobal('ip', $_SERVER['REMOTE_ADDR'] ?? '');
 
     // Store current user to the request object.
     $request = $request->withAttribute('user', $user);
