@@ -2,6 +2,8 @@ import katex from 'katex';
 import { View } from '.';
 import { Post } from '../model';
 import { DOM } from '../utils';
+import { eventBus } from '../event-bus';
+import { Events } from '../events';
 
 export class PostView implements View {
   readonly model: Post;
@@ -74,49 +76,36 @@ export class PostView implements View {
       $element.classList.add('post--own');
     }
 
-    const $delete = DOM.qs('.post-header__delete', $element);
-    if ($delete) {
-      $delete.addEventListener('click', async e => {
-        e.preventDefault();
-
+    eventBus.on(Events.PostDeleted, async id => {
+      if (+id === +this.model.id) {
         try {
           await this.model.delete();
           this.$element.style.display = 'none';
         } catch (e) {
           console.error(e);
         }
-      });
-    }
+      }
+    });
 
     const $score = DOM.qs('.post-header__score-value', $element);
-    if ($score) {
-      const $voteUp = DOM.qs('.post-header__score-up', $element);
-      if ($voteUp) {
-        $voteUp.addEventListener('click', async e => {
-          e.preventDefault();
-
+    eventBus.on(Events.PostVoted, async (id, vote) => {
+      if (+id === +this.model.id) {
+        if (vote === 'up') {
           try {
             const data = await this.model.voteUp();
             $score.textContent = data.total_score.toString();
           } catch (e) {
             console.error(e);
           }
-        });
-      }
-
-      const $voteDown = DOM.qs('.post-header__score-down', $element);
-      if ($voteDown) {
-        $voteDown.addEventListener('click', async e => {
-          e.preventDefault();
-
+        } else if (vote === 'down') {
           try {
             const data = await this.model.voteDown();
             $score.textContent = data.total_score.toString();
           } catch (e) {
             console.error(e);
           }
-        });
+        }
       }
-    }
+    });
   }
 }
