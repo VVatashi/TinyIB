@@ -13,6 +13,9 @@ declare global {
     baseUrl: string;
     websocketUrl: string;
     board: string;
+    userId: number;
+    userRole: number;
+    ipHash: string;
     app: App;
     WebSocket?: any;
     OneSignal?: any;
