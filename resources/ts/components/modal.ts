@@ -141,6 +141,10 @@ export class Modal {
         }
       }
 
+      if ((e.target as HTMLElement).closest('.video-player__controls')) {
+        return;
+      }
+
       e.preventDefault();
 
       const { x, y } = getEventCoords(e);
@@ -202,6 +206,15 @@ export class Modal {
         this.$content.style.height = `${height}px`;
       }
 
+      const controls = document.querySelector('.video-player__controls');
+      if (controls) {
+        if (width < 200) {
+          controls.classList.add('hidden');
+        } else {
+          controls.classList.remove('hidden');
+        }
+      }
+
       return false;
     });
   }
@@ -231,6 +244,11 @@ export class Modal {
     }
 
     this.$modal.classList.remove('modal--hidden');
+
+    const controls = document.querySelector('.video-player__controls');
+    if (controls && width < 200) {
+      controls.classList.add('hidden');
+    }
 
     this._isOpen = true;
   }

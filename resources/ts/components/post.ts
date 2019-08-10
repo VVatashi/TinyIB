@@ -1,6 +1,7 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { Modal } from './modal';
-import { VideoPlayer } from './video-player';
-
+import { VideoPlayer } from '@vvatashi/video-player';
 import { eventBus, Events } from '..';
 import { Coub, LocalStorage, Settings } from '../services';
 import { DOM, Keyboard } from '../utils';
@@ -38,7 +39,6 @@ export class Post {
   protected $layout: HTMLElement = null;
   protected $modal: HTMLElement = null;
   protected modal: Modal = null;
-  protected player: VideoPlayer = null;
 
   protected readonly media: FileData[] = [];
   protected readonly ownPostIds: number[] = [];
@@ -300,6 +300,10 @@ export class Post {
 
         return false;
       } else if (Settings.get('image.hide-popup-on-outside-click')) {
+        if ((e.target as HTMLElement).closest('.video-player__controls')) {
+          return;
+        }
+
         if (this.modal && !this.modal.isDragging) {
           this.modal.hide();
         }
@@ -747,62 +751,28 @@ export class Post {
       this.$modal.classList.add('modal');
       this.$modal.innerHTML = `
 <div class="modal__content modal__content--video">
-  <div class="player">
-    <video class="player__video" ${autoPlay ? 'autoplay="true"' : ''} preload="metadata">
-      <source src="${file.url}">
-    </video>
-
-    <div class="player__controls">
-      <button class="player__play hidden">
-        <span class="fas fa-play"></span>
-      </button>
-
-      <button class="player__pause">
-        <span class="fas fa-pause"></span>
-      </button>
-
-      <input type="range" class="player__seek"
-        value="0" min="0" max="1" step="0.001" />
-
-      <span class="player__time"></span>
-
-      <button class="player__mute">
-        <span class="fas fa-volume-up"></span>
-      </button>
-
-      <button class="player__unmute hidden">
-        <span class="fas fa-volume-mute"></span>
-      </button>
-
-      <input type="range" class="player__volume"
-        value="1" min="0" max="1" step="0.01" />
-
-      <button class="player__expand">
-        <span class="fas fa-expand"></span>
-      </button>
-
-      <button class="player__compress hidden">
-        <span class="fas fa-compress"></span>
-      </button>
-    </div>
-  </div>
+  <div id="player"></div>
 </div>`;
       this.$layout.appendChild(this.$modal);
 
-      const $player = DOM.qs('.player', this.$modal);
-      this.player = new VideoPlayer($player, autoPlay);
-
-      this.player.on('ended', () => {
-        if (this.autoPlayNextVideo) {
-          this.showNextVideo();
-        }
+      const $player = DOM.qs('#player', this.$modal);
+      const Player = React.createElement(VideoPlayer, {
+        autoplay: autoPlay,
+        src: file.url,
+        onEnded: () => {
+          if (this.autoPlayNextVideo) {
+            this.showNextVideo();
+          }
+        },
       });
+      ReactDOM.render(Player, $player);
+
+      const video = $player.querySelector('.video-player__video') as HTMLElement;
+      video.focus();
 
       this.modal = new Modal(this.$modal);
       this.modal.show(left, top, width, height, () => {
-        this.player.setPlaying(false);
-        this.player = null;
-
+        ReactDOM.unmountComponentAtNode($player);
         onModalHide();
       });
     } else if (file.type === 'coub') {

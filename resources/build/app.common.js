@@ -23,6 +23,8 @@ module.exports = {
     'axios': 'axios',
     'luxon': 'luxon',
     'katex': 'katex',
+    'react': 'React',
+    'react-dom': 'ReactDOM',
     'vue': 'Vue',
   },
   resolve: {
