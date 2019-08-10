@@ -2,7 +2,7 @@
 
 <section id="reply_{{ post.id }}"
   class="post {{ post.parent_id == 0 ? 'content__oppost post_oppost oppost' : 'content__post post_reply reply' }}"
-  data-post-id="{{ post.id }}">
+  data-post-id="{{ post.id }}" data-ip-hash="{{ post.ip_hash }}">
   <div class="post__inner">
     {% include 'components/_post_header_mobile.twig' with {'class': 'post__header-mobile'} %}
     {% include 'components/_post_header.twig' with {'class': 'post__header'} %}

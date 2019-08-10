@@ -76,6 +76,14 @@ export class PostView implements View {
       $element.classList.add('post--own');
     }
 
+    const $delete = DOM.qs('.post-header__delete', $element);
+    if ($delete) {
+      const ipHash = $element.getAttribute('data-ip-hash');
+      if (ipHash !== window.ipHash && window.userRole < 2) {
+        $delete.classList.add('hidden');
+      }
+    }
+
     eventBus.on(Events.PostDeleted, async id => {
       if (+id === +this.model.id) {
         try {
