@@ -411,7 +411,6 @@ export class ThreadPage extends BasePage {
       this.$updaterWS.classList.add('hidden');
     }
 
-    this.updaterModel.on('new-posts-loaded', this.onNewPostsLoaded.bind(this));
     eventBus.on(Events.PostCreated, this.updaterModel.getNewPosts.bind(this.updaterModel));
   }
 
@@ -461,7 +460,7 @@ export class ThreadPage extends BasePage {
     }
 
     this.socket = new WebSocket(window.websocketUrl);
-    this.socket.addEventListener('open', e => {
+    this.socket.addEventListener('open', async e => {
       const board = window.board;
       const threadId = this.threadId;
       const channel = `${board}:thread:${threadId}`;
@@ -482,6 +481,17 @@ export class ThreadPage extends BasePage {
       }
 
       this.checkLatensy();
+
+      // Load missed posts throught the API.
+      try {
+        await this.updaterModel.getNewPosts();
+      } catch (e) {
+        console.error(e);
+
+        if (this.$status) {
+          this.$status.textContent = `Error: ${e.message}`;
+        }
+      }
     });
 
     this.socket.addEventListener('message', e => {
@@ -558,6 +568,8 @@ export class ThreadPage extends BasePage {
   }
 
   protected bindModel() {
+    this.updaterModel.on('new-posts-loaded', this.onNewPostsLoaded.bind(this));
+
     if (window.websocketUrl && window.websocketUrl.length
       && !Settings.get('post.disable-web-sockets')
       && this.checkWebSocketSupport()) {
