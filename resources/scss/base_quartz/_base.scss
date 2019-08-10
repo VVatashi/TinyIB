@@ -73,3 +73,20 @@ ul, ol {
 
   pointer-events: none;
 }
+
+a[data-has-popup] {
+  outline: 1px dotted;
+}
+
+a.backlink {
+  font-weight: 700;
+}
+
+.video-player {
+  width: 100%;
+  height: 100%;
+}
+
+#player {
+  line-height: 0;
+}
