@@ -758,7 +758,12 @@ export class Post {
       const $player = DOM.qs('#player', this.$modal);
       const Player = React.createElement(VideoPlayer, {
         autoplay: autoPlay,
+        loop: true,
         src: file.url,
+        defaultVolume: +LocalStorage.get('player.volume', 1),
+        onVolumeChanged: (volume: number) => {
+          LocalStorage.set('player.volume', volume);
+        },
         onEnded: () => {
           if (this.autoPlayNextVideo) {
             this.showNextVideo();
@@ -767,7 +772,7 @@ export class Post {
       });
       ReactDOM.render(Player, $player);
 
-      const video = $player.querySelector('.video-player__video') as HTMLElement;
+      const video = $player.querySelector('.video-player') as HTMLElement;
       video.focus();
 
       this.modal = new Modal(this.$modal);
