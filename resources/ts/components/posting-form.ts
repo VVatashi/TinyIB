@@ -477,7 +477,7 @@ export class PostingForm {
           const message = this.fields.message as string;
           const before = message.substring(0, selection.begin);
           const after = message.substring(selection.end);
-          const quoteText = window.getSelection().toString().replace(/^/gm, '> ');
+          const quoteText = window.getSelection().toString().replace(/^(.+)$/gm, '> $1');
           const newLineBefore = before.length && !before.endsWith('\n') ? '\n' : '';
           const newLineAfter = (!after.length || !after.startsWith('\n')) && quoteText.length ? '\n' : '';
           const quote = `${newLineBefore}${quoteText}${newLineAfter}`;
@@ -600,7 +600,7 @@ export class PostingForm {
         const newLineBefore = before.length && !before.endsWith('\n') ? '\n' : '';
         const newLineAfter = !after.length || !after.startsWith('\n') ? '\n' : '';
         const id = target.getAttribute('data-reflink');
-        const quoteText = window.getSelection().toString().replace(/^/gm, '> ');
+        const quoteText = window.getSelection().toString().replace(/^(.+)$/gm, '> $1');
         const lastQuoteIndex = message.lastIndexOf('>>', selection.begin);
         const quoteSamePost = lastQuoteIndex !== -1
           && message.lastIndexOf(`>>${id}`, selection.begin) >= lastQuoteIndex;

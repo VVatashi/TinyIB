@@ -215,6 +215,24 @@ export class Modal {
         }
       }
 
+      const volume = document.querySelector('.video-player__volume-bar');
+      if (volume) {
+        if (width < 400) {
+          volume.classList.add('hidden');
+        } else {
+          volume.classList.remove('hidden');
+        }
+      }
+
+      const time = document.querySelector('.video-player__time');
+      if (time) {
+        if (width < 500) {
+          time.classList.add('hidden');
+        } else {
+          time.classList.remove('hidden');
+        }
+      }
+
       return false;
     });
   }
@@ -248,6 +266,16 @@ export class Modal {
     const controls = document.querySelector('.video-player__controls');
     if (controls && width < 200) {
       controls.classList.add('hidden');
+    }
+
+    const volume = document.querySelector('.video-player__volume-bar');
+    if (volume && width < 400) {
+      volume.classList.add('hidden');
+    }
+
+    const time = document.querySelector('.video-player__time');
+    if (time && width < 500) {
+      time.classList.add('hidden');
     }
 
     this._isOpen = true;
