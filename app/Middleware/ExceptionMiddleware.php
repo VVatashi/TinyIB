@@ -5,6 +5,7 @@ namespace Imageboard\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Imageboard\Exceptions\HttpException;
 use Imageboard\Functions;
+use Imageboard\Services\ConfigService;
 use Imageboard\Services\RendererService;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Http\Server\{RequestHandlerInterface, MiddlewareInterface};
@@ -42,12 +43,14 @@ class ExceptionMiddleware implements MiddlewareInterface
 		catch (HttpException $exception) {
 			$code = $exception->getHTTPStatusCode();
 			$message = Functions::formatException($exception);
-			$this->logger->critical($message);
+      $this->logger->critical($message);
 
 			if ($code < 500) {
 				// Hide exception details in the response, if it is not a server fault.
 				$message = $exception->getMessage();
-			}
+			} elseif (ConfigService::getInstance()->get('MODE', 'production') === 'production') {
+        $message = 'An error occurred. Contact the administrator.';
+      }
 
 			if ($request->getHeaderLine('Accept') === 'application/json') {
 				$content = json_encode(['error' => $message]);
@@ -60,6 +63,10 @@ class ExceptionMiddleware implements MiddlewareInterface
 		catch (\Exception $exception) {
 			$message = Functions::formatException($exception);
 			$this->logger->critical($message);
+
+      if (ConfigService::getInstance()->get('MODE', 'production') === 'production') {
+        $message = 'An error occurred. Contact the administrator.';
+      }
 
 			if ($request->getHeaderLine('Accept') === 'application/json') {
 				$content = json_encode(['error' => $message]);

@@ -113,6 +113,10 @@ class App
         $logger->critical($message);
       }
 
+      if (ConfigService::getInstance()->get('MODE', 'production') === 'production') {
+        $message = 'An error occurred. Contact the administrator.';
+      }
+
       $html = <<<EOF
 <!DOCTYPE html>
 <html lang="en">
