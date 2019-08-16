@@ -32,6 +32,7 @@ use Imageboard\Services\Booru\{
 use Imageboard\Services\Cache\NoCache;
 use Imageboard\Services\Notification\StubNotificationService;
 use Imageboard\Tests\Functional\TestWithUsers;
+use Monolog\Logger;
 
 final class PostControllerTest extends TestWithUsers
 {
@@ -56,6 +57,7 @@ final class PostControllerTest extends TestWithUsers
     $builder->delete($posts)->execute();
 
     $cache = new NoCache();
+    $logger = new Logger('App');
 
     $ban_repository = new BanRepository($config, $database);
     $refmap_repository = new RefMapRepository($database);
@@ -77,6 +79,7 @@ final class PostControllerTest extends TestWithUsers
     $post_service = new PostService(
       $config,
       $cache,
+      $logger,
       $ban_repository,
       $refmap_repository,
       $this->post_repository,

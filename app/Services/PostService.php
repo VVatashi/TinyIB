@@ -6,13 +6,13 @@ use Imageboard\Exceptions\{
   NotFoundException,
   ValidationException
 };
+use Imageboard\Functions;
 use Imageboard\Models\{Ban, Post, RefMap};
 use Imageboard\Repositories\{
   BanRepository,
   PostRepository,
   RefMapRepository
 };
-use Predis\Client as Redis;
 use Imageboard\Services\Booru\{
   SafebooruService,
   E621Service,
@@ -22,6 +22,8 @@ use Imageboard\Services\Booru\{
 };
 use Imageboard\Services\Cache\CacheInterface;
 use Imageboard\Services\Notification\NotificationService;
+use Predis\Client as Redis;
+use Psr\Log\LoggerInterface;
 
 class PostService
 {
@@ -30,6 +32,9 @@ class PostService
 
   /** @var CacheInterface */
   protected $cache;
+
+  /** @var LoggerInterface */
+  protected $logger;
 
   /** @var BanRepository */
   protected $ban_repository;
@@ -78,6 +83,7 @@ class PostService
    *
    * @param ConfigService       $config
    * @param CacheInterface      $cache
+   * @param LoggerInterface     $logger
    * @param BanRepository       $ban_repository
    * @param RefMapRepository    $refmap_repository
    * @param PostRepository      $post_repository
@@ -97,6 +103,7 @@ class PostService
   function __construct(
     ConfigService       $config,
     CacheInterface      $cache,
+    LoggerInterface     $logger,
     BanRepository       $ban_repository,
     RefMapRepository    $refmap_repository,
     PostRepository      $post_repository,
@@ -114,6 +121,7 @@ class PostService
   ) {
     $this->config            = $config;
     $this->cache             = $cache;
+    $this->logger            = $logger;
     $this->ban_repository    = $ban_repository;
     $this->refmap_repository = $refmap_repository;
     $this->post_repository   = $post_repository;
@@ -770,7 +778,13 @@ class PostService
       $message = "{$post->name}!{$post->tripcode} $date\r\n$message";
       $title = "New reply in $basePath/{$post->parent_id}";
       $url = "$protocol://$hostname$basePath/res/{$post->parent_id}#reply_{$post->id}";
-      $this->notification->sendNotification($user_ids, $title, $message, $url);
+
+      try {
+        $this->notification->sendNotification($user_ids, $title, $message, $url);
+      } catch (\Exception $exception) {
+        $message = Functions::formatException($exception);
+        $this->logger->error($message);
+      }
     }
 
     return $post;

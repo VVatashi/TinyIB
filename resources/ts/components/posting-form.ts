@@ -477,9 +477,10 @@ export class PostingForm {
           const message = this.fields.message as string;
           const before = message.substring(0, selection.begin);
           const after = message.substring(selection.end);
-          const quoteText = window.getSelection().toString().replace(/^(.+)$/gm, '> $1');
+          const selectionText = window.getSelection().toString();
+          const quoteText = selectionText.length ? selectionText.replace(/^(.+)$/gm, '> $1') : '> ';
           const newLineBefore = before.length && !before.endsWith('\n') ? '\n' : '';
-          const newLineAfter = (!after.length || !after.startsWith('\n')) && quoteText.length ? '\n' : '';
+          const newLineAfter = (!after.length || !after.startsWith('\n')) && quoteText.length > 2 ? '\n' : '';
           const quote = `${newLineBefore}${quoteText}${newLineAfter}`;
 
           const scroll = messageEl.scrollTop;
