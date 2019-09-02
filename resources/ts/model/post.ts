@@ -3,6 +3,8 @@ import { LocalStorage, API } from '../services';
 import { Time } from '../utils';
 
 export class Post {
+  deleted: boolean;
+
   constructor(
     readonly id: number,
     readonly createdAt: number,
@@ -14,6 +16,7 @@ export class Post {
     readonly fileWidth: number,
     readonly fileHeight: number,
     readonly referencedIds: number[],
+    readonly ipHash: string,
   ) { }
 
   protected _formattedTime: string = null;
@@ -41,8 +44,10 @@ export class Post {
     return this._isOwn = authorName.length && postAuthorName.indexOf(authorName) === 0;
   }
 
-  delete() {
-    return API.deletePost(this.id);
+  async delete() {
+    const result = await API.deletePost(this.id);
+    this.deleted = true;
+    return result;
   }
 
   voteUp() {

@@ -105,7 +105,7 @@
 
     <div class="settings-form__row">
       {{ self.radio('Custom'
-          ~ ' <input type="file" data-key="post.unread-posts-notify-custom" />',
+          ~ ' <label data-key="post.unread-posts-notify-custom"><span class="filename button"></span> <input type="file" hidden /></label>',
           'post.unread-posts-notify-type', 'custom') }}
     </div>
 
@@ -142,7 +142,7 @@
 
     <div class="settings-form__row">
       {{ self.radio('Custom'
-          ~ ' <input type="file" data-key="post.unread-replies-notify-custom" />',
+          ~ ' <label data-key="post.unread-replies-notify-custom"><span class="filename button"></span> <input type="file" hidden /></label>',
           'post.unread-replies-notify-type', 'custom') }}
     </div>
 
@@ -214,10 +214,6 @@
   </div>
 
   <div class="settings-form__tab-content" data-tab-content="form">
-    <div class="settings-form__row">
-      {{ self.checkbox('Scroll to the bottom after posting', 'form.scroll-bottom') }}
-    </div>
-
     <div class="settings-form__row">
       {{ self.checkbox('Save subject after posting', 'form.save-subject') }}
     </div>

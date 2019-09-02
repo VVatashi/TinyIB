@@ -67,7 +67,7 @@
     display: none;
   }
 
-  &__post-no {
+  .post:not(.post--deleted) &__post-no {
     color: #008700;
   }
 

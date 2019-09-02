@@ -132,6 +132,7 @@ EOF;
 
       $response = new Response(500, [], $html);
       $this->sendResponse($response);
+      exit;
     });
   }
 
@@ -291,8 +292,5 @@ EOF;
     while (!$stream->eof()) {
       echo $stream->read(1024 * 8);
     }
-
-    // End script execution.
-    exit;
   }
 }

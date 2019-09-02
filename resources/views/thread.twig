@@ -10,7 +10,6 @@
   <main class="{{class is defined ? class ~ ' '}}">
     <article class="thread">
       {% for post in posts %}
-        {% set postNo = loop.index %}
         {% include 'components/_post.twig' %}
       {% endfor %}
     </article>

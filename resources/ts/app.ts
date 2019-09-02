@@ -17,10 +17,20 @@ declare global {
     userRole: number;
     ipHash: string;
     app: App;
+    hasWebpSupport: boolean;
     WebSocket?: any;
     OneSignal?: any;
   }
 }
+
+// Detect WEBP support.
+window.hasWebpSupport = false;
+try {
+  const image = new Image();
+  image.addEventListener('load', () => window.hasWebpSupport = image.width === 1);
+  image.addEventListener('error', () => window.hasWebpSupport = false);
+  image.src = 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=';
+} catch { }
 
 new Post();
 new PostingForm();

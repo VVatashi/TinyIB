@@ -557,7 +557,7 @@ export class PostingForm {
             }
           }
 
-          if (Settings.get('form.scroll-bottom')) {
+          if (Settings.get('post.scroll-to-new-posts')) {
             // Scroll to the last post.
             setTimeout(() => {
               const el = DOM.qs('.post:nth-last-of-type(1)');
