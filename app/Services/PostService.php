@@ -482,10 +482,6 @@ class PostService
     $post->setIp($ip);
     $post->setUserId($user_id);
 
-    $now = time();
-    $post->setCreatedAt($now);
-    $post->setUpdatedAt($now);
-
     $nameAndTripcode = $this->processName($name);
     $post->setName($this->cleanString(substr($nameAndTripcode['name'], 0, 75)));
     $post->setTripcode($nameAndTripcode['tripcode']);
@@ -667,6 +663,9 @@ class PostService
       }
     }
 
+    $now = time();
+    $post->setCreatedAt($now);
+    $post->setUpdatedAt($now);
     $post->setBumpedAt($now);
     $this->post_repository->add($post);
 
@@ -678,14 +677,8 @@ class PostService
       ]));
     }
 
-    $this->trimThreads();
-
-    $board = $this->config->get("BOARD");
-
+    // Bump thread.
     if ($post->isReply()) {
-      $parent = $post->parent_id;
-      $this->cache->deletePattern($board . ":thread:$parent:*");
-
       if (strtolower($post->email) !== 'sage') {
         $max_replies = $this->config->get("MAXREPLIES");
         if (
@@ -694,98 +687,114 @@ class PostService
         ) {
           $thread = $this->post_repository->getById($parent);
           if (isset($thread)) {
-            $thread->setBumpedAt($now);
+            $thread->setBumpedAt($post->created_at);
             $this->post_repository->update($thread);
           }
         }
       }
-    } else {
-      $id = $post->id;
-      $this->cache->deletePattern($board . ":thread:$id:*");
     }
 
-    $this->cache->deletePattern($board . ':page:*');
+    // Do stuff after response is sent to speed things up.
+    register_shutdown_function(function () use ($post, $refs) {
+      // Check threads limit.
+      // TODO: move it to the cron or something.
+      if ($post->isThread()) {
+        $this->trimThreads();
+      }
 
-    $redis_host = $this->config->get('REDIS_HOST', '');
-    if (!empty($redis_host)) {
+      // Invalidate cache.
+      $board = $this->config->get("BOARD");
+      $parent = $post->parent_id;
+      if ($post->isReply()) {
+        $this->cache->deletePattern($board . ":thread:$parent:*");
+      } else {
+        $id = $post->id;
+        $this->cache->deletePattern($board . ":thread:$id:*");
+      }
+      $this->cache->deletePattern($board . ':page:*');
+
+
       // Send post to the redis queue.
-      $board = $this->config->get('BOARD');
-      $channel = "$board:thread:$parent";
-      $data = [
-        'id'             => $post->id,
-        'created_at'     => $post->created_at,
-        'updated_at'     => $post->updated_at,
-        'parent_id'      => $post->parent_id,
-        'bumped_at'      => $post->bumped_at,
-        'ip'             => $post->ip,
-        'ip_hash'        => base64_encode(md5($post->ip, true)),
-        'name'           => $post->name,
-        'tripcode'       => $post->tripcode,
-        'subject'        => $post->subject,
-        'message'        => $post->getMessageFormatted(),
-        'message_raw'    => $post->message_raw,
-        'message_tree'   => $post->getMessageTree(),
-        'refs_from'      => [],
-        'refs_to'        => [],
-        'file'           => $post->file,
-        'file_hex'       => $post->file_hex,
-        'file_original'  => $post->file_original,
-        'file_type'      => $post->getFileType(),
-        'file_size'      => $post->file_size,
-        'file_size_text' => $post->getFileSizeFormatted(),
-        'file_extension' => $post->getFileExtension(),
-        'image_width'    => $post->image_width,
-        'image_height'   => $post->image_height,
-        'thumb'          => $post->thumb,
-        'thumb_width'    => $post->thumb_width,
-        'thumb_height'   => $post->thumb_height,
-        'score'          => (int) $post->score,
-      ];
+      $redis_host = $this->config->get('REDIS_HOST', '');
+      if (!empty($redis_host)) {
+        $board = $this->config->get('BOARD');
+        $channel = "$board:thread:$parent";
+        $data = [
+          'id'             => $post->id,
+          'created_at'     => $post->created_at,
+          'updated_at'     => $post->updated_at,
+          'parent_id'      => $post->parent_id,
+          'bumped_at'      => $post->bumped_at,
+          'ip'             => $post->ip,
+          'ip_hash'        => base64_encode(md5($post->ip, true)),
+          'name'           => $post->name,
+          'tripcode'       => $post->tripcode,
+          'subject'        => $post->subject,
+          'message'        => $post->getMessageFormatted(),
+          'message_raw'    => $post->message_raw,
+          'message_tree'   => $post->getMessageTree(),
+          'refs_from'      => [],
+          'refs_to'        => [],
+          'file'           => $post->file,
+          'file_hex'       => $post->file_hex,
+          'file_original'  => $post->file_original,
+          'file_type'      => $post->getFileType(),
+          'file_size'      => $post->file_size,
+          'file_size_text' => $post->getFileSizeFormatted(),
+          'file_extension' => $post->getFileExtension(),
+          'image_width'    => $post->image_width,
+          'image_height'   => $post->image_height,
+          'thumb'          => $post->thumb,
+          'thumb_width'    => $post->thumb_width,
+          'thumb_height'   => $post->thumb_height,
+          'score'          => (int) $post->score,
+        ];
 
-      $data['html'] = $this->renderer->render('ajax/post.twig', [
-        'post' => $data,
-        'res'  => RESPAGE,
-      ]);
+        $data['html'] = $this->renderer->render('ajax/post.twig', [
+          'post' => $data,
+          'res'  => RESPAGE,
+        ]);
 
-      $message = json_encode([
-        'type' => 'add_post',
-        'data' => $data,
-      ]);
+        $message = json_encode([
+          'type' => 'add_post',
+          'data' => $data,
+        ]);
 
-      $redis = new Redis($redis_host);
-      $redis->publish($channel, $message);
-      $redis->quit();
-    }
-
-    // Send desktop notifications.
-    if (!empty($refs)) {
-      $posts = $this->post_repository->getMany($refs);
-      $user_ids = array_filter(array_map(function (Post $post) {
-        return $post->user_id;
-      }, $posts));
-
-      $protocol = $_SERVER['REQUEST_SCHEME'] ?? 'https';
-      $hostname = $_SERVER['HTTP_HOST'] ?? 'localhost';
-      $basePath = $this->config->get('BASE_PATH', '/');
-
-      $name = $post->name . $post->tripcode;
-      if (empty($name)) {
-        $name = 'Anonymous';
+        $redis = new Redis($redis_host);
+        $redis->publish($channel, $message);
+        $redis->quit();
       }
 
-      $date = date('Y-m-d H:i:s', $post->created_at);
-      $message = preg_replace('/\[[^[]+\]/', '', $post->message_raw);
-      $message = "{$post->name}!{$post->tripcode} $date\r\n$message";
-      $title = "New reply in $basePath/{$post->parent_id}";
-      $url = "$protocol://$hostname$basePath/res/{$post->parent_id}#reply_{$post->id}";
+      // Send desktop notifications.
+      if (!empty($refs)) {
+        $posts = $this->post_repository->getMany($refs);
+        $user_ids = array_filter(array_map(function (Post $post) {
+          return $post->user_id;
+        }, $posts));
 
-      try {
-        $this->notification->sendNotification($user_ids, $title, $message, $url);
-      } catch (\Exception $exception) {
-        $message = Functions::formatException($exception);
-        $this->logger->error($message);
+        $protocol = $_SERVER['REQUEST_SCHEME'] ?? 'https';
+        $hostname = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $basePath = $this->config->get('BASE_PATH', '/');
+
+        $name = $post->name . $post->tripcode;
+        if (empty($name)) {
+          $name = 'Anonymous';
+        }
+
+        $date = date('Y-m-d H:i:s', $post->created_at);
+        $message = preg_replace('/\[[^[]+\]/', '', $post->message_raw);
+        $message = "{$post->name}!{$post->tripcode} $date\r\n$message";
+        $title = "New reply in $basePath/{$post->parent_id}";
+        $url = "$protocol://$hostname$basePath/res/{$post->parent_id}#reply_{$post->id}";
+
+        try {
+          $this->notification->sendNotification($user_ids, $title, $message, $url);
+        } catch (\Exception $exception) {
+          $message = Functions::formatException($exception);
+          $this->logger->error($message);
+        }
       }
-    }
+    });
 
     return $post;
   }
