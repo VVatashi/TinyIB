@@ -38,7 +38,6 @@ const defaultSettings: SettingsData = {
   'link.add-names-to-links': true,
   'link.add-you-to-links': true,
   'link.show-post-popups': true,
-  'form.scroll-bottom': true,
   'form.save-subject': false,
   'form.save-name': true,
   'form.show-markup': true,

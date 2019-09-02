@@ -130,34 +130,50 @@ export class SettingsView implements View {
       }, 1000);
     }
 
-    const $postsCustomNotify = DOM.qs('[data-key="post.unread-posts-notify-custom"]') as HTMLInputElement;
+    const $postsCustomNotify = DOM.qs('[data-key="post.unread-posts-notify-custom"]');
     if ($postsCustomNotify) {
-      $postsCustomNotify.addEventListener('change', e => {
-        if ($postsCustomNotify.files.length === 0) {
+      const name = Settings.get<string>('post.unread-posts-notify-custom-name');
+      const $filename = DOM.qs('.filename', $postsCustomNotify);
+      $filename.textContent = name ? name : 'Click to select...';
+
+      const $input = DOM.qs('input', $postsCustomNotify) as HTMLInputElement;
+      $input.addEventListener('change', e => {
+        if ($input.files.length === 0) {
           return;
         }
 
-        const file = $postsCustomNotify.files[0];
+        const file = $input.files[0];
+        $filename.textContent = file.name;
+
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.addEventListener('load', e => {
           Settings.set('post.unread-posts-notify-custom', reader.result);
+          Settings.set('post.unread-posts-notify-custom-name', file.name);
         });
       });
     }
 
-    const $repliesCustomNotify = DOM.qs('[data-key="post.unread-replies-notify-custom"]') as HTMLInputElement;
+    const $repliesCustomNotify = DOM.qs('[data-key="post.unread-replies-notify-custom"]');
     if ($repliesCustomNotify) {
-      $repliesCustomNotify.addEventListener('change', e => {
-        if ($repliesCustomNotify.files.length === 0) {
+      const name = Settings.get<string>('post.unread-replies-notify-custom-name');
+      const $filename = DOM.qs('.filename', $repliesCustomNotify);
+      $filename.textContent = name ? name : 'Click to select...';
+
+      const $input = DOM.qs('input', $repliesCustomNotify) as HTMLInputElement;
+      $input.addEventListener('change', e => {
+        if ($input.files.length === 0) {
           return;
         }
 
-        const file = $repliesCustomNotify.files[0];
+        const file = $input.files[0];
+        $filename.textContent = file.name;
+
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.addEventListener('load', e => {
           Settings.set('post.unread-replies-notify-custom', reader.result);
+          Settings.set('post.unread-replies-notify-custom-name', file.name);
         });
       });
     }

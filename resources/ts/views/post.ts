@@ -40,6 +40,8 @@ export class PostView implements View {
       return +$reference.getAttribute('data-target-post-id');
     });
 
+    const ipHash = $element.getAttribute('data-ip-hash');
+
     this.model = new Post(
       id,
       createdAt,
@@ -51,6 +53,7 @@ export class PostView implements View {
       fileWidth,
       fileHeight,
       referencedIds,
+      ipHash,
     );
 
     if ($dateTime) {
@@ -88,7 +91,7 @@ export class PostView implements View {
       if (+id === +this.model.id) {
         try {
           await this.model.delete();
-          this.$element.style.display = 'none';
+          this.$element.classList.add('post--deleted');
         } catch (e) {
           console.error(e);
         }

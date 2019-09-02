@@ -37,6 +37,9 @@ export class Thread extends EventEmitter {
     this.posts.push(...posts);
 
     if (unread) {
+      // Remove user own posts.
+      posts = posts.filter(post => post.ipHash !== window.ipHash);
+
       this.unreadPosts += posts.length;
 
       if (!this._hasReplies) {

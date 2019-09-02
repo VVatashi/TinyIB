@@ -275,10 +275,15 @@ export class Post {
           return;
         }
 
-        e.preventDefault();
-
         const $link = (e.target.tagName === 'A' ? e.target : e.target.parentElement) as HTMLAnchorElement;
         const link = $link.getAttribute('href');
+
+        if (link.endsWith('.webp') && !window.hasWebpSupport) {
+          return;
+        }
+
+        e.preventDefault();
+
         if (this.modalFileIndex !== null && this.media[this.modalFileIndex].url === link) {
           this.closeModals();
         } else if (expandMode === 'post') {
@@ -587,7 +592,13 @@ export class Post {
               throw new Error(response.statusText);
             }
 
-            const url = `https://www.youtube.com/watch?v=${id}`;
+            const timeMatch = url.match(/(?:\?|\&)t=([1-9][0-9]*)/);
+            const time = timeMatch ? +timeMatch[1] : 0;
+
+            const videoURL = time
+              ? `https://www.youtube.com/watch?v=${id}&t=${time}`
+              : `https://www.youtube.com/watch?v=${id}`;
+
             const embedInfo = await response.json();
             const thumbnailUrl = embedInfo.thumbnail_url;
             const $thumbnail = document.createElement('div');
@@ -595,14 +606,14 @@ export class Post {
             $thumbnail.setAttribute('data-hash', id);
             $thumbnail.innerHTML = `
 <div class="post__file-info file-info">
-  <a class="file-info__link" href="${url}" target="_blank">YouTube</a>
+  <a class="file-info__link" href="${videoURL}" target="_blank">YouTube</a>
   <span class="file-info__size"></span>
 </div>
 
 <span class="file__hide fas fa-window-close" title="Hide preview"></span>
 <span class="file__show far fa-plus-square hidden" title="Show hidden preview"></span>
 
-<a class="file__thumbnail thumbnail thumbnail--embed" href="${url}" target="_blank">
+<a class="file__thumbnail thumbnail thumbnail--embed" href="${videoURL}" target="_blank">
   <img class="thumbnail__content thumbnail__content--embed"
     style="max-width: 250px; max-height: 250px;"
     src="${thumbnailUrl}" />
@@ -621,16 +632,16 @@ export class Post {
 
             const postId = +$post.getAttribute('data-post-id');
             const html = embedInfo.html
-              .replace(/src="([^"]+)"/i, 'src="$1&autoplay=0"')
+              .replace(/src="([^"]+)"/i, `src="$1&autoplay=0&start=${time}"`)
               .replace(/width="\d+"/i, 'width="100%"')
               .replace(/height="\d+"/i, 'height="100%"');
-            if (!this.media.find(file => file.postId === postId && file.url === url)) {
+            if (!this.media.find(file => file.postId === postId && file.url === videoURL)) {
               this.media.push({
                 $post,
                 $link: DOM.qs('.thumbnail', $thumbnail) as HTMLAnchorElement,
                 postId,
                 type: 'youtube',
-                url,
+                url: videoURL,
                 width: embedInfo.thumbnail_width,
                 height: embedInfo.thumbnail_height,
                 data: html,
@@ -826,7 +837,8 @@ export class Post {
     const $parentPost = $link.closest('.post');
     const parentPostId = +$parentPost.getAttribute('data-post-id');
 
-    let $postContent = DOM.qs(`#reply_${targetPostId} > .post__inner`);
+    let $targetPost = DOM.qs(`#reply_${targetPostId}`);
+    let $postContent = DOM.qs('.post__inner', $targetPost);
     if (!$postContent) {
       // Try fetch post.
       const response = await fetch(`${window.baseUrl}/ajax/post/${targetPostId}`, {
@@ -838,19 +850,18 @@ export class Post {
       }
 
       const html = await response.text();
-      const $post = document.createElement('div');
-      $post.classList.add('hidden');
-      $post.insertAdjacentHTML('beforeend', html);
+      $targetPost = document.createElement('div');
+      $targetPost.classList.add('hidden');
+      $targetPost.insertAdjacentHTML('beforeend', html);
 
-      this.$layout.appendChild($post);
+      this.$layout.appendChild($targetPost);
 
-      $postContent = DOM.qs('.post__inner', $post);
+      $postContent = DOM.qs('.post__inner', $targetPost);
     }
 
     let parentId: number = null;
-    const $targetPost = $link.closest('.post');
-    if ($targetPost.hasAttribute('data-popup-id')) {
-      parentId = +$targetPost.getAttribute('data-popup-id');
+    if ($parentPost.hasAttribute('data-popup-id')) {
+      parentId = +$parentPost.getAttribute('data-popup-id');
     }
 
     const isAlreadyOpen = Object.keys(this.popups)
@@ -868,6 +879,10 @@ export class Post {
     $popup.classList.add('post', 'post_reply', 'post--popup', 'fade', 'faded');
     $popup.style.position = 'absolute';
     $popup.style.maxWidth = '60%';
+
+    if ($targetPost.classList.contains('post--deleted')) {
+      $popup.classList.add('post--deleted');
+    }
 
     const $postContentCopy = $postContent.cloneNode(true);
     $popup.appendChild($postContentCopy);

@@ -97,6 +97,10 @@ export class ToolsView implements View {
       const $body = document.createElement('div');
       $body.classList.add('popup__body');
       $body.innerHTML = await API.getSettingsHtml();
+      if (!this.$settingsPopup) {
+        return;
+      }
+
       this.$settingsPopup.appendChild($body);
 
       document.body.appendChild(this.$settingsPopup);
@@ -107,11 +111,15 @@ export class ToolsView implements View {
     });
 
     this.model.on('settings-closed', () => {
-      this.settingsView.detach();
-      this.settingsView = null;
+      if (this.settingsView) {
+        this.settingsView.detach();
+        this.settingsView = null;
+      }
 
-      this.$settingsPopup.remove();
-      this.$settingsPopup = null;
+      if (this.$settingsPopup) {
+        this.$settingsPopup.remove();
+        this.$settingsPopup = null;
+      }
 
       $toggleSettings.classList.remove(btnActiveClass);
     });

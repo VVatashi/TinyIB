@@ -109,6 +109,7 @@ export class ThreadPage extends BasePage {
     this.model = new Thread(threadId, posts);
     this.updaterModel = new ThreadUpdater(this.model);
     this.bindModel();
+    this.updatePostCounter();
   }
 
   async updateCounter() {
@@ -191,6 +192,36 @@ export class ThreadPage extends BasePage {
     }
   }
 
+  protected updatePostCounter() {
+    let index = 1;
+    for (let i = 0; i < this.posts.length; ++i) {
+      const post = this.posts[i].model;
+      let text = '';
+      if (!post.deleted) {
+        text = `#${index}`;
+        index++;
+      } else {
+        text = 'deleted';
+      }
+
+      const $post = this.posts[i].$element;
+      let $postNo = DOM.qsa('.post-header__post-no', $post);
+      if ($postNo.length) {
+        $postNo.forEach($el => $el.textContent = text);
+      } else {
+        const $el = document.createElement('span');
+        $el.classList.add('post-header__post-no');
+        $el.textContent = text;
+
+        const $refWrapper = DOM.qs('.post-header__reflink-wrapper', $post);
+        $refWrapper.appendChild($el);
+
+        const $mobileRefWrapper = DOM.qs('.post-header-mobile__reflink-wrapper', $post);
+        $mobileRefWrapper.appendChild($el.cloneNode(true));
+      }
+    }
+  }
+
   protected processNewPosts($wrapper: Element) {
     const $posts = DOM.qsa('.post', $wrapper);
     const $newPosts = $posts
@@ -200,19 +231,6 @@ export class ThreadPage extends BasePage {
       });
 
     if ($newPosts.length) {
-      $newPosts.forEach(($post, index) => {
-        // Add post number in thread.
-        const $postNo = document.createElement('span');
-        $postNo.classList.add('post-header__post-no');
-        $postNo.textContent = `#${$posts.length - $newPosts.length + index + 1}`;
-
-        const $refWrapper = DOM.qs('.post-header__reflink-wrapper', $post);
-        $refWrapper.appendChild($postNo);
-
-        const $mobileRefWrapper = DOM.qs('.post-header-mobile__reflink-wrapper', $post);
-        $mobileRefWrapper.appendChild($postNo.cloneNode(true));
-      });
-
       const prevUnreadCount = this.model.unreadPosts;
 
       // Create view & model for each post.
@@ -261,6 +279,7 @@ export class ThreadPage extends BasePage {
         }
       }
 
+      this.updatePostCounter();
       eventBus.emit(Events.PostsInserted, $newPosts);
     }
   }
@@ -291,15 +310,16 @@ export class ThreadPage extends BasePage {
   }
 
   protected removePost(id: number) {
-    const $wrapper = DOM.qs('.post').parentElement;
-    if (!$wrapper) {
-      return;
+    const post = this.posts.find(post => post.model.id === id);
+    if (post) {
+      post.model.deleted = true;
+
+      if (post.$element) {
+        post.$element.classList.add('post--deleted');
+      }
     }
 
-    const $post = DOM.qs(`[data-post-id="${id}"]`, $wrapper);
-    if ($post) {
-      $post.remove();
-    }
+    this.updatePostCounter();
   }
 
   protected setPostScore(id: number, score: number) {
@@ -412,6 +432,9 @@ export class ThreadPage extends BasePage {
     }
 
     eventBus.on(Events.PostCreated, this.updaterModel.getNewPosts.bind(this.updaterModel));
+    eventBus.on(Events.PostDeleted, async id => {
+      this.updatePostCounter();
+    });
   }
 
   protected socket: WebSocket;
