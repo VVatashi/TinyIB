@@ -96,6 +96,16 @@ class App
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
 
+    // Init Sentry.
+    $sentry_dsn = ConfigService::getInstance()->get('SENTRY_DSN');
+    if (!empty($sentry_dsn)) {
+      $version = shell_exec('git log --pretty="%H" -n1 HEAD');
+      \Sentry\init([
+        'dsn' => $sentry_dsn,
+        'release' => $version,
+      ]);
+    }
+
     // Treat errors as exceptions.
     set_error_handler(function ($code, $message, $file, $line) {
       throw new \ErrorException($message, 0, $code, $file, $line);
@@ -132,7 +142,6 @@ EOF;
 
       $response = new Response(500, [], $html);
       $this->sendResponse($response);
-      exit;
     });
   }
 
