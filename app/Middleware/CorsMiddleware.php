@@ -105,7 +105,9 @@ class CorsMiddleware implements MiddlewareInterface
             $response = $response->withHeader('Access-Control-Allow-Headers', $this->allow_headers);
         } else {
             $response = $handler->handle($request);
-            $response = $response->withHeader('Access-Control-Expose-Headers', $this->expose_headers);
+            if (!empty($this->expose_headers)) {
+              $response = $response->withHeader('Access-Control-Expose-Headers', $this->expose_headers);
+            }
         }
 
         if ($this->allow_credentials) {

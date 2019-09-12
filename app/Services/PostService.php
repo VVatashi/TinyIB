@@ -713,7 +713,6 @@ class PostService
       }
       $this->cache->deletePattern($board . ':page:*');
 
-
       // Send post to the redis queue.
       $redis_host = $this->config->get('REDIS_HOST', '');
       if (!empty($redis_host)) {
