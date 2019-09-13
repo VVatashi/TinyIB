@@ -4,6 +4,7 @@ namespace Imageboard\Middleware;
 
 use Imageboard\Repositories\UserRepository;
 use Imageboard\Services\{
+  ConfigService,
   RendererService,
   TokenService,
   UserService
@@ -60,10 +61,28 @@ class AuthMiddleware implements MiddlewareInterface
       }
     }
 
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+
+    $sentry_dsn = ConfigService::getInstance()->get('SENTRY_DSN');
+    if (!empty($sentry_dsn)) {
+      \Sentry\configureScope(function (\Sentry\State\Scope $scope) use ($ip, $user) {
+        $data = [
+          'ip_address' => $ip,
+        ];
+
+        if (!$user->isAnonymous()) {
+          $data['id'] = $user->id;
+          $data['email'] = $user->email;
+        }
+
+        $scope->setUser($data);
+      });
+    }
+
     // Store current user to a Twig global variable.
     $this->renderer->registerGlobal('user', $user);
-    $this->renderer->registerGlobal('ip', $_SERVER['REMOTE_ADDR'] ?? '');
-    $this->renderer->registerGlobal('ip_hash', base64_encode(md5($_SERVER['REMOTE_ADDR'] ?? '', true)));
+    $this->renderer->registerGlobal('ip', $ip);
+    $this->renderer->registerGlobal('ip_hash', base64_encode(md5($ip, true)));
 
     // Store current user to the request object.
     $request = $request->withAttribute('user', $user);
