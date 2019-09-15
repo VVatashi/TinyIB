@@ -5,7 +5,6 @@ namespace Imageboard\Tests\Functional\Controller;
 use GuzzleHttp\Psr7\ServerRequest;
 use Imageboard\Controllers\AuthController;
 use Imageboard\Services\{
-  CaptchaService,
   ConfigService,
   RendererService,
   SessionService
@@ -31,10 +30,8 @@ final class AuthControllerTest extends TestWithUsers
     $builder->delete('users')->execute();
 
     $config = new ConfigService();
-    $captcha = new CaptchaService($this->session);
     $renderer = new RendererService($config);
     $this->controller = new AuthController(
-      $captcha,
       $this->user_service,
       $this->session,
       $renderer,

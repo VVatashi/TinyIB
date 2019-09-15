@@ -6,7 +6,6 @@ use GuzzleHttp\Psr7\Response;
 use Imageboard\Exceptions\ValidationException;
 use Imageboard\Models\User;
 use Imageboard\Services\{
-  CaptchaService,
   ConfigService,
   RendererService,
   SessionService,
@@ -16,9 +15,6 @@ use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
 class AuthController implements ControllerInterface
 {
-  /** @var CaptchaService */
-  protected $captcha;
-
   /** @var UserService */
   protected $user_service;
 
@@ -34,20 +30,17 @@ class AuthController implements ControllerInterface
   /**
    * Creates a new AuthController instance.
    *
-   * @param CaptchaService  $captcha
    * @param UserService     $user_service
    * @param SessionService  $session
    * @param RendererService $renderer
    * @param ConfigService   $config
    */
   function __construct(
-    CaptchaService  $captcha,
     UserService     $user_service,
     SessionService  $session,
     RendererService $renderer,
     ConfigService   $config
   ) {
-    $this->captcha      = $captcha;
     $this->user_service = $user_service;
     $this->session      = $session;
     $this->renderer     = $renderer;
@@ -106,13 +99,6 @@ class AuthController implements ControllerInterface
 
     // Store form input to the session.
     $this->session->email = $email;
-
-    // Check captcha.
-    $captcha = isset($data['captcha']) ? $data['captcha'] : '';
-    if (!$this->captcha->checkCaptcha($captcha)) {
-      $this->session->error = 'Incorrect CAPTCHA';
-      return new Response(302, ['Location' => '/' . $this->config->get("BOARD") . '/auth/register']);
-    }
 
     try {
       $this->user_service->create($email, $password, 0);
@@ -178,13 +164,6 @@ class AuthController implements ControllerInterface
 
     // Store form input to the session.
     $this->session->email = $email;
-
-    // Check captcha.
-    $captcha = isset($data['captcha']) ? $data['captcha'] : '';
-    if (!$this->captcha->checkCaptcha($captcha)) {
-      $this->session->error = 'Incorrect CAPTCHA';
-      return new Response(302, ['Location' => '/' . $this->config->get("BOARD") . '/auth/login']);
-    }
 
     try {
       $this->user_service->login($email, $password);
