@@ -6,7 +6,6 @@ use GuzzleHttp\Psr7\Response;
 use Imageboard\Exceptions\{NotFoundException, ValidationException, AccessDeniedException};
 use Imageboard\Repositories\PostRepository;
 use Imageboard\Services\{
-  CaptchaService,
   ConfigService,
   PostService,
   RendererService
@@ -18,9 +17,6 @@ class PostController implements ControllerInterface
 {
   /** @var CacheInterface */
   protected $cache;
-
-  /** @var CaptchaService */
-  protected $captcha;
 
   /** @var PostRepository */
   protected $repository;
@@ -39,7 +35,6 @@ class PostController implements ControllerInterface
    *
    * @param ConfigService   $config
    * @param CacheInterface  $cache
-   * @param CaptchaService  $captcha
    * @param PostRepository  $repository
    * @param PostService     $service
    * @param RendererService $renderer
@@ -47,43 +42,17 @@ class PostController implements ControllerInterface
   function __construct(
     ConfigService   $config,
     CacheInterface  $cache,
-    CaptchaService  $captcha,
     PostRepository  $repository,
     PostService     $service,
     RendererService $renderer
   ) {
     $this->config     = $config;
     $this->cache      = $cache;
-    $this->captcha    = $captcha;
     $this->repository = $repository;
     $this->service    = $service;
     $this->renderer   = $renderer;
 
     $this->base_path = $this->config->get('BASE_PATH', '');
-  }
-
-  /**
-   * Checks captcha.
-   *
-   * @param string $captcha
-   *
-   * @return bool
-   */
-  protected function checkCAPTCHA(string $captcha): bool
-  {
-    $configCaptcha = $this->config->get("CAPTCHA", true);
-
-    if ($configCaptcha === true) {
-      return true;
-    }
-
-    switch ($this->config->get("CAPTCHA")) {
-      case 'simple':
-        return $this->captcha->checkCaptcha($captcha);
-
-      default:
-        return true;
-    }
   }
 
   /**
@@ -98,11 +67,6 @@ class PostController implements ControllerInterface
   function create(ServerRequestInterface $request): ResponseInterface
   {
     $data = $request->getParsedBody();
-    $captcha = isset($data['captcha']) ? $data['captcha'] : '';
-    if (!$this->checkCAPTCHA($captcha)) {
-      throw new ValidationException('Incorrect CAPTCHA');
-    }
-
     $name     = $data['name'] ?? '';
     $email    = $data['email'] ?? '';
     $subject  = $data['subject'] ?? '';

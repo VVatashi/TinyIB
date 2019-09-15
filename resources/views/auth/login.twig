@@ -36,13 +36,6 @@
         'label': 'Password', 'type': 'password', 'name': 'password', 'value': '', 'required': true,
       } %}
 
-      {% include 'components/form/_captcha.twig' with {
-        'class': ['auth-form__field'],
-        'label_class': ['auth-form__label'],
-        'input_class': ['auth-form__input'],
-        'label': 'CAPTCHA', 'name': 'captcha', 'value': '', 'required': true, 'action': 'login',
-      } %}
-
       <div class="auth-form__buttons">
         <button class="button auth-form__button" type="submit">Login</button>
       </div>

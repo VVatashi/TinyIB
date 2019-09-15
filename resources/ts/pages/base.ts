@@ -1,18 +1,15 @@
 import { Page } from '.';
 import { Settings } from '../services';
 import { DOM } from '../utils';
-import { CaptchaView, StyleSelectorView, ToolsView } from '../views';
+import { StyleSelectorView, ToolsView } from '../views';
 import { eventBus } from '../event-bus';
 import { Events } from '../events';
 
 export class BasePage implements Page {
   readonly style: StyleSelectorView;
-  readonly captha: CaptchaView;
   readonly tools: ToolsView;
 
   constructor() {
-    this.captha = new CaptchaView();
-
     const $style = DOM.qid('style-selector') as HTMLSelectElement;
     if ($style) {
       this.style = new StyleSelectorView($style);

@@ -20,7 +20,6 @@ use Imageboard\Controllers\Api\{
 };
 use Imageboard\Controllers\{
   AuthController as Auth,
-  CaptchaController as Captcha,
   PostController as Posts,
   SettingsController as Settings,
   SitemapController as Sitemap
@@ -148,7 +147,6 @@ class RoutingService implements RequestHandlerInterface
         $routes->addRoute('POST', '/post/create',     [Posts::class, 'ajaxCreatePost']);
       });
 
-      $routes->addRoute('GET', '/captcha',     [Captcha::class,  'captcha']);
       $routes->addRoute('GET', '/settings',    [Settings::class, 'settings']);
       $routes->addRoute('GET', '/sitemap.xml', [Sitemap::class,  'sitemap']);
 
