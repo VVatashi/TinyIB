@@ -882,8 +882,10 @@ export class Post {
     const parentPostId = +$parentPost.getAttribute('data-post-id');
 
     let $targetPost = DOM.qs(`#reply_${targetPostId}`);
-    let $postContent = DOM.qs('.post__inner', $targetPost);
-    if (!$postContent) {
+    let $postContent;
+    if ($targetPost) {
+      $postContent = DOM.qs('.post__inner', $targetPost);
+    } else {
       // Try fetch post.
       const response = await fetch(`${window.baseUrl}/ajax/post/${targetPostId}`, {
         credentials: 'same-origin',
