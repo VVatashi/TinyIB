@@ -880,7 +880,7 @@ export class Post {
     $popup.style.position = 'absolute';
     $popup.style.maxWidth = '60%';
 
-    if ($targetPost.classList.contains('post--deleted')) {
+    if ($targetPost && $targetPost.classList.contains('post--deleted')) {
       $popup.classList.add('post--deleted');
     }
 
