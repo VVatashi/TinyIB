@@ -86,7 +86,7 @@ class UserService
     $user->setEmail($email);
     $user->setRole($role);
 
-    if (!empty($password)) {
+    if (trim($password) !== "") {
       $user->setPassword($password);
     }
 

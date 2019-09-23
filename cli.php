@@ -40,7 +40,7 @@ $commands['serve'] = function (array $args) use ($color) {
   $config = new ConfigService();
   $host = $config->get('DEBUG_BASE_URL', 'localhost:8000');
 
-  print("{$color("red")}Development server started: {$color("white")}<http://$host/>\n");
+  print("{$color("red")}Development server started: {$color("white")}<http://$host />\n");
   print("{$color("default")}Press Ctrl+C to stop");
 
   shell_exec("php -S $host -t webroot/");
