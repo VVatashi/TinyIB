@@ -3,8 +3,9 @@ import ReactDOM from 'react-dom';
 import { Modal } from './modal';
 import { VideoPlayer } from '@vvatashi/video-player';
 import { eventBus, Events } from '..';
+import { HotKeys } from '../hotkeys';
 import { Coub, LocalStorage, Settings } from '../services';
-import { DOM, Keyboard } from '../utils';
+import { DOM } from '../utils';
 
 interface FileData {
   $post: HTMLElement;
@@ -171,29 +172,28 @@ export class Post {
         return;
       }
 
-      if (e.key === 'Escape' || Keyboard.checkKeyCode(e, 27)) {
+      const hotKeys = HotKeys.load();
+      if (HotKeys.check(hotKeys['closeMedia'], e)) {
         e.preventDefault();
         this.closeModals();
         return false;
-      } else if (this.modalFileIndex !== null
-        && (e.key === 'ArrowLeft' || Keyboard.checkKeyCode(e, 37)) && e.ctrlKey) {
+      } else if (this.modalFileIndex !== null && HotKeys.check(hotKeys['previousMedia'], e)) {
         e.preventDefault();
         this.showPrevMedia();
         return false;
-      } else if (this.modalFileIndex !== null
-        && (e.key === 'ArrowRight' || Keyboard.checkKeyCode(e, 39)) && e.ctrlKey) {
+      } else if (this.modalFileIndex !== null && HotKeys.check(hotKeys['nextMedia'], e)) {
         e.preventDefault();
         this.showNextMedia();
         return false;
-      } else if ((e.key === 'k' || Keyboard.checkKeyCode(e, 75)) && !e.ctrlKey) {
+      } else if (HotKeys.check(hotKeys['previousPost'], e)) {
         e.preventDefault();
         this.selectPrevPost();
         return false;
-      } else if ((e.key === 'j' || Keyboard.checkKeyCode(e, 74)) && !e.ctrlKey) {
+      } else if (HotKeys.check(hotKeys['nextPost'], e)) {
         e.preventDefault();
         this.selectNextPost();
         return false;
-      } else if ((e.key === 'r' || Keyboard.checkKeyCode(e, 82)) && !e.ctrlKey) {
+      } else if (HotKeys.check(hotKeys['reply'], e)) {
         e.preventDefault();
         const $post = this.getCurrentPost();
         if ($post) {
@@ -203,7 +203,7 @@ export class Post {
           }
         }
         return false;
-      } else if ((e.key === 'h' || Keyboard.checkKeyCode(e, 72)) && !e.ctrlKey) {
+      } else if (HotKeys.check(hotKeys['toggleHide'], e)) {
         e.preventDefault();
         const $post = this.getCurrentPost();
         if ($post) {
@@ -213,7 +213,51 @@ export class Post {
           }
         }
         return false;
-      } else if ((e.key === 's' || Keyboard.checkKeyCode(e, 83)) && !e.ctrlKey && e.altKey) {
+      } else if (HotKeys.check(hotKeys['toggleFile'], e)) {
+        e.preventDefault();
+
+        const $post = this.getCurrentPost();
+        if (!$post) {
+          return;
+        }
+
+        const $link = DOM.qs('.file__thumbnail', $post) as HTMLAnchorElement;
+        if (!$link) {
+          return;
+        }
+
+        const link = $link.getAttribute('href');
+        const expandMode = Settings.get<string>('image.expand-images');
+        if (expandMode === 'tab') {
+          window.open(link);
+          return;
+        }
+
+        if (this.modalFileIndex !== null && this.media[this.modalFileIndex].url === link) {
+          this.closeModals();
+        } else if (expandMode === 'post') {
+          const $close = DOM.qs('[data-close-original]', $post) as HTMLElement;
+          if ($close) {
+            $close.click();
+          } else {
+            const index = this.media.findIndex(file => file.url === link);
+            if (index !== -1) {
+              this.showFileInPost(index);
+            }
+          }
+        } else if (expandMode === 'popup') {
+          if ($post.hasAttribute('data-popup-id')) {
+            this.modalParentPopupId = +$post.getAttribute('data-popup-id');
+          }
+
+          const index = this.media.findIndex(file => file.url === link);
+          if (index !== -1) {
+            this.showMediaModal(index);
+          }
+        }
+
+        return false;
+      } else if (HotKeys.check(hotKeys['toggleSettings'], e)) {
         e.preventDefault();
         const $settings = DOM.qid('tools-toggle-settings');
         if ($settings) {
@@ -1129,39 +1173,31 @@ export class Post {
 
     file.$link.appendChild($original);
 
+    const $close = document.createElement('a');
+    $close.href = '#';
+    $close.textContent = '(Close)';
+    $close.setAttribute('data-close-original', '');
+
+    file.$link.parentElement.appendChild($close);
+
+    const onCloseClick = (e: Event) => {
+      e.preventDefault();
+
+      $thumbnail.classList.remove('hidden');
+      $original.remove();
+      $close.remove();
+
+      setTimeout(() => {
+        DOM.scrollToMiddle($thumbnail);
+      });
+
+      return false;
+    };
+
+    $close.addEventListener('click', onCloseClick);
+
     if (file.type === 'image') {
-      $original.addEventListener('click', e => {
-        e.preventDefault();
-
-        $thumbnail.classList.remove('hidden');
-        $original.remove();
-
-        setTimeout(() => {
-          DOM.scrollToMiddle($thumbnail);
-        });
-
-        return false;
-      });
-    } else {
-      const $close = document.createElement('a');
-      $close.href = '#';
-      $close.textContent = '(Close)';
-
-      file.$link.parentElement.appendChild($close);
-
-      $close.addEventListener('click', e => {
-        e.preventDefault();
-
-        $thumbnail.classList.remove('hidden');
-        $original.remove();
-        $close.remove();
-
-        setTimeout(() => {
-          DOM.scrollToMiddle($thumbnail);
-        });
-
-        return false;
-      });
+      $original.addEventListener('click', onCloseClick);
     }
 
     setTimeout(() => {

@@ -1,6 +1,7 @@
 {
     "include": [
         "resources/components/**/*.ts",
+        "resources/components/**/*.tsx",
         "resources/ts/**/*.ts",
     ],
     "exclude": [
@@ -11,6 +12,7 @@
         "noImplicitAny": true,
         "target": "es6",
         "module": "commonjs",
+        "jsx": "react",
         "lib": [
             "dom",
             "es2015",

@@ -1,11 +1,12 @@
 import Vue from 'vue';
+import { HSVColorPicker } from '@vvatashi/color-picker';
 import { draggable, FilePreview } from '.';
 import { eventBus, Events } from '..';
 import { Api } from '../api';
 import { Coords } from './draggable';
+import { HotKeys } from '../hotkeys';
 import { LocalStorage, Settings } from '../services';
 import { DOM, Keyboard } from '../utils';
-import { HSVColorPicker } from '@vvatashi/color-picker';
 
 interface ViewModel {
   fields: {
@@ -20,6 +21,7 @@ interface ViewModel {
   hidden: boolean;
   position: 'bottom' | 'post' | 'float';
   colorPopupVisible: boolean;
+  hotKeys: HotKeys;
 }
 
 export class PostingForm {
@@ -219,6 +221,7 @@ export class PostingForm {
             && Settings.get('form.float')
             ? 'float' : 'bottom',
           colorPopupVisible: false,
+          hotKeys: {},
         };
       },
       computed: {
@@ -245,6 +248,8 @@ export class PostingForm {
             this.fields.name = name;
           }
         }
+
+        this.hotKeys = HotKeys.load();
 
         window.addEventListener('resize', this._resize);
       },
@@ -364,10 +369,7 @@ export class PostingForm {
         },
         onMessageKeyDown(e: KeyboardEvent) {
           // Submit form on Ctrl+Enter in the message field.
-          if ((e.key === 'Enter'
-            || Keyboard.checkKeyCode(e, 10)
-            || Keyboard.checkKeyCode(e, 13))
-            && e.ctrlKey) {
+          if (HotKeys.check(this.hotKeys['send'], e)) {
             this.onSubmit();
           } else if (Keyboard.checkKeyChar(e, 'b') && e.altKey) {
             e.preventDefault();

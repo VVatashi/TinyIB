@@ -1,7 +1,10 @@
 import { DateTime } from 'luxon';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 import { View } from './view';
 
+import { Hotkeys } from '../components';
 import { Settings as Model } from '../model';
 import { Settings } from '../services';
 import { DOM, Time } from '../utils';
@@ -189,6 +192,12 @@ export class SettingsView implements View {
         });
       });
     }
+
+    const $hotKeys = DOM.qs('.settings-form__hotkeys', this.$form);
+    if ($hotKeys) {
+      const hotKeys = React.createElement(Hotkeys);
+      ReactDOM.render(hotKeys, $hotKeys);
+    }
   }
 
   detach() {
@@ -221,6 +230,11 @@ export class SettingsView implements View {
 
     if (this.updateInterval !== null) {
       clearInterval(this.updateInterval);
+    }
+
+    const $hotKeys = DOM.qs('.settings-form__hotkeys', this.$form);
+    if ($hotKeys) {
+      ReactDOM.unmountComponentAtNode($hotKeys);
     }
   }
 

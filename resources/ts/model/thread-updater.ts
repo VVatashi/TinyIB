@@ -1,6 +1,7 @@
 import { Thread } from '.';
+import { HotKeys } from '../hotkeys';
 import { API, Settings } from '../services';
-import { EventEmitter, Keyboard } from '../utils';
+import { EventEmitter } from '../utils';
 
 const updateInterval = 10;
 
@@ -57,7 +58,8 @@ export class ThreadUpdater extends EventEmitter {
         return;
       }
 
-      if (Keyboard.checkKeyChar(e, 'u')) {
+      const hotKeys = HotKeys.load();
+      if (HotKeys.check(hotKeys['updateThread'], e)) {
         e.preventDefault();
 
         if (Settings.get('post.enable-thread-autoupdate')) {
