@@ -1,6 +1,7 @@
 import { View, SettingsView } from '.';
+import { HotKeys } from '../hotkeys';
 import { Tools } from '../model';
-import { DOM, Keyboard } from '../utils';
+import { DOM } from '../utils';
 import { API } from '../services';
 
 export class ToolsView implements View {
@@ -83,7 +84,8 @@ export class ToolsView implements View {
         return;
       }
 
-      if (Keyboard.checkKeyChar(e, 'b')) {
+      const hotKeys = HotKeys.load();
+      if (HotKeys.check(hotKeys['toggleNSFW'], e)) {
         e.preventDefault();
         this.model.toggleNsfw();
         return false;

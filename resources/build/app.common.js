@@ -6,7 +6,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.ts$/,
+        test: /\.tsx?$/,
         use: 'ts-loader',
         exclude: /node_modules/,
       },
@@ -28,7 +28,7 @@ module.exports = {
     'vue': 'Vue',
   },
   resolve: {
-    extensions: ['.js', '.ts', '.vue'],
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.vue'],
   },
   output: {
     filename: './js/index.js',
