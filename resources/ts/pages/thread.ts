@@ -295,7 +295,19 @@ export class ThreadPage extends BasePage {
       return;
     }
 
-    $wrapper.insertAdjacentHTML('beforeend', html);
+    const $tempWrapper = document.createElement('div');
+    $tempWrapper.insertAdjacentHTML('beforeend', html);
+
+    const $posts = DOM.qsa('.post', $tempWrapper);
+    $posts.forEach($post => {
+      const id = +$post.getAttribute('data-post-id');
+      // If post does not already exist.
+      if (!DOM.qs(`[data-post-id="${id}"]`)) {
+        $wrapper.insertAdjacentElement('beforeend', $post);
+      }
+    });
+
+    $tempWrapper.remove();
     this.processNewPosts($wrapper);
   }
 
