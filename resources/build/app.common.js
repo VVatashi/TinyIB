@@ -25,6 +25,8 @@ module.exports = {
     'katex': 'katex',
     'react': 'React',
     'react-dom': 'ReactDOM',
+    'redux': 'Redux',
+    'react-redux': 'ReactRedux',
     'vue': 'Vue',
   },
   resolve: {
