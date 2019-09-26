@@ -5,6 +5,7 @@ import { VideoPlayer } from '@vvatashi/video-player';
 import { eventBus, Events } from '..';
 import { HotKeys } from '../hotkeys';
 import { Coub, LocalStorage, Settings } from '../services';
+import { store } from '../store';
 import { DOM } from '../utils';
 
 interface FileData {
@@ -172,7 +173,7 @@ export class Post {
         return;
       }
 
-      const hotKeys = HotKeys.load();
+      const { hotKeys } = store.getState().hotKeys;
       if (HotKeys.check(hotKeys['closeMedia'], e)) {
         e.preventDefault();
         this.closeModals();

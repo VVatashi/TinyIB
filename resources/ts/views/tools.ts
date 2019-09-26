@@ -3,6 +3,7 @@ import { HotKeys } from '../hotkeys';
 import { Tools } from '../model';
 import { DOM } from '../utils';
 import { API } from '../services';
+import { store } from '../store';
 
 export class ToolsView implements View {
   readonly model: Tools;
@@ -84,7 +85,7 @@ export class ToolsView implements View {
         return;
       }
 
-      const hotKeys = HotKeys.load();
+      const { hotKeys } = store.getState().hotKeys;
       if (HotKeys.check(hotKeys['toggleNSFW'], e)) {
         e.preventDefault();
         this.model.toggleNsfw();

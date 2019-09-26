@@ -6,6 +6,7 @@ import { Api } from '../api';
 import { Coords } from './draggable';
 import { HotKeys } from '../hotkeys';
 import { LocalStorage, Settings } from '../services';
+import { store } from '../store';
 import { DOM, Keyboard } from '../utils';
 
 interface ViewModel {
@@ -249,7 +250,7 @@ export class PostingForm {
           }
         }
 
-        this.hotKeys = HotKeys.load();
+        this.hotKeys = store.getState().hotKeys.hotKeys;
 
         window.addEventListener('resize', this._resize);
       },

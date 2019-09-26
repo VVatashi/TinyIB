@@ -1,12 +1,14 @@
 import { DateTime } from 'luxon';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
 
 import { View } from './view';
 
-import { Hotkeys } from '../components';
+import { HotKeys } from '../components';
 import { Settings as Model } from '../model';
 import { Settings } from '../services';
+import { store } from '../store';
 import { DOM, Time } from '../utils';
 
 interface PostAuthor {
@@ -195,7 +197,9 @@ export class SettingsView implements View {
 
     const $hotKeys = DOM.qs('.settings-form__hotkeys', this.$form);
     if ($hotKeys) {
-      const hotKeys = React.createElement(Hotkeys);
+      const hotKeys = React.createElement(Provider, { store }, [
+        React.createElement(HotKeys),
+      ]);
       ReactDOM.render(hotKeys, $hotKeys);
     }
   }

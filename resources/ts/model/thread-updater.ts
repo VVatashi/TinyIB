@@ -2,6 +2,7 @@ import { Thread } from '.';
 import { HotKeys } from '../hotkeys';
 import { API, Settings } from '../services';
 import { EventEmitter } from '../utils';
+import { store } from '../store';
 
 const updateInterval = 10;
 
@@ -58,7 +59,7 @@ export class ThreadUpdater extends EventEmitter {
         return;
       }
 
-      const hotKeys = HotKeys.load();
+      const { hotKeys } = store.getState().hotKeys;
       if (HotKeys.check(hotKeys['updateThread'], e)) {
         e.preventDefault();
 
