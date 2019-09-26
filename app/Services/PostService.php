@@ -714,8 +714,9 @@ class PostService
       $this->cache->deletePattern($board . ':page:*');
 
       // Send post to the redis queue.
+      $is_redis_enabled = $this->config->get('REDIS_ENABLE', false);
       $redis_host = $this->config->get('REDIS_HOST', '');
-      if (!empty($redis_host)) {
+      if ($is_redis_enabled) {
         $board = $this->config->get('BOARD');
         $channel = "$board:thread:$parent";
         $data = [
@@ -855,8 +856,9 @@ class PostService
       $this->modlog_service->create("User {$user->email} has deleted post {$id}.", $user->id);
     }
 
+    $is_redis_enabled = $this->config->get('REDIS_ENABLE', false);
     $redis_host = $this->config->get('REDIS_HOST', '');
-    if (!empty($redis_host)) {
+    if ($is_redis_enabled) {
       // Send notify to the redis queue.
       $board = $this->config->get('BOARD');
       $channel = "$board:thread:$thread_id";
