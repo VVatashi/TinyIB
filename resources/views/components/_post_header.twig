@@ -53,7 +53,7 @@
     <a class="post-header__hide fas fa-minus" href="#" title="Hide post"></a>
 
     {% if isInThread %}
-      <a class="post-header__reflink-icon fas fa-reply" href="{{ reflink }}" title="Quick reply" data-reflink="{{ post.id }}"></a>
+      <a class="post-header__reflink-icon fas fa-reply" href="{{ reflink }}" title="Quick reply" data-quote-reflink="{{ post.id }}"></a>
     {% endif %}
 
     {% if post.parent_id == 0 and not isInThread %}

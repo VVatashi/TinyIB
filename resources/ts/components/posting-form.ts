@@ -583,7 +583,7 @@ export class PostingForm {
     if (layout) {
       layout.addEventListener('click', e => {
         const target = e.target as HTMLElement;
-        if (!target.getAttribute('data-reflink')) {
+        if (!target.getAttribute('data-reflink') && !target.getAttribute('data-quote-reflink')) {
           return;
         }
 
@@ -602,8 +602,10 @@ export class PostingForm {
         const after = message.substring(selection.end);
         const newLineBefore = before.length && !before.endsWith('\n') ? '\n' : '';
         const newLineAfter = !after.length || !after.startsWith('\n') ? '\n' : '';
-        const id = target.getAttribute('data-reflink');
-        const quoteText = window.getSelection().toString().replace(/^(.+)$/gm, '> $1');
+        const id = target.getAttribute('data-reflink') || target.getAttribute('data-quote-reflink');
+        const quoteText = target.getAttribute('data-quote-reflink')
+          ? window.getSelection().toString().replace(/^(.+)$/gm, '> $1')
+          : '';
         const lastQuoteIndex = message.lastIndexOf('>>', selection.begin);
         const quoteSamePost = lastQuoteIndex !== -1
           && message.lastIndexOf(`>>${id}`, selection.begin) >= lastQuoteIndex;
