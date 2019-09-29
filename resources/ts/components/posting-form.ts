@@ -473,13 +473,12 @@ export class PostingForm {
           const selection = {
             begin: messageEl.selectionStart,
             end: messageEl.selectionEnd,
-            length: messageEl.selectionEnd - messageEl.selectionStart,
           };
 
           const message = this.fields.message as string;
           const before = message.substring(0, selection.begin);
           const after = message.substring(selection.end);
-          const selectionText = window.getSelection().toString();
+          const selectionText = this.getSelection();
           const quoteText = selectionText.length ? selectionText.replace(/^(.+)$/gm, '> $1') : '> ';
           const newLineBefore = before.length && !before.endsWith('\n') ? '\n' : '';
           const newLineAfter = (!after.length || !after.startsWith('\n')) && quoteText.length > 2 ? '\n' : '';
@@ -494,8 +493,14 @@ export class PostingForm {
 
           this.$nextTick(() => {
             messageEl.focus();
-            messageEl.selectionStart = selection.begin + quote.length;
-            messageEl.selectionEnd = selection.begin + quote.length;
+
+            let cursorPosition = selection.begin + quote.replace(/\r/g, '').length;
+            if (!quote.endsWith('\n') && after.startsWith('\n')) {
+              cursorPosition += 1;
+            }
+
+            messageEl.setSelectionRange(cursorPosition, cursorPosition, 'none');
+
             // Restore scroll position in the Chrome.
             messageEl.scrollTop = scroll;
           });
@@ -583,7 +588,7 @@ export class PostingForm {
     if (layout) {
       layout.addEventListener('click', e => {
         const target = e.target as HTMLElement;
-        if (!target.getAttribute('data-reflink')) {
+        if (!target.getAttribute('data-reflink') && !target.getAttribute('data-quote-reflink')) {
           return;
         }
 
@@ -594,7 +599,6 @@ export class PostingForm {
         const selection = {
           begin: messageEl.selectionStart,
           end: messageEl.selectionEnd,
-          length: messageEl.selectionEnd - messageEl.selectionStart,
         };
 
         const message = vm.fields.message as string;
@@ -602,11 +606,14 @@ export class PostingForm {
         const after = message.substring(selection.end);
         const newLineBefore = before.length && !before.endsWith('\n') ? '\n' : '';
         const newLineAfter = !after.length || !after.startsWith('\n') ? '\n' : '';
-        const id = target.getAttribute('data-reflink');
-        const quoteText = window.getSelection().toString().replace(/^(.+)$/gm, '> $1');
-        const lastQuoteIndex = message.lastIndexOf('>>', selection.begin);
-        const quoteSamePost = lastQuoteIndex !== -1
-          && message.lastIndexOf(`>>${id}`, selection.begin) >= lastQuoteIndex;
+        const id = target.getAttribute('data-reflink') || target.getAttribute('data-quote-reflink');
+
+        const quoteText = target.getAttribute('data-quote-reflink')
+          ? this.getSelection().replace(/^(.+)$/gm, '> $1')
+          : '';
+
+        const lastQuoteIndex = before.lastIndexOf('>>');
+        const quoteSamePost = lastQuoteIndex !== -1 && lastQuoteIndex === before.lastIndexOf(`>>${id}`);
 
         // If quoting the same post again, not insert id.
         let quote = '';
@@ -620,17 +627,17 @@ export class PostingForm {
             : `${newLineBefore}>>${id}${newLineAfter}`;
         }
 
-        // Insert reply markup.
-        vm.fields.message = [
-          before,
-          quote,
-          after,
-        ].join('');
-
         if (this.isInThread) {
           if (quoteSamePost && !quoteText && !vm.hidden && vm.position !== 'bottom') {
             this.hide();
           } else {
+            // Insert reply markup.
+            vm.fields.message = [
+              before,
+              quote,
+              after,
+            ].join('');
+
             if (vm.position !== 'float') {
               // Move form to the post.
               const targetPost = target.closest('.post') as HTMLElement;
@@ -649,12 +656,28 @@ export class PostingForm {
               this.show();
             }
           }
+        } else {
+          // Insert reply markup.
+          vm.fields.message = [
+            before,
+            quote,
+            after,
+          ].join('');
         }
 
+        const scroll = messageEl.scrollTop;
         vm.$nextTick(() => {
           messageEl.focus();
-          messageEl.selectionStart = selection.begin + quote.length;
-          messageEl.selectionEnd = selection.begin + quote.length;
+
+          let cursorPosition = selection.begin + quote.length;
+          if (!quote.endsWith('\n') && after.startsWith('\n')) {
+            cursorPosition += 1;
+          }
+
+          messageEl.setSelectionRange(cursorPosition, cursorPosition, 'none');
+
+          // Restore scroll position in the Chrome.
+          messageEl.scrollTop = scroll;
         });
       });
     }
@@ -696,6 +719,13 @@ export class PostingForm {
     } else {
       showButton.classList.add('hidden');
     }
+  }
+
+  protected getSelection(): string {
+    // On windows '\n' in the selection is replaced by '\r\n',
+    // increasing the length of the selection.
+    // Fix this by replacing '\r' with ''.
+    return window.getSelection().toString().replace(/\r/g, '').trim();
   }
 
   protected hide() {

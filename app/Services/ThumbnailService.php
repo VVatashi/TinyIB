@@ -193,9 +193,9 @@ class ThumbnailService
     // Use ImageMagick identify utility.
     $output = [];
     if ($mime_type !== 'image/gif') {
-      exec("identify -format '%w %h' $path", $output);
+      exec("identify -format \"%w %h\" $path", $output);
     } else {
-      exec("identify -format '%w %h' ${path}[0]", $output);
+      exec("identify -format \"%w %h\" ${path}[0]", $output);
     }
 
     $sizes = explode(' ', reset($output));
@@ -267,7 +267,7 @@ class ThumbnailService
     } else {
       $options = '-coalesce -layers OptimizeFrame -depth 4 -type palettealpha';
     }
-    exec("convert $path -auto-orient -thumbnail '{$width}x$height' $options $output_path");
+    exec("convert $path -auto-orient -thumbnail \"{$width}x$height\" $options $output_path");
 
     // Optimize png.
     if ($extension === 'png' && $this->config->get('FILE_OPTIMIZE_PNG')) {

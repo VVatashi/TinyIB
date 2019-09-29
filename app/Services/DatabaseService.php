@@ -30,6 +30,7 @@ class DatabaseService
         'driver'   => 'pdo_' . $this->config->get('DBDRIVER'),
         'host'     => $this->config->get('DBHOST'),
         'dbname'   => $this->config->get('DBNAME'),
+        'path'     => $this->config->get('DBNAME'),
         'user'     => $this->config->get('DBUSERNAME'),
         'password' => $this->config->get('DBPASSWORD'),
       ];
