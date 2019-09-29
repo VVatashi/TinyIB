@@ -24,14 +24,14 @@
     {% set replylink = url('res/' ~ post.id) %}
 
     <span class="post-header-mobile__reflink-wrapper">
-      №<a class="post-header-mobile__reflink" href="{{ reflink }}" data-reflink="{{ post.id }}">
+      №<a class="post-header-mobile__reflink" href="{{ reflink }}" title="Reply" data-reflink="{{ post.id }}">
         {{- post.id -}}
       </a>
 
       <a class="post-header-mobile__hide fas fa-times" href="#" title="Hide post"></a>
 
       {% if isInThread %}
-        <a class="post-header__reflink-icon fas fa-reply" href="{{ reflink }}" title="Quick reply" data-quote-reflink="{{ post.id }}"></a>
+        <a class="post-header__reflink-icon fas fa-reply" href="{{ reflink }}" title="Reply with quote" data-quote-reflink="{{ post.id }}"></a>
       {% endif %}
 
       {% if post.parent_id == 0 and not isInThread %}
