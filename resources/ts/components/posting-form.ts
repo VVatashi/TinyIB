@@ -5,7 +5,8 @@ import { eventBus, Events } from '..';
 import { Api } from '../api';
 import { Coords } from './draggable';
 import { HotKeys } from '../hotkeys';
-import { LocalStorage, Settings } from '../services';
+import { LocalStorage } from '../local-storage';
+import { Settings } from '../settings';
 import { store } from '../store';
 import { DOM, Keyboard } from '../utils';
 
@@ -26,10 +27,14 @@ interface ViewModel {
 }
 
 export class PostingForm {
+  protected readonly settings: Settings;
+
   protected isInThread: boolean = false;
   protected viewModel: Vue & ViewModel;
 
   constructor() {
+    this.settings = Settings.load();
+
     eventBus.on(Events.Ready, this.onReady.bind(this));
     eventBus.on(Events.PostsInserted, this.onPostsInserted.bind(this));
   }
@@ -218,8 +223,8 @@ export class PostingForm {
           disabled: false,
           status: '',
           hidden: true,
-          position: Settings.get('form.save-form-state')
-            && Settings.get('form.float')
+          position: component.settings.form.saveFormState
+            && LocalStorage.get('form.fload')
             ? 'float' : 'bottom',
           colorPopupVisible: false,
           hotKeys: {},
@@ -230,11 +235,11 @@ export class PostingForm {
           return threadId;
         },
         previewAlign() {
-          return Settings.get('form.preview-align');
+          return component.settings.form.previewAlign;
         },
       },
       created() {
-        if (Settings.get('form.save-subject')) {
+        if (component.settings.form.saveSubject) {
           // Load saved subject.
           const subject = LocalStorage.get('posting-form.subject', '');
           if (subject) {
@@ -242,7 +247,7 @@ export class PostingForm {
           }
         }
 
-        if (Settings.get('form.save-name')) {
+        if (component.settings.form.saveName) {
           // Load saved name.
           const name = LocalStorage.get('posting-form.name', '');
           if (name) {
@@ -256,7 +261,7 @@ export class PostingForm {
       },
       mounted() {
         if (this.position === 'float') {
-          const position = Settings.get('form.float-position') || { x: 0, y: 0 };
+          const position = LocalStorage.get('form.float-position') || { x: 0, y: 0 };
           this.setPosition(this.checkBounds(position));
         }
       },
@@ -293,7 +298,7 @@ export class PostingForm {
           draggable.style.left = `${coords.x}px`;
           draggable.style.top = `${coords.y}px`;
 
-          Settings.set('form.float-position', coords);
+          LocalStorage.set('form.float-position', coords);
         },
         onDraggableResize() {
           if (this.hidden) {
@@ -303,11 +308,11 @@ export class PostingForm {
           this.setPosition(this.checkBounds(this.getPosition()));
         },
         resetFields() {
-          if (!Settings.get('form.save-subject')) {
+          if (!component.settings.form.saveSubject) {
             this.fields.subject = '';
           }
 
-          if (!Settings.get('form.save-name')) {
+          if (!component.settings.form.saveName) {
             this.fields.name = '';
           }
 
@@ -425,7 +430,7 @@ export class PostingForm {
 
           let message = this.fields.message as string;
 
-          if (selection.length || Settings.get('form.insert-tags-in-pairs')) {
+          if (selection.length || component.settings.form.insertTagsInPairs) {
             // If text is selected, wrap it in a tag pair.
             message = [
               message.substring(0, selection.begin),
@@ -505,7 +510,7 @@ export class PostingForm {
           this.disabled = true;
 
           // Apply replaces to the message.
-          const replaces = Settings.get('form.replaces') as { pattern: string, replace: string }[];
+          const replaces = component.settings.form.replaces;
           const message = replaces.reduce((message: string, item) => {
             const regexp = new RegExp(item.pattern, 'gm');
             return message.replace(regexp, item.replace);
@@ -538,7 +543,7 @@ export class PostingForm {
             }
 
             if (isInThread) {
-              if (Settings.get('post.enable-thread-autoupdate')) {
+              if (component.settings.post.enableThreadAutoupdate) {
                 eventBus.emit(Events.PostCreated);
               }
             } else {
@@ -560,7 +565,7 @@ export class PostingForm {
             }
           }
 
-          if (Settings.get('post.scroll-to-new-posts')) {
+          if (component.settings.post.scrollToNewPosts) {
             // Scroll to the last post.
             setTimeout(() => {
               const el = DOM.qs('.post:nth-last-of-type(1)');
@@ -662,7 +667,7 @@ export class PostingForm {
   }
 
   protected onPostsInserted(posts: HTMLElement[], initial: boolean) {
-    if (!initial && Settings.get('post.scroll-to-new-posts')) {
+    if (!initial && this.settings.post.scrollToNewPosts) {
       const scrollingEl = document.scrollingElement || document.body;
       const postsHeight = posts.reduce((total, post) => {
         const style = document.defaultView.getComputedStyle(post, '');
@@ -712,9 +717,9 @@ export class PostingForm {
 
     const vm = this.viewModel as any;
     vm.position = 'float';
-    Settings.set('form.float', true);
+    LocalStorage.set('form.float', true);
 
-    const position = Settings.get('form.float-position') || { x: 0, y: 0 };
+    const position = LocalStorage.get('form.float-position') || { x: 0, y: 0 };
     vm.setPosition(vm.checkBounds(position));
 
     this.updateReplyButton();
@@ -730,7 +735,7 @@ export class PostingForm {
 
     const vm = this.viewModel;
     vm.position = 'post';
-    Settings.set('form.float', false);
+    LocalStorage.set('form.float', false);
 
     const showButton = DOM.qid('posting-form-show');
     if (showButton) {
@@ -760,7 +765,7 @@ export class PostingForm {
 
     const vm = this.viewModel;
     vm.position = 'bottom';
-    Settings.set('form.float', false);
+    LocalStorage.set('form.float', false);
 
     this.updateReplyButton();
 

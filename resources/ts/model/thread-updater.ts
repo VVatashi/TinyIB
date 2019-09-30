@@ -1,12 +1,15 @@
 import { Thread } from '.';
 import { HotKeys } from '../hotkeys';
-import { API, Settings } from '../services';
+import { API } from '../services';
+import { Settings } from '../settings';
 import { EventEmitter } from '../utils';
 import { store } from '../store';
 
 const updateInterval = 10;
 
 export class ThreadUpdater extends EventEmitter {
+  protected readonly settings: Settings;
+
   protected _counter: number = updateInterval;
   protected _isLoading: boolean = false;
 
@@ -29,11 +32,15 @@ export class ThreadUpdater extends EventEmitter {
   }
 
   get isUpdateEnabled() {
-    return Settings.get('post.enable-thread-autoupdate');
+    return this.settings.post.enableThreadAutoupdate;
   }
 
   set isUpdateEnabled(value: boolean) {
-    Settings.set('post.enable-thread-autoupdate', value);
+    this.settings.post.enableThreadAutoupdate = value;
+
+    const settings = Settings.load();
+    settings.post.enableThreadAutoupdate = value;
+    Settings.save(settings);
   }
 
   get threadId() {
@@ -53,6 +60,8 @@ export class ThreadUpdater extends EventEmitter {
   ) {
     super();
 
+    this.settings = Settings.load();
+
     document.addEventListener('keydown', e => {
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
@@ -63,7 +72,7 @@ export class ThreadUpdater extends EventEmitter {
       if (HotKeys.check(hotKeys['updateThread'], e)) {
         e.preventDefault();
 
-        if (Settings.get('post.enable-thread-autoupdate')) {
+        if (this.isUpdateEnabled) {
           this.getNewPosts();
         }
 

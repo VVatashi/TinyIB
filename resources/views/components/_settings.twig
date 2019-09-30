@@ -29,11 +29,11 @@
 
   <div class="settings-form__tab-content" data-tab-content="filter">
     <div class="settings-form__row">
-      {{ self.checkbox('Remove hidden posts', 'filter.remove-hidden-posts') }}
+      {{ self.checkbox('Remove hidden posts', 'filter.removeHiddenPosts') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.checkbox('Hide threads', 'filter.hide-threads') }}
+      {{ self.checkbox('Hide threads', 'filter.hideThreads') }}
     </div>
 
     <h3 class="settings-form__option-title">Hide posts by author</h3>
@@ -43,112 +43,112 @@
 
   <div class="settings-form__tab-content" data-tab-content="post">
     <div class="settings-form__row">
-      {{ self.checkbox('Enable thread autoupdate', 'post.enable-thread-autoupdate') }}
+      {{ self.checkbox('Enable thread autoupdate', 'post.enableThreadAutoupdate') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.checkbox('Disable web sockets', 'post.disable-web-sockets') }}
+      {{ self.checkbox('Disable web sockets', 'post.disableWebSockets') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.checkbox('Scroll to new posts', 'post.scroll-to-new-posts') }}
+      {{ self.checkbox('Scroll to new posts', 'post.scrollToNewPosts') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.checkbox('Show spoilers', 'post.show-spoilers') }}
+      {{ self.checkbox('Show spoilers', 'post.showSpoilers') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.checkbox('Disable subscript and superscript', 'post.disable-sub') }}
+      {{ self.checkbox('Disable subscript and superscript', 'post.disableSub') }}
     </div>
 
     <h3 class="settings-form__option-title">Reply icon position</h3>
 
     <div class="settings-form__row">
-      {{ self.radio('In the post header', 'post.reflink-icon-position', 'header') }}
+      {{ self.radio('In the post header', 'post.reflinkIconPosition', 'header') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.radio('In the right bottom corner', 'post.reflink-icon-position', 'post') }}
+      {{ self.radio('In the right bottom corner', 'post.reflinkIconPosition', 'post') }}
     </div>
 
     <h3 class="settings-form__option-title">Unread posts notify</h3>
 
     <div class="settings-form__row">
-      {{ self.radio('Disable', 'post.unread-posts-notify', 'disable') }}
+      {{ self.radio('Disable', 'post.unreadPostsNotify.mode', 'disable') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.radio('Play once', 'post.unread-posts-notify', 'once') }}
+      {{ self.radio('Play once', 'post.unreadPostsNotify.mode', 'once') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.radio('Play on every new post', 'post.unread-posts-notify', 'every-post') }}
+      {{ self.radio('Play on every new post', 'post.unreadPostsNotify.mode', 'every-post') }}
     </div>
 
     <div class="settings-form__row">
       {{ self.radio('Play every'
-          ~ ' <input type="number" min="1" data-key="post.unread-posts-notify-interval"'
+          ~ ' <input type="number" min="1" data-key="post.unreadPostsNotify.interval"'
           ~ ' class="input settings-form__text" />'
-          ~ ' seconds', 'post.unread-posts-notify', 'repeat') }}
+          ~ ' seconds', 'post.unreadPostsNotify.mode', 'repeat') }}
     </div>
 
     <h4 class="settings-form__option-title">Unread posts notify sound</h4>
 
     <div class="settings-form__row">
-      {{ self.radio('Default 1', 'post.unread-posts-notify-type', 'default-1') }}
+      {{ self.radio('Default 1', 'post.unreadPostsNotify.type', 'default-1') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.radio('Default 2', 'post.unread-posts-notify-type', 'default-2') }}
+      {{ self.radio('Default 2', 'post.unreadPostsNotify.type', 'default-2') }}
     </div>
 
     <div class="settings-form__row">
       {{ self.radio('Custom'
-          ~ ' <label data-key="post.unread-posts-notify-custom"><span class="filename button"></span> <input type="file" hidden /></label>',
-          'post.unread-posts-notify-type', 'custom') }}
+          ~ ' <label data-key="post.unreadPostsNotify.custom"><span class="filename button"></span> <input type="file" hidden /></label>',
+          'post.unreadPostsNotify.type', 'custom') }}
     </div>
 
     <h3 class="settings-form__option-title">Unread replies notify</h3>
 
     <div class="settings-form__row">
-      {{ self.radio('Disable', 'post.unread-replies-notify', 'disable') }}
+      {{ self.radio('Disable', 'post.unreadRepliesNotify.mode', 'disable') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.radio('Play once', 'post.unread-replies-notify', 'once') }}
+      {{ self.radio('Play once', 'post.unreadRepliesNotify.mode', 'once') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.radio('Play on every new post', 'post.unread-replies-notify', 'every-post') }}
+      {{ self.radio('Play on every new post', 'post.unreadRepliesNotify.mode', 'every-post') }}
     </div>
 
     <div class="settings-form__row">
       {{ self.radio('Play every'
-          ~ ' <input type="number" min="1" data-key="post.unread-replies-notify-interval"'
+          ~ ' <input type="number" min="1" data-key="post.unreadRepliesNotify.interval"'
           ~ ' class="input settings-form__text" />'
-          ~ ' seconds', 'post.unread-replies-notify', 'repeat') }}
+          ~ ' seconds', 'post.unreadRepliesNotify.mode', 'repeat') }}
     </div>
 
     <h4 class="settings-form__option-title">Unread replies notify sound</h4>
 
     <div class="settings-form__row">
-      {{ self.radio('Default 1', 'post.unread-replies-notify-type', 'default-1') }}
+      {{ self.radio('Default 1', 'post.unreadRepliesNotify.type', 'default-1') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.radio('Default 2', 'post.unread-replies-notify-type', 'default-2') }}
+      {{ self.radio('Default 2', 'post.unreadRepliesNotify.type', 'default-2') }}
     </div>
 
     <div class="settings-form__row">
       {{ self.radio('Custom'
-          ~ ' <label data-key="post.unread-replies-notify-custom"><span class="filename button"></span> <input type="file" hidden /></label>',
-          'post.unread-replies-notify-type', 'custom') }}
+          ~ ' <label data-key="post.unreadRepliesNotify.custom"><span class="filename button"></span> <input type="file" hidden /></label>',
+          'post.unreadRepliesNotify.type', 'custom') }}
     </div>
 
-    <h3 class="settings-form__option-title">Desktop notifications</h3>
-
     {% if config('ONESIGNAL_APPID') %}
+      <h3 class="settings-form__option-title">Desktop notifications</h3>
+
       <button id="enable-desktop-notify">Enable desktop notifications</button>
 
       <p>May not work if <a href="https://onesignal.com/" target="_blank">onesignal.com</a> is blocked</p>
@@ -161,77 +161,73 @@
     </div>
 
     <div class="settings-form__row">
-      {{ self.checkbox('Show video overlay', 'image.show-video-overlay') }}
+      {{ self.checkbox('Show video overlay', 'image.showVideoOverlay') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.checkbox('Close image popup when clicking outside', 'image.hide-popup-on-outside-click') }}
+      {{ self.checkbox('Close image popup when clicking outside', 'image.hidePopupOnOutsideClick') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.checkbox('Autoplay audio &amp; video files', 'image.auto-play') }}
+      {{ self.checkbox('Autoplay audio &amp; video files', 'image.autoPlay') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.checkbox('Replace image thumbnails with original', 'image.replace-thumbnail') }}
+      {{ self.checkbox('Replace image thumbnails with original', 'image.replaceThumbnail') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.checkbox("Replace GIF thumbnails with original", 'image.replace-thumbnail-gif') }}
+      {{ self.checkbox("Replace GIF thumbnails with original", 'image.replaceThumbnailGif') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.checkbox("Show modal over controls", 'image.modal-at-top') }}
+      {{ self.checkbox("Show modal over controls", 'image.modalAtTop') }}
     </div>
 
     <h3 class="settings-form__option-title">Expand images</h3>
 
     <div class="settings-form__row">
-      {{ self.radio('In a new tab', 'image.expand-images', 'tab') }}
+      {{ self.radio('In a new tab', 'image.expandImages', 'tab') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.radio('In post', 'image.expand-images', 'post') }}
+      {{ self.radio('In post', 'image.expandImages', 'post') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.radio('In popup', 'image.expand-images', 'popup') }}
+      {{ self.radio('In popup', 'image.expandImages', 'popup') }}
     </div>
   </div>
 
   <div class="settings-form__tab-content" data-tab-content="link">
     <div class="settings-form__row">
-      {{ self.checkbox('Add names to the links', 'link.add-names-to-links') }}
+      {{ self.checkbox('Add names to the links', 'link.addNamesToLinks') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.checkbox('Add \'(you)\' to the links', 'link.add-you-to-links') }}
+      {{ self.checkbox('Add \'(you)\' to the links', 'link.addYouToLinks') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.checkbox('Show post in a popup when hovering over a link', 'link.show-post-popups') }}
+      {{ self.checkbox('Show post in a popup when hovering over a link', 'link.showPostPopups') }}
     </div>
   </div>
 
   <div class="settings-form__tab-content" data-tab-content="form">
     <div class="settings-form__row">
-      {{ self.checkbox('Save subject after posting', 'form.save-subject') }}
+      {{ self.checkbox('Save subject after posting', 'form.saveSubject') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.checkbox('Save name after posting', 'form.save-name') }}
+      {{ self.checkbox('Save name after posting', 'form.saveName') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.checkbox('Show markup buttons', 'form.show-markup') }}
+      {{ self.checkbox('Show markup buttons', 'form.showMarkup') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.checkbox('Show markup buttons (mobile)', 'form.show-markup-mobile') }}
-    </div>
-
-    <div class="settings-form__row">
-      {{ self.checkbox('Save form floating state on page reload', 'form.save-form-state') }}
+      {{ self.checkbox('Save form floating state on page reload', 'form.saveFormState') }}
     </div>
 
     <h3 class="settings-form__option-title">Form Alignment</h3>
@@ -247,15 +243,15 @@
     <h3 class="settings-form__option-title">Preview Alignment</h3>
 
     <div class="settings-form__row">
-      {{ self.radio('On the left', 'form.preview-align', 'left') }}
+      {{ self.radio('On the left', 'form.previewAlign', 'left') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.radio('On the right', 'form.preview-align', 'right') }}
+      {{ self.radio('On the right', 'form.previewAlign', 'right') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.checkbox('Insert tags in pairs', 'form.insert-tags-in-pairs') }}
+      {{ self.checkbox('Insert tags in pairs', 'form.insertTagsInPairs') }}
     </div>
 
     <h3 class="settings-form__option-title">Replaces</h3>
@@ -272,7 +268,7 @@
 
     <div class="settings-form__row">
       {{ self.radio('Custom'
-          ~ ' <input type="text" data-key="time.locale-custom"'
+          ~ ' <input type="text" data-key="time.localeCustom"'
           ~ ' class="input settings-form__text" placeholder="en" />',
         'time.locale', 'custom') }}
     </div>
@@ -285,7 +281,7 @@
 
     <div class="settings-form__row">
       {{ self.radio('Custom'
-          ~ ' <input type="text" data-key="time.format-custom"'
+          ~ ' <input type="text" data-key="time.formatCustom"'
           ~ ' class="input settings-form__text" placeholder="EEE, dd MMM yyyy HH:mm:ss" />',
         'time.format', 'custom') }}
     </div>
@@ -306,7 +302,7 @@
 
     <div class="settings-form__row">
       {{ self.radio('Fixed UTC offset'
-          ~ ' <input type="number" data-key="time.zone-fixed"'
+          ~ ' <input type="number" data-key="time.zoneFixed"'
           ~ ' class="input settings-form__text" min="-99" max="99" />',
         'time.zone', 'fixed') }}
     </div>
@@ -317,11 +313,11 @@
 
   <div class="settings-form__tab-content" data-tab-content="common">
     <div class="settings-form__row">
-      {{ self.checkbox('Smooth scrolling', 'common.smooth-scroll') }}
+      {{ self.checkbox('Smooth scrolling', 'common.smoothScroll') }}
     </div>
 
     <div class="settings-form__row">
-      {{ self.checkbox('Show count of unread posts in title', 'common.show-unread-count-in-title') }}
+      {{ self.checkbox('Show count of unread posts in title', 'common.showUnreadCountInTitle') }}
     </div>
 
     <h3 class="settings-form__option-title">Thread Alignment</h3>

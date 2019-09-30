@@ -2,9 +2,10 @@ import { BasePage } from './base';
 import { eventBus } from '../event-bus';
 import { Events } from '../events';
 import { Thread, ThreadUpdater } from '../model';
-import { Settings } from '../services';
+import { Settings } from '../settings';
 import { DOM } from '../utils';
 import { PostView } from '../views';
+import { LocalStorage } from '../local-storage';
 
 const faviconSize = 16;
 
@@ -152,7 +153,7 @@ export class ThreadPage extends BasePage {
         context.textBaseline = 'middle';
         context.fillStyle = '#FFFFFF';
 
-        if (!Settings.get('common.show-unread-count-in-title')) {
+        if (!this.settings.common.showUnreadCountInTitle) {
           // Draw new posts count.
           if (unreadPosts < 10) {
             context.font = `700 10px 'Roboto Condensed', sans-serif`;
@@ -185,7 +186,7 @@ export class ThreadPage extends BasePage {
   }
 
   updateTitle(unreadPosts: number) {
-    if (Settings.get('common.show-unread-count-in-title') && unreadPosts > 0) {
+    if (this.settings.common.showUnreadCountInTitle && unreadPosts > 0) {
       this.$title.textContent = `[${this.model.unreadPosts}] ${this.title}`;
     } else {
       this.$title.textContent = this.title;
@@ -244,9 +245,9 @@ export class ThreadPage extends BasePage {
 
       if (this.model.unreadPosts > 0) {
         const notifyTypeKey = this.model.hasReplies
-          ? 'post.unread-replies-notify'
-          : 'post.unread-posts-notify';
-        const notifyType = Settings.get(notifyTypeKey);
+          ? 'post.unreadRepliesNotify.mode'
+          : 'post.unreadPostsNotify.mode';
+        const notifyType = Settings.get(this.settings, notifyTypeKey);
         switch (notifyType) {
           case 'every-post':
             this.notify(this.model.hasReplies);
@@ -265,9 +266,9 @@ export class ThreadPage extends BasePage {
             }
 
             const intervalKey = this.model.hasReplies
-              ? 'post.unread-replies-notify-interval'
-              : 'post.unread-posts-notify-interval';
-            const interval = Settings.get<number>(intervalKey) * 1000;
+              ? 'post.unreadRepliesNotify.interval'
+              : 'post.unreadPostsNotify.interval';
+            const interval = Settings.get(this.settings, intervalKey) * 1000;
             this.notify(false);
             this.notifyIntervalTimer = setInterval(() => {
               this.notify(false);
@@ -355,9 +356,9 @@ export class ThreadPage extends BasePage {
     if ($source && $notify) {
       const oldSrc = $source.src;
       const typeKey = reply
-        ? 'post.unread-replies-notify-type'
-        : 'post.unread-posts-notify-type';
-      const type = Settings.get(typeKey);
+        ? 'post.unreadRepliesNotify.type'
+        : 'post.unreadPostsNotify.type';
+      const type = Settings.get(this.settings, typeKey);
       switch (type) {
         case 'default-1':
           $source.src = `${window.baseUrl}/mp3/notify-1.mp3`;
@@ -369,9 +370,9 @@ export class ThreadPage extends BasePage {
 
         case 'custom':
           const srcKey = reply
-            ? 'post.unread-replies-notify-custom'
-            : 'post.unread-posts-notify-custom';
-          $source.src = Settings.get(srcKey);
+            ? 'post.unreadRepliesNotifyFile'
+            : 'post.unreadPostsNotifyFile';
+          $source.src = LocalStorage.get(srcKey);
           break;
 
         default:
@@ -606,7 +607,7 @@ export class ThreadPage extends BasePage {
     this.updaterModel.on('new-posts-loaded', this.onNewPostsLoaded.bind(this));
 
     if (window.websocketUrl && window.websocketUrl.length
-      && !Settings.get('post.disable-web-sockets')
+      && !this.settings.post.disableWebSockets
       && this.checkWebSocketSupport()) {
       this.bindWSThreadUpdater();
     } else {

@@ -6,8 +6,9 @@ import { Provider } from 'react-redux';
 import { View } from './view';
 
 import { HotKeys } from '../components';
+import { LocalStorage } from '../local-storage';
 import { Settings as Model } from '../model';
-import { Settings } from '../services';
+import { Settings } from '../settings';
 import { store } from '../store';
 import { DOM, Time } from '../utils';
 
@@ -103,10 +104,11 @@ export class SettingsView implements View {
     });
 
     // Bind initial settings values to DOM.
+    const settings = Settings.load();
     const $inputs = DOM.qsa('[data-key]', this.$form);
     $inputs.forEach($input => {
       const key = $input.getAttribute('data-key');
-      const value = Settings.get(key);
+      const value = Settings.get(settings, key);
       if ($input instanceof HTMLInputElement) {
         if ($input.type === 'checkbox') {
           $input.checked = value === 'true' || value === true;
@@ -119,11 +121,11 @@ export class SettingsView implements View {
     });
 
     // Bind hidden post authors.
-    const hidden = Settings.get('filter.hidden-authors') as PostAuthor[];
+    const hidden = Settings.get(settings, 'filter.hiddenAuthors') as PostAuthor[];
     this.updateHiddenPosts(hidden);
 
     // Bind replaces list.
-    const replaces = Settings.get('form.replaces') as Replace[];
+    const replaces = Settings.get(settings, 'form.replaces') as Replace[];
     this.updateReplaces(replaces);
 
     // Display current time format.
@@ -135,9 +137,9 @@ export class SettingsView implements View {
       }, 1000);
     }
 
-    const $postsCustomNotify = DOM.qs('[data-key="post.unread-posts-notify-custom"]');
+    const $postsCustomNotify = DOM.qs('[data-key="post.unreadPostsNotify.custom"]');
     if ($postsCustomNotify) {
-      const name = Settings.get<string>('post.unread-posts-notify-custom-name');
+      const name = LocalStorage.get('post.unreadPostsNotifyName', '');
       const $filename = DOM.qs('.filename', $postsCustomNotify);
       $filename.textContent = name ? name : 'Click to select...';
 
@@ -152,16 +154,16 @@ export class SettingsView implements View {
 
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.addEventListener('load', e => {
-          Settings.set('post.unread-posts-notify-custom', reader.result);
-          Settings.set('post.unread-posts-notify-custom-name', file.name);
+        reader.addEventListener('load', () => {
+          LocalStorage.set('post.unreadPostsNotifyFile', reader.result);
+          LocalStorage.set('post.unreadPostsNotifyName', file.name);
         });
       });
     }
 
-    const $repliesCustomNotify = DOM.qs('[data-key="post.unread-replies-notify-custom"]');
+    const $repliesCustomNotify = DOM.qs('[data-key="post.unreadRepliesNotify.custom"]');
     if ($repliesCustomNotify) {
-      const name = Settings.get<string>('post.unread-replies-notify-custom-name');
+      const name = LocalStorage.get('post.unreadRepliesNotifyName', '');
       const $filename = DOM.qs('.filename', $repliesCustomNotify);
       $filename.textContent = name ? name : 'Click to select...';
 
@@ -176,9 +178,9 @@ export class SettingsView implements View {
 
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.addEventListener('load', e => {
-          Settings.set('post.unread-replies-notify-custom', reader.result);
-          Settings.set('post.unread-replies-notify-custom-name', file.name);
+        reader.addEventListener('load', () => {
+          LocalStorage.set('post.unreadRepliesNotifyFile', reader.result);
+          LocalStorage.set('post.unreadRepliesNotifyName', file.name);
         });
       });
     }
@@ -259,9 +261,13 @@ export class SettingsView implements View {
     if (e.target instanceof HTMLInputElement && e.target.hasAttribute('data-key')) {
       const key = e.target.getAttribute('data-key');
       if (e.target.type === 'checkbox') {
-        Settings.set(key, e.target.checked);
+        let settings = Settings.load();
+        settings = Settings.set(settings, key, e.target.checked);
+        Settings.save(settings);
       } else {
-        Settings.set(key, e.target.value);
+        let settings = Settings.load();
+        settings = Settings.set(settings, key, e.target.value);
+        Settings.save(settings);
       }
     }
   }
@@ -270,9 +276,12 @@ export class SettingsView implements View {
     if (e.target instanceof HTMLButtonElement && e.target.hasAttribute('data-remove-index')) {
       e.preventDefault();
       const index = +e.target.getAttribute('data-remove-index');
-      const hidden = Settings.get('filter.hidden-authors') as PostAuthor[];
+
+      const settings = Settings.load();
+      const hidden = settings.filter.hiddenAuthors;
       hidden.splice(index, 1);
-      Settings.set('filter.hidden-authors', hidden);
+      Settings.save(settings);
+
       this.updateHiddenPosts(hidden);
       return false;
     }
@@ -282,25 +291,30 @@ export class SettingsView implements View {
     if (e.target instanceof HTMLInputElement) {
       if (e.target.hasAttribute('data-name-index')) {
         const index = +e.target.getAttribute('data-name-index');
-        const hidden = Settings.get('filter.hidden-authors') as PostAuthor[];
+        const settings = Settings.load();
+        const hidden = settings.filter.hiddenAuthors;
         hidden[index].name = e.target.value;
-        Settings.set('filter.hidden-authors', hidden);
+        Settings.save(settings);
       }
 
       if (e.target.hasAttribute('data-tripcode-index')) {
         const index = +e.target.getAttribute('data-tripcode-index');
-        const hidden = Settings.get('filter.hidden-authors') as PostAuthor[];
+        const settings = Settings.load();
+        const hidden = settings.filter.hiddenAuthors;
         hidden[index].tripcode = e.target.value;
-        Settings.set('filter.hidden-authors', hidden);
+        Settings.save(settings);
       }
     }
   }
 
   protected onAddHiddenClick(e: Event) {
     e.preventDefault();
-    const hidden = Settings.get('filter.hidden-authors') as PostAuthor[];
+
+    const settings = Settings.load();
+    const hidden = settings.filter.hiddenAuthors;
     hidden.push({ name: '', tripcode: '' });
-    Settings.set('filter.hidden-authors', hidden);
+    Settings.save(settings);
+
     this.updateHiddenPosts(hidden);
     return false;
   }
@@ -349,9 +363,12 @@ export class SettingsView implements View {
     if (e.target instanceof HTMLButtonElement && e.target.hasAttribute('data-remove-index')) {
       e.preventDefault();
       const index = +e.target.getAttribute('data-remove-index');
-      const replaces = Settings.get('form.replaces') as Replace[];
+
+      const settings = Settings.load();
+      const replaces = settings.form.replaces;
       replaces.splice(index, 1);
-      Settings.set('form.replaces', replaces);
+      Settings.save(settings);
+
       this.updateReplaces(replaces);
       return false;
     }
@@ -361,25 +378,32 @@ export class SettingsView implements View {
     if (e.target instanceof HTMLInputElement) {
       if (e.target.hasAttribute('data-pattern-index')) {
         const index = +e.target.getAttribute('data-pattern-index');
-        const replaces = Settings.get('form.replaces') as Replace[];
+
+        const settings = Settings.load();
+        const replaces = settings.form.replaces;
         replaces[index].pattern = e.target.value;
-        Settings.set('form.replaces', replaces);
+        Settings.save(settings);
       }
 
       if (e.target.hasAttribute('data-replace-index')) {
         const index = +e.target.getAttribute('data-replace-index');
-        const replaces = Settings.get('form.replaces') as Replace[];
+
+        const settings = Settings.load();
+        const replaces = settings.form.replaces;
         replaces[index].replace = e.target.value;
-        Settings.set('form.replaces', replaces);
+        Settings.save(settings);
       }
     }
   }
 
   protected onAddReplaceClick(e: Event) {
     e.preventDefault();
-    const replaces = Settings.get('form.replaces') as Replace[];
+
+    const settings = Settings.load();
+    const replaces = settings.form.replaces;
     replaces.push({ pattern: '', replace: '' });
-    Settings.set('form.replaces', replaces);
+    Settings.save(settings);
+
     this.updateReplaces(replaces);
     return false;
   }

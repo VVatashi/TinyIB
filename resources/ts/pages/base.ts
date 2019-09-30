@@ -1,15 +1,19 @@
 import { Page } from '.';
-import { Settings } from '../services';
+import { Settings } from '../settings';
 import { DOM } from '../utils';
 import { StyleSelectorView, ToolsView } from '../views';
 import { eventBus } from '../event-bus';
 import { Events } from '../events';
 
 export class BasePage implements Page {
+  protected readonly settings: Settings;
+
   readonly style: StyleSelectorView;
   readonly tools: ToolsView;
 
   constructor() {
+    this.settings = Settings.load();
+
     const $style = DOM.qid('style-selector') as HTMLSelectElement;
     if ($style) {
       this.style = new StyleSelectorView($style);
@@ -36,16 +40,22 @@ export class BasePage implements Page {
 
           const $post = e.target.closest('.post');
           if ($post) {
+            const settings = Settings.load();
+
             $post.classList.toggle('post--hidden');
             const id = +$post.getAttribute('data-post-id');
             const hidden = $post.classList.contains('post--hidden');
-            let hiddenPosts = Settings.get<number[]>('filter.hidden-posts') || [];
+            let hiddenPosts = settings.filter.hiddenPosts || [];
             if (hidden) {
               hiddenPosts.push(id);
             } else {
               hiddenPosts = hiddenPosts.filter(h => h !== id);
             }
-            Settings.set('filter.hidden-posts', hiddenPosts);
+
+            this.settings.filter.hiddenPosts = hiddenPosts;
+
+            settings.filter.hiddenPosts = hiddenPosts;
+            Settings.save(settings);
           }
 
           return false;

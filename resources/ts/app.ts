@@ -4,9 +4,9 @@ import {
   PostingForm,
   PostReferenceMap,
 } from './components';
-import { Settings, LocalStorage } from './services';
-import { DOM } from './utils';
 import { Page, BasePage, BoardPage, ThreadPage, SettingsPage } from './pages';
+import { Settings } from './settings';
+import { DOM } from './utils';
 
 declare global {
   interface Window {
@@ -36,21 +36,23 @@ new Post();
 new PostingForm();
 new PostReferenceMap();
 
+const settings = Settings.load();
+
 document.addEventListener('DOMContentLoaded', e => {
   eventBus.emit(Events.Ready);
 
   const posts = DOM.qsa('.post');
   eventBus.emit(Events.PostsInserted, posts, true);
 
-  if (Settings.get('common.smooth-scroll')) {
+  if (settings.common.smoothScroll) {
     document.body.classList.add('smooth-scroll');
   }
 
   const $layout = DOM.qs('.layout');
   if ($layout) {
-    $layout.classList.add('layout--' + Settings.get('common.layout'));
+    $layout.classList.add('layout--' + settings.common.layout);
 
-    const reflinkPosition = Settings.get<string>('post.reflink-icon-position');
+    const reflinkPosition = settings.post.reflinkIconPosition;
     if (reflinkPosition !== 'header') {
       $layout.classList.add('layout--hide-post-header-reflink-icon');
     }
@@ -58,46 +60,42 @@ document.addEventListener('DOMContentLoaded', e => {
       $layout.classList.add('layout--hide-post-reflink-icon');
     }
 
-    if (Settings.get('image.show-video-overlay')) {
+    if (settings.image.showVideoOverlay) {
       $layout.classList.add('layout--show-thumb-overlay');
     }
 
-    if (Settings.get('image.nsfw')) {
+    if (settings.image.nsfw) {
       $layout.classList.add('layout--nsfw');
     }
 
-    if (Settings.get('filter.remove-hidden-posts')) {
+    if (settings.filter.removeHiddenPosts) {
       $layout.classList.add('layout--remove-hidden');
     }
 
-    if (Settings.get('filter.hide-threads')) {
+    if (settings.filter.hideThreads) {
       $layout.classList.add('layout--hide-threads');
     }
 
-    if (Settings.get('form.show-markup')) {
+    if (settings.form.showMarkup) {
       $layout.classList.add('layout--show-markup');
     }
 
-    if (Settings.get('form.show-markup-mobile')) {
-      $layout.classList.add('layout--show-markup-mobile');
-    }
-
-    if (Settings.get('post.show-spoilers')) {
+    if (settings.post.showSpoilers) {
       $layout.classList.add('layout--show-spoilers');
     }
 
-    if (Settings.get('post.disable-sub')) {
+    if (settings.post.disableSub) {
       $layout.classList.add('layout--disable-sub');
     }
 
-    if (Settings.get('image.modal-at-top')) {
+    if (settings.image.modalAtTop) {
       $layout.classList.add('layout--modal-at-top');
     }
   }
 
   const $formWrapper = DOM.qs('.content__posting-form-wrapper');
   if ($formWrapper) {
-    $formWrapper.classList.add('content__posting-form-wrapper--' + Settings.get('form.align'));
+    $formWrapper.classList.add('content__posting-form-wrapper--' + settings.form.align);
   }
 });
 
@@ -120,6 +118,7 @@ class App {
   }
 }
 
-document.addEventListener('DOMContentLoaded', e => {
+document.addEventListener('DOMContentLoaded', () => {
+  Settings.migrate();
   window.app = new App();
 });

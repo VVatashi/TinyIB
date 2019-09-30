@@ -1,8 +1,16 @@
-import { Settings } from '../services';
+import { Settings } from '../settings';
 import { EventEmitter } from '../utils';
 
 export class Tools extends EventEmitter {
+  protected readonly settings: Settings;
+
   protected _isSettingsOpened = false;
+
+  public constructor() {
+    super();
+
+    this.settings = Settings.load();
+  }
 
   get isSettingsOpened(): boolean {
     return this._isSettingsOpened;
@@ -19,11 +27,11 @@ export class Tools extends EventEmitter {
   }
 
   get nsfw(): boolean {
-    return Settings.get('image.nsfw');
+    return this.settings.image.nsfw;
   }
 
   get autoPlay(): boolean {
-    return Settings.get('image.auto-play');
+    return this.settings.image.autoPlay;
   }
 
   toggleSettings() {
@@ -31,15 +39,23 @@ export class Tools extends EventEmitter {
   }
 
   toggleNsfw() {
-    const value = Settings.get('image.nsfw');
-    Settings.set('image.nsfw', !value);
-    this.emit('toggle-nsfw', !value);
+    this.settings.image.nsfw = !this.settings.image.nsfw;
+
+    const settings = Settings.load();
+    settings.image.nsfw = !settings.image.nsfw;
+    Settings.save(settings);
+
+    this.emit('toggle-nsfw', settings.image.nsfw);
   }
 
   toggleAutoPlay() {
-    const value = Settings.get('image.auto-play');
-    Settings.set('image.auto-play', !value);
-    this.emit('toggle-autoplay', !value);
+    this.settings.image.autoPlay = !this.settings.image.autoPlay;
+
+    const settings = Settings.load();
+    settings.image.autoPlay = !settings.image.autoPlay;
+    Settings.save(settings);
+
+    this.emit('toggle-autoplay', settings.image.autoPlay);
   }
 
   scrollToTop() {

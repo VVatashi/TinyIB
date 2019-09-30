@@ -84,7 +84,7 @@
     }
   }
 
-  @at-root .layout:not(.layout--show-markup-mobile) &__row--markup {
+  @at-root .layout:not(.layout--show-markup) &__row--markup {
     display: none;
   }
 
