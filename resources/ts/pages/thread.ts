@@ -2,10 +2,11 @@ import { BasePage } from './base';
 import { eventBus } from '../event-bus';
 import { Events } from '../events';
 import { Thread, ThreadUpdater } from '../model';
-import { Settings } from '../settings';
 import { DOM } from '../utils';
 import { PostView } from '../views';
 import { LocalStorage } from '../local-storage';
+import { store } from '../store';
+import { Settings } from '../settings';
 
 const faviconSize = 16;
 
@@ -128,6 +129,7 @@ export class ThreadPage extends BasePage {
   }
 
   updateFavicon(unreadPosts: number, hasReplies: boolean) {
+    const { settings } = store.getState().settings;
     const $canvas = document.createElement('canvas');
     $canvas.width = faviconSize;
     $canvas.height = faviconSize;
@@ -153,7 +155,7 @@ export class ThreadPage extends BasePage {
         context.textBaseline = 'middle';
         context.fillStyle = '#FFFFFF';
 
-        if (!this.settings.common.showUnreadCountInTitle) {
+        if (!settings.common.showUnreadCountInTitle) {
           // Draw new posts count.
           if (unreadPosts < 10) {
             context.font = `700 10px 'Roboto Condensed', sans-serif`;
@@ -186,7 +188,8 @@ export class ThreadPage extends BasePage {
   }
 
   updateTitle(unreadPosts: number) {
-    if (this.settings.common.showUnreadCountInTitle && unreadPosts > 0) {
+    const { settings } = store.getState().settings;
+    if (settings.common.showUnreadCountInTitle && unreadPosts > 0) {
       this.$title.textContent = `[${this.model.unreadPosts}] ${this.title}`;
     } else {
       this.$title.textContent = this.title;
@@ -224,6 +227,7 @@ export class ThreadPage extends BasePage {
   }
 
   protected processNewPosts($wrapper: Element) {
+    const { settings } = store.getState().settings;
     const $posts = DOM.qsa('.post', $wrapper);
     const $newPosts = $posts
       .filter($post => {
@@ -247,7 +251,7 @@ export class ThreadPage extends BasePage {
         const notifyTypeKey = this.model.hasReplies
           ? 'post.unreadRepliesNotify.mode'
           : 'post.unreadPostsNotify.mode';
-        const notifyType = Settings.get(this.settings, notifyTypeKey);
+        const notifyType = Settings.get(settings, notifyTypeKey);
         switch (notifyType) {
           case 'every-post':
             this.notify(this.model.hasReplies);
@@ -268,7 +272,7 @@ export class ThreadPage extends BasePage {
             const intervalKey = this.model.hasReplies
               ? 'post.unreadRepliesNotify.interval'
               : 'post.unreadPostsNotify.interval';
-            const interval = Settings.get(this.settings, intervalKey) * 1000;
+            const interval = Settings.get(settings, intervalKey) * 1000;
             this.notify(false);
             this.notifyIntervalTimer = setInterval(() => {
               this.notify(false);
@@ -351,6 +355,7 @@ export class ThreadPage extends BasePage {
   }
 
   protected notify(reply: boolean) {
+    const { settings } = store.getState().settings;
     const $source = DOM.qid('notify-source') as HTMLSourceElement;
     const $notify = DOM.qid('notify') as HTMLAudioElement;
     if ($source && $notify) {
@@ -358,7 +363,7 @@ export class ThreadPage extends BasePage {
       const typeKey = reply
         ? 'post.unreadRepliesNotify.type'
         : 'post.unreadPostsNotify.type';
-      const type = Settings.get(this.settings, typeKey);
+      const type = Settings.get(settings, typeKey);
       switch (type) {
         case 'default-1':
           $source.src = `${window.baseUrl}/mp3/notify-1.mp3`;
@@ -604,10 +609,11 @@ export class ThreadPage extends BasePage {
   }
 
   protected bindModel() {
+    const { settings } = store.getState().settings;
     this.updaterModel.on('new-posts-loaded', this.onNewPostsLoaded.bind(this));
 
     if (window.websocketUrl && window.websocketUrl.length
-      && !this.settings.post.disableWebSockets
+      && !settings.post.disableWebSockets
       && this.checkWebSocketSupport()) {
       this.bindWSThreadUpdater();
     } else {

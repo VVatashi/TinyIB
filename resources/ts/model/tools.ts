@@ -1,16 +1,8 @@
-import { Settings } from '../settings';
+import { store, setOption } from '../store';
 import { EventEmitter } from '../utils';
 
 export class Tools extends EventEmitter {
-  protected readonly settings: Settings;
-
   protected _isSettingsOpened = false;
-
-  public constructor() {
-    super();
-
-    this.settings = Settings.load();
-  }
 
   get isSettingsOpened(): boolean {
     return this._isSettingsOpened;
@@ -27,11 +19,13 @@ export class Tools extends EventEmitter {
   }
 
   get nsfw(): boolean {
-    return this.settings.image.nsfw;
+    const { settings } = store.getState().settings;
+    return settings.image.nsfw;
   }
 
   get autoPlay(): boolean {
-    return this.settings.image.autoPlay;
+    const { settings } = store.getState().settings;
+    return settings.image.autoPlay;
   }
 
   toggleSettings() {
@@ -39,23 +33,17 @@ export class Tools extends EventEmitter {
   }
 
   toggleNsfw() {
-    this.settings.image.nsfw = !this.settings.image.nsfw;
-
-    const settings = Settings.load();
-    settings.image.nsfw = !settings.image.nsfw;
-    Settings.save(settings);
-
-    this.emit('toggle-nsfw', settings.image.nsfw);
+    const { settings } = store.getState().settings;
+    const nsfw = !settings.image.nsfw;
+    store.dispatch(setOption('image.nsfw', nsfw));
+    this.emit('toggle-nsfw', nsfw);
   }
 
   toggleAutoPlay() {
-    this.settings.image.autoPlay = !this.settings.image.autoPlay;
-
-    const settings = Settings.load();
-    settings.image.autoPlay = !settings.image.autoPlay;
-    Settings.save(settings);
-
-    this.emit('toggle-autoplay', settings.image.autoPlay);
+    const { settings } = store.getState().settings;
+    const autoPlay = !settings.image.autoPlay;
+    store.dispatch(setOption('image.autoPlay', autoPlay));
+    this.emit('toggle-autoplay', autoPlay);
   }
 
   scrollToTop() {

@@ -1,16 +1,14 @@
 import { eventBus, Events } from '..';
-import { Settings } from '../settings';
 import { DOM } from '../utils';
+import { store } from '../store';
 
 export class PostReferenceMap {
-  protected readonly settings: Settings;
   protected readonly posts: { [id: number]: Element } = {};
 
   constructor() {
-    this.settings = Settings.load();
-
     eventBus.on(Events.PostsInserted, (posts: Element[]) => {
-      if (!this.settings.link.addNamesToLinks) {
+      const { settings } = store.getState().settings;
+      if (!settings.link.addNamesToLinks) {
         return;
       }
 

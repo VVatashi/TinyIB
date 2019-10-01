@@ -134,7 +134,7 @@ export interface Settings {
   };
 }
 
-const defaultSettings: Settings = {
+export const defaultSettings: Settings = {
   filter: {
     removeHiddenPosts: false,
     hiddenAuthors: [],

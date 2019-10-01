@@ -6,8 +6,7 @@ import { eventBus, Events } from '..';
 import { HotKeys } from '../hotkeys';
 import { LocalStorage } from '../local-storage';
 import { Coub } from '../services';
-import { Settings } from '../settings';
-import { store } from '../store';
+import { store, setOption } from '../store';
 import { DOM } from '../utils';
 
 interface FileData {
@@ -40,8 +39,6 @@ function offset($el: HTMLElement) {
 }
 
 export class Post {
-  protected settings: Settings;
-
   protected $layout: HTMLElement = null;
   protected $modal: HTMLElement = null;
   protected modal: Modal = null;
@@ -60,8 +57,6 @@ export class Post {
   protected autoPlayNextVideo = false;
 
   constructor() {
-    this.settings = Settings.load();
-
     eventBus.on(Events.Ready, this.onReady.bind(this));
     eventBus.on(Events.PostsInserted, this.onPostsInserted.bind(this));
   }
@@ -172,6 +167,7 @@ export class Post {
 
   protected onReady() {
     this.$layout = DOM.qs('.layout') as HTMLElement;
+    const { settings } = store.getState().settings;
 
     const onKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -234,7 +230,7 @@ export class Post {
         }
 
         const link = $link.getAttribute('href');
-        const expandMode = this.settings.image.expandImages;
+        const expandMode = settings.image.expandImages;
         if (expandMode === 'tab') {
           window.open(link);
           return;
@@ -321,7 +317,7 @@ export class Post {
 
       if (e.target.tagName === 'A' && e.target.classList.contains('thumbnail')
         || e.target.tagName === 'IMG' && e.target.classList.contains('thumbnail__content')) {
-        const expandMode = this.settings.image.expandImages;
+        const expandMode = settings.image.expandImages;
         if (expandMode === 'tab') {
           return;
         }
@@ -355,7 +351,7 @@ export class Post {
         }
 
         return false;
-      } else if (this.settings.image.hidePopupOnOutsideClick) {
+      } else if (settings.image.hidePopupOnOutsideClick) {
         if ((e.target as HTMLElement).closest('.video-player__controls')) {
           return;
         }
@@ -373,11 +369,9 @@ export class Post {
 
         const hash = $file.getAttribute('data-hash');
         if (hash) {
-          this.settings.filter.hiddenFiles.push(hash);
-
-          const settings = Settings.load();
-          settings.filter.hiddenFiles.push(hash);
-          Settings.save(settings);
+          const hiddenFiles = [...settings.filter.hiddenFiles];
+          hiddenFiles.push(hash);
+          store.dispatch(setOption('filter.hiddenFiles', hiddenFiles));
         }
 
         this.hideFile($file);
@@ -391,18 +385,15 @@ export class Post {
 
         const hash = $file.getAttribute('data-hash');
         if (hash) {
-          this.settings.filter.hiddenFiles = this.settings.filter.hiddenFiles.filter(h => h !== hash);
-
-          const settings = Settings.load();
-          settings.filter.hiddenFiles = settings.filter.hiddenFiles.filter(h => h !== hash);
-          Settings.save(settings);
+          const hiddenFiles = settings.filter.hiddenFiles.filter(h => h !== hash);
+          store.dispatch(setOption('filter.hiddenFiles', hiddenFiles));
         }
 
         this.showFile($file);
       }
     });
 
-    if (this.settings.link.showPostPopups) {
+    if (settings.link.showPostPopups) {
       document.addEventListener('mouseover', e => {
         const $target = e.target as HTMLElement;
         if ($target.tagName === 'A'
@@ -427,12 +418,13 @@ export class Post {
   }
 
   protected checkHidden($post: HTMLElement) {
-    const hiddenPosts = this.settings.filter.hiddenPosts || [];
+    const { settings } = store.getState().settings;
+    const hiddenPosts = settings.filter.hiddenPosts || [];
     const id = +$post.getAttribute('data-post-id');
     if (hiddenPosts.indexOf(id) !== -1) {
       $post.classList.add('post--hidden');
     } else {
-      const hidden = this.settings.filter.hiddenAuthors || [];
+      const hidden = settings.filter.hiddenAuthors || [];
 
       const $name = DOM.qs('.post-header__name', $post);
       const $tripcode = DOM.qs('.post-header__tripcode', $post);
@@ -448,7 +440,8 @@ export class Post {
   }
 
   protected onPostsInserted(posts: HTMLElement[]) {
-    const hiddenFiles = this.settings.filter.hiddenFiles || [];
+    const { settings } = store.getState().settings;
+    const hiddenFiles = settings.filter.hiddenFiles || [];
     posts.forEach($post => {
       const $fileLink = DOM.qs('.thumbnail', $post) as HTMLAnchorElement;
       if ($fileLink) {
@@ -485,9 +478,9 @@ export class Post {
         // Replace thumbnail with original.
         if (type === 'image') {
           const $thumbnail = DOM.qs('.thumbnail__content', $fileLink) as HTMLImageElement;
-          if (!url.endsWith('.gif') && this.settings.image.replaceThumbnail) {
+          if (!url.endsWith('.gif') && settings.image.replaceThumbnail) {
             $thumbnail.src = $fileLink.href;
-          } else if (url.endsWith('.gif') && this.settings.image.replaceThumbnailGif) {
+          } else if (url.endsWith('.gif') && settings.image.replaceThumbnailGif) {
             $thumbnail.src = $fileLink.href;
           }
         }
@@ -500,6 +493,7 @@ export class Post {
   }
 
   protected processReplies(post: HTMLElement) {
+    const { settings } = store.getState().settings;
     const name = LocalStorage.get('user.name', '')
       + LocalStorage.get('user.tripcode', '');
 
@@ -517,7 +511,7 @@ export class Post {
     links.forEach(link => {
       const targetId = +link.getAttribute('data-target-post-id');
       if (this.ownPostIds.indexOf(targetId) !== -1) {
-        if (this.settings.link.addYouToLinks) {
+        if (settings.link.addYouToLinks) {
           const youEl = document.createElement('span');
           youEl.classList.add('post__reference-link-author');
           youEl.innerHTML = '(You)';
@@ -547,7 +541,7 @@ export class Post {
         const name = $name ? $name.textContent : '';
         const tripcode = $tripcode ? $tripcode.textContent : '';
 
-        const hidden = this.settings.filter.hiddenAuthors || [];
+        const hidden = settings.filter.hiddenAuthors || [];
         if (hidden.some((author: { name: string, tripcode: string }) =>
           author.name === name && author.tripcode === tripcode)) {
           $reflink.classList.add('post__refmap-link--hidden');
@@ -563,12 +557,13 @@ export class Post {
   }
 
   protected async processOEmbedLinks($post: HTMLElement) {
+    const { settings } = store.getState().settings;
     const postContent = DOM.qs('.post__content', $post);
     if (!postContent) {
       return;
     }
 
-    const hiddenFiles = this.settings.filter.hiddenFiles || [];
+    const hiddenFiles = settings.filter.hiddenFiles || [];
     const postMessage = DOM.qs('.post__message', $post);
     const links = DOM.qsa('a[href]', postMessage) as HTMLAnchorElement[];
     links.filter(link => !link.hasAttribute('data-processed'))
@@ -712,21 +707,20 @@ export class Post {
   }
 
   protected toggleNsfw() {
-    this.settings.image.nsfw = this.settings.image.nsfw;
+    const { settings } = store.getState().settings;
 
     const nsfwClass = 'layout--nsfw';
-    if (this.settings.image.nsfw) {
+    if (settings.image.nsfw) {
       this.$layout.classList.add(nsfwClass);
     } else {
       this.$layout.classList.remove(nsfwClass);
     }
 
-    const settings = Settings.load();
-    settings.image.nsfw = !settings.image.nsfw;
-    Settings.save(settings);
+    store.dispatch(setOption('image.nsfw', !settings.image.nsfw));
   }
 
   protected async showMediaModal(mediaIndex: number) {
+    const { settings } = store.getState().settings;
     const modalParentPopupId = this.modalParentPopupId;
     this.closeModals();
 
@@ -780,7 +774,7 @@ export class Post {
       $navigationPanels.forEach($panel => $panel.classList.add('hidden'));
     }
 
-    const autoPlay = this.settings.image.autoPlay;
+    const autoPlay = settings.image.autoPlay;
 
     if (file.type === 'image') {
       this.$modal = document.createElement('div');
@@ -1148,12 +1142,13 @@ export class Post {
   }
 
   async showFileInPost(mediaIndex: number) {
+    const { settings } = store.getState().settings;
     const file = this.media[mediaIndex];
 
     const $thumbnail = DOM.qs('.thumbnail__content', file.$link);
     $thumbnail.classList.add('hidden');
 
-    const autoPlay = this.settings.image.autoPlay;
+    const autoPlay = settings.image.autoPlay;
     let $original: HTMLElement;
     if (file.type === 'video') {
       $original = document.createElement('video');

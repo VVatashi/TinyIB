@@ -1,9 +1,9 @@
 import { DateTime } from 'luxon';
-import { Settings } from '../settings';
+import { store } from '../store';
 
 export class Time {
   static format(time: DateTime) {
-    const settings = Settings.load();
+    const { settings } = store.getState().settings;
 
     if (settings.time.locale === 'custom') {
       time = time.setLocale(settings.time.localeCustom);

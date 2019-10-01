@@ -6,7 +6,6 @@ import { Api } from '../api';
 import { Coords } from './draggable';
 import { HotKeys } from '../hotkeys';
 import { LocalStorage } from '../local-storage';
-import { Settings } from '../settings';
 import { store } from '../store';
 import { DOM, Keyboard } from '../utils';
 
@@ -27,19 +26,16 @@ interface ViewModel {
 }
 
 export class PostingForm {
-  protected readonly settings: Settings;
-
   protected isInThread: boolean = false;
   protected viewModel: Vue & ViewModel;
 
   constructor() {
-    this.settings = Settings.load();
-
     eventBus.on(Events.Ready, this.onReady.bind(this));
     eventBus.on(Events.PostsInserted, this.onPostsInserted.bind(this));
   }
 
   onReady() {
+    const { settings } = store.getState().settings;
     const form = DOM.qid('posting-form');
     if (!form) {
       return;
@@ -223,7 +219,7 @@ export class PostingForm {
           disabled: false,
           status: '',
           hidden: true,
-          position: component.settings.form.saveFormState
+          position: settings.form.saveFormState
             && LocalStorage.get('form.fload')
             ? 'float' : 'bottom',
           colorPopupVisible: false,
@@ -235,11 +231,11 @@ export class PostingForm {
           return threadId;
         },
         previewAlign() {
-          return component.settings.form.previewAlign;
+          return settings.form.previewAlign;
         },
       },
       created() {
-        if (component.settings.form.saveSubject) {
+        if (settings.form.saveSubject) {
           // Load saved subject.
           const subject = LocalStorage.get('posting-form.subject', '');
           if (subject) {
@@ -247,7 +243,7 @@ export class PostingForm {
           }
         }
 
-        if (component.settings.form.saveName) {
+        if (settings.form.saveName) {
           // Load saved name.
           const name = LocalStorage.get('posting-form.name', '');
           if (name) {
@@ -308,11 +304,11 @@ export class PostingForm {
           this.setPosition(this.checkBounds(this.getPosition()));
         },
         resetFields() {
-          if (!component.settings.form.saveSubject) {
+          if (!settings.form.saveSubject) {
             this.fields.subject = '';
           }
 
-          if (!component.settings.form.saveName) {
+          if (!settings.form.saveName) {
             this.fields.name = '';
           }
 
@@ -430,7 +426,7 @@ export class PostingForm {
 
           let message = this.fields.message as string;
 
-          if (selection.length || component.settings.form.insertTagsInPairs) {
+          if (selection.length || settings.form.insertTagsInPairs) {
             // If text is selected, wrap it in a tag pair.
             message = [
               message.substring(0, selection.begin),
@@ -510,7 +506,7 @@ export class PostingForm {
           this.disabled = true;
 
           // Apply replaces to the message.
-          const replaces = component.settings.form.replaces;
+          const replaces = settings.form.replaces;
           const message = replaces.reduce((message: string, item) => {
             const regexp = new RegExp(item.pattern, 'gm');
             return message.replace(regexp, item.replace);
@@ -543,7 +539,7 @@ export class PostingForm {
             }
 
             if (isInThread) {
-              if (component.settings.post.enableThreadAutoupdate) {
+              if (settings.post.enableThreadAutoupdate) {
                 eventBus.emit(Events.PostCreated);
               }
             } else {
@@ -565,7 +561,7 @@ export class PostingForm {
             }
           }
 
-          if (component.settings.post.scrollToNewPosts) {
+          if (settings.post.scrollToNewPosts) {
             // Scroll to the last post.
             setTimeout(() => {
               const el = DOM.qs('.post:nth-last-of-type(1)');
@@ -667,7 +663,8 @@ export class PostingForm {
   }
 
   protected onPostsInserted(posts: HTMLElement[], initial: boolean) {
-    if (!initial && this.settings.post.scrollToNewPosts) {
+    const { settings } = store.getState().settings;
+    if (!initial && settings.post.scrollToNewPosts) {
       const scrollingEl = document.scrollingElement || document.body;
       const postsHeight = posts.reduce((total, post) => {
         const style = document.defaultView.getComputedStyle(post, '');

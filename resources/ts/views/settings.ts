@@ -9,7 +9,7 @@ import { HotKeys } from '../components';
 import { LocalStorage } from '../local-storage';
 import { Settings as Model } from '../model';
 import { Settings } from '../settings';
-import { store } from '../store';
+import { store, setOption } from '../store';
 import { DOM, Time } from '../utils';
 
 interface PostAuthor {
@@ -52,6 +52,8 @@ export class SettingsView implements View {
     if (!this.$form) {
       return;
     }
+
+    const { settings } = store.getState().settings;
 
     // Bind DOM events to model.
     this.$form.addEventListener('click', this.onFormClick);
@@ -104,7 +106,6 @@ export class SettingsView implements View {
     });
 
     // Bind initial settings values to DOM.
-    const settings = Settings.load();
     const $inputs = DOM.qsa('[data-key]', this.$form);
     $inputs.forEach($input => {
       const key = $input.getAttribute('data-key');
@@ -261,13 +262,9 @@ export class SettingsView implements View {
     if (e.target instanceof HTMLInputElement && e.target.hasAttribute('data-key')) {
       const key = e.target.getAttribute('data-key');
       if (e.target.type === 'checkbox') {
-        let settings = Settings.load();
-        settings = Settings.set(settings, key, e.target.checked);
-        Settings.save(settings);
+        store.dispatch(setOption(key, e.target.checked));
       } else {
-        let settings = Settings.load();
-        settings = Settings.set(settings, key, e.target.value);
-        Settings.save(settings);
+        store.dispatch(setOption(key, e.target.value));
       }
     }
   }
@@ -277,10 +274,10 @@ export class SettingsView implements View {
       e.preventDefault();
       const index = +e.target.getAttribute('data-remove-index');
 
-      const settings = Settings.load();
-      const hidden = settings.filter.hiddenAuthors;
+      const { settings } = store.getState().settings;
+      const hidden = [...settings.filter.hiddenAuthors];
       hidden.splice(index, 1);
-      Settings.save(settings);
+      store.dispatch(setOption('filter.hiddenAuthors', hidden));
 
       this.updateHiddenPosts(hidden);
       return false;
@@ -289,20 +286,20 @@ export class SettingsView implements View {
 
   protected onHiddenChange(e: Event) {
     if (e.target instanceof HTMLInputElement) {
+      const { settings } = store.getState().settings;
+
       if (e.target.hasAttribute('data-name-index')) {
         const index = +e.target.getAttribute('data-name-index');
-        const settings = Settings.load();
-        const hidden = settings.filter.hiddenAuthors;
+        const hidden = [...settings.filter.hiddenAuthors];
         hidden[index].name = e.target.value;
-        Settings.save(settings);
+        store.dispatch(setOption('filter.hiddenAuthors', hidden));
       }
 
       if (e.target.hasAttribute('data-tripcode-index')) {
         const index = +e.target.getAttribute('data-tripcode-index');
-        const settings = Settings.load();
-        const hidden = settings.filter.hiddenAuthors;
+        const hidden = [...settings.filter.hiddenAuthors];
         hidden[index].tripcode = e.target.value;
-        Settings.save(settings);
+        store.dispatch(setOption('filter.hiddenAuthors', hidden));
       }
     }
   }
@@ -310,10 +307,10 @@ export class SettingsView implements View {
   protected onAddHiddenClick(e: Event) {
     e.preventDefault();
 
-    const settings = Settings.load();
-    const hidden = settings.filter.hiddenAuthors;
+    const { settings } = store.getState().settings;
+    const hidden = [...settings.filter.hiddenAuthors];
     hidden.push({ name: '', tripcode: '' });
-    Settings.save(settings);
+    store.dispatch(setOption('filter.hiddenAuthors', hidden));
 
     this.updateHiddenPosts(hidden);
     return false;
@@ -364,10 +361,10 @@ export class SettingsView implements View {
       e.preventDefault();
       const index = +e.target.getAttribute('data-remove-index');
 
-      const settings = Settings.load();
-      const replaces = settings.form.replaces;
+      const { settings } = store.getState().settings;
+      const replaces = [...settings.form.replaces];
       replaces.splice(index, 1);
-      Settings.save(settings);
+      store.dispatch(setOption('form.replaces', replaces));
 
       this.updateReplaces(replaces);
       return false;
@@ -376,22 +373,22 @@ export class SettingsView implements View {
 
   protected onReplacesChange(e: Event) {
     if (e.target instanceof HTMLInputElement) {
+      const { settings } = store.getState().settings;
+
       if (e.target.hasAttribute('data-pattern-index')) {
         const index = +e.target.getAttribute('data-pattern-index');
 
-        const settings = Settings.load();
-        const replaces = settings.form.replaces;
+        const replaces = [...settings.form.replaces];
         replaces[index].pattern = e.target.value;
-        Settings.save(settings);
+        store.dispatch(setOption('form.replaces', replaces));
       }
 
       if (e.target.hasAttribute('data-replace-index')) {
         const index = +e.target.getAttribute('data-replace-index');
 
-        const settings = Settings.load();
-        const replaces = settings.form.replaces;
+        const replaces = [...settings.form.replaces];
         replaces[index].replace = e.target.value;
-        Settings.save(settings);
+        store.dispatch(setOption('form.replaces', replaces));
       }
     }
   }
@@ -399,10 +396,10 @@ export class SettingsView implements View {
   protected onAddReplaceClick(e: Event) {
     e.preventDefault();
 
-    const settings = Settings.load();
-    const replaces = settings.form.replaces;
+    const { settings } = store.getState().settings;
+    const replaces = [...settings.form.replaces];
     replaces.push({ pattern: '', replace: '' });
-    Settings.save(settings);
+    store.dispatch(setOption('form.replaces', replaces));
 
     this.updateReplaces(replaces);
     return false;

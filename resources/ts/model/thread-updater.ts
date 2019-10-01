@@ -1,15 +1,12 @@
 import { Thread } from '.';
 import { HotKeys } from '../hotkeys';
 import { API } from '../services';
-import { Settings } from '../settings';
 import { EventEmitter } from '../utils';
-import { store } from '../store';
+import { store, setOption } from '../store';
 
 const updateInterval = 10;
 
 export class ThreadUpdater extends EventEmitter {
-  protected readonly settings: Settings;
-
   protected _counter: number = updateInterval;
   protected _isLoading: boolean = false;
 
@@ -32,15 +29,12 @@ export class ThreadUpdater extends EventEmitter {
   }
 
   get isUpdateEnabled() {
-    return this.settings.post.enableThreadAutoupdate;
+    const { settings } = store.getState().settings;
+    return settings.post.enableThreadAutoupdate;
   }
 
   set isUpdateEnabled(value: boolean) {
-    this.settings.post.enableThreadAutoupdate = value;
-
-    const settings = Settings.load();
-    settings.post.enableThreadAutoupdate = value;
-    Settings.save(settings);
+    store.dispatch(setOption('post.enableThreadAutoupdate', value));
   }
 
   get threadId() {
@@ -59,8 +53,6 @@ export class ThreadUpdater extends EventEmitter {
     readonly thread: Thread,
   ) {
     super();
-
-    this.settings = Settings.load();
 
     document.addEventListener('keydown', e => {
       const target = e.target as HTMLElement;

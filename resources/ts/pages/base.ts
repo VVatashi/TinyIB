@@ -1,19 +1,15 @@
 import { Page } from '.';
-import { Settings } from '../settings';
 import { DOM } from '../utils';
 import { StyleSelectorView, ToolsView } from '../views';
 import { eventBus } from '../event-bus';
 import { Events } from '../events';
+import { store, setOption } from '../store';
 
 export class BasePage implements Page {
-  protected readonly settings: Settings;
-
   readonly style: StyleSelectorView;
   readonly tools: ToolsView;
 
   constructor() {
-    this.settings = Settings.load();
-
     const $style = DOM.qid('style-selector') as HTMLSelectElement;
     if ($style) {
       this.style = new StyleSelectorView($style);
@@ -33,6 +29,8 @@ export class BasePage implements Page {
         return;
       }
 
+      const { settings } = store.getState().settings;
+
       if (e.target.tagName === 'A') {
         if (e.target.classList.contains('post-header__hide')
           || e.target.classList.contains('post-header-mobile__hide')) {
@@ -40,22 +38,17 @@ export class BasePage implements Page {
 
           const $post = e.target.closest('.post');
           if ($post) {
-            const settings = Settings.load();
-
             $post.classList.toggle('post--hidden');
             const id = +$post.getAttribute('data-post-id');
             const hidden = $post.classList.contains('post--hidden');
-            let hiddenPosts = settings.filter.hiddenPosts || [];
+            let hiddenPosts = [...settings.filter.hiddenPosts];
             if (hidden) {
               hiddenPosts.push(id);
             } else {
               hiddenPosts = hiddenPosts.filter(h => h !== id);
             }
 
-            this.settings.filter.hiddenPosts = hiddenPosts;
-
-            settings.filter.hiddenPosts = hiddenPosts;
-            Settings.save(settings);
+            store.dispatch(setOption('filter.hiddenPosts', hiddenPosts));
           }
 
           return false;
