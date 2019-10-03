@@ -478,7 +478,7 @@ export class PostingForm {
           const message = this.fields.message as string;
           const before = message.substring(0, selection.begin);
           const after = message.substring(selection.end);
-          const selectionText = this.getSelection();
+          const selectionText = component.getSelection();
           const quoteText = selectionText.length ? selectionText.replace(/^(.+)$/gm, '> $1') : '> ';
           const newLineBefore = before.length && !before.endsWith('\n') ? '\n' : '';
           const newLineAfter = (!after.length || !after.startsWith('\n')) && quoteText.length > 2 ? '\n' : '';
