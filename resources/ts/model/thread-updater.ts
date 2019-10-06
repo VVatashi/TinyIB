@@ -1,7 +1,8 @@
 import { Thread } from '.';
 import { HotKeys } from '../hotkeys';
-import { API, Settings } from '../services';
+import { API } from '../services';
 import { EventEmitter } from '../utils';
+import { store, setOption } from '../store';
 
 const updateInterval = 10;
 
@@ -28,11 +29,12 @@ export class ThreadUpdater extends EventEmitter {
   }
 
   get isUpdateEnabled() {
-    return Settings.get('post.enable-thread-autoupdate');
+    const { settings } = store.getState().settings;
+    return settings.post.enableThreadAutoupdate;
   }
 
   set isUpdateEnabled(value: boolean) {
-    Settings.set('post.enable-thread-autoupdate', value);
+    store.dispatch(setOption('post.enableThreadAutoupdate', value));
   }
 
   get threadId() {
@@ -58,11 +60,11 @@ export class ThreadUpdater extends EventEmitter {
         return;
       }
 
-      const hotKeys = HotKeys.load();
+      const { hotKeys } = store.getState().hotKeys;
       if (HotKeys.check(hotKeys['updateThread'], e)) {
         e.preventDefault();
 
-        if (Settings.get('post.enable-thread-autoupdate')) {
+        if (this.isUpdateEnabled) {
           this.getNewPosts();
         }
 

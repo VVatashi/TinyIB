@@ -3,6 +3,7 @@
         "resources/components/**/*.ts",
         "resources/components/**/*.tsx",
         "resources/ts/**/*.ts",
+        "resources/app/**/*.ts",
     ],
     "exclude": [
         "node_modules/**/*"
@@ -15,8 +16,7 @@
         "jsx": "react",
         "lib": [
             "dom",
-            "es2015",
-            "es2015.promise"
+            "es2017"
         ],
         "outDir": "./"
     }

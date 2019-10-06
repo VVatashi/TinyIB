@@ -1,9 +1,9 @@
 import { Page } from '.';
-import { Settings } from '../services';
 import { DOM } from '../utils';
 import { StyleSelectorView, ToolsView } from '../views';
 import { eventBus } from '../event-bus';
 import { Events } from '../events';
+import { store, setOption } from '../store';
 
 export class BasePage implements Page {
   readonly style: StyleSelectorView;
@@ -29,6 +29,8 @@ export class BasePage implements Page {
         return;
       }
 
+      const { settings } = store.getState().settings;
+
       if (e.target.tagName === 'A') {
         if (e.target.classList.contains('post-header__hide')
           || e.target.classList.contains('post-header-mobile__hide')) {
@@ -39,13 +41,14 @@ export class BasePage implements Page {
             $post.classList.toggle('post--hidden');
             const id = +$post.getAttribute('data-post-id');
             const hidden = $post.classList.contains('post--hidden');
-            let hiddenPosts = Settings.get<number[]>('filter.hidden-posts') || [];
+            let hiddenPosts = [...settings.filter.hiddenPosts];
             if (hidden) {
               hiddenPosts.push(id);
             } else {
               hiddenPosts = hiddenPosts.filter(h => h !== id);
             }
-            Settings.set('filter.hidden-posts', hiddenPosts);
+
+            store.dispatch(setOption('filter.hiddenPosts', hiddenPosts));
           }
 
           return false;

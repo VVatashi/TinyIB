@@ -1,5 +1,8 @@
 import React, { PureComponent } from 'react';
-import { HotKeys, HotKey } from '../hotkeys';
+import { Dispatch } from 'redux';
+import { connect } from 'react-redux';
+import { HotKeys as HotKeysData, HotKey } from '../hotkeys';
+import { AppState, setHotKey } from '../store';
 
 interface HotKeyLabels {
   readonly [key: string]: string;
@@ -29,19 +32,18 @@ const specialKeys = [
   'ShiftRight',
 ];
 
-interface Props { }
-
-interface State {
-  readonly hotKeys: HotKeys;
+interface Props {
+  readonly hotKeys: HotKeysData;
+  readonly setHotKey: (actionName: string, hotKey: HotKey) => void;
 }
 
-export default class HotkeysComponent extends PureComponent<Props, State> {
+interface State { }
+
+export class HotKeys extends PureComponent<Props, State> {
   public constructor(props: Props) {
     super(props);
 
-    this.state = {
-      hotKeys: HotKeys.load(),
-    };
+    this.state = {};
   }
 
   private formatHotkey = (hotKey: HotKey): string => {
@@ -87,41 +89,60 @@ export default class HotkeysComponent extends PureComponent<Props, State> {
     event.preventDefault();
     event.stopPropagation();
 
-    const hotkey = this.eventToHotKey(event);
-
-    this.setState(state => {
-      const hotKeys = { ...state.hotKeys, [hotKeyName]: hotkey };
-      HotKeys.save(hotKeys);
-      return { hotKeys };
-    });
+    const hotKey = this.eventToHotKey(event);
+    this.props.setHotKey(hotKeyName, hotKey);
   }
 
   private renderHotKey = (hotKeyName: string, label: string) => {
-    const hotKey = this.state.hotKeys[hotKeyName];
+    const hotKey = this.props.hotKeys[hotKeyName];
+    const id = `hotkeys-${hotKeyName}`;
     const onKeyDown = (e: React.KeyboardEvent) => this.onKeyDown(hotKeyName, e);
     return (
-      <div className="settings-form__row" key={hotKeyName}>
-        <label className="settings-form__label">
-          <span>{label} </span>
-          <input type="text" className="input settings-form__text"
+      <tr key={hotKeyName}>
+        <td>
+          <label htmlFor={id}>{label}</label>
+        </td>
+
+        <td>
+          <input type="text" className="input settings-form__text" id={id}
             value={this.formatHotkey(hotKey)}
             onKeyDown={onKeyDown} />
-        </label>
-      </div>
+        </td>
+      </tr>
     );
   }
 
   public render() {
-    const inputs = Object.keys(hotKeys).map(hotKeyName => {
+    const rows = Object.keys(hotKeys).map(hotKeyName => {
       const label = hotKeys[hotKeyName];
       return this.renderHotKey(hotKeyName, label);
     });
 
     return (
-      <div className="settings-form__hotkeys">
-        <h3 className="settings-form__option-title">Hotkeys</h3>
-        {inputs}
-      </div>
+      <table>
+        <tbody>
+          {rows}
+        </tbody>
+      </table>
     );
   }
 }
+
+const mapStateToProps = (state: AppState, ownProps: {}) => {
+  return {
+    hotKeys: state.hotKeys.hotKeys,
+  };
+};
+
+const mapDispatchToProps = (dispatch: Dispatch, ownProps: {}) => {
+  return {
+    setHotKey: (actionName: string, hotKey: HotKey) => dispatch(setHotKey(actionName, hotKey)),
+  };
+};
+
+const HotKeysWithStore = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(HotKeys);
+
+export default HotKeysWithStore;

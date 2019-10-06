@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon';
-import { LocalStorage, API } from '../services';
+import { LocalStorage } from '../local-storage';
+import { API } from '../services';
 import { Time } from '../utils';
 
 export class Post {

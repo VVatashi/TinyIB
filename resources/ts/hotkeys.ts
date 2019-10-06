@@ -1,4 +1,4 @@
-import { LocalStorage } from './services';
+import { LocalStorage } from './local-storage';
 
 export interface HotKey {
   readonly code: string;
@@ -27,14 +27,17 @@ const defaultHotKeys: HotKeys = {
 };
 
 export class HotKeys {
+  public static readonly key = 'hotkeys';
+
   public static load(): HotKeys {
-    const hotKeysData = LocalStorage.get<string>('hotkeys', '{}');
+    const hotKeysData = LocalStorage.get<string>(HotKeys.key, '{}');
     return { ...defaultHotKeys, ...JSON.parse(hotKeysData) };
   }
 
-  public static save(hotKeys: HotKeys) {
+  public static save(hotKeys: HotKeys): HotKeys {
     const hotKeysData = JSON.stringify(hotKeys);
-    LocalStorage.set('hotkeys', hotKeysData);
+    LocalStorage.set(HotKeys.key, hotKeysData);
+    return hotKeys;
   }
 
   public static check(hotKey: HotKey, event: KeyboardEvent): boolean {
