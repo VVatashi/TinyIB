@@ -38,73 +38,6 @@ try {
   image.src = 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=';
 } catch { }
 
-new Post();
-new PostingForm();
-new PostReferenceMap();
-
-const settings = Settings.load();
-
-document.addEventListener('DOMContentLoaded', e => {
-  eventBus.emit(Events.Ready);
-
-  const posts = DOM.qsa('.post');
-  eventBus.emit(Events.PostsInserted, posts, true);
-
-  if (settings.common.smoothScroll) {
-    document.body.classList.add('smooth-scroll');
-  }
-
-  const $layout = DOM.qs('.layout');
-  if ($layout) {
-    $layout.classList.add('layout--' + settings.common.layout);
-
-    const reflinkPosition = settings.post.reflinkIconPosition;
-    if (reflinkPosition !== 'header') {
-      $layout.classList.add('layout--hide-post-header-reflink-icon');
-    }
-    if (reflinkPosition !== 'post') {
-      $layout.classList.add('layout--hide-post-reflink-icon');
-    }
-
-    if (settings.image.showVideoOverlay) {
-      $layout.classList.add('layout--show-thumb-overlay');
-    }
-
-    if (settings.image.nsfw) {
-      $layout.classList.add('layout--nsfw');
-    }
-
-    if (settings.filter.removeHiddenPosts) {
-      $layout.classList.add('layout--remove-hidden');
-    }
-
-    if (settings.filter.hideThreads) {
-      $layout.classList.add('layout--hide-threads');
-    }
-
-    if (settings.form.showMarkup) {
-      $layout.classList.add('layout--show-markup');
-    }
-
-    if (settings.post.showSpoilers) {
-      $layout.classList.add('layout--show-spoilers');
-    }
-
-    if (settings.post.disableSub) {
-      $layout.classList.add('layout--disable-sub');
-    }
-
-    if (settings.image.modalAtTop) {
-      $layout.classList.add('layout--modal-at-top');
-    }
-  }
-
-  const $formWrapper = DOM.qs('.content__posting-form-wrapper');
-  if ($formWrapper) {
-    $formWrapper.classList.add('content__posting-form-wrapper--' + settings.form.align);
-  }
-});
-
 interface Components {
   [key: string]: any;
 }
@@ -146,7 +79,58 @@ class App {
   }
 }
 
+function updateClass(element: Element, className: string, setClass: boolean = true) {
+  if (!element) {
+    return;
+  }
+
+  if (setClass) {
+    element.classList.add(className);
+  } else {
+    element.classList.remove(className);
+  }
+}
+
+function updateClasses(settings: Settings) {
+  updateClass(document.body, 'smooth-scroll', settings.common.smoothScroll);
+
+  const $layout = DOM.qs('.layout');
+  updateClass($layout, 'layout--left', settings.common.layout === 'left');
+  updateClass($layout, 'layout--center', settings.common.layout === 'center');
+  updateClass($layout, 'layout--hide-post-header-reflink-icon', settings.post.reflinkIconPosition !== 'header');
+  updateClass($layout, 'layout--hide-post-reflink-icon', settings.post.reflinkIconPosition !== 'post');
+  updateClass($layout, 'layout--show-thumb-overlay', settings.image.showVideoOverlay);
+  updateClass($layout, 'layout--nsfw', settings.image.nsfw);
+  updateClass($layout, 'layout--remove-hidden', settings.filter.removeHiddenPosts);
+  updateClass($layout, 'layout--hide-threads', settings.filter.hideThreads);
+  updateClass($layout, 'layout--show-markup', settings.form.showMarkup);
+  updateClass($layout, 'layout--show-spoilers', settings.post.showSpoilers);
+  updateClass($layout, 'layout--disable-sub', settings.post.disableSub);
+  updateClass($layout, 'layout--modal-at-top', settings.image.modalAtTop);
+
+  const $formWrapper = DOM.qs('.content__posting-form-wrapper');
+  updateClass($formWrapper, 'content__posting-form-wrapper--left', settings.form.align === 'left');
+  updateClass($formWrapper, 'content__posting-form-wrapper--center', settings.form.align === 'center');
+}
+
+new Post();
+new PostingForm();
+new PostReferenceMap();
+
 document.addEventListener('DOMContentLoaded', () => {
+  const { settings } = store.getState().settings;
+  updateClasses(settings);
+
+  store.subscribe(() => {
+    const { settings } = store.getState().settings;
+    updateClasses(settings);
+  });
+
+  eventBus.emit(Events.Ready);
+
+  const posts = DOM.qsa('.post');
+  eventBus.emit(Events.PostsInserted, posts, true);
+
   Settings.migrate();
   window.app = new App();
 });
