@@ -1,12 +1,18 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+
 import { eventBus, Events } from '.';
 import {
   Post,
   PostingForm,
   PostReferenceMap,
+  Settings as SettingsComponent,
 } from './components';
-import { Settings, LocalStorage } from './services';
+import { Page, BasePage, BoardPage, ThreadPage } from './pages';
+import { Settings } from './settings';
+import { store } from './store';
 import { DOM } from './utils';
-import { Page, BasePage, BoardPage, ThreadPage, SettingsPage } from './pages';
 
 declare global {
   interface Window {
@@ -32,94 +38,99 @@ try {
   image.src = 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=';
 } catch { }
 
-new Post();
-new PostingForm();
-new PostReferenceMap();
+interface Components {
+  [key: string]: any;
+}
 
-document.addEventListener('DOMContentLoaded', e => {
-  eventBus.emit(Events.Ready);
-
-  const posts = DOM.qsa('.post');
-  eventBus.emit(Events.PostsInserted, posts, true);
-
-  if (Settings.get('common.smooth-scroll')) {
-    document.body.classList.add('smooth-scroll');
-  }
-
-  const $layout = DOM.qs('.layout');
-  if ($layout) {
-    $layout.classList.add('layout--' + Settings.get('common.layout'));
-
-    const reflinkPosition = Settings.get<string>('post.reflink-icon-position');
-    if (reflinkPosition !== 'header') {
-      $layout.classList.add('layout--hide-post-header-reflink-icon');
-    }
-    if (reflinkPosition !== 'post') {
-      $layout.classList.add('layout--hide-post-reflink-icon');
-    }
-
-    if (Settings.get('image.show-video-overlay')) {
-      $layout.classList.add('layout--show-thumb-overlay');
-    }
-
-    if (Settings.get('image.nsfw')) {
-      $layout.classList.add('layout--nsfw');
-    }
-
-    if (Settings.get('filter.remove-hidden-posts')) {
-      $layout.classList.add('layout--remove-hidden');
-    }
-
-    if (Settings.get('filter.hide-threads')) {
-      $layout.classList.add('layout--hide-threads');
-    }
-
-    if (Settings.get('form.show-markup')) {
-      $layout.classList.add('layout--show-markup');
-    }
-
-    if (Settings.get('form.show-markup-mobile')) {
-      $layout.classList.add('layout--show-markup-mobile');
-    }
-
-    if (Settings.get('post.show-spoilers')) {
-      $layout.classList.add('layout--show-spoilers');
-    }
-
-    if (Settings.get('post.disable-sub')) {
-      $layout.classList.add('layout--disable-sub');
-    }
-
-    if (Settings.get('image.modal-at-top')) {
-      $layout.classList.add('layout--modal-at-top');
-    }
-  }
-
-  const $formWrapper = DOM.qs('.content__posting-form-wrapper');
-  if ($formWrapper) {
-    $formWrapper.classList.add('content__posting-form-wrapper--' + Settings.get('form.align'));
-  }
-});
+const components: Components = {
+  settings: SettingsComponent,
+};
 
 class App {
-  readonly view: Page;
+  public readonly view: Page;
 
-  constructor() {
+  public constructor() {
     const path = window.location.pathname;
     let matches = [];
     if (matches = path.match(/\/res\/(\d+)(?:\.html)?\/?$/i)) {
       const threadId = +matches[1];
       this.view = new ThreadPage(threadId);
-    } else if (path.match(/\/settings\/?$/i)) {
-      this.view = new SettingsPage();
     } else if (path.match(/\/?$/i)) {
       this.view = new BoardPage();
     } else {
       this.view = new BasePage();
     }
+
+    this.initComponents();
+  }
+
+  public initComponents(context: Element = null) {
+    const COMPONENT_ATTRIBUTE = 'data-component';
+    const $elements = DOM.qsa(`[${COMPONENT_ATTRIBUTE}]`, context);
+    $elements.forEach($element => {
+      const key = $element.getAttribute(COMPONENT_ATTRIBUTE);
+      const component = components[key];
+      const element = React.createElement(Provider, { store }, [
+        React.createElement(component),
+      ]);
+      ReactDOM.render(element, $element);
+      $element.removeAttribute(COMPONENT_ATTRIBUTE);
+    });
   }
 }
 
-document.addEventListener('DOMContentLoaded', e => {
+function updateClass(element: Element, className: string, setClass: boolean = true) {
+  if (!element) {
+    return;
+  }
+
+  if (setClass) {
+    element.classList.add(className);
+  } else {
+    element.classList.remove(className);
+  }
+}
+
+function updateClasses(settings: Settings) {
+  updateClass(document.body, 'smooth-scroll', settings.common.smoothScroll);
+
+  const $layout = DOM.qs('.layout');
+  updateClass($layout, 'layout--left', settings.common.layout === 'left');
+  updateClass($layout, 'layout--center', settings.common.layout === 'center');
+  updateClass($layout, 'layout--hide-post-header-reflink-icon', settings.post.reflinkIconPosition !== 'header');
+  updateClass($layout, 'layout--hide-post-reflink-icon', settings.post.reflinkIconPosition !== 'post');
+  updateClass($layout, 'layout--show-thumb-overlay', settings.image.showVideoOverlay);
+  updateClass($layout, 'layout--nsfw', settings.image.nsfw);
+  updateClass($layout, 'layout--remove-hidden', settings.filter.removeHiddenPosts);
+  updateClass($layout, 'layout--hide-threads', settings.filter.hideThreads);
+  updateClass($layout, 'layout--show-markup', settings.form.showMarkup);
+  updateClass($layout, 'layout--show-spoilers', settings.post.showSpoilers);
+  updateClass($layout, 'layout--disable-sub', settings.post.disableSub);
+  updateClass($layout, 'layout--modal-at-top', settings.image.modalAtTop);
+
+  const $formWrapper = DOM.qs('.content__posting-form-wrapper');
+  updateClass($formWrapper, 'content__posting-form-wrapper--left', settings.form.align === 'left');
+  updateClass($formWrapper, 'content__posting-form-wrapper--center', settings.form.align === 'center');
+}
+
+new Post();
+new PostingForm();
+new PostReferenceMap();
+
+document.addEventListener('DOMContentLoaded', () => {
+  const { settings } = store.getState().settings;
+  updateClasses(settings);
+
+  store.subscribe(() => {
+    const { settings } = store.getState().settings;
+    updateClasses(settings);
+  });
+
+  eventBus.emit(Events.Ready);
+
+  const posts = DOM.qsa('.post');
+  eventBus.emit(Events.PostsInserted, posts, true);
+
+  Settings.migrate();
   window.app = new App();
 });

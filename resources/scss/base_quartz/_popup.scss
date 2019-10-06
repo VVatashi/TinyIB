@@ -1,5 +1,6 @@
 .popup {
   background: $form-background;
+  box-sizing: border-box;
 
   position: fixed;
   top: 0;
@@ -12,23 +13,38 @@
 
   z-index: 11;
 
-  &--settings {
+  &#{&}--settings {
     top: unset;
     left: unset;
 
     bottom: 36px;
     right: 0;
 
+    min-width: 40vw;
+    width: 100%;
+    height: 50vh;
+
+    background: transparent;
+    border: 0;
+    padding: 0;
+
+    pointer-events: none;
+
+    .settings-form {
+      display: flex;
+      flex-flow: column;
+      height: 100%;
+
+      &__tab-content {
+        flex: 1;
+        overflow-y: auto;
+      }
+    }
+
     @include breakpoint($xs-up) {
       bottom: 30px;
+      width: unset;
     }
-  }
-
-  &--settings &__body {
-    min-width: 40vw;
-    height: 40vh;
-
-    overflow-y: auto;
   }
 
   &__header {

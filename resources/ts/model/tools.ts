@@ -1,4 +1,4 @@
-import { Settings } from '../services';
+import { store, setOption } from '../store';
 import { EventEmitter } from '../utils';
 
 export class Tools extends EventEmitter {
@@ -19,11 +19,13 @@ export class Tools extends EventEmitter {
   }
 
   get nsfw(): boolean {
-    return Settings.get('image.nsfw');
+    const { settings } = store.getState().settings;
+    return settings.image.nsfw;
   }
 
   get autoPlay(): boolean {
-    return Settings.get('image.auto-play');
+    const { settings } = store.getState().settings;
+    return settings.image.autoPlay;
   }
 
   toggleSettings() {
@@ -31,15 +33,17 @@ export class Tools extends EventEmitter {
   }
 
   toggleNsfw() {
-    const value = Settings.get('image.nsfw');
-    Settings.set('image.nsfw', !value);
-    this.emit('toggle-nsfw', !value);
+    const { settings } = store.getState().settings;
+    const nsfw = !settings.image.nsfw;
+    store.dispatch(setOption('image.nsfw', nsfw));
+    this.emit('toggle-nsfw', nsfw);
   }
 
   toggleAutoPlay() {
-    const value = Settings.get('image.auto-play');
-    Settings.set('image.auto-play', !value);
-    this.emit('toggle-autoplay', !value);
+    const { settings } = store.getState().settings;
+    const autoPlay = !settings.image.autoPlay;
+    store.dispatch(setOption('image.autoPlay', autoPlay));
+    this.emit('toggle-autoplay', autoPlay);
   }
 
   scrollToTop() {

@@ -1,13 +1,14 @@
 import { eventBus, Events } from '..';
-import { Settings } from '../services';
 import { DOM } from '../utils';
+import { store } from '../store';
 
 export class PostReferenceMap {
   protected readonly posts: { [id: number]: Element } = {};
 
   constructor() {
     eventBus.on(Events.PostsInserted, (posts: Element[]) => {
-      if (!Settings.get('link.add-names-to-links')) {
+      const { settings } = store.getState().settings;
+      if (!settings.link.addNamesToLinks) {
         return;
       }
 
@@ -58,7 +59,7 @@ export class PostReferenceMap {
       return `(<span class="post__reference-link-name">${name}</span>`
         + `<span class="post__reference-link-tripcode">${tripcode}</span>)`;
     } else {
-      return ``;
+      return '';
     }
   }
 }
