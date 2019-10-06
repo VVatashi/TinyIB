@@ -1,10 +1,13 @@
-import { HotKeys, HotKey } from '../hotkeys';
 import {
   SET_HOTKEY,
   SET_OPTION,
   HotKeyActionTypes,
+  SET_POST_NOTIFY,
+  SET_REPLY_NOTIFY,
   SettingsActionTypes,
 } from './types';
+import { HotKeys, HotKey } from '../hotkeys';
+import { LocalStorage } from '../local-storage';
 import { Settings } from '../settings';
 
 export function setHotKey(actionName: string, hotKey: HotKey): HotKeyActionTypes {
@@ -32,6 +35,32 @@ export function setOption(key: string, value: any): SettingsActionTypes {
     payload: {
       key,
       value,
+    },
+  };
+}
+
+export function setPostNotify(name: string, file: string): SettingsActionTypes {
+  LocalStorage.set('post.unreadPostsNotifyName', name);
+  LocalStorage.set('post.unreadPostsNotifyFile', file);
+
+  return {
+    type: SET_POST_NOTIFY,
+    payload: {
+      name,
+      file,
+    },
+  };
+}
+
+export function setReplyNotify(name: string, file: string): SettingsActionTypes {
+  LocalStorage.set('post.unreadRepliesNotifyName', name);
+  LocalStorage.set('post.unreadRepliesNotifyFile', file);
+
+  return {
+    type: SET_REPLY_NOTIFY,
+    payload: {
+      name,
+      file,
     },
   };
 }

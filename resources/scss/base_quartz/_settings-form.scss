@@ -1,7 +1,11 @@
 .settings-form {
+  pointer-events: none;
+
   &__tabs {
     flex-flow: row wrap;
     padding: 0 2px;
+
+    pointer-events: none;
   }
 
   &__tab {
@@ -16,22 +20,23 @@
 
     padding: 0.25em;
 
+    pointer-events: initial;
+
     &--active {
       @extend .button, :active;
     }
   }
 
   &__tab-content {
+    position: relative;
+
     background: $form-background;
-
     border: $form-border;
-    border-bottom: 0;
-
     border-radius: $form-border-radius;
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 0;
 
     padding: $form-content-padding;
+
+    pointer-events: initial;
   }
 
   &__row {
@@ -45,6 +50,7 @@
   &__checkbox,
   &__radio {
     vertical-align: middle;
+    margin-right: 0.25em;
   }
 
   &__list {
@@ -60,21 +66,6 @@
   &__list .input,
   &__list .button {
     margin: 0 0.5em 0.5em 0;
-  }
-
-  &__footer {
-    background: $form-background;
-
-    border: $form-border;
-    border-top: 0;
-
-    border-radius: $form-border-radius;
-    border-top-right-radius: 0;
-    border-top-left-radius: 0;
-  }
-
-  &__footer:not(:empty) {
-    padding: $form-content-padding;
   }
 
   &__buttons {

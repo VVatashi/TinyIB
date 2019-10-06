@@ -19,7 +19,7 @@ export class LocalStorage {
   }
 
   public static remove<T>(key: string, defaultValue: T = null): T {
-    const value = localStorage[key];
+    const value = LocalStorage.get(key, defaultValue);
     localStorage.removeItem(key);
     return value;
   }

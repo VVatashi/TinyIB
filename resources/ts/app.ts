@@ -1,11 +1,17 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+
 import { eventBus, Events } from '.';
 import {
   Post,
   PostingForm,
   PostReferenceMap,
+  Settings as SettingsComponent,
 } from './components';
-import { Page, BasePage, BoardPage, ThreadPage, SettingsPage } from './pages';
+import { Page, BasePage, BoardPage, ThreadPage } from './pages';
 import { Settings } from './settings';
+import { store } from './store';
 import { DOM } from './utils';
 
 declare global {
@@ -99,22 +105,44 @@ document.addEventListener('DOMContentLoaded', e => {
   }
 });
 
-class App {
-  readonly view: Page;
+interface Components {
+  [key: string]: any;
+}
 
-  constructor() {
+const components: Components = {
+  settings: SettingsComponent,
+};
+
+class App {
+  public readonly view: Page;
+
+  public constructor() {
     const path = window.location.pathname;
     let matches = [];
     if (matches = path.match(/\/res\/(\d+)(?:\.html)?\/?$/i)) {
       const threadId = +matches[1];
       this.view = new ThreadPage(threadId);
-    } else if (path.match(/\/settings\/?$/i)) {
-      this.view = new SettingsPage();
     } else if (path.match(/\/?$/i)) {
       this.view = new BoardPage();
     } else {
       this.view = new BasePage();
     }
+
+    this.initComponents();
+  }
+
+  public initComponents(context: Element = null) {
+    const COMPONENT_ATTRIBUTE = 'data-component';
+    const $elements = DOM.qsa(`[${COMPONENT_ATTRIBUTE}]`, context);
+    $elements.forEach($element => {
+      const key = $element.getAttribute(COMPONENT_ATTRIBUTE);
+      const component = components[key];
+      const element = React.createElement(Provider, { store }, [
+        React.createElement(component),
+      ]);
+      ReactDOM.render(element, $element);
+      $element.removeAttribute(COMPONENT_ATTRIBUTE);
+    });
   }
 }
 

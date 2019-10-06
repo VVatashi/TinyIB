@@ -1,6 +1,7 @@
 import { createStore, combineReducers } from 'redux';
 import { hotKeysReducer, settingsReducer } from './reducers';
 import { HotKeys } from '../hotkeys';
+import { LocalStorage } from '../local-storage';
 import { Settings } from '../settings';
 
 const rootReducer = combineReducers({
@@ -16,6 +17,14 @@ const initialState: AppState = {
   },
   settings: {
     settings: Settings.load(),
+    customPostNotify: {
+      name: LocalStorage.get('post.unreadPostsNotifyName', ''),
+      file: LocalStorage.get('post.unreadPostsNotifyFile', ''),
+    },
+    customReplyNotify: {
+      name: LocalStorage.get('post.unreadRepliesNotifyName', ''),
+      file: LocalStorage.get('post.unreadRepliesNotifyFile', ''),
+    },
   },
 };
 

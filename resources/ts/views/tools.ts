@@ -1,15 +1,13 @@
-import { View, SettingsView } from '.';
+import { View } from '.';
 import { HotKeys } from '../hotkeys';
 import { Tools } from '../model';
 import { DOM } from '../utils';
-import { API } from '../services';
 import { store } from '../store';
 
 export class ToolsView implements View {
   readonly model: Tools;
 
   protected $settingsPopup: HTMLElement = null;
-  protected settingsView: SettingsView = null;
 
   constructor(readonly $tools: HTMLElement) {
     this.model = new Tools();
@@ -94,34 +92,22 @@ export class ToolsView implements View {
     }, true);
 
     this.model.on('settings-opened', async () => {
-      this.$settingsPopup = document.createElement('div');
-      this.$settingsPopup.classList.add('popup', 'popup--settings');
-
-      const $body = document.createElement('div');
-      $body.classList.add('popup__body');
-      $body.innerHTML = await API.getSettingsHtml();
-      if (!this.$settingsPopup) {
-        return;
+      if (this.$settingsPopup) {
+        this.$settingsPopup.classList.remove('hidden');
+      } else {
+        this.$settingsPopup = document.createElement('div');
+        this.$settingsPopup.classList.add('popup', 'popup--settings');
+        this.$settingsPopup.setAttribute('data-component', 'settings');
+        document.body.appendChild(this.$settingsPopup);
+        window.app.initComponents();
       }
-
-      this.$settingsPopup.appendChild($body);
-
-      document.body.appendChild(this.$settingsPopup);
-
-      this.settingsView = new SettingsView(this.$settingsPopup);
 
       $toggleSettings.classList.add(btnActiveClass);
     });
 
     this.model.on('settings-closed', () => {
-      if (this.settingsView) {
-        this.settingsView.detach();
-        this.settingsView = null;
-      }
-
       if (this.$settingsPopup) {
-        this.$settingsPopup.remove();
-        this.$settingsPopup = null;
+        this.$settingsPopup.classList.add('hidden');
       }
 
       $toggleSettings.classList.remove(btnActiveClass);

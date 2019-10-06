@@ -5,12 +5,7 @@ export interface HotKeysState {
   readonly hotKeys: HotKeys;
 }
 
-export interface SettingsState {
-  readonly settings: Settings;
-}
-
 export const SET_HOTKEY = 'SET_HOTKEY';
-export const SET_OPTION = 'SET_OPTION';
 
 interface SetHotKeyAction {
   type: typeof SET_HOTKEY;
@@ -20,6 +15,23 @@ interface SetHotKeyAction {
   };
 }
 
+export type HotKeyActionTypes = SetHotKeyAction;
+
+export interface CustomNotify {
+  readonly name: string;
+  readonly file: string;
+}
+
+export interface SettingsState {
+  readonly settings: Settings;
+  readonly customPostNotify: CustomNotify;
+  readonly customReplyNotify: CustomNotify;
+}
+
+export const SET_OPTION = 'SET_OPTION';
+export const SET_POST_NOTIFY = 'SET_POST_NOTIFY';
+export const SET_REPLY_NOTIFY = 'SET_REPLY_NOTIFY';
+
 interface SetOptionAction {
   type: typeof SET_OPTION;
   payload: {
@@ -28,5 +40,15 @@ interface SetOptionAction {
   };
 }
 
-export type HotKeyActionTypes = SetHotKeyAction;
-export type SettingsActionTypes = SetOptionAction;
+interface SetPostNotifyAction {
+  type: typeof SET_POST_NOTIFY;
+  payload: CustomNotify;
+}
+
+interface SetReplyNotifyAction {
+  type: typeof SET_REPLY_NOTIFY;
+  payload: CustomNotify;
+}
+
+export type SettingsActionTypes = SetOptionAction
+  | SetPostNotifyAction | SetReplyNotifyAction;

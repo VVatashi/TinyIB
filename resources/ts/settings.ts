@@ -1,6 +1,6 @@
 import { LocalStorage } from './local-storage';
 
-interface PostAuthor {
+export interface PostAuthor {
   name: string;
   tripcode: string;
 }
@@ -45,7 +45,7 @@ const enum PreviewAlign {
   Right = 'right',
 }
 
-interface Replace {
+export interface Replace {
   pattern: string;
   replace: string;
 }
