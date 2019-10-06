@@ -605,12 +605,25 @@ export class PostingForm {
         const before = message.substring(0, selection.begin);
         const after = message.substring(selection.end);
         const newLineBefore = before.length && !before.endsWith('\n') ? '\n' : '';
-        const newLineAfter = !after.length || !after.startsWith('\n') ? '\n' : '';
-        const id = target.getAttribute('data-reflink') || target.getAttribute('data-quote-reflink');
 
         const quoteText = target.getAttribute('data-quote-reflink')
           ? this.getSelection().replace(/^(.+)$/gm, '> $1')
           : '';
+
+        let newLineAfter;
+        if (!after.length || target.getAttribute('data-reflink')) {
+          newLineAfter = '\n';
+        } else if (target.getAttribute('data-quote-reflink')) {
+          if (!after.startsWith('\n')) {
+            newLineAfter = '\n\n';
+          } else {
+            newLineAfter = '\n';
+          }
+        } else {
+          newLineAfter = '';
+        }
+
+        const id = target.getAttribute('data-reflink') || target.getAttribute('data-quote-reflink');
 
         const lastQuoteIndex = before.lastIndexOf('>>');
         const quoteSamePost = lastQuoteIndex !== -1 && lastQuoteIndex === before.lastIndexOf(`>>${id}`);
@@ -672,6 +685,10 @@ export class PostingForm {
           let cursorPosition = selection.begin + quote.length;
           if (!quote.endsWith('\n') && after.startsWith('\n')) {
             cursorPosition += 1;
+          }
+
+          if (quote.endsWith('\n\n')) {
+            cursorPosition -= 1;
           }
 
           messageEl.setSelectionRange(cursorPosition, cursorPosition, 'none');
