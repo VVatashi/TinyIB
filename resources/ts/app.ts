@@ -118,6 +118,8 @@ new PostingForm();
 new PostReferenceMap();
 
 document.addEventListener('DOMContentLoaded', () => {
+  Settings.migrate();
+
   const { settings } = store.getState().settings;
   updateClasses(settings);
 
@@ -131,6 +133,5 @@ document.addEventListener('DOMContentLoaded', () => {
   const posts = DOM.qsa('.post');
   eventBus.emit(Events.PostsInserted, posts, true);
 
-  Settings.migrate();
   window.app = new App();
 });
