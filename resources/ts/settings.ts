@@ -228,13 +228,13 @@ export class Settings {
   }
 
   public static load(): Settings {
-    const settingsData = LocalStorage.get<string>(Settings.key, '{}');
+    const settingsData = LocalStorage.get<string>(this.key, '{}');
     return this.merge(defaultSettings, JSON.parse(settingsData));
   }
 
   public static save(settings: Settings): Settings {
     const settingsData = JSON.stringify(settings);
-    LocalStorage.set(Settings.key, settingsData);
+    LocalStorage.set(this.key, settingsData);
     return settings;
   }
 
@@ -327,6 +327,6 @@ export class Settings {
       },
     };
 
-    return this.save(settings);
+    return this.save(this.merge(defaultSettings, settings));
   }
 }
