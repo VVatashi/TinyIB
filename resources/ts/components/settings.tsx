@@ -321,7 +321,7 @@ export class Settings extends PureComponent<Props, State> {
             <>
               <h3 className="settings-form__option-title">Push notifications</h3>
               <button onClick={this.enablePushNotifications}>Enable push notifications</button>
-              <p>May not work if <a href="https://onesignal.com/" target="_blank">onesignal.com</a> is blocked</p>
+              <p>Push notifications will not work if <a href="https://onesignal.com/" target="_blank">onesignal.com</a> is blocked or down</p>
             </>
           );
         }
@@ -373,7 +373,7 @@ export class Settings extends PureComponent<Props, State> {
             {this.renderCheckbox('image.autoPlay', <span>Autoplay audio & video files</span>)}
             {this.renderCheckbox('image.replaceThumbnail', <span>Replace image thumbnails with original</span>)}
             {this.renderCheckbox('image.replaceThumbnailGif', <span>Replace GIF thumbnails with original</span>)}
-            {this.renderCheckbox('image.modalAtTop', <span>Show modal over controls</span>)}
+            {this.renderCheckbox('image.modalAtTop', <span>Show media popup on top of the controls</span>)}
 
             <h3 className="settings-form__option-title">Expand images</h3>
             {this.renderRadioButton('image.expandImages', 'tab', <span>In a new tab</span>)}
