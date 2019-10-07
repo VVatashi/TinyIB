@@ -168,7 +168,7 @@ export const defaultSettings: Settings = {
     replaceThumbnail: false,
     replaceThumbnailGif: false,
     expandImages: ImageExpandMode.Popup,
-    modalAtTop: false,
+    modalAtTop: true,
   },
   link: {
     addNamesToLinks: true,
@@ -195,7 +195,7 @@ export const defaultSettings: Settings = {
   },
   common: {
     smoothScroll: true,
-    showUnreadCountInTitle: false,
+    showUnreadCountInTitle: true,
     layout: Layout.Left,
   },
 };
