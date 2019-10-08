@@ -45,6 +45,8 @@ export class StyleSelectorView implements View {
     if ($style && style !== $style.title) {
       this.onStyleChanged(style);
     }
+
+    window.dataLayer.push({ 'theme': style });
   }
 
   protected onStyleChanged(style: string) {
