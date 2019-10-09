@@ -369,7 +369,7 @@ export class Post {
 
         const hash = $file.getAttribute('data-hash');
         if (hash) {
-          const hiddenFiles = [...settings.filter.hiddenFiles];
+          const hiddenFiles = [...settings.filter.hiddenFiles || []];
           hiddenFiles.push(hash);
           store.dispatch(setOption('filter.hiddenFiles', hiddenFiles));
         }
@@ -385,7 +385,7 @@ export class Post {
 
         const hash = $file.getAttribute('data-hash');
         if (hash) {
-          const hiddenFiles = settings.filter.hiddenFiles.filter(h => h !== hash);
+          const hiddenFiles = (settings.filter.hiddenFiles || []).filter(h => h !== hash);
           store.dispatch(setOption('filter.hiddenFiles', hiddenFiles));
         }
 
