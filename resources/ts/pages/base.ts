@@ -41,7 +41,7 @@ export class BasePage implements Page {
             $post.classList.toggle('post--hidden');
             const id = +$post.getAttribute('data-post-id');
             const hidden = $post.classList.contains('post--hidden');
-            let hiddenPosts = [...settings.filter.hiddenPosts];
+            let hiddenPosts = [...settings.filter.hiddenPosts || []];
             if (hidden) {
               hiddenPosts.push(id);
             } else {

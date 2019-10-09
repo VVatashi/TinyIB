@@ -511,7 +511,7 @@ export class PostingForm {
           this.disabled = true;
 
           // Apply replaces to the message.
-          const replaces = settings.form.replaces;
+          const replaces = settings.form.replaces || [];
           const message = replaces.reduce((message: string, item) => {
             const regexp = new RegExp(item.pattern, 'gm');
             return message.replace(regexp, item.replace);

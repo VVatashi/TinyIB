@@ -118,8 +118,6 @@ new PostingForm();
 new PostReferenceMap();
 
 document.addEventListener('DOMContentLoaded', () => {
-  Settings.migrate();
-
   const { settings } = store.getState().settings;
   updateClasses(settings);
 

@@ -129,25 +129,29 @@ export class Settings extends PureComponent<Props, State> {
   };
 
   private addNewFilter = () => {
-    const hidden = [...this.props.settings.filter.hiddenAuthors];
+    const { settings } = this.props;
+    const hidden = [...settings.filter.hiddenAuthors || []];
     hidden.push({ name: '', tripcode: '' });
     this.props.onChange('filter.hiddenAuthors', hidden);
   };
 
   private changeFilter = (index: number, value: PostAuthor) => {
-    const hidden = [...this.props.settings.filter.hiddenAuthors];
+    const { settings } = this.props;
+    const hidden = [...settings.filter.hiddenAuthors || []];
     hidden[index] = value;
     this.props.onChange('filter.hiddenAuthors', hidden);
   };
 
   private removeFilter = (index: number) => {
-    const hidden = [...this.props.settings.filter.hiddenAuthors];
+    const { settings } = this.props;
+    const hidden = [...settings.filter.hiddenAuthors || []];
     hidden.splice(index, 1);
     this.props.onChange('filter.hiddenAuthors', hidden);
   };
 
   private renderFilters = () => {
-    const filters = this.props.settings.filter.hiddenAuthors.map((value, index) => {
+    const { settings } = this.props;
+    const filters = (settings.filter.hiddenAuthors || []).map((value, index) => {
       return (
         <li className="settings-form__list-item">
           <input type="text" className="input settings-form__text"
@@ -181,25 +185,29 @@ export class Settings extends PureComponent<Props, State> {
   };
 
   private addNewReplace = () => {
-    const replaces = [...this.props.settings.form.replaces];
+    const { settings } = this.props;
+    const replaces = [...settings.form.replaces || []];
     replaces.push({ pattern: '', replace: '' });
     this.props.onChange('form.replaces', replaces);
   };
 
   private changeReplace = (index: number, value: Replace) => {
-    const replaces = [...this.props.settings.form.replaces];
+    const { settings } = this.props;
+    const replaces = [...settings.form.replaces || []];
     replaces[index] = value;
     this.props.onChange('form.replaces', replaces);
   };
 
   private removeReplace = (index: number) => {
-    const replaces = [...this.props.settings.form.replaces];
+    const { settings } = this.props;
+    const replaces = [...settings.form.replaces || []];
     replaces.splice(index, 1);
     this.props.onChange('form.replaces', replaces);
   };
 
   private renderReplaces = () => {
-    const replaces = this.props.settings.form.replaces.map((value, index) => {
+    const { settings } = this.props;
+    const replaces = (settings.form.replaces || []).map((value, index) => {
       return (
         <li className="settings-form__list-item">
           <input type="text" className="input settings-form__text"
