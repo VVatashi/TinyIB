@@ -88,8 +88,8 @@ class AuthMiddleware implements MiddlewareInterface
     // Store current user to the request object.
     $request = $request->withAttribute('user', $user);
 
-    // Disallow anonymous user acceess.
-    if ($user->role === 0) {
+    // Disallow blocked user acceess.
+    if ($user->id !== 0 && $user->role === 0) {
       $path = $request->getUri()->getPath();
       $base_path = ConfigService::getInstance()->get('BASE_PATH', '');
       if (!preg_match('#^' . preg_quote($base_path) . '/(auth|captcha|api/auth)#', $path)) {
@@ -98,6 +98,7 @@ class AuthMiddleware implements MiddlewareInterface
           return new Response(403, ['Content-Type' => 'application/json'], $content);
         }
 
+        $this->user_service->logout();
         return new Response(302, ['Location' => "$base_path/auth/login"]);
       }
     }

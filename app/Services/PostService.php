@@ -477,6 +477,20 @@ class PostService
       }
     }
 
+    $bumpLimit = $this->config->get('MAXREPLIES');
+    $threadPostCount = $parent !== 0 ? $this->post_repository->getThreadPostCount($parent) : 0;
+    $isInBumpLimit = $bumpLimit != 0 && $threadPostCount > $bumpLimit;
+
+    if ($user_id === 0) {
+      if ($parent === 0) {
+        throw new ValidationException('Anonymous users are not allowed to create new threads.');
+      }
+
+      if ($isInBumpLimit) {
+        throw new ValidationException('Anonymous users are not allowed to post in threads after a bump limit.');
+      }
+    }
+
     $post = new Post();
     $post->setParentId($parent);
     $post->setIp($ip);
@@ -680,11 +694,7 @@ class PostService
     // Bump thread.
     if ($post->isReply()) {
       if (strtolower($post->email) !== 'sage') {
-        $max_replies = $this->config->get("MAXREPLIES");
-        if (
-          $max_replies == 0
-          || $this->post_repository->getThreadPostCount($parent) <= $max_replies
-        ) {
+        if (!$isInBumpLimit) {
           $thread = $this->post_repository->getById($parent);
           if (isset($thread)) {
             $thread->setBumpedAt($post->created_at);
