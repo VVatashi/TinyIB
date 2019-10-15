@@ -121,7 +121,7 @@ final class PostControllerTest extends TestWithUsers
     return $this->post_repository->add($post);
   }
 
-  function test_createThread_shouldCreateItem(): void
+  function test_anonymousUserCreateThread_shouldReturnBadRequest(): void
   {
     $data = [
       'subject' => 'Subject',
@@ -135,7 +135,7 @@ final class PostControllerTest extends TestWithUsers
     $response = $this->controller->createThread($request);
 
     $status = $response->getStatusCode();
-    $this->assertEquals(201, $status);
+    $this->assertEquals(400, $status);
   }
 
   function test_createPost_shouldCreateItem(): void
