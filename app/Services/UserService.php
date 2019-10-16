@@ -86,6 +86,9 @@ class UserService
     $user->setEmail($email);
     $user->setRole($role);
 
+    $now = time();
+    $user->setUpdatedAt($now);
+
     if (trim($password) !== "") {
       $user->setPassword($password);
     }

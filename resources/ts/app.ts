@@ -26,6 +26,7 @@ declare global {
     hasWebpSupport: boolean;
     WebSocket?: any;
     OneSignal?: any;
+    dataLayer?: any;
   }
 }
 
@@ -118,6 +119,8 @@ new PostingForm();
 new PostReferenceMap();
 
 document.addEventListener('DOMContentLoaded', () => {
+  window.dataLayer = window.dataLayer || [];
+
   const { settings } = store.getState().settings;
   updateClasses(settings);
 

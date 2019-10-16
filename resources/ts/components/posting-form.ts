@@ -193,6 +193,7 @@ export class PostingForm {
       <div class="posting-form__row posting-form__row--message">
         <textarea class="input posting-form__message" placeholder="Message"
           v-model="fields.message" v-bind:disabled="disabled"
+          v-on:change="onMessageChange"
           v-on:keydown="onMessageKeyDown"
           v-on:paste="onMessagePaste"
           ref="message"></textarea>
@@ -249,6 +250,12 @@ export class PostingForm {
           if (name) {
             this.fields.name = name;
           }
+        }
+
+        // Load saved message.
+        const message = LocalStorage.get('posting-form.message', '');
+        if (message) {
+          this.fields.message = message;
         }
 
         this.hotKeys = store.getState().hotKeys.hotKeys;
@@ -315,6 +322,8 @@ export class PostingForm {
           this.fields.message = '';
           this.fields.file = '';
           this.file = null;
+
+          LocalStorage.set('posting-form.message', '');
         },
         makeFloating() {
           component.makeFloating();
@@ -336,6 +345,9 @@ export class PostingForm {
         },
         onNameChange() {
           LocalStorage.set('posting-form.name', this.fields.name);
+        },
+        onMessageChange() {
+          LocalStorage.set('posting-form.message', this.fields.message);
         },
         async onFileDrop(e: DragEvent) {
           const file = e.dataTransfer.files[0];

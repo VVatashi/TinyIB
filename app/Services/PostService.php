@@ -863,7 +863,8 @@ class PostService
 
     if (isset($user)) {
       // Add entry to the modlog.
-      $this->modlog_service->create("User {$user->email} has deleted post {$id}.", $user->id);
+      $ip = $post->ip;
+      $this->modlog_service->create("User {$user->email} has deleted post {$id} (created from {$ip}).", $user->id);
     }
 
     $is_redis_enabled = $this->config->get('REDIS_ENABLE', false);
