@@ -151,22 +151,7 @@ class Ban extends Model
    */
   function setIp(string $ip): self
   {
-    if (!preg_match('
-/^
-  (?:
-    (?:
-      25[0-5]|
-      2[0-4][0-9]|
-      1?[0-9][0-9]?
-    )
-    \.
-  ){3}
-  (?:
-    25[0-5]|
-    2[0-4][0-9]|
-    1?[0-9][0-9]?
-  )
-$/x', $ip)) {
+    if (!preg_match('/^[.:0-9a-f]+$/i', $ip)) {
       throw new ValidationException('IP is invalid');
     }
 
