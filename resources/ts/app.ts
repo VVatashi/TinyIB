@@ -10,7 +10,7 @@ import {
   Settings as SettingsComponent,
 } from './components';
 import { Page, BasePage, BoardPage, ThreadPage } from './pages';
-import { Settings } from './settings';
+import Settings from './settings';
 import { store } from './store';
 import { DOM } from './utils';
 
@@ -71,9 +71,7 @@ class App {
     $elements.forEach($element => {
       const key = $element.getAttribute(COMPONENT_ATTRIBUTE);
       const component = components[key];
-      const element = React.createElement(Provider, { store }, [
-        React.createElement(component),
-      ]);
+      const element = React.createElement(Provider, { store }, React.createElement(component));
       ReactDOM.render(element, $element);
       $element.removeAttribute(COMPONENT_ATTRIBUTE);
     });

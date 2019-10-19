@@ -255,3 +255,5 @@ export class Settings {
     return result;
   }
 }
+
+export default Settings;

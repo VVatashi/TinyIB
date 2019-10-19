@@ -1,8 +1,9 @@
 import React, { PureComponent } from 'react';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
-import { HotKeys as HotKeysData, HotKey } from '../hotkeys';
-import { AppState, setHotKey } from '../store';
+
+import { HotKeys as HotKeysData, HotKey } from '../../../hotkeys';
+import { AppState, setHotKey } from '../../../store';
 
 interface HotKeyLabels {
   readonly [key: string]: string;
@@ -23,14 +24,14 @@ const hotKeys: HotKeyLabels = {
   send: 'Submit reply form',
 };
 
-const specialKeys = [
+const specialKeys = new Set([
   'ControlLeft',
   'AltLeft',
   'ShiftLeft',
   'ControlRight',
   'AltRight',
   'ShiftRight',
-];
+]);
 
 interface Props {
   readonly hotKeys: HotKeysData;
@@ -49,9 +50,14 @@ export class HotKeys extends PureComponent<Props, State> {
   private formatHotkey = (hotKey: HotKey): string => {
     let key = hotKey.code;
 
-    // Remove the 'Key' prefix.
+    // Remove 'Key' and 'Digit' prefixes.
+
     if (key.substr(0, 3) === 'Key') {
       key = key.substr(3);
+    }
+
+    if (key.substr(0, 5) === 'Digit') {
+      key = key.substr(5);
     }
 
     // Add modifiers.
@@ -82,7 +88,7 @@ export class HotKeys extends PureComponent<Props, State> {
 
   private onKeyDown = (hotKeyName: string, event: React.KeyboardEvent) => {
     const { code } = event.nativeEvent;
-    if (specialKeys.indexOf(code) !== -1) {
+    if (specialKeys.has(code)) {
       return;
     }
 
@@ -106,7 +112,7 @@ export class HotKeys extends PureComponent<Props, State> {
         <td>
           <input type="text" className="input settings-form__text" id={id}
             value={this.formatHotkey(hotKey)}
-            onKeyDown={onKeyDown} />
+            onKeyDown={onKeyDown} onChange={() => { }} />
         </td>
       </tr>
     );
@@ -128,19 +134,19 @@ export class HotKeys extends PureComponent<Props, State> {
   }
 }
 
-const mapStateToProps = (state: AppState, ownProps: {}) => {
+const mapStateToProps = (state: AppState) => {
   return {
     hotKeys: state.hotKeys.hotKeys,
   };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch, ownProps: {}) => {
+const mapDispatchToProps = (dispatch: Dispatch) => {
   return {
     setHotKey: (actionName: string, hotKey: HotKey) => dispatch(setHotKey(actionName, hotKey)),
   };
 };
 
-const HotKeysWithStore = connect(
+export const HotKeysWithStore = connect(
   mapStateToProps,
   mapDispatchToProps
 )(HotKeys);

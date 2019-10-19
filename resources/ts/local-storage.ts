@@ -24,3 +24,5 @@ export class LocalStorage {
     return value;
   }
 }
+
+export default LocalStorage;

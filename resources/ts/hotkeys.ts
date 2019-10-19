@@ -60,3 +60,5 @@ export class HotKeys {
     return true;
   }
 }
+
+export default HotKeys;
