@@ -10,6 +10,7 @@ import {
   Settings as SettingsComponent,
   Tools,
   SettingsPopup,
+  StyleSelector,
 } from './components';
 import { Page, BasePage, BoardPage, ThreadPage } from './pages';
 import Settings from './settings';
@@ -19,14 +20,16 @@ import HotKeys from './hotkeys';
 
 declare global {
   interface Window {
-    baseUrl: string;
-    websocketUrl: string;
-    board: string;
-    userId: number;
-    userRole: number;
-    ipHash: string;
+    readonly baseUrl: string;
+    readonly contentUrl: string;
+    readonly websocketUrl: string;
+    readonly board: string;
+    readonly userId: number;
+    readonly userRole: number;
+    readonly ipHash: string;
+
     app?: App;
-    hasWebpSupport: boolean;
+    hasWebpSupport?: boolean;
     WebSocket?: any;
     OneSignal?: any;
     dataLayer?: any;
@@ -42,13 +45,10 @@ try {
   image.src = 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=';
 } catch { }
 
-interface Components {
-  [key: string]: any;
-}
-
-const components: Components = {
+const components: { [key: string]: React.ComponentClass } = {
   settings: SettingsComponent,
   'settings-popup': SettingsPopup,
+  'style-selector': StyleSelector,
   tools: Tools,
 };
 

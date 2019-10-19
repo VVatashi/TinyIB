@@ -1,19 +1,11 @@
 import { Page } from '.';
 import { DOM } from '../utils';
-import { StyleSelectorView } from '../views';
 import { eventBus } from '../event-bus';
 import { Events } from '../events';
 import { store, setOption } from '../store';
 
 export class BasePage implements Page {
-  readonly style: StyleSelectorView;
-
   constructor() {
-    const $style = DOM.qid('style-selector') as HTMLSelectElement;
-    if ($style) {
-      this.style = new StyleSelectorView($style);
-    }
-
     document.addEventListener('click', e => {
       if (!(e.target instanceof HTMLElement)) {
         return;

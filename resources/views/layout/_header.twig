@@ -1,5 +1,6 @@
 <header class="{{ class is defined ? class ~ ' ' }}header" id="header">
-  {% include 'components/_style_selector.twig' with {'class': 'header__style-selector'} %}
+  <div class="header__style-selector" data-component="style-selector"></div>
+
   {% include 'components/_menu.twig' with {'class': 'header__menu'} %}
 
   <div class="header__logo">
