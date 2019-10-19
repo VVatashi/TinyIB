@@ -1,10 +1,14 @@
 .tools {
-  background: $block-background;
+  background: transparent;
 
   font-size: 24px;
 
   @include breakpoint($xs-up) {
     font-size: 20px;
+  }
+
+  &__item {
+    background: $block-background;
   }
 
   &__item:not(:first-child) &__button {

@@ -1,43 +1,18 @@
 import {
-  HotKeysState,
   SettingsState,
-  HotKeyActionTypes,
   SettingsActionTypes,
-  SET_HOTKEY,
+  TOGGLE_POPUP,
   SET_OPTION,
+  SET_HOTKEY,
   SET_POST_NOTIFY,
   SET_REPLY_NOTIFY,
 } from './types';
 import { Settings, defaultSettings } from '../settings';
 
-const hotKeysInitialState: HotKeysState = {
-  hotKeys: {},
-}
-
-export function hotKeysReducer(
-  state = hotKeysInitialState,
-  action: HotKeyActionTypes
-): HotKeysState {
-  switch (action.type) {
-    case SET_HOTKEY:
-      const { actionName, hotKey } = action.payload;
-      const hotKeys = {
-        ...state.hotKeys,
-        [actionName]: hotKey,
-      };
-
-      return {
-        ...state,
-        hotKeys,
-      };
-
-    default:
-      return state;
-  }
-}
-
 const settingsInitialState: SettingsState = {
+  showPopup: false,
   settings: defaultSettings,
+  hotKeys: {},
   customPostNotify: {
     name: '',
     file: '',
@@ -53,6 +28,12 @@ export function settingsReducer(
   action: SettingsActionTypes
 ): SettingsState {
   switch (action.type) {
+    case TOGGLE_POPUP:
+      return {
+        ...state,
+        showPopup: !state.showPopup,
+      };
+
     case SET_OPTION: {
       const { key, value } = action.payload;
       const settings = Settings.set(state.settings, key, value);
@@ -60,6 +41,19 @@ export function settingsReducer(
       return {
         ...state,
         settings,
+      };
+    }
+
+    case SET_HOTKEY: {
+      const { actionName, hotKey } = action.payload;
+      const hotKeys = {
+        ...state.hotKeys,
+        [actionName]: hotKey,
+      };
+
+      return {
+        ...state,
+        hotKeys,
       };
     }
 

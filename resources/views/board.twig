@@ -25,11 +25,14 @@
     <hr />
 
     {% include 'components/_pager.twig' with {'class': 'content__pager'} %}
-    {% include 'components/_tools.twig' with {'class': 'content__tools'} %}
+
+    <div class="content__tools" data-component="tools"></div>
+
     {% include 'components/_nav-left.twig' with {'class': 'content__navigation-left hidden'} %}
     {% include 'components/_nav-right.twig' with {'class': 'content__navigation-right hidden'} %}
   </main>
 {% endblock %}
 
-{% block footer_links %}
+{% block after_layout %}
+  <div data-component="settings-popup"></div>
 {% endblock %}

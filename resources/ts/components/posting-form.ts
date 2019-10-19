@@ -258,7 +258,7 @@ export class PostingForm {
           this.fields.message = message;
         }
 
-        this.hotKeys = store.getState().hotKeys.hotKeys;
+        this.hotKeys = store.getState().settings.hotKeys;
 
         window.addEventListener('resize', this._resize);
       },

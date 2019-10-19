@@ -8,11 +8,14 @@ import {
   PostingForm,
   PostReferenceMap,
   Settings as SettingsComponent,
+  Tools,
+  SettingsPopup,
 } from './components';
 import { Page, BasePage, BoardPage, ThreadPage } from './pages';
 import Settings from './settings';
-import { store } from './store';
+import { store, setOption, togglePopup } from './store';
 import { DOM } from './utils';
+import HotKeys from './hotkeys';
 
 declare global {
   interface Window {
@@ -22,7 +25,7 @@ declare global {
     userId: number;
     userRole: number;
     ipHash: string;
-    app: App;
+    app?: App;
     hasWebpSupport: boolean;
     WebSocket?: any;
     OneSignal?: any;
@@ -45,6 +48,8 @@ interface Components {
 
 const components: Components = {
   settings: SettingsComponent,
+  'settings-popup': SettingsPopup,
+  tools: Tools,
 };
 
 class App {
@@ -134,3 +139,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.app = new App();
 });
+
+document.addEventListener('keydown', e => {
+  const target = e.target as HTMLElement;
+  if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+    return;
+  }
+
+  const { hotKeys } = store.getState().settings;
+  if (HotKeys.check(hotKeys['toggleNSFW'], e)) {
+    e.preventDefault();
+
+    const { settings } = store.getState().settings;
+    const value = !settings.image.nsfw;
+    store.dispatch(setOption('image.nsfw;', value));
+
+    return false;
+  } else if (HotKeys.check(hotKeys['toggleSettings'], e)) {
+    e.preventDefault();
+    store.dispatch(togglePopup());
+
+    return false;
+  }
+}, true);

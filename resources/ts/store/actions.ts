@@ -1,7 +1,7 @@
 import {
-  SET_HOTKEY,
+  TOGGLE_POPUP,
   SET_OPTION,
-  HotKeyActionTypes,
+  SET_HOTKEY,
   SET_POST_NOTIFY,
   SET_REPLY_NOTIFY,
   SettingsActionTypes,
@@ -10,7 +10,14 @@ import { HotKeys, HotKey } from '../hotkeys';
 import { LocalStorage } from '../local-storage';
 import { Settings } from '../settings';
 
-export function setHotKey(actionName: string, hotKey: HotKey): HotKeyActionTypes {
+export function togglePopup(): SettingsActionTypes {
+  return {
+    type: TOGGLE_POPUP,
+    payload: {},
+  };
+}
+
+export function setHotKey(actionName: string, hotKey: HotKey): SettingsActionTypes {
   HotKeys.save({
     ...HotKeys.load(),
     [actionName]: hotKey,

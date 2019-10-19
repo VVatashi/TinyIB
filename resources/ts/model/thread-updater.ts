@@ -60,7 +60,7 @@ export class ThreadUpdater extends EventEmitter {
         return;
       }
 
-      const { hotKeys } = store.getState().hotKeys;
+      const { hotKeys } = store.getState().settings;
       if (HotKeys.check(hotKeys['updateThread'], e)) {
         e.preventDefault();
 

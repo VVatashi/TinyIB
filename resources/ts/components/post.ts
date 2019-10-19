@@ -175,7 +175,7 @@ export class Post {
         return;
       }
 
-      const { hotKeys } = store.getState().hotKeys;
+      const { hotKeys } = store.getState().settings;
       if (HotKeys.check(hotKeys['closeMedia'], e)) {
         e.preventDefault();
         this.closeModals();
@@ -259,13 +259,6 @@ export class Post {
           }
         }
 
-        return false;
-      } else if (HotKeys.check(hotKeys['toggleSettings'], e)) {
-        e.preventDefault();
-        const $settings = DOM.qid('tools-toggle-settings');
-        if ($settings) {
-          $settings.click();
-        }
         return false;
       }
     };

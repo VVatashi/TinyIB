@@ -136,7 +136,7 @@ export class HotKeys extends PureComponent<Props, State> {
 
 const mapStateToProps = (state: AppState) => {
   return {
-    hotKeys: state.hotKeys.hotKeys,
+    hotKeys: state.settings.hotKeys,
   };
 };
 

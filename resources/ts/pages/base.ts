@@ -1,23 +1,17 @@
 import { Page } from '.';
 import { DOM } from '../utils';
-import { StyleSelectorView, ToolsView } from '../views';
+import { StyleSelectorView } from '../views';
 import { eventBus } from '../event-bus';
 import { Events } from '../events';
 import { store, setOption } from '../store';
 
 export class BasePage implements Page {
   readonly style: StyleSelectorView;
-  readonly tools: ToolsView;
 
   constructor() {
     const $style = DOM.qid('style-selector') as HTMLSelectElement;
     if ($style) {
       this.style = new StyleSelectorView($style);
-    }
-
-    const $tools = DOM.qs('.tools') as HTMLElement;
-    if ($tools) {
-      this.tools = new ToolsView($tools);
     }
 
     document.addEventListener('click', e => {
