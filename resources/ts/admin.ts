@@ -1,4 +1,4 @@
-import { DOM } from "./utils";
+import { DOM } from './utils/dom';
 
 function setupListAjaxUpdate() {
   const list = DOM.qid('list');
