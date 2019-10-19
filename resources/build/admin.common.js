@@ -20,6 +20,13 @@ module.exports = {
     new VueLoaderPlugin(),
   ],
   externals: {
+    'axios': 'axios',
+    'luxon': 'luxon',
+    'katex': 'katex',
+    'react': 'React',
+    'react-dom': 'ReactDOM',
+    'redux': 'Redux',
+    'react-redux': 'ReactRedux',
     'vue': 'Vue',
   },
   resolve: {
