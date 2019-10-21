@@ -15,7 +15,9 @@ interface ViewModel {
     name: string;
     file: string;
     message: string;
+    captcha: string;
   };
+  captchaImage: string;
   file?: File;
   disabled: boolean;
   status: string;
@@ -199,6 +201,13 @@ export class PostingForm {
           ref="message"></textarea>
       </div>
 
+      <div class="posting-form__row" v-if="window.userId == 0 && window.anonPosting == 'captcha'">
+        <img id="captcha-image" :src="captchaImage" alt="CAPTCHA" style="width: 180px" />
+        <input type="text" class="input posting-form__catcha" placeholder="CAPTCHA"
+          v-model="fields.captcha"
+          v-bind:disabled="disabled" />
+      </div>
+
       <div class="posting-form__row posting-form__row--bottom">
         <button type="submit" class="posting-form__submit posting-form__submit--mobile"
           v-bind:disabled="disabled">Reply</button>
@@ -215,7 +224,9 @@ export class PostingForm {
             name: '',
             file: '',
             message: '',
+            captcha: '',
           },
+          captchaImage: `${window.baseUrl}/captcha`,
           file: null,
           disabled: false,
           status: '',
@@ -310,6 +321,9 @@ export class PostingForm {
 
           this.setPosition(this.checkBounds(this.getPosition()));
         },
+        reloadCaptcha() {
+          this.captchaImage = `${window.baseUrl}/captcha?time=${new Date().getTime()}`;
+        },
         resetFields() {
           if (!settings.form.saveSubject) {
             this.fields.subject = '';
@@ -321,6 +335,7 @@ export class PostingForm {
 
           this.fields.message = '';
           this.fields.file = '';
+          this.fields.captcha = '';
           this.file = null;
 
           LocalStorage.set('posting-form.message', '');
@@ -538,6 +553,7 @@ export class PostingForm {
               subject: this.fields.subject,
               name: this.fields.name,
               message: message,
+              captcha: this.fields.captcha,
               file: this.file,
             }, e => {
               const progressPercent = Math.ceil(e.loaded / e.total * 100);
@@ -569,6 +585,7 @@ export class PostingForm {
             this.status = `Error: ${e}`;
           }
 
+          this.reloadCaptcha();
           this.disabled = false;
 
           if (document.activeElement) {

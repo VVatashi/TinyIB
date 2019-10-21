@@ -14,6 +14,7 @@ export interface CreatePostRequest {
   subject: string;
   name: string;
   message: string;
+  captcha: string;
   file: File;
 }
 
@@ -35,6 +36,7 @@ export class Api {
       data.append('name', request.name);
       data.append('message', request.message);
       data.append('file', request.file);
+      data.append('captcha', request.captcha);
 
       const xhr = new XMLHttpRequest();
       xhr.open('POST', url, true);

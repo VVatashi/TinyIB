@@ -36,6 +36,9 @@ class PostService
   /** @var LoggerInterface */
   protected $logger;
 
+  /** @var CaptchaService */
+  protected $captcha;
+
   /** @var BanRepository */
   protected $ban_repository;
 
@@ -84,6 +87,7 @@ class PostService
    * @param ConfigService       $config
    * @param CacheInterface      $cache
    * @param LoggerInterface     $logger
+   * @param CaptchaService      $captcha
    * @param BanRepository       $ban_repository
    * @param RefMapRepository    $refmap_repository
    * @param PostRepository      $post_repository
@@ -104,6 +108,7 @@ class PostService
     ConfigService       $config,
     CacheInterface      $cache,
     LoggerInterface     $logger,
+    CaptchaService      $captcha,
     BanRepository       $ban_repository,
     RefMapRepository    $refmap_repository,
     PostRepository      $post_repository,
@@ -122,6 +127,7 @@ class PostService
     $this->config            = $config;
     $this->cache             = $cache;
     $this->logger            = $logger;
+    $this->captcha           = $captcha;
     $this->ban_repository    = $ban_repository;
     $this->refmap_repository = $refmap_repository;
     $this->post_repository   = $post_repository;
@@ -426,7 +432,7 @@ class PostService
    * @param string $email
    * @param string $subject
    * @param string $message
-   * @param string $password
+   * @param string $captcha
    * @param int    $user_id
    * @param int    $parent
    *
@@ -440,7 +446,7 @@ class PostService
     string $email,
     string $subject,
     string $message,
-    string $password,
+    string $captcha,
     string $ip,
     int $user_id = 0,
     int $parent = 0
@@ -488,6 +494,16 @@ class PostService
 
       if ($isInBumpLimit) {
         throw new ValidationException('Anonymous users are not allowed to post in threads after a bump limit.');
+      }
+
+      $anonPosting = $this->config->get('ANON_POSTING', 'allow');
+      if ($anonPosting === 'disallow') {
+        throw new ValidationException('Anonymous posting disabled.');
+      } elseif ($anonPosting === 'captcha') {
+        if (!$this->captcha->checkCaptcha($captcha)) {
+          $this->captcha->resetCaptcha();
+          throw new ValidationException('Invalid captcha.');
+        }
       }
     }
 
