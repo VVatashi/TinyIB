@@ -22,6 +22,7 @@ declare global {
     userId: number;
     userRole: number;
     ipHash: string;
+    anonPosting: 'allow' | 'captcha' | 'disallow';
     app: App;
     hasWebpSupport: boolean;
     WebSocket?: any;

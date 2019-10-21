@@ -15,6 +15,7 @@ use Imageboard\Repositories\{
   RefMapRepository
 };
 use Imageboard\Services\{
+  CaptchaService,
   ConfigService,
   PostService,
   RendererService,
@@ -58,6 +59,7 @@ final class PostControllerTest extends TestWithUsers
 
     $cache = new NoCache();
     $logger = new Logger('App');
+    $captcha = new CaptchaService($config, $this->session);
 
     $ban_repository = new BanRepository($config, $database);
     $refmap_repository = new RefMapRepository($database);
@@ -80,6 +82,7 @@ final class PostControllerTest extends TestWithUsers
       $config,
       $cache,
       $logger,
+      $captcha,
       $ban_repository,
       $refmap_repository,
       $this->post_repository,

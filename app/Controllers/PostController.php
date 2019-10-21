@@ -71,7 +71,7 @@ class PostController implements ControllerInterface
     $email    = $data['email'] ?? '';
     $subject  = $data['subject'] ?? '';
     $message  = $data['message'] ?? '';
-    $password = '';
+    $captcha  = $data['captcha'] ?? '';
     $ip       = $_SERVER['REMOTE_ADDR'] ?? '';
     $user_id  = $request->getAttribute('user')->id;
     $parent   = (int)($data['parent'] ?? 0);
@@ -81,7 +81,7 @@ class PostController implements ControllerInterface
       $email,
       $subject,
       $message,
-      $password,
+      $captcha,
       $ip,
       $user_id,
       $parent
@@ -105,7 +105,7 @@ class PostController implements ControllerInterface
     $email    = $data['email'] ?? '';
     $subject  = $data['subject'] ?? '';
     $message  = $data['message'] ?? '';
-    $password = '';
+    $captcha  = $data['captcha'] ?? '';
     $ip       = $_SERVER['REMOTE_ADDR'] ?? '';
     $user_id  = $request->getAttribute('user')->id;
     $parent   = (int)($data['parent'] ?? 0);
@@ -115,7 +115,7 @@ class PostController implements ControllerInterface
       $email,
       $subject,
       $message,
-      $password,
+      $captcha,
       $ip,
       $user_id,
       $parent

@@ -36,6 +36,7 @@ class RendererService
     $this->twig->addGlobal('style', $_COOKIE['style'] ?? 'Synthwave');
     $this->twig->addGlobal('websocket_url', $this->config->get('WEBSOCKET_URL'));
     $this->twig->addGlobal('board', $this->config->get('BOARD'));
+    $this->twig->addGlobal('anon_posting', $this->config->get('ANON_POSTING'));
 
     $this->twig->addFunction(new TwigFunction('mtime', function ($path) {
       $filename = basename($path);

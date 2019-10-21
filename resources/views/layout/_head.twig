@@ -45,6 +45,7 @@
   window.userId = {{ user.id|raw }};
   window.userRole = {{ user.role|raw }};
   window.ipHash = '{{ ip_hash|raw }}';
+  window.anonPosting = '{{ anon_posting|raw }}';
 </script>
 
 {% if config('GTM') %}
