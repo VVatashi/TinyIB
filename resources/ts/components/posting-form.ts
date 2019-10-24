@@ -49,7 +49,7 @@ export class PostingForm {
 
     const component = this;
     this.viewModel = new Vue({
-      el: form,
+      //el: form,
       template: `
 <form class="content__posting-form posting-form" id="posting-form"
   v-bind:class="{ 'posting-form--floating': position == 'float' }"

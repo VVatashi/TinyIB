@@ -9,3 +9,11 @@
     border-radius: $btn-border-radius;
   }
 }
+
+.post-form {
+  &__preview {
+    border: $post-header-border;
+    border-style: dashed;
+    border-radius: $btn-border-radius;
+  }
+}

@@ -5,12 +5,13 @@ import { Provider } from 'react-redux';
 import { eventBus, Events } from '.';
 import {
   Post,
+  PostForm,
   PostingForm,
   PostReferenceMap,
   Settings as SettingsComponent,
-  Tools,
   SettingsPopup,
   StyleSelector,
+  Tools,
 } from './components';
 import { Page, BasePage, BoardPage, ThreadPage } from './pages';
 import Settings from './settings';
@@ -29,6 +30,7 @@ declare global {
     readonly ipHash: string;
 
     app?: App;
+    threadID: number;
     hasWebpSupport?: boolean;
     WebSocket?: any;
     OneSignal?: any;
@@ -46,6 +48,7 @@ try {
 } catch { }
 
 const components: { [key: string]: React.ComponentClass } = {
+  'post-form': PostForm,
   settings: SettingsComponent,
   'settings-popup': SettingsPopup,
   'style-selector': StyleSelector,
@@ -59,8 +62,8 @@ class App {
     const path = window.location.pathname;
     let matches = [];
     if (matches = path.match(/\/res\/(\d+)(?:\.html)?\/?$/i)) {
-      const threadId = +matches[1];
-      this.view = new ThreadPage(threadId);
+      window.threadID = +matches[1];
+      this.view = new ThreadPage(window.threadID);
     } else if (path.match(/\/?$/i)) {
       this.view = new BoardPage();
     } else {

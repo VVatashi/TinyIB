@@ -286,3 +286,102 @@
     }
   }
 }
+
+.post-form {
+  display: inline-block;
+  background: $form-background;
+
+  &__title {
+    text-align: center;
+  }
+
+  &__header {
+    border-bottom: $post-header-border;
+    padding: $form-header-padding;
+
+    @include clearfix;
+  }
+
+  &__buttons {
+    float: right;
+  }
+
+  &__buttons > span {
+    @extend %clickable;
+  }
+
+  &__buttons > span:not(:last-child) {
+    margin-right: 1em;
+  }
+
+  &__content {
+    display: flex;
+    flex-flow: row;
+    padding: $form-content-padding;
+  }
+
+  &__main {
+    flex: 1;
+  }
+
+  &__main:not(:first-child) {
+    margin-left: 6px;
+  }
+
+  &__main:not(:last-child) {
+    margin-right: 6px;
+  }
+
+  &__author-row {
+    display: flex;
+    flex-flow: row;
+    margin-bottom: 6px;
+  }
+
+  &__markup-row {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  &__markup-row > button {
+    flex: 1;
+  }
+
+  &__markup-row > button:not(:last-child) {
+    margin-right: 4px;
+  }
+
+  &__markup-row,
+  &__message-row {
+    margin-bottom: 6px;
+  }
+
+  &__subject,
+  &__name {
+    margin-right: 4px;
+    min-width: 80px;
+    width: 80px;
+    flex: 50%;
+  }
+
+  &__submit {
+    min-width: 80px;
+  }
+
+  &__message {
+    min-width: 350px;
+    min-height: 100px;
+    width: 100%;
+    resize: both;
+  }
+
+  &__preview {
+    @extend %clickable;
+
+    position: relative;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    width: 140px;
+    height: 140px;
+  }
+}
