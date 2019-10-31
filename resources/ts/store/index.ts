@@ -1,5 +1,3 @@
-export * from './types';
-export * from './actions';
-export * from './reducers';
-//export * from './thunks';
+export * from './posts';
+export * from './settings';
 export * from './store';

@@ -1,14 +1,15 @@
 import {
+  SettingsActionTypes,
   TOGGLE_POPUP,
-  SET_OPTION,
   SET_HOTKEY,
+  SET_OPTION,
   SET_POST_NOTIFY,
   SET_REPLY_NOTIFY,
-  SettingsActionTypes,
 } from './types';
-import { HotKeys, HotKey } from '../hotkeys';
-import { LocalStorage } from '../local-storage';
-import { Settings } from '../settings';
+
+import { HotKeys, HotKey } from '../../hotkeys';
+import { LocalStorage } from '../../local-storage';
+import { Settings } from '../../settings';
 
 export function togglePopup(): SettingsActionTypes {
   return {

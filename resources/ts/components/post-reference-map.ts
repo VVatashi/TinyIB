@@ -1,4 +1,5 @@
-import { eventBus, Events } from '..';
+import { eventBus } from '../event-bus';
+import { Events } from '../events';
 import { DOM } from '../utils';
 import { store } from '../store';
 

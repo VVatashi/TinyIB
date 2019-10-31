@@ -8,7 +8,7 @@
 
 {% block content %}
   <main class="{{class is defined ? class ~ ' '}}">
-    {% include 'components/_posting_form.twig' with {'class': 'content__posting-form'} %}
+    <div class="content__posting-form" data-component="post-form"></div>
 
     <article class="thread">
       {% for post in posts %}

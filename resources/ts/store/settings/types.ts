@@ -1,5 +1,5 @@
-import { HotKeys, HotKey } from '../hotkeys';
-import { Settings } from '../settings';
+import { HotKeys, HotKey } from '../../hotkeys';
+import { Settings } from '../../settings';
 
 export interface CustomNotify {
   readonly name: string;

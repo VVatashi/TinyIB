@@ -2,20 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
-import { eventBus, Events } from '.';
-import {
-  Post,
-  PostForm,
-  PostingForm,
-  PostReferenceMap,
-  Settings as SettingsComponent,
-  SettingsPopup,
-  StyleSelector,
-  Tools,
-} from './components';
+import { eventBus } from './event-bus';
+import { Events } from './events';
+import * as components from './components';
 import { Page, BasePage, BoardPage, ThreadPage } from './pages';
 import Settings from './settings';
-import { store, setOption, togglePopup } from './store';
+import { store, setOption, togglePopup, putPostFormAfterPost } from './store';
 import { DOM } from './utils';
 import HotKeys from './hotkeys';
 
@@ -47,12 +39,12 @@ try {
   image.src = 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=';
 } catch { }
 
-const components: { [key: string]: React.ComponentClass } = {
-  'post-form': PostForm,
-  settings: SettingsComponent,
-  'settings-popup': SettingsPopup,
-  'style-selector': StyleSelector,
-  tools: Tools,
+const componentsMap: { [key: string]: React.ComponentClass } = {
+  'post-form': components.PostFormWrapper,
+  settings: components.Settings,
+  'settings-popup': components.SettingsPopup,
+  'style-selector': components.StyleSelector,
+  tools: components.Tools,
 };
 
 class App {
@@ -78,7 +70,7 @@ class App {
     const $elements = DOM.qsa(`[${COMPONENT_ATTRIBUTE}]`, context);
     $elements.forEach($element => {
       const key = $element.getAttribute(COMPONENT_ATTRIBUTE);
-      const component = components[key];
+      const component = componentsMap[key];
       const element = React.createElement(Provider, { store }, React.createElement(component));
       ReactDOM.render(element, $element);
       $element.removeAttribute(COMPONENT_ATTRIBUTE);
@@ -120,9 +112,8 @@ function updateClasses(settings: Settings) {
   updateClass($formWrapper, 'content__posting-form-wrapper--center', settings.form.align === 'center');
 }
 
-new Post();
-new PostingForm();
-new PostReferenceMap();
+new components.Post();
+new components.PostReferenceMap();
 
 document.addEventListener('DOMContentLoaded', () => {
   window.dataLayer = window.dataLayer || [];
@@ -141,6 +132,17 @@ document.addEventListener('DOMContentLoaded', () => {
   eventBus.emit(Events.PostsInserted, posts, true);
 
   window.app = new App();
+});
+
+document.addEventListener('click', e => {
+  const target = e.target as HTMLElement;
+  if (target.getAttribute('data-reflink')) {
+    const postID = +target.getAttribute('data-reflink');
+    store.dispatch(putPostFormAfterPost(postID));
+  } else if (target.getAttribute('data-quote-reflink')) {
+    const postID = +target.getAttribute('data-quote-reflink');
+    store.dispatch(putPostFormAfterPost(postID));
+  }
 });
 
 document.addEventListener('keydown', e => {

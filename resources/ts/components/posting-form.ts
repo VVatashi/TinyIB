@@ -1,13 +1,14 @@
 import Vue from 'vue';
 import { HSVColorPicker } from '@vvatashi/color-picker';
-import { draggable, FilePreview } from '.';
-import { eventBus, Events } from '..';
+import { draggable } from '.';
+import { eventBus } from '../event-bus';
+import { Events } from '../events';
 import { Api } from '../api';
 import { Coords } from './draggable';
 import { HotKeys } from '../hotkeys';
 import { LocalStorage } from '../local-storage';
 import { store } from '../store';
-import { DOM, Keyboard } from '../utils';
+import { DOM } from '../utils';
 
 interface ViewModel {
   fields: {
@@ -78,23 +79,6 @@ export class PostingForm {
   </div>
 
   <div class="posting-form__content">
-    <x-file-preview class="posting-form__preview posting-form__preview--mobile"
-      v-bind:file="file"
-      v-on:click="showFileDialog()"
-      v-on:drop="onFileDrop($event)"
-      v-show="file">
-      <span class="posting-form__preview-remove fas fa-window-close" v-on:click.stop="file = null"></span>
-    </x-file-preview>
-
-    <x-file-preview class="posting-form__preview posting-form__preview--desktop"
-      v-bind:class="{ 'posting-form__preview--right': previewAlign == 'right' }"
-      v-bind:file="file"
-      v-on:click="showFileDialog()"
-      v-on:drop="onFileDrop($event)">
-      <span class="posting-form__preview-remove fas fa-window-close"
-        v-if="file" v-on:click.stop="file = null"></span>
-    </x-file-preview>
-
     <div class="posting-form__main">
       <div class="posting-form__row">
         <input type="text" class="input posting-form__subject" placeholder="Subject"
@@ -119,41 +103,6 @@ export class PostingForm {
       </div>
 
       <div class="posting-form__row posting-form__row--markup markup">
-        <button type="button" class="button posting-form__markup-button"
-          v-on:click.prevent="insertMarkup('b')">
-          <strong>b</strong>
-        </button>
-
-        <button type="button" class="button posting-form__markup-button"
-          v-on:click.prevent="insertMarkup('i')">
-          <em>i</em>
-        </button>
-
-        <button type="button" class="button posting-form__markup-button"
-          v-on:click.prevent="insertMarkup('u')">
-          <span class="markup__underline">u</span>
-        </button>
-
-        <button type="button" class="button posting-form__markup-button"
-          v-on:click.prevent="insertMarkup('s')">
-          <del>s</del>
-        </button>
-
-        <button type="button" class="button posting-form__markup-button"
-          v-on:click.prevent="insertMarkup('sub')">
-          <sub>sub</sub>
-        </button>
-
-        <button type="button" class="button posting-form__markup-button"
-          v-on:click.prevent="insertMarkup('sup')">
-          <sup>sup</sup>
-        </button>
-
-        <button type="button" class="button posting-form__markup-button"
-          @click.prevent="toggleColorPopup">
-          color
-        </button>
-
         <div class="color-picker-overlay"
           v-if="colorPopupVisible"
           @click="onColorPopupCancel">
@@ -173,21 +122,6 @@ export class PostingForm {
               @click.prevent="onColorPopupCancel">Cancel</button>
           </div>
         </div>
-
-        <button type="button" class="button posting-form__markup-button"
-          v-on:click.prevent="insertMarkup('code')">
-          <code>code</code>
-        </button>
-
-        <button type="button" class="button posting-form__markup-button"
-          v-on:click.prevent="insertMarkup('spoiler')">
-          <span class="markup__spoiler markup__spoiler--visible">sp</span>
-        </button>
-
-        <button type="button" class="button posting-form__markup-button"
-          v-on:click.prevent="insertQuote()">
-          <span class="markup__quote">&gt;</span>
-        </button>
       </div>
 
       <div class="posting-form__row posting-form__row--message">
@@ -275,7 +209,6 @@ export class PostingForm {
         }
       },
       components: {
-        'x-file-preview': FilePreview,
         'x-color-picker': HSVColorPicker,
       },
       mixins: [
@@ -382,25 +315,6 @@ export class PostingForm {
           this.file = files.length ? files[0] : null;
         },
         onMessageKeyDown(e: KeyboardEvent) {
-          // Submit form on Ctrl+Enter in the message field.
-          if (HotKeys.check(this.hotKeys['send'], e)) {
-            this.onSubmit();
-          } else if (Keyboard.checkKeyChar(e, 'b') && e.altKey) {
-            e.preventDefault();
-            this.insertMarkup('b');
-          } else if (Keyboard.checkKeyChar(e, 'i') && e.altKey) {
-            e.preventDefault();
-            this.insertMarkup('i');
-          } else if (Keyboard.checkKeyChar(e, 't') && e.altKey) {
-            e.preventDefault();
-            this.insertMarkup('s');
-          } else if (Keyboard.checkKeyChar(e, 'p') && e.altKey) {
-            e.preventDefault();
-            this.insertMarkup('spoiler');
-          } else if (Keyboard.checkKeyChar(e, 'c') && e.altKey) {
-            e.preventDefault();
-            this.insertMarkup('code');
-          }
         },
         onMessagePaste(e: ClipboardEvent) {
           // Paste file.

@@ -2,8 +2,7 @@
     "include": [
         "resources/components/**/*.ts",
         "resources/components/**/*.tsx",
-        "resources/ts/**/*.ts",
-        "resources/app/**/*.ts",
+        "resources/ts/**/*.ts"
     ],
     "exclude": [
         "node_modules/**/*"

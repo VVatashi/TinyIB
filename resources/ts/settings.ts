@@ -19,9 +19,9 @@ const enum NotifyType {
 }
 
 interface Notify {
-  mode: NotifyMode;
-  interval: number;
-  type: NotifyType;
+  readonly mode: NotifyMode;
+  readonly interval: number;
+  readonly type: NotifyType;
 }
 
 const enum RefLinkPosition {
@@ -46,8 +46,8 @@ const enum PreviewAlign {
 }
 
 export interface Replace {
-  pattern: string;
-  replace: string;
+  readonly pattern: string;
+  readonly replace: string;
 }
 
 const enum Layout {
@@ -71,66 +71,66 @@ const enum TimeZone {
 }
 
 export interface Settings {
-  filter: {
-    removeHiddenPosts: boolean;
-    hiddenAuthors: PostAuthor[];
-    hiddenPosts: number[];
-    hiddenFiles: string[];
-    hideThreads: boolean;
+  readonly filter: {
+    readonly removeHiddenPosts: boolean;
+    readonly hiddenAuthors: PostAuthor[];
+    readonly hiddenPosts: number[];
+    readonly hiddenFiles: string[];
+    readonly hideThreads: boolean;
   };
 
-  post: {
-    enableThreadAutoupdate: boolean;
-    disableWebSockets: boolean;
-    scrollToNewPosts: boolean;
-    reflinkIconPosition: RefLinkPosition;
-    showSpoilers: boolean;
-    disableSub: boolean;
-    unreadPostsNotify: Notify;
-    unreadRepliesNotify: Notify;
+  readonly post: {
+    readonly enableThreadAutoupdate: boolean;
+    readonly disableWebSockets: boolean;
+    readonly scrollToNewPosts: boolean;
+    readonly reflinkIconPosition: RefLinkPosition;
+    readonly showSpoilers: boolean;
+    readonly disableSub: boolean;
+    readonly unreadPostsNotify: Notify;
+    readonly unreadRepliesNotify: Notify;
   };
 
-  image: {
-    nsfw: boolean;
-    showVideoOverlay: boolean;
-    hidePopupOnOutsideClick: boolean;
-    autoPlay: boolean;
-    replaceThumbnail: boolean;
-    replaceThumbnailGif: boolean;
-    expandImages: ImageExpandMode;
-    modalAtTop: boolean;
+  readonly image: {
+    readonly nsfw: boolean;
+    readonly showVideoOverlay: boolean;
+    readonly hidePopupOnOutsideClick: boolean;
+    readonly autoPlay: boolean;
+    readonly replaceThumbnail: boolean;
+    readonly replaceThumbnailGif: boolean;
+    readonly expandImages: ImageExpandMode;
+    readonly modalAtTop: boolean;
   };
 
-  link: {
-    addNamesToLinks: boolean;
-    addYouToLinks: boolean;
-    showPostPopups: boolean;
+  readonly link: {
+    readonly addNamesToLinks: boolean;
+    readonly addYouToLinks: boolean;
+    readonly showPostPopups: boolean;
   };
 
-  form: {
-    saveSubject: boolean;
-    saveName: boolean;
-    showMarkup: boolean;
-    saveFormState: boolean;
-    align: FormAlign;
-    previewAlign: PreviewAlign;
-    replaces: Replace[];
-    insertTagsInPairs: boolean;
+  readonly form: {
+    readonly saveSubject: boolean;
+    readonly saveName: boolean;
+    readonly showMarkup: boolean;
+    readonly saveFormState: boolean;
+    readonly align: FormAlign;
+    readonly previewAlign: PreviewAlign;
+    readonly replaces: Replace[];
+    readonly insertTagsInPairs: boolean;
   };
 
-  time: {
-    locale: TimeLocale;
-    localeCustom: string;
-    format: TimeFormat;
-    formatCustom: string;
-    zone: TimeZone;
-    zoneFixed: number;
+  readonly time: {
+    readonly locale: TimeLocale;
+    readonly localeCustom: string;
+    readonly format: TimeFormat;
+    readonly formatCustom: string;
+    readonly zone: TimeZone;
+    readonly zoneFixed: number;
   };
 
-  common: {
-    smoothScroll: boolean;
-    showUnreadCountInTitle: boolean;
-    layout: Layout;
+  readonly common: {
+    readonly smoothScroll: boolean;
+    readonly showUnreadCountInTitle: boolean;
+    readonly layout: Layout;
   };
 }
 
@@ -220,21 +220,21 @@ function merge(target: any, source: any) {
   return output;
 }
 
-export class Settings {
-  public static readonly key = 'settings';
+const SETTINGS_KEY = 'settings';
 
+export class Settings {
   public static merge(a: Settings, b: Settings) {
     return merge(a, b);
   }
 
   public static load(): Settings {
-    const settingsData = LocalStorage.get<string>(this.key, '{}');
+    const settingsData = LocalStorage.get<string>(SETTINGS_KEY, '{}');
     return this.merge(defaultSettings, JSON.parse(settingsData));
   }
 
   public static save(settings: Settings): Settings {
     const settingsData = JSON.stringify(settings);
-    LocalStorage.set(this.key, settingsData);
+    LocalStorage.set(SETTINGS_KEY, settingsData);
     return settings;
   }
 

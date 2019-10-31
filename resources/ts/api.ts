@@ -1,25 +1,25 @@
 export interface PostData {
-  id: number;
-  parent_id: number;
-  name: string;
-  tripcode: string;
-  email: string;
-  subject: string;
-  file?: string;
-  created_at: number;
+  readonly id: number;
+  readonly parent_id: number;
+  readonly name: string;
+  readonly tripcode: string;
+  readonly email: string;
+  readonly subject: string;
+  readonly file?: string;
+  readonly created_at: number;
 }
 
 export interface CreatePostRequest {
-  parent: number;
-  subject: string;
-  name: string;
-  message: string;
-  file: File;
+  readonly parent: number;
+  readonly subject: string;
+  readonly name: string;
+  readonly message: string;
+  readonly file: File;
 }
 
 export interface CreatePostResponse {
-  post: PostData,
-  location: string;
+  readonly post: PostData,
+  readonly location: string;
 }
 
 export class Api {

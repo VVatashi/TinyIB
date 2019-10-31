@@ -7,19 +7,22 @@ import {
   SET_POST_NOTIFY,
   SET_REPLY_NOTIFY,
 } from './types';
-import { Settings, defaultSettings } from '../settings';
 
-const settingsInitialState: SettingsState = {
+import HotKeys from '../../hotkeys';
+import LocalStorage from '../../local-storage';
+import Settings from '../../settings';
+
+export const settingsInitialState: SettingsState = {
   showPopup: false,
-  settings: defaultSettings,
-  hotKeys: {},
+  settings: Settings.load(),
+  hotKeys: HotKeys.load(),
   customPostNotify: {
-    name: '',
-    file: '',
+    name: LocalStorage.get('post.unreadPostsNotifyName', ''),
+    file: LocalStorage.get('post.unreadPostsNotifyFile', ''),
   },
   customReplyNotify: {
-    name: '',
-    file: '',
+    name: LocalStorage.get('post.unreadRepliesNotifyName', ''),
+    file: LocalStorage.get('post.unreadRepliesNotifyFile', ''),
   },
 }
 

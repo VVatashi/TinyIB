@@ -1,14 +1,24 @@
 import React, { PureComponent } from 'react';
+import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 
 import Markup from './markup';
 import Preview from './preview';
 
+import HotKeys from '../../hotkeys';
+import { PostFormPosition } from '../../post-form';
 import Settings from '../../settings';
-import { AppState } from '../../store';
+import { AppState, closePostForm, makePostFormFloat, putPostFormAfterPost, openPostForm } from '../../store';
 
 interface Props {
   readonly settings: Settings;
+  readonly hotKeys: HotKeys;
+  readonly postFormPosition: PostFormPosition;
+
+  readonly onOpenForm: () => void;
+  readonly onCloseForm: () => void;
+  readonly onMakeFormFloat: (x: number, y: number) => void;
+  readonly onPutFormAfterPost: (postID: number) => void;
 }
 
 interface State {
@@ -20,6 +30,7 @@ interface State {
 
 export class PostForm extends PureComponent<Props, State> {
   private message = React.createRef<HTMLTextAreaElement>();
+  private file = React.createRef<HTMLInputElement>();
 
   public constructor(props: Props) {
     super(props);
@@ -31,6 +42,30 @@ export class PostForm extends PureComponent<Props, State> {
       file: null,
     };
   }
+
+  private onClear = () => {
+    this.setState({
+      message: '',
+    });
+  };
+
+  private onMakeFloating = () => {
+    this.props.onMakeFormFloat(0, 0);
+  };
+
+  private onMoveToBottom = () => {
+    this.props.onOpenForm();
+  };
+
+  private onClose = () => {
+    this.props.onCloseForm();
+  };
+
+  private onSubmit = (e: Event) => {
+    e.preventDefault();
+
+    console.log('onSubmit');
+  };
 
   private onInsertMarkup = (insertBefore: string, insertAfter: string) => {
     this.setState(state => {
@@ -85,28 +120,50 @@ export class PostForm extends PureComponent<Props, State> {
     console.log('onInsertQuote');
   };
 
-  private onClear = () => {
-    this.setState({
-      message: '',
-    });
+  private onMessageKeyDown = (e: React.KeyboardEvent) => {
+    if (HotKeys.check(this.props.hotKeys['send'], e.nativeEvent)) {
+      this.onSubmit(e.nativeEvent);
+    } else if (HotKeys.check({ code: 'KeyB', alt: true }, e.nativeEvent)) {
+      e.preventDefault();
+      this.onInsertMarkup('[b]', '[/b]');
+    } else if (HotKeys.check({ code: 'KeyI', alt: true }, e.nativeEvent)) {
+      e.preventDefault();
+      this.onInsertMarkup('[i]', '[/i]');
+    } else if (HotKeys.check({ code: 'KeyT', alt: true }, e.nativeEvent)) {
+      e.preventDefault();
+      this.onInsertMarkup('[s]', '[/s]');
+    } else if (HotKeys.check({ code: 'KeyP', alt: true }, e.nativeEvent)) {
+      e.preventDefault();
+      this.onInsertMarkup('[spoiler]', '[/spoiler]');
+    } else if (HotKeys.check({ code: 'KeyC', alt: true }, e.nativeEvent)) {
+      e.preventDefault();
+      this.onInsertMarkup('[code]', '[/code]');
+    }
   };
 
-  private onMakeFloating = () => {
-    console.log('onMakeFloating');
-  };
+  private onPreviewDrop = (data: DataTransfer) => {
+    const file = data.files[0];
+    if (file) {
+      this.setState({ file });
+    } else {
+      // TODO: move this to a service.
+      const text = data.getData('text');
+      if (text && text.match(/https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{2,}\.[a-z]{2,}\b[-a-zA-Z0-9@:%_\+.~#?&\/=]*/)) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', text, true);
+        xhr.responseType = 'blob';
 
-  private onMoveToBottom = () => {
-    console.log('onMoveToBottom');
-  };
+        xhr.addEventListener('readystatechange', e => {
+          if (xhr.readyState !== XMLHttpRequest.DONE) {
+            return;
+          }
 
-  private onClose = () => {
-    console.log('onClose');
-  };
+          this.setState({ file: xhr.status < 400 ? xhr.response : null });
+        });
 
-  private onSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    console.log('onSubmit');
+        xhr.send();
+      }
+    }
   };
 
   public render() {
@@ -114,9 +171,26 @@ export class PostForm extends PureComponent<Props, State> {
     const previewAlign = this.props.settings.form.previewAlign;
     const preview = (
       <div className="post-form__side">
-        <Preview file={this.state.file} onChange={file => this.setState({ file })} />
+        <Preview file={this.state.file}
+          onClick={() => this.file.current.click()}
+          onChange={file => this.setState({ file })}
+          onDrop={this.onPreviewDrop} />
       </div>
     );
+
+    let makeFloatButton = null;
+    if (this.props.postFormPosition.position !== 'float') {
+      makeFloatButton = (
+        <span className="far fa-window-maximize" title="Floating form" onClick={this.onMakeFloating}></span>
+      );
+    }
+
+    let moveToBottomButton = null;
+    if (this.props.postFormPosition.position !== 'open') {
+      moveToBottomButton = (
+        <span className="fas fa-arrow-down" title="Move form to bottom" onClick={this.onMoveToBottom}></span>
+      );
+    }
 
     return (
       <div className="post-form">
@@ -124,32 +198,25 @@ export class PostForm extends PureComponent<Props, State> {
           <span className="post-form__title">{title}</span>
 
           <div className="post-form__buttons">
-            <span className="fas fa-ban" title="Clear form"
-              onClick={this.onClear}></span>
-
-            <span className="far fa-window-maximize" title="Floating form"
-              onClick={this.onMakeFloating}></span>
-
-            <span className="fas fa-arrow-down" title="Move form to bottom"
-              onClick={this.onMoveToBottom}></span>
-
-            <span className="far fa-window-close" title="Close form"
-              onClick={this.onClose}></span>
+            <span className="fas fa-ban" title="Clear form" onClick={this.onClear}></span>
+            {makeFloatButton}
+            {moveToBottomButton}
+            <span className="far fa-window-close" title="Close form" onClick={this.onClose}></span>
           </div>
         </div>
 
-        <form className="post-form__content" onSubmit={this.onSubmit}>
+        <form className="post-form__content" onSubmit={e => this.onSubmit(e.nativeEvent)}>
           {previewAlign === 'left' ? preview : null}
 
           <div className="post-form__main">
             <div className="post-form__author-row">
               <input className="post-form__subject input" type="text"
-                placeholder="Subject" title="Subject"
+                name="subject" placeholder="Subject" title="Subject"
                 value={this.state.subject}
                 onChange={e => this.setState({ subject: e.target.value })} />
 
               <input className="post-form__name input" type="text"
-                placeholder="Name" title="Name"
+                name="name" placeholder="Name" title="Name"
                 value={this.state.name}
                 onChange={e => this.setState({ name: e.target.value })} />
 
@@ -162,14 +229,18 @@ export class PostForm extends PureComponent<Props, State> {
 
             <div className="post-form__message-row">
               <textarea className="post-form__message input"
-                placeholder="Message" title="Message"
+                name="message" placeholder="Message" title="Message"
                 value={this.state.message}
                 onChange={e => this.setState({ message: e.target.value })}
+                onKeyDown={this.onMessageKeyDown}
                 ref={this.message}></textarea>
             </div>
           </div>
 
           {previewAlign === 'right' ? preview : null}
+
+          <input type="file" name="file" ref={this.file} hidden
+            onChange={e => this.setState({ file: e.target.files[0] })} />
         </form>
       </div>
     );
@@ -179,8 +250,19 @@ export class PostForm extends PureComponent<Props, State> {
 const mapStateToProps = (state: AppState) => {
   return {
     settings: state.settings.settings,
+    hotKeys: state.settings.hotKeys,
+    postFormPosition: state.posts.postFormPosition,
   };
 };
 
-export const PostFormWithStore = connect(mapStateToProps)(PostForm);
+const mapDispatchToProps = (dispatch: Dispatch) => {
+  return {
+    onOpenForm: () => dispatch(openPostForm()),
+    onCloseForm: () => dispatch(closePostForm()),
+    onMakeFormFloat: (x: number, y: number) => dispatch(makePostFormFloat(x, y)),
+    onPutFormAfterPost: (postID: number) => dispatch(putPostFormAfterPost(postID)),
+  };
+};
+
+export const PostFormWithStore = connect(mapStateToProps, mapDispatchToProps)(PostForm);
 export default PostFormWithStore;

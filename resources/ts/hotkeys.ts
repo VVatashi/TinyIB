@@ -26,17 +26,17 @@ const defaultHotKeys: HotKeys = {
   send: { code: 'Enter', ctrl: true },
 };
 
-export class HotKeys {
-  public static readonly key = 'hotkeys';
+const HOTKEYS_KEY = 'hotkeys';
 
+export class HotKeys {
   public static load(): HotKeys {
-    const hotKeysData = LocalStorage.get<string>(HotKeys.key, '{}');
+    const hotKeysData = LocalStorage.get<string>(HOTKEYS_KEY, '{}');
     return { ...defaultHotKeys, ...JSON.parse(hotKeysData) };
   }
 
   public static save(hotKeys: HotKeys): HotKeys {
     const hotKeysData = JSON.stringify(hotKeys);
-    LocalStorage.set(HotKeys.key, hotKeysData);
+    LocalStorage.set(HOTKEYS_KEY, hotKeysData);
     return hotKeys;
   }
 
