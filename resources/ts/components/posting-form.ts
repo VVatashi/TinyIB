@@ -245,6 +245,9 @@ export class PostingForm {
         previewAlign() {
           return settings.form.previewAlign;
         },
+        window() {
+          return window;
+        },
       },
       created() {
         if (settings.form.saveSubject) {
