@@ -727,9 +727,11 @@ class PostService
       $parent = $post->parent_id;
       if ($post->isReply()) {
         $this->cache->deletePattern($board . ":thread:$parent:*");
+        $this->cache->deletePattern($board . ":api:threads:$parent:*");
       } else {
         $id = $post->id;
         $this->cache->deletePattern($board . ":thread:$id:*");
+        $this->cache->delete($board . ":api:threads");
       }
       $this->cache->deletePattern($board . ':page:*');
 
@@ -872,6 +874,9 @@ class PostService
     $thread_id = $post->isThread() ? $id : $post->parent_id;
     $this->cache->deletePattern($board . ":thread:$thread_id:*");
     $this->cache->deletePattern($board . ':page:*');
+    $this->cache->delete($board . ":api:posts:$id");
+    $this->cache->deletePattern($board . ":api:threads:$thread_id:*");
+    $this->cache->delete($board . ":api:threads");
 
     if (isset($user)) {
       // Add entry to the modlog.

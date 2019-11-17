@@ -6,12 +6,21 @@ use GuzzleHttp\Psr7\Response;
 use Imageboard\Exceptions\{AccessDeniedException, NotFoundException};
 use Imageboard\Models\User;
 use Imageboard\Controllers\ControllerInterface;
-use Imageboard\Services\{PostService, UserService};
+use Imageboard\Services\{ConfigService, PostService, UserService};
+use Imageboard\Services\Cache\CacheInterface;
 use Imageboard\Repositories\PostRepository;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 
 class PostController implements ControllerInterface
 {
+  const CACHE_TTL = 4 * 60 * 60;
+
+  /** @var ConfigService  */
+  protected $config;
+
+  /** @var CacheInterface */
+  protected $cache;
+
   /** @var PostRepository */
   protected $post_repository;
 
@@ -22,10 +31,14 @@ class PostController implements ControllerInterface
   protected $user_service;
 
   function __construct(
+    ConfigService  $config,
+    CacheInterface $cache,
     PostRepository $post_repository,
     PostService    $post_service,
     UserService    $user_service
   ) {
+    $this->config          = $config;
+    $this->cache           = $cache;
     $this->post_repository = $post_repository;
     $this->post_service    = $post_service;
     $this->user_service    = $user_service;
@@ -335,10 +348,23 @@ class PostController implements ControllerInterface
   /**
    * Returns threads.
    *
-   * @return array Array of thread view models.
+   * @param ServerRequestInterface $request
+   *
+   * @return ResponseInterface Response.
    */
-  function threads(): array {
-    return $this->post_service->getThreads();
+  function threads(ServerRequestInterface $request): ResponseInterface {
+    $key = $this->config->get("BOARD") . ':api:threads';
+    $headers = [];
+    $data = $this->cache->get($key);
+    if (isset($data)) {
+      $headers['X-Cached'] = 'true';
+    } else {
+      $headers['X-Cached'] = 'false';
+      $data = json_encode($this->post_service->getThreads());
+      $this->cache->set($key, $data, static::CACHE_TTL);
+    }
+
+    return new Response(200, $headers, $data);
   }
 
   /**
@@ -419,13 +445,25 @@ class PostController implements ControllerInterface
    * @param ServerRequestInterface $request
    * @param array $args Path arguments.
    *
-   * @return array Array of post view models.
+   * @return ResponseInterface Response.
    */
-  function threadPosts(ServerRequestInterface $request, array $args): array {
+  function threadPosts(ServerRequestInterface $request, array $args): ResponseInterface {
     $thread_id = (int)$args['id'];
     $params = $request->getQueryParams();
     $after_id = (int)($params['after'] ?? 0);
-    return $this->post_service->getThreadPosts($thread_id, $after_id);
+
+    $key = $this->config->get("BOARD") . ":api:threads:$thread_id:$after_id";
+    $headers = [];
+    $data = $this->cache->get($key);
+    if (isset($data)) {
+      $headers['X-Cached'] = 'true';
+    } else {
+      $headers['X-Cached'] = 'false';
+      $data = json_encode($this->post_service->getThreadPosts($thread_id, $after_id));
+      $this->cache->set($key, $data, static::CACHE_TTL);
+    }
+
+    return new Response(200, $headers, $data);
   }
 
   /**
@@ -502,10 +540,21 @@ class PostController implements ControllerInterface
    *
    * @param array $args Path arguments.
    *
-   * @return array Post view models.
+   * @return ResponseInterface Response.
    */
-  function post(array $args): array {
+  function post(array $args): ResponseInterface {
     $id = (int)$args['id'];
-    return $this->post_service->getById($id);
+    $key = $this->config->get("BOARD") . ":api:posts:$id";
+    $headers = [];
+    $data = $this->cache->get($key);
+    if (isset($data)) {
+      $headers['X-Cached'] = 'true';
+    } else {
+      $headers['X-Cached'] = 'false';
+      $data = json_encode($this->post_service->getById($id));
+      $this->cache->set($key, $data, static::CACHE_TTL);
+    }
+
+    return new Response(200, $headers, $data);
   }
 }
