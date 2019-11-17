@@ -158,6 +158,9 @@ class PostService
 
     $results = [];
     foreach ($posts as $post) {
+      $salt = $this->config->get('IP_SALT', '1234');
+      $hash = base64_encode(md5($salt . md5($post->ip, true), true));
+
       /** @var Post $post */
       $results[$post->id] = [
         'id'             => $post->id,
@@ -165,8 +168,7 @@ class PostService
         'updated_at'     => $post->updated_at,
         'parent_id'      => $post->parent_id,
         'bumped_at'      => $post->bumped_at,
-        'ip'             => $post->ip,
-        'ip_hash'        => base64_encode(md5($post->ip, true)),
+        'ip_hash'        => $hash,
         'name'           => $post->name,
         'tripcode'       => $post->tripcode,
         'subject'        => $post->subject,
@@ -735,6 +737,9 @@ class PostService
       $is_redis_enabled = $this->config->get('REDIS_ENABLE', false);
       $redis_host = $this->config->get('REDIS_HOST', '');
       if ($is_redis_enabled) {
+        $salt = $this->config->get('IP_SALT', '1234');
+        $hash = base64_encode(md5($salt . md5($post->ip, true), true));
+
         $board = $this->config->get('BOARD');
         $channel = "$board:thread:$parent";
         $data = [
@@ -743,8 +748,7 @@ class PostService
           'updated_at'     => $post->updated_at,
           'parent_id'      => $post->parent_id,
           'bumped_at'      => $post->bumped_at,
-          'ip'             => $post->ip,
-          'ip_hash'        => base64_encode(md5($post->ip, true)),
+          'ip_hash'        => $hash,
           'name'           => $post->name,
           'tripcode'       => $post->tripcode,
           'subject'        => $post->subject,
