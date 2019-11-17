@@ -95,6 +95,8 @@ final class PostControllerTest extends TestWithUsers
     );
 
     $this->controller = new PostController(
+      new ConfigService(),
+      new NoCache(),
       $this->post_repository,
       $post_service,
       $this->user_service
@@ -169,10 +171,11 @@ final class PostControllerTest extends TestWithUsers
       $this->createPost();
     }
 
-    $items = $this->controller->threads();
+    $request = (new ServerRequest('GET', "/api/threads"))
+      ->withAttribute('user', $this->createAnonymous());
 
-    $this->assertIsArray($items);
-    $this->assertCount($count, $items);
+    $response = $this->controller->threads($request);
+    $this->assertEquals(200, $response->getStatusCode());
   }
 
   function test_threadPosts_shouldReturnItems(): void
@@ -188,10 +191,8 @@ final class PostControllerTest extends TestWithUsers
     $request = (new ServerRequest('GET', "/api/threads/$id/posts"))
       ->withAttribute('user', $this->createAnonymous());
 
-    $items = $this->controller->threadPosts($request, ['id' => $id]);
-
-    $this->assertIsArray($items);
-    $this->assertCount($count + 1, $items);
+    $response = $this->controller->threadPosts($request, ['id' => $id]);
+    $this->assertEquals(200, $response->getStatusCode());
   }
 
   function test_post_shouldReturnItem(): void
@@ -199,15 +200,14 @@ final class PostControllerTest extends TestWithUsers
     $post = $this->createPost();
     $id = $post->id;
 
-    $item = $this->controller->post(['id' => $id]);
-
-    $this->assertIsArray($item);
+    $response = $this->controller->post(['id' => $id]);
+    $this->assertEquals(200, $response->getStatusCode());
   }
 
   function test_post_notFound_shouldThrow(): void
   {
     $this->expectException(NotFoundException::class);
 
-    $item = $this->controller->post(['id' => 1]);
+    $this->controller->post(['id' => 1]);
   }
 }
