@@ -766,7 +766,7 @@ class PostService
           'message_raw'    => $post->message_raw,
           'message_tree'   => $post->getMessageTree(),
           'refs_from'      => [],
-          'refs_to'        => [],
+          'refs_to'        => $refs,
           'file'           => $post->file,
           'file_hex'       => $post->file_hex,
           'file_original'  => $post->file_original,
