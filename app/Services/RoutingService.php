@@ -15,6 +15,7 @@ use Imageboard\Controllers\Admin\{
 use Imageboard\Controllers\Api\{
   EmbedController as EmbedApi,
   PostController as PostApi,
+  StatusController as StatusApi,
   TokenController as TokenApi,
   VoteController as VotesApi
 };
@@ -80,6 +81,8 @@ class RoutingService implements RequestHandlerInterface
         $routes->addGroup('/embed', function (RouteCollector $routes) {
           $routes->addRoute('GET', '', [EmbedApi::class, 'embed']);
         });
+
+        $routes->addRoute('GET', '/status', [StatusApi::class, 'status']);
       });
 
       $routes->addGroup('/auth', function (RouteCollector $routes) {
