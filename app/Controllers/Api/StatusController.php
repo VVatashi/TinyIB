@@ -25,7 +25,10 @@ class StatusController implements ControllerInterface
 
   public function status(ServerRequestInterface $request): ResponseInterface
   {
-    $user = $this->service->getCurrentUser();
+    $user = $request->getAttribute('user');
+    if (!isset($user)) {
+      $user = $this->service->getCurrentUser();
+    }
 
     $ip = $_SERVER['REMOTE_ADDR'];
     $salt = $this->config->get('IP_SALT', '1234');
