@@ -1,7 +1,0 @@
-a {
-  transition: color .3s ease, text-shadow .3s ease;
-
-  &:hover {
-    text-shadow: $color 0 0 10px;
-  }
-}

@@ -1,3 +1,1 @@
-Imageboard script, originally based on TinyIB.
-
-Under development, not suitable for production use.
+# lewd.site backend

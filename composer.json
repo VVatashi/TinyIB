@@ -1,33 +1,18 @@
 {
-  "name": "vvatashi/imageboard",
+  "name": "lewd-site/backend",
+  "description": "lewd.site backend",
   "type": "project",
-  "require": {
-    "doctrine/dbal": "^2.9",
-    "ext-gd": "*",
-    "ext-json": "*",
-    "ext-mbstring": "*",
-    "guzzlehttp/guzzle": "^6.3",
-    "guzzlehttp/psr7": "^1.4",
-    "monolog/monolog": "^1.23",
-    "nikic/fast-route": "^1.3",
-    "predis/predis": "^1.1",
-    "psr/http-server-middleware": "^1.0",
-    "twig/twig": "~2.0",
-    "vvatashi/bbcode": "^2.1",
-    "vvatashi/di": "^1.0",
-    "sentry/sdk": "2.0.3"
-  },
-  "require-dev": {
-    "phpunit/phpunit": "^7.2"
-  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Nina Lisitsinskaya",
+      "email": "vvatashi4259@gmail.com"
+    }
+  ],
+  "require": {},
   "autoload": {
     "psr-4": {
-      "Imageboard\\": "app"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Imageboard\\Tests\\": "app/Tests"
+      "App\\": "src/"
     }
   }
 }

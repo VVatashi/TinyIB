@@ -1,16 +1,1 @@
-.directory
-.idea/
-.project
-.settings/
-.vscode/
-*.db
-*error_log
-/doc/
-/logs/
-/node_modules/
 /vendor/
-clover.xml
-npm-debug.log*
-settings.php
-/.env
-/*.sqlite
