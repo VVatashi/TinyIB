@@ -1,0 +1,57 @@
+version: '3'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www
+    networks:
+      - app-network
+    volumes:
+       - ./:/var/www
+       - ./.docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+  webserver:
+    image: nginx:1.17-alpine
+    container_name: webserver
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - app-network
+    volumes:
+      - ./:/var/www
+      - ./.docker/nginx/conf.d/:/etc/nginx/conf.d/
+  db:
+    image: postgres:12.1-alpine
+    container_name: db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: imageboard
+      POSTGRES_PASSWORD: imageboard
+      SERVICE_NAME: postgres
+      SERVICE_TAGS: dev
+    networks:
+      - app-network
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+networks:
+  app-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.220.0/28
+volumes:
+  dbdata:
+    driver: local
