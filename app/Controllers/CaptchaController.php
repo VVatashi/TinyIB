@@ -34,7 +34,7 @@ class CaptchaController implements ControllerInterface
     $headers = [
       'Content-Type' => 'image/png',
     ];
-    $image = $this->captcha->createCaptcha('test');
+    $image = $this->captcha->createCaptcha();
     $stream = fopen('php://memory','r+');
     imagepng($image, $stream);
 
