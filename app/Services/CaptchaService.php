@@ -119,6 +119,10 @@ class CaptchaService
    */
   public function checkCaptcha(string $text): bool
   {
+    if (empty($text)) {
+      return false;
+    }
+
     return mb_strtoupper($text) === mb_strtoupper($this->loadText());
   }
 
