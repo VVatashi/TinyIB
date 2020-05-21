@@ -2,6 +2,8 @@
 
 namespace Imageboard\Services;
 
+use Predis\Client as Redis;
+
 class CaptchaService
 {
   const WIDTH = 320;
@@ -20,6 +22,9 @@ class CaptchaService
   /** @var SessionService */
   private $session;
 
+  /** @var Redis|null */
+  private $redis = null;
+
   /**
    * @param ConfigService  $config
    * @param SessionService $session
@@ -30,6 +35,11 @@ class CaptchaService
   ) {
     $this->config = $config;
     $this->session = $session;
+
+    $redis_host = $config->get('REDIS_HOST', '');
+    if (!empty($redis_host)) {
+      $this->redis = new Redis($redis_host);
+    }
   }
 
   private function generateText(): string
@@ -48,16 +58,32 @@ class CaptchaService
 
   private function storeText(string $text)
   {
+    if (isset($this->redis)) {
+      $key = 'captcha:' . $_SERVER['REMOTE_ADDR'];
+      $this->redis->set($key, $text);
+      $this->redis->expire($key, 3600);
+    }
+
     $this->session->set(static::SESSION_KEY, $text);
   }
 
   private function loadText(): ?string
   {
+    if (isset($this->redis)) {
+      $key = 'captcha:' . $_SERVER['REMOTE_ADDR'];
+      return $this->redis->get($key);
+    }
+
     return $this->session->get(static::SESSION_KEY);
   }
 
   private function resetText()
   {
+    if (isset($this->redis)) {
+      $key = 'captcha:' . $_SERVER['REMOTE_ADDR'];
+      $this->redis->del($key);
+    }
+
     $this->session->delete(static::SESSION_KEY);
   }
 
