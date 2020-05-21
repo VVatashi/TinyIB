@@ -65,6 +65,7 @@ export class Modal {
   protected aspect: number = 1;
 
   protected onClose?: () => any = null;
+  protected onResize?: (width: number) => boolean;
 
   protected $content?: HTMLElement = null;
 
@@ -177,18 +178,25 @@ export class Modal {
 
       const sensitivity = 0.1;
       const newScale = this.scale + sensitivity * Math.sign(e.deltaY);
+
       const newWidth = this.width * Math.pow(newScale, pow);
       if (newWidth > 128 && newWidth < 32768) {
-        this.scale = newScale;
+        if (this.onResize) {
+          if (this.onResize(newWidth)) {
+            this.scale = newScale;
+          }
+        } else {
+          this.scale = newScale;
+        }
       }
 
-      const width = this.width * Math.pow(this.scale, pow);
-      const height = width / this.aspect;
+      const w = this.width * Math.pow(this.scale, pow);
+      const h = w / this.aspect;
 
       const rx = (e.clientX - this.left) / prevWidth;
       const ry = (e.clientY - this.top) / prevHeight;
-      const dx = (width - prevWidth) * rx;
-      const dy = (height - prevHeight) * ry;
+      const dx = (w - prevWidth) * rx;
+      const dy = (h - prevHeight) * ry;
 
       if (this.dragStart) {
         this.dragStart.left -= dx;
@@ -200,15 +208,15 @@ export class Modal {
 
       this.$modal.style.left = `${this.left}px`;
       this.$modal.style.top = `${this.top}px`;
-      this.$content.style.width = `${width}px`;
+      this.$content.style.width = `${w}px`;
 
       if (!this.fitHeightToContent) {
-        this.$content.style.height = `${height}px`;
+        this.$content.style.height = `${h}px`;
       }
 
       const controls = document.querySelector('.video-player__controls');
       if (controls) {
-        if (width < 200) {
+        if (w < 200) {
           controls.classList.add('hidden');
         } else {
           controls.classList.remove('hidden');
@@ -217,7 +225,7 @@ export class Modal {
 
       const volume = document.querySelector('.video-player__volume-bar');
       if (volume) {
-        if (width < 400) {
+        if (w < 400) {
           volume.classList.add('hidden');
         } else {
           volume.classList.remove('hidden');
@@ -226,7 +234,7 @@ export class Modal {
 
       const time = document.querySelector('.video-player__time');
       if (time) {
-        if (width < 500) {
+        if (w < 500) {
           time.classList.add('hidden');
         } else {
           time.classList.remove('hidden');
@@ -243,6 +251,7 @@ export class Modal {
     width: number,
     height: number,
     onClose?: () => any,
+    onResize?: (width: number) => boolean,
   ) {
     this.left = left;
     this.top = top;
@@ -252,6 +261,7 @@ export class Modal {
     this.aspect = this.height > 0 ? this.width / this.height : 1;
 
     this.onClose = onClose;
+    this.onResize = onResize;
 
     this.$modal.style.left = `${left}px`;
     this.$modal.style.top = `${top}px`;

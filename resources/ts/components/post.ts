@@ -13,7 +13,7 @@ interface FileData {
   $post: HTMLElement;
   $link: HTMLAnchorElement;
   postId: number;
-  type: 'image' | 'audio' | 'video' | 'coub' | 'youtube';
+  type: 'image' | 'audio' | 'video' | 'coub' | 'oembed' | 'youtube';
   url: string;
   width: number;
   height: number;
@@ -572,6 +572,7 @@ export class Post {
 
         const url = $link.getAttribute('href');
         const matches = url.match(/^https?:\/\/(?:www\.)?(coub\.com)\/view\/([0-9a-z]+)$/i)
+          || url.match(/^https?:\/\/(?:www\.)?(tiktok\.com)\/@([0-9a-z_-]+)\/video\/(\d+)/i)
           || url.match(/^https?:\/\/(?:www\.)?(youtube\.com)\/watch\?v=([0-9a-z_-]+)/i)
           || url.match(/^https?:\/\/(?:www\.)?(youtu\.be)\/([0-9a-z_-]+)/i);
         return { $link, url, matches };
@@ -628,6 +629,60 @@ export class Post {
             this.media.sort((a, b) => a.postId - b.postId);
           } catch (e) {
             console.warn(`Can\'t load coub '${matches[0]}':`, e);
+          }
+        } else if (matches[1] === 'tiktok.com') {
+          try {
+            const originalUrl = `https://www.tiktok.com/@${matches[2]}/video/${matches[3]}`;
+            const oembedUrl = `https://www.tiktok.com/oembed?url=${encodeURIComponent(originalUrl)}`;
+            const oembedResponse = await fetch(oembedUrl, { credentials: 'same-origin' });
+            const oembed = await oembedResponse.json();
+            const thumbnailUrl = oembed.thumbnail_url;
+            const $thumbnail = document.createElement('div');
+            $thumbnail.classList.add('post__file-preview', 'file');
+            $thumbnail.setAttribute('data-hash', originalUrl);
+            $thumbnail.innerHTML = `
+<div class="post__file-info file-info">
+  <a class="file-info__link" href="${originalUrl}" target="_blank">TikTok</a>
+  <span class="file-info__size"></span>
+</div>
+
+<span class="file__hide fas fa-window-close" title="Hide preview"></span>
+<span class="file__show far fa-plus-square hidden" title="Show hidden preview"></span>
+
+<a class="file__thumbnail thumbnail thumbnail--embed" href="${originalUrl}" target="_blank">
+  <img class="thumbnail__content thumbnail__content--embed"
+    style="max-width: 250px; max-height: 250px;"
+    src="${thumbnailUrl}" />
+</a>`;
+            postContent.insertBefore($thumbnail, postMessage);
+            $link.innerHTML = `<span class="fab fa-tiktok"></span> ${oembed.title}`;
+
+            if (hiddenFiles.indexOf(originalUrl) !== -1) {
+              this.hideFile($thumbnail);
+            }
+
+            if (DOM.qsa('.post__file-preview', postContent).length > 1) {
+              const message = DOM.qs('.post__message', postContent) as HTMLElement;
+              message.style.clear = 'both';
+            }
+
+            const postId = +$post.getAttribute('data-post-id');
+            if (!this.media.find(file => file.postId === postId && file.url === url)) {
+              this.media.push({
+                $post,
+                $link: DOM.qs('.thumbnail', $thumbnail) as HTMLAnchorElement,
+                postId,
+                type: 'oembed',
+                url: originalUrl,
+                width: oembed.thumbnail_width,
+                height: oembed.thumbnail_height,
+                data: oembed.html,
+              });
+            }
+
+            this.media.sort((a, b) => a.postId - b.postId);
+          } catch (e) {
+            console.warn(`Can\'t load oembed '${matches[0]}':`, e);
           }
         } else if (matches[1] === 'youtube.com' || matches[1] === 'youtu.be') {
           try {
@@ -858,6 +913,31 @@ export class Post {
 
       this.modal = new Modal(this.$modal, false);
       this.modal.show(left, top, width, height, onModalHide.bind(this));
+    } else if (file.type === 'oembed') {
+      this.$modal = document.createElement('div');
+      this.$modal.classList.add('modal', 'modal_oembed');
+      this.$modal.innerHTML = `
+<div class="modal__header">
+</div>
+
+<div id="embed-modal_content" class="modal__content modal__content--embed">
+  ${file.data}
+</div>`;
+      this.$layout.appendChild(this.$modal);
+
+      this.modal = new Modal(this.$modal, false);
+      this.modal.show(left, top, width, height, onModalHide.bind(this), (width) => width >= 325 && width <= 605);
+
+      const existingScript = document.querySelector('[data-tiktok-loader]');
+      if (existingScript) {
+        existingScript.remove();
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://www.tiktok.com/embed.js';
+      script.async = true;
+      script.setAttribute('data-tiktok-loader', 'true');
+      document.head.appendChild(script);
     } else if (file.type === 'youtube') {
       this.$modal = document.createElement('div');
       this.$modal.classList.add('modal');
@@ -1170,6 +1250,9 @@ export class Post {
     } else if (file.type === 'coub') {
       $original = document.createElement('div');
       $original.innerHTML = await Coub.getHtml(file.url, autoPlay);
+    } else if (file.type === 'oembed') {
+      $original = document.createElement('div');
+      $original.innerHTML = file.data;
     } else if (file.type === 'youtube') {
       $original = document.createElement('div');
       $original.innerHTML = file.data.replace('autoplay=0', 'autoplay=' + (autoPlay ? 1 : 0));
